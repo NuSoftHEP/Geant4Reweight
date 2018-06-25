@@ -169,11 +169,7 @@ void G4SteppingManager::GetProcessNumber()
    for(size_t np=0; np < MAXofPostStepLoops; np++){
      fCurrentProcess = (*fPostStepGetPhysIntVector)(np);
 
-
-    
      fStep->postStepProcNames->push_back( fCurrentProcess->GetProcessName());    
-   
-  
 
      if (fCurrentProcess== 0) {
        (*fSelectedPostStepDoItVector)[np] = InActivated;
@@ -186,8 +182,8 @@ void G4SteppingManager::GetProcessNumber()
                                    &fCondition );
      
      double MFP = fCurrentProcess->GetMFP( *fTrack,
-                                                    fPreviousStepSize,
-                                                    &fCondition );
+                                           fPreviousStepSize,
+                                           &fCondition );
 
      fStep->postStepProcMFPs->push_back(MFP);
      fStep->postStepProcIntLens->push_back(physIntLength);
@@ -255,10 +251,14 @@ void G4SteppingManager::GetProcessNumber()
    proposedSafety = DBL_MAX;
    G4double safetyProposedToAndByProcess = proposedSafety;
 
-
+   fStep->alongStepProcNames->clear();
+   fStep->alongStepProcMFPs->clear();
+   fStep->alongStepProcIntLens->clear();
 
    for(size_t kp=0; kp < MAXofAlongStepLoops; kp++){
      fCurrentProcess = (*fAlongStepGetPhysIntVector)[kp];
+
+     fStep->alongStepProcNames->push_back( fCurrentProcess->GetProcessName());    
 
      if (fCurrentProcess== 0) continue;
          // NULL means the process is inactivated by a user on fly.
@@ -268,6 +268,14 @@ void G4SteppingManager::GetProcessNumber()
                                      PhysicalStep,
 				     safetyProposedToAndByProcess,
                                     &fGPILSelection );
+
+     double MFP = fCurrentProcess->GetMFP( *fTrack,
+                                           fPreviousStepSize,
+                                           &fCondition );
+
+     fStep->alongStepProcMFPs->push_back(MFP);
+     fStep->alongStepProcIntLens->push_back(physIntLength);
+
 #ifdef G4VERBOSE
                          // !!!!! Verbose
      if(verboseLevel>0) fVerbose->DPSLAlongStep();

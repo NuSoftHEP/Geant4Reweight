@@ -162,7 +162,6 @@ void G4SteppingManager::GetProcessNumber()
 // GPIL for PostStep
    fPostStepDoItProcTriggered = MAXofPostStepLoops;
 
-   std::cout << "Getting Post Step processes" << std::endl;
    fStep->postStepProcNames->clear();
    fStep->postStepProcMFPs->clear();
    fStep->postStepProcIntLens->clear();
@@ -170,7 +169,7 @@ void G4SteppingManager::GetProcessNumber()
    for(size_t np=0; np < MAXofPostStepLoops; np++){
      fCurrentProcess = (*fPostStepGetPhysIntVector)(np);
 
-     std::cout << "\tProcess " << np << ": " << fCurrentProcess->GetProcessName() << std::endl;
+
     
      fStep->postStepProcNames->push_back( fCurrentProcess->GetProcessName());    
    
@@ -256,11 +255,11 @@ void G4SteppingManager::GetProcessNumber()
    proposedSafety = DBL_MAX;
    G4double safetyProposedToAndByProcess = proposedSafety;
 
-   std::cout << "Getting Along Step processes" << std::endl;
+
 
    for(size_t kp=0; kp < MAXofAlongStepLoops; kp++){
      fCurrentProcess = (*fAlongStepGetPhysIntVector)[kp];
-     std::cout << "\tProcess " << kp << ": " << fCurrentProcess->GetProcessName() << std::endl;
+
      if (fCurrentProcess== 0) continue;
          // NULL means the process is inactivated by a user on fly.
 

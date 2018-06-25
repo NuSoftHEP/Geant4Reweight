@@ -65,6 +65,15 @@ G4Step::G4Step()
   fpPostStepPoint = new G4StepPoint();
 
   secondaryInCurrentStep = new std::vector<CT>;
+
+  //postStepProcList = new processContainer();
+  postStepProcNames = new std::vector<G4String>;
+  postStepProcMFPs = new std::vector<double>;
+  postStepProcIntLens = new std::vector<double>;
+  //alongStepProcList = new processContainer()
+  alongStepProcNames = new std::vector<G4String>;
+  alongStepProcMFPs = new std::vector<double>;
+  alongStepProcIntLens = new std::vector<double>;
 }
 
 /////////////////
@@ -75,6 +84,14 @@ G4Step::~G4Step()
   delete fpPostStepPoint;
 
   secondaryInCurrentStep->clear();
+  //delete postStepProcList;
+  postStepProcNames->clear();
+  postStepProcMFPs->clear();
+  postStepProcIntLens->clear();
+  //delete alongStepProcList;
+  alongStepProcNames->clear();
+  alongStepProcMFPs->clear();
+  alongStepProcIntLens->clear();
   delete secondaryInCurrentStep;
 
   if (fSecondary !=0 ) {

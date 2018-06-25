@@ -103,7 +103,10 @@ class G4VDiscreteProcess : public G4VProcess
 			     const G4Track& ,
 			     const G4Step& 
 			    ) {return 0;};
- 
+      G4double GetMFP(const G4Track& track,
+		      G4double   previousStepSize,
+		      G4ForceCondition* condition);                                   
+
   protected:// with description
      virtual G4double GetMeanFreePath(const G4Track& aTrack,
                              G4double   previousStepSize,
@@ -116,6 +119,7 @@ class G4VDiscreteProcess : public G4VProcess
   // hide default constructor and assignment operator as private 
       G4VDiscreteProcess();
       G4VDiscreteProcess & operator=(const G4VDiscreteProcess &right);
+
 
 };
 

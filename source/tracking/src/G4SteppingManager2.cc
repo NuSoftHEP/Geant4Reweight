@@ -162,8 +162,20 @@ void G4SteppingManager::GetProcessNumber()
 // GPIL for PostStep
    fPostStepDoItProcTriggered = MAXofPostStepLoops;
 
+   std::cout << "Getting Post Step processes" << std::endl;
+   fStep->postStepProcNames->clear();
+   fStep->postStepProcMFPs->clear();
+   fStep->postStepProcIntLens->clear();
+
    for(size_t np=0; np < MAXofPostStepLoops; np++){
      fCurrentProcess = (*fPostStepGetPhysIntVector)(np);
+
+     std::cout << "\tProcess " << np << ": " << fCurrentProcess->GetProcessName() << std::endl;
+    
+     fStep->postStepProcNames->push_back( fCurrentProcess->GetProcessName());    
+   
+  
+
      if (fCurrentProcess== 0) {
        (*fSelectedPostStepDoItVector)[np] = InActivated;
        continue;
@@ -171,8 +183,18 @@ void G4SteppingManager::GetProcessNumber()
 
      physIntLength = fCurrentProcess->
                      PostStepGPIL( *fTrack,
-                                                 fPreviousStepSize,
-                                                      &fCondition );
+                                   fPreviousStepSize,
+                                   &fCondition );
+     
+     double MFP = fCurrentProcess->GetMFP( *fTrack,
+                                                    fPreviousStepSize,
+                                                    &fCondition );
+
+     fStep->postStepProcMFPs->push_back(MFP);
+     fStep->postStepProcIntLens->push_back(physIntLength);
+
+
+
 #ifdef G4VERBOSE
                          // !!!!! Verbose
      if(verboseLevel>0) fVerbose->DPSLPostStep();
@@ -234,8 +256,11 @@ void G4SteppingManager::GetProcessNumber()
    proposedSafety = DBL_MAX;
    G4double safetyProposedToAndByProcess = proposedSafety;
 
+   std::cout << "Getting Along Step processes" << std::endl;
+
    for(size_t kp=0; kp < MAXofAlongStepLoops; kp++){
      fCurrentProcess = (*fAlongStepGetPhysIntVector)[kp];
+     std::cout << "\tProcess " << kp << ": " << fCurrentProcess->GetProcessName() << std::endl;
      if (fCurrentProcess== 0) continue;
          // NULL means the process is inactivated by a user on fly.
 

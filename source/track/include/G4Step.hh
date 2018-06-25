@@ -72,6 +72,13 @@ class G4Polyline;                   // Forward declaration.
 class G4Track;                      // Forward declaration.
 #include "G4TrackVector.hh"           // Include from 'tracking'
 
+
+/*struct processContainer{
+  std::vector<G4String> * name;
+  std::vector<double> * crossSection;
+  std::vector<double> * intLength;
+};*/
+
 ////////////
 class G4Step
 ////////////
@@ -167,6 +174,17 @@ class G4Step
   
    G4Polyline* CreatePolyline () const;
    // for visualization
+   
+ 
+//   processContainer * alongStepProcList;
+   std::vector<G4String> * alongStepProcNames;
+   std::vector<double> * alongStepProcMFPs;
+   std::vector<double> * alongStepProcIntLens;
+
+//   processContainer * postStepProcList;
+   std::vector<G4String> * postStepProcNames;
+   std::vector<double> * postStepProcMFPs;
+   std::vector<double> * postStepProcIntLens;
 
 //-----------
    protected:

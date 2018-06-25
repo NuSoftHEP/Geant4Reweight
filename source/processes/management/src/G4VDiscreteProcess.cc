@@ -119,3 +119,9 @@ G4VParticleChange* G4VDiscreteProcess::PostStepDoIt(
 
     return pParticleChange;
 }
+
+G4double G4VDiscreteProcess::GetMFP(const G4Track& aTrack,
+                                    G4double   previousStepSize,
+                                    G4ForceCondition* condition){
+  return this->GetMeanFreePath(aTrack, previousStepSize, condition);
+}

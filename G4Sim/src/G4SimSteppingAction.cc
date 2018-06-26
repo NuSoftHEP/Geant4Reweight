@@ -54,7 +54,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   auto postPro = poststep->GetProcessDefinedStep(); 
   auto postProName = postPro->GetProcessName();
   MyTreeBuffer->postStepProcess->push_back(postProName); 
-  MyStepTreeBuffer->stepChosenProc = new TString(postProName);
+  MyStepTreeBuffer->stepChosenProc = new std::string(postProName);
   ///
 
   int nPostProcs = step->postStepProcNames->size();

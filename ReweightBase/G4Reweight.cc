@@ -37,7 +37,13 @@ int main(){
   double postStepPy;
   double postStepPz;  
   
-  TString * stepChosenProc;
+
+  std::vector<std::string> * stepActivePostProcNames = 0;
+  std::vector<std::string> * stepActiveAlongProcNames = 0;
+  std::vector<std::string> * stepActivePostProcMFPs = 0;
+  std::vector<std::string> * stepActiveAlongProcMFPs = 0;
+
+  std::string * stepChosenProc = 0;
 
   step->SetBranchAddress("PID", &sPID);
   step->SetBranchAddress("trackID", &sTrackID);
@@ -50,6 +56,10 @@ int main(){
   step->SetBranchAddress("postStepPy", &postStepPy);
   step->SetBranchAddress("postStepPz", &postStepPz);
   step->SetBranchAddress("stepChosenProc", &stepChosenProc);
+  step->SetBranchAddress("stepActivePostProcNames", &stepActivePostProcNames);
+  step->SetBranchAddress("stepActiveAlongProcNames", &stepActiveAlongProcNames);
+  step->SetBranchAddress("stepActivePostProcMFPs", &stepActivePostProcMFPs);
+  step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
 
   std::cout << "getting entry" << std::endl;
   track->GetEntry(0);  
@@ -60,9 +70,12 @@ int main(){
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
-    std::cout << stepChosenProc->Data() << std::endl;
+    std::cout << *stepChosenProc << std::endl;
+    for(int is = 0; is < stepActivePostProcNames->size(); is++){
+      std::cout << stepActivePostProcNames->at(is) << std::endl;
+    }
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
-                                                  preStepP, postStepP, stepChosenProc->Data());
+                                                  preStepP, postStepP, *stepChosenProc);
 
     delete G4RStep;
   }

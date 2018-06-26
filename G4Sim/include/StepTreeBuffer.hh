@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+#include "TString.h"
 struct StepTreeBuffer{
   
   int eventNum;
@@ -12,7 +13,8 @@ struct StepTreeBuffer{
   int PID;
   int parID;
 
-  std::string stepChosenProc;
+//  std::string * stepChosenProc;
+  TString * stepChosenProc;
   std::vector<std::string> * stepActivePostProcNames;
   std::vector<std::string> * stepActiveAlongProcNames;
   std::vector<double> * stepActivePostProcMFPs;

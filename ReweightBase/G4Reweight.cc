@@ -36,6 +36,8 @@ int main(){
   double postStepPx;
   double postStepPy;
   double postStepPz;  
+  
+  TString * stepChosenProc;
 
   step->SetBranchAddress("PID", &sPID);
   step->SetBranchAddress("trackID", &sTrackID);
@@ -47,6 +49,7 @@ int main(){
   step->SetBranchAddress("postStepPx", &postStepPx);
   step->SetBranchAddress("postStepPy", &postStepPy);
   step->SetBranchAddress("postStepPz", &postStepPz);
+  step->SetBranchAddress("stepChosenProc", &stepChosenProc);
 
   std::cout << "getting entry" << std::endl;
   track->GetEntry(0);  
@@ -57,8 +60,9 @@ int main(){
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
+    std::cout << stepChosenProc->Data() << std::endl;
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
-                                                  preStepP, postStepP);
+                                                  preStepP, postStepP, stepChosenProc->Data());
 
     delete G4RStep;
   }

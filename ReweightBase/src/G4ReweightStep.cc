@@ -7,7 +7,7 @@
 G4ReweightStep::G4ReweightStep(){}
 
 G4ReweightStep::G4ReweightStep(int tid, int pid, int parid, int eventnum,
-                               double preStepP[3], double postStepP[3]){
+                               double preStepP[3], double postStepP[3], std::string chosenProc){
   trackID = tid;
   PID = pid;
   parID = parid; 
@@ -19,6 +19,8 @@ G4ReweightStep::G4ReweightStep(int tid, int pid, int parid, int eventnum,
   postStepPx = postStepP[0];
   postStepPy = postStepP[1];
   postStepPz = postStepP[2];
+
+  stepChosenProc = chosenProc;
 }
 
 G4ReweightStep::~G4ReweightStep(){

@@ -17,7 +17,7 @@ class G4ReweightStep{
   public:
     
     G4ReweightStep();
-    G4ReweightStep(int tid, int pid, int parid, int eventnum, double preStepP[3], double postStepP[3]);
+    G4ReweightStep(int tid, int pid, int parid, int eventnum, double preStepP[3], double postStepP[3], std::string chosenProc);
     ~G4ReweightStep();
 
     int trackID; 

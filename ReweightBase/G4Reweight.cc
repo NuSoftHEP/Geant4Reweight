@@ -40,8 +40,8 @@ int main(){
 
   std::vector<std::string> * stepActivePostProcNames = 0;
   std::vector<std::string> * stepActiveAlongProcNames = 0;
-  std::vector<std::string> * stepActivePostProcMFPs = 0;
-  std::vector<std::string> * stepActiveAlongProcMFPs = 0;
+  std::vector<double> * stepActivePostProcMFPs = 0;
+  std::vector<double> * stepActiveAlongProcMFPs = 0;
 
   std::string * stepChosenProc = 0;
 
@@ -70,12 +70,29 @@ int main(){
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
-    std::cout << *stepChosenProc << std::endl;
-    for(int is = 0; is < stepActivePostProcNames->size(); is++){
-      std::cout << stepActivePostProcNames->at(is) << std::endl;
-    }
+
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
                                                   preStepP, postStepP, *stepChosenProc);
+
+    Proc theProc;
+    for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){
+      std::string theName = stepActivePostProcNames->at(ip);
+      double theMFP = stepActivePostProcMFPs->at(ip); 
+
+      theProc.Name = theName;
+      theProc.MFP = theMFP;
+
+      G4RStep->AddActivePostProc(theProc);
+    }
+    for(size_t ip = 0; ip < stepActiveAlongProcMFPs->size(); ++ip){
+      std::string theName = stepActiveAlongProcNames->at(ip);
+      double theMFP = stepActiveAlongProcMFPs->at(ip); 
+
+      theProc.Name = theName;
+      theProc.MFP = theMFP;
+
+      G4RStep->AddActiveAlongProc(theProc);
+    }
 
     delete G4RStep;
   }

@@ -86,44 +86,70 @@ void G4ReweightTreeParser::FillCollection(){
 
   int prevEvent = -1;
   std::map<int, G4ReweightTraj*> * trajMap = new std::map<int, G4ReweightTraj*>();
-  for(int ie = 0; ie < track->GetEntries(); ++ie){
+  std::vector<int> * skipped = new std::vector<int>();
+  for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(skipEM){
-      if( abs(tPID) == 11){continue;}
-    }
-
-    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);
-    
-    std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
-
-    SetSteps(G4RTraj);
-//    std::cout << G4RTraj->GetNSteps() << std::endl;
-
-    std::cout << G4RTraj->GetFinalProc() << std::endl;
-    
-    if(prevEvent == -1){
-      //First entry. Just use the previously created pointer
-      (*trajMap)[tTrackID] = G4RTraj;
-    }
-    else if(tEventNum == prevEvent){
-      //Still on the same event. Just add the pointer to the traj 
-      //to the map
-      (*trajMap)[tTrackID] = G4RTraj;
-    }
-    else if(tEventNum != prevEvent){
-      //New Event. Save the map in the vector and make new one.  
+ 
+    //First event: prev = -1 -> just use already created pointers
+    //Same event: prev = eventNum -> use same pointers
+    //else: we're on a new event and need to make new pointers
+    //      and store the previous map
+    if( (prevEvent != -1) && (tEventNum != prevEvent) ){
+      //store the previous map and make a new one
       trajCollection->push_back(trajMap);
+
+      std::map<int,G4ReweightTraj*>::iterator itMap;
+/*      for(itMap = trajMap->begin(); itMap != trajMap->end(); ++itMap){
+        std::cout << itMap->first << " " << itMap->second->PID << std::endl;
+      }
+*/
       trajMap = new std::map<int, G4ReweightTraj*>();
-      (*trajMap)[tTrackID] = G4RTraj;
+
+      //clear skipped 
+      skipped->clear();
+//      std::cout << "Event: " << tEventNum << std::endl;
+    }
+/*    else if(prevEvent == -1){
+      std::cout << "Event: " << tEventNum << std::endl;
+    }
+*/ 
+    if(skipEM){
+      if( abs(tPID) == 11){
+        skipped->push_back(tTrackID);
+        continue;
+      }     
+    }
+    
+    std::vector<int>::iterator checkSkipped = skipped->begin();
+    for(checkSkipped; checkSkipped != skipped->end(); ++checkSkipped){
+      if (*checkSkipped == tParID){
+        break;
+      }
+    }
+    if(checkSkipped != skipped->end()){
+      skipped->push_back(tTrackID);
+      continue;
     }
 
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
+    std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
+    SetSteps(G4RTraj);
+    std::cout << G4RTraj->GetFinalProc() << std::endl;
+   
+    (*trajMap)[tTrackID] = G4RTraj;
     prevEvent = tEventNum;
-
-
-//    trajCollection->push_back(G4RTraj);
   }
 
+//  std::cout<< "Event: " << tEventNum << std::endl;
+  trajCollection->push_back(trajMap);
+  std::map<int,G4ReweightTraj*>::iterator itMap;
+/*  for(itMap = trajMap->begin(); itMap != trajMap->end(); ++itMap){
+    std::cout << itMap->first << " " << itMap->second << std::endl;
+  }
+*/
+  skipped->clear();
+  
   std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
 }
 
@@ -193,6 +219,8 @@ void G4ReweightTreeParser::SortCollection(){
   for( size_t ie = 0; ie < GetNEvents(); ++ie){
     auto trajMap = trajCollection->at(ie);
 
+//    std::cout << "Event " << ie << std::endl;
+
     for(auto itTraj = trajMap->begin(); itTraj != trajMap->end(); ++itTraj){
       size_t checkID = (itTraj->second)->parID;
       if(checkID == 0){
@@ -207,7 +235,10 @@ void G4ReweightTreeParser::SortCollection(){
       auto tryTraj = (*trajMap)[checkID];
       if( (itTraj->second)->SetParent(tryTraj) ){
         std::cout << "SetParent for " << itTraj->first << " and " << checkID << std::endl;
-        break;
+  //      break;
+      }
+      else{
+        std::cout << "meh" << itTraj->first << " and " << checkID << std::endl;
       }
     }
     

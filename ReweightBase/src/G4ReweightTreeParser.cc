@@ -1,50 +1,25 @@
-#include <iostream>
-#include <utility>
-#include "TTree.h"
-#include "TFile.h"
-
-#include "G4ReweightStep.hh"
-#include "G4ReweightTraj.hh"
 #include "G4ReweightTreeParser.hh"
+#include <iostream>
 
-int main(){
+G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName){
+  fin = new TFile(fInputFileName.c_str()); 
+  track = (TTree*)fin->Get("track");
+  step = (TTree*)fin->Get("step");
+}
 
-/*  TFile * fin = new TFile("try.root","READ");   
+G4ReweightTreeParser::~G4ReweightTreeParser(){
+  stepActivePostProcNames->clear();
+  stepActiveAlongProcNames->clear();
+  stepActivePostProcMFPs->clear();
+  stepActiveAlongProcMFPs->clear();
+}
 
-  TTree * track = (TTree*)fin->Get("track");
-  TTree * step = (TTree*)fin->Get("step");
- 
-  int tPID;
-  int tTrackID;
-  int tEventNum;
-  int tParID;
-  std::pair<int,int> * tSteps = new std::pair<int,int>(0,0); 
-
+void G4ReweightTreeParser::SetBranches(){
   track->SetBranchAddress("PID", &tPID);
   track->SetBranchAddress("trackID", &tTrackID);
-  std::cout << "tid"<< std::endl;
   track->SetBranchAddress("steps", &tSteps);
-  std::cout << "steps" << std::endl;
-
-  int sPID;
-  int sTrackID; 
-  int sEventNum;
-  int sParID;
-
-  double preStepPx;
-  double preStepPy;
-  double preStepPz;
-  double postStepPx;
-  double postStepPy;
-  double postStepPz;  
-  
-
-  std::vector<std::string> * stepActivePostProcNames = 0;
-  std::vector<std::string> * stepActiveAlongProcNames = 0;
-  std::vector<double> * stepActivePostProcMFPs = 0;
-  std::vector<double> * stepActiveAlongProcMFPs = 0;
-
-  std::string * stepChosenProc = 0;
+  track->SetBranchAddress("parID", &tParID);
+  track->SetBranchAddress("eventNum", &tEventNum);
 
   step->SetBranchAddress("PID", &sPID);
   step->SetBranchAddress("trackID", &sTrackID);
@@ -60,18 +35,13 @@ int main(){
   step->SetBranchAddress("stepActivePostProcNames", &stepActivePostProcNames);
   step->SetBranchAddress("stepActiveAlongProcNames", &stepActiveAlongProcNames);
   step->SetBranchAddress("stepActivePostProcMFPs", &stepActivePostProcMFPs);
-  step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);*/
+  step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
+}
 
-  G4ReweightTreeParser * tp = new G4ReweightTreeParser("try.root");
-  tp->SetBranches();
-  tp->FillCollection();
-  
+void G4ReweightTreeParser::GetSteps(G4ReweightTraj * G4RTraj){
 
-/*  std::cout << "getting entry" << std::endl;
-  track->GetEntry(0);  
-  std::cout << "got it" << std::endl;
-  for(int is = tSteps->first; is <= tSteps->second; ++is){
-    std::cout << "Step " << is << std::endl;
+  for(int is = G4RTraj->stepRange.first; is <= G4RTraj->stepRange.second; ++is){
+    if(!(is%100)){std::cout << "Step " << is << std::endl;}
     step->GetEntry(is);
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
@@ -100,8 +70,22 @@ int main(){
       G4RStep->AddActiveAlongProc(theProc);
     }
 
-    delete G4RStep;
-  }*/
+    G4RTraj->AddStep(G4RStep);
+  }
 
-  return 0;
+  std::cout << "Got " << G4RTraj->GetNSteps() << " steps for track " << G4RTraj->trackID << std::endl;
+
+}
+
+void G4ReweightTreeParser::FillCollection(){
+
+  std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
+
+  for(int ie = 0; ie < track->GetEntries(); ++ie){
+    track->GetEntry(ie);
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);
+
+    GetSteps(G4RTraj);
+    std::cout << G4RTraj->GetNSteps() << std::endl;
+  }
 }

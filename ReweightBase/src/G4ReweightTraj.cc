@@ -3,8 +3,12 @@
 
 #include <iostream>
 
-G4ReweightTraj::G4ReweightTraj(){
-
+G4ReweightTraj::G4ReweightTraj(int tid, int pid, int parid, int eventnum, std::pair<int,int> range){
+  trackID = tid;
+  PID = pid;
+  parID = parid;
+  eventNum = eventnum;
+  stepRange = range;
 }
 
 G4ReweightTraj::~G4ReweightTraj(){

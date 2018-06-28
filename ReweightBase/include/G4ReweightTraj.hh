@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <utility>
 
 //Forward Declaration to let Traj know of step
 class G4ReweightStep;
@@ -13,14 +14,16 @@ class G4ReweightTraj{
 
   public:
 
-    G4ReweightTraj();
+    G4ReweightTraj(int,int,int,int,std::pair<int,int>);
     ~G4ReweightTraj();
     
     int trackID;
     int eventNum;
     int PID;
     int parID;
-   
+  
+    std::pair<int,int> stepRange;
+
     G4ReweightTraj * parent;
     
     void AddStep(G4ReweightStep *); 

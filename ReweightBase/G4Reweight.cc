@@ -64,6 +64,7 @@ int main(){
 
   G4ReweightTreeParser * tp = new G4ReweightTreeParser("try.root");
   tp->SetBranches();
+  //tp->skipEM = false;
   tp->FillCollection();
   tp->SortCollection();
   

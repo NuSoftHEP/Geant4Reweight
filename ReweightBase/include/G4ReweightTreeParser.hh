@@ -18,7 +18,8 @@ class G4ReweightTreeParser{
     void FillCollection();
 
     size_t GetNTrajs();
-    G4ReweightTraj * GetTraj(size_t);
+    size_t GetNEvents();
+    G4ReweightTraj * GetTraj(size_t, size_t);
     void SortCollection();
 
     bool skipEM = true;
@@ -30,7 +31,7 @@ class G4ReweightTreeParser{
     TTree * track;
     TTree * step;
 
-    std::vector<G4ReweightTraj *> * trajCollection = new std::vector<G4ReweightTraj*>;
+    std::vector< std::map< int,G4ReweightTraj* >* > * trajCollection = new std::vector< std::map< int, G4ReweightTraj* >* >();
 
     int tPID;
     int tTrackID;

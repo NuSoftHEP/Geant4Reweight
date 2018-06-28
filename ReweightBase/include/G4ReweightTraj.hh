@@ -29,10 +29,15 @@ class G4ReweightTraj{
     void AddStep(G4ReweightStep *); 
     size_t GetNSteps();
     G4ReweightStep * GetStep(size_t is);
+  
+    bool SetParent(G4ReweightTraj *);
+    bool AddChild(G4ReweightTraj *);
+
+    std::string GetFinalProc();
+    
     //Possibly: 
     
     //Function: append traj
-    //Function: set parent
     //Function: return index of main interaction (i.e. scattering)
 
   protected:

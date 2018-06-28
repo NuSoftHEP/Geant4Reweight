@@ -10,18 +10,27 @@
 class G4ReweightTreeParser{
 
   public:
+    //Functions
     G4ReweightTreeParser(std::string inputFileName);
    ~G4ReweightTreeParser();
     void SetBranches();
-    void GetSteps(G4ReweightTraj *);
+    void SetSteps(G4ReweightTraj *);
     void FillCollection();
 
+    size_t GetNTrajs();
+    G4ReweightTraj * GetTraj(size_t);
+    void SortCollection();
+
+    bool skipEM = true;
+
   private:
+
+    //Data Members
     TFile * fin;
     TTree * track;
     TTree * step;
 
-    std::vector<G4ReweightTraj *> trajCollection;
+    std::vector<G4ReweightTraj *> * trajCollection = new std::vector<G4ReweightTraj*>;
 
     int tPID;
     int tTrackID;
@@ -47,6 +56,9 @@ class G4ReweightTreeParser{
     std::vector<double> * stepActiveAlongProcMFPs = 0;
 
     std::string * stepChosenProc = 0;
+
+    //Functions
 };
+
 
 #endif

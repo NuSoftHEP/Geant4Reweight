@@ -38,10 +38,9 @@ void G4ReweightTreeParser::SetBranches(){
   step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
 }
 
-void G4ReweightTreeParser::GetSteps(G4ReweightTraj * G4RTraj){
+void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
 
-  for(int is = G4RTraj->stepRange.first; is <= G4RTraj->stepRange.second; ++is){
-    if(!(is%100)){std::cout << "Step " << is << std::endl;}
+  for(int is = G4RTraj->stepRange.first; is < G4RTraj->stepRange.second; ++is){
     step->GetEntry(is);
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
@@ -73,19 +72,78 @@ void G4ReweightTreeParser::GetSteps(G4ReweightTraj * G4RTraj){
     G4RTraj->AddStep(G4RStep);
   }
 
-  std::cout << "Got " << G4RTraj->GetNSteps() << " steps for track " << G4RTraj->trackID << std::endl;
+//  std::cout << "Got " << G4RTraj->GetNSteps() << " steps for track " << G4RTraj->trackID << std::endl;
 
 }
 
 void G4ReweightTreeParser::FillCollection(){
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
-
+  if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
+  
   for(int ie = 0; ie < track->GetEntries(); ++ie){
     track->GetEntry(ie);
-    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);
 
-    GetSteps(G4RTraj);
-    std::cout << G4RTraj->GetNSteps() << std::endl;
+    if(skipEM){
+      if( abs(tPID) == 11){continue;}
+    }
+
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);
+    
+    std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
+
+    SetSteps(G4RTraj);
+//    std::cout << G4RTraj->GetNSteps() << std::endl;
+
+    std::cout << G4RTraj->GetFinalProc() << std::endl;
+    trajCollection->push_back(G4RTraj);
+  }
+
+  std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
+}
+
+size_t G4ReweightTreeParser::GetNTrajs(){ 
+  return trajCollection->size();
+}
+
+G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t index){
+  if(!GetNTrajs()){
+    std::cout << "Traj collection is empty" << std::endl;
+    return NULL;
+  }
+  else if(index > (GetNTrajs() - 1)){
+    std::cout << "Traj index out of range. Expecting index between 0 and " <<
+    (GetNTrajs() - 1) << std::endl;
+    return NULL;
+  }
+  else{
+    return trajCollection->at(index);
+  }
+}
+
+void G4ReweightTreeParser::SortCollection(){
+  std::cout << "Attempting to sort " << GetNTrajs() << 
+  " trajectories and set child-parent relationships" <<std::endl;
+
+  //This will go through potential child
+  //particles. The second loop will scan through and find the parents. 
+  //Iterate backward first as the trees should have saved children after parents 
+  for (size_t it = GetNTrajs() - 1 ; it > 0; --it){
+    //Check if primary
+    if (GetTraj(it)->parID == 0){
+      continue;
+    }
+
+    //Then iterate forward.
+    for (size_t it2 = 0; it2 < GetNTrajs(); ++it2){
+      if(it == it2){
+        continue;
+      }
+
+      if( GetTraj(it)->SetParent(GetTraj(it2)) ){
+        std::cout << "Set parent for " << it << " and " << it2 << std::endl;
+        break;
+      }
+    }
   }
 }

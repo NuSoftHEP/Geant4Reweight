@@ -65,6 +65,7 @@ int main(){
   G4ReweightTreeParser * tp = new G4ReweightTreeParser("try.root");
   tp->SetBranches();
   tp->FillCollection();
+  tp->SortCollection();
   
 
 /*  std::cout << "getting entry" << std::endl;

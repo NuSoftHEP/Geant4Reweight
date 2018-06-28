@@ -41,3 +41,43 @@ G4ReweightStep * G4ReweightTraj::GetStep(size_t is){
     return steps.at(is); 
   }
 }
+
+
+bool G4ReweightTraj::SetParent(G4ReweightTraj * parTraj){
+  
+  //Check if the event nums match, parID matches trackID
+  bool check = (  (eventNum == parTraj->eventNum) 
+               && (parID == parTraj->trackID) );
+  
+//  std::cout << "Parent check: " << check << std::endl;
+  bool check_2 = parTraj->AddChild(this);
+  if(check && check_2){
+
+//    std::cout << "Setting parent" << std::endl;
+    //Set the pointer  
+    parent = parTraj; 
+  }
+
+  return (check && check_2);
+}
+
+bool G4ReweightTraj::AddChild(G4ReweightTraj * childTraj){
+
+  //Check if  the event nums match, and trackID matches child's parent
+  bool check = (  (eventNum == childTraj->eventNum)
+               && (trackID == childTraj->parID) );
+
+//  std::cout << "Child check: " << check << std::endl;
+  if(check){
+    //Set the pointer
+    children.push_back(childTraj);
+//    std::cout << "Added child" << std::endl;
+  }
+
+  return check;
+
+}
+
+std::string G4ReweightTraj::GetFinalProc(){
+  return steps.back()->stepChosenProc;
+}

@@ -78,6 +78,27 @@ bool G4ReweightTraj::AddChild(G4ReweightTraj * childTraj){
 
 }
 
+size_t G4ReweightTraj::GetNChilds(){
+  return children.size();
+}
+
+G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic){
+  size_t NChilds = GetNChilds();
+  if(NChilds == 0){
+    std::cout << "Has no childs" << std::endl;
+    return NULL;
+  }
+  else if(ic > NChilds - 1){
+    std::cout << "Index out of range." << std::endl <<
+    "Please Provide index in Range [0, " << NChilds - 1 << "]" << std::endl;
+    return NULL;
+  }
+  else{
+    return children.at(ic);
+  }
+
+}
+
 std::string G4ReweightTraj::GetFinalProc(){
   return steps.back()->stepChosenProc;
 }

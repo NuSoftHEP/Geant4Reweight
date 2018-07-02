@@ -16,6 +16,7 @@ class G4ReweightTreeParser{
     void SetBranches();
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
+    void Analyze();
 
     size_t GetNTrajs();
     size_t GetNEvents();
@@ -32,7 +33,8 @@ class G4ReweightTreeParser{
     TTree * step;
 
     std::vector< std::map< int,G4ReweightTraj* >* > * trajCollection = new std::vector< std::map< int, G4ReweightTraj* >* >();
-
+    
+    //For input tree branches 
     int tPID;
     int tTrackID;
     int tEventNum;
@@ -53,12 +55,13 @@ class G4ReweightTreeParser{
 
     std::vector<std::string> * stepActivePostProcNames = 0;
     std::vector<std::string> * stepActiveAlongProcNames = 0;
-    std::vector<double> * stepActivePostProcMFPs = 0;
-    std::vector<double> * stepActiveAlongProcMFPs = 0;
+    std::vector<double> *      stepActivePostProcMFPs = 0;
+    std::vector<double> *      stepActiveAlongProcMFPs = 0;
+    std::string *              stepChosenProc = 0;
 
-    std::string * stepChosenProc = 0;
-
-    //Functions
+    //To check if sorted and filled
+    bool filled = false;
+    bool sorted = false;
 };
 
 

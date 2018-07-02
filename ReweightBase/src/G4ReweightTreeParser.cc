@@ -151,6 +151,7 @@ void G4ReweightTreeParser::FillCollection(){
   skipped->clear();
   
   std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
+  filled = true;
 }
 
 size_t G4ReweightTreeParser::GetNTrajs(){ 
@@ -193,28 +194,6 @@ void G4ReweightTreeParser::SortCollection(){
   std::cout << "Attempting to sort " << GetNTrajs() << 
   " trajectories and set child-parent relationships" <<std::endl;
 
-  //This will go through potential child
-  //particles. The second loop will scan through and find the parents. 
-  //Iterate backward first as the trees should have saved children after parents 
-/*  for (size_t it = GetNTrajs() - 1 ; it > 0; --it){
-    //Check if primary
-    if (GetTraj(it)->parID == 0){
-      continue;
-    }
-
-    //Then iterate forward.
-    for (size_t it2 = 0; it2 < GetNTrajs(); ++it2){
-      if(it == it2){
-        continue;
-      }
-
-      if( GetTraj(it)->SetParent(GetTraj(it2)) ){
-        std::cout << "Set parent for " << it << " and " << it2 << std::endl;
-        break;
-      }
-    }
-  }*/
-
   //Go through each event
   for( size_t ie = 0; ie < GetNEvents(); ++ie){
     auto trajMap = trajCollection->at(ie);
@@ -243,5 +222,36 @@ void G4ReweightTreeParser::SortCollection(){
     }
     
     
+  }
+
+  sorted = true;
+}
+
+void G4ReweightTreeParser::Analyze(){
+  if( !(filled && sorted) ){
+    std::cout << "Please Fill and Sort before analyzing" << std::endl;   
+    return;
+  }
+   
+  //Iterate through the collection events
+  for(size_t ie = 0; ie < trajCollection->size(); ++ie){
+    auto trajMap = trajCollection->at(ie); 
+  
+    std::cout << "Event " << ie << std::endl;
+
+    //Get the primary trajs
+    std::map<int,G4ReweightTraj*>::iterator itTraj;
+    for(itTraj = trajMap->begin(); itTraj != trajMap->end(); ++itTraj){
+      auto theTraj = itTraj->second;
+
+      if (theTraj->parID == 0){
+        std::cout << "Found primary " << theTraj->PID << std::endl;
+        std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+        std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+        for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+          std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
+        }
+      }
+    }
   }
 }

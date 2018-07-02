@@ -28,7 +28,7 @@ G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
 
   //World
   //
-  G4Tubs * solidWorld = new G4Tubs("World", 0., radius, height, 0.*deg, 360.*deg);
+  G4Tubs * solidWorld = new G4Tubs("World", 0., 10.*radius, 100.*height, 0.*deg, 360.*deg);
   G4LogicalVolume * logicWorld = new G4LogicalVolume(solidWorld, water, "World");
   G4VPhysicalVolume * physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0, checkOverlaps);
 

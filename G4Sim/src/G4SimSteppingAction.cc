@@ -80,7 +80,9 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   int nAlongProcs = step->alongStepProcNames->size();
   std::cout << "AlongStep Procs" << std::endl;
+  std::cout << "N: " << step->alongStepProcNames->size() << step->alongStepProcMFPs->size() << step->alongStepProcIntLens->size() << std::endl;
   std::cout << std::setw(15) << "Name" <<std::setw(15) << "MFP"  <<std::setw(15) << "IntLen" <<std::endl;
+
 
   MyStepTreeBuffer->stepActiveAlongProcNames->clear();
   MyStepTreeBuffer->stepActiveAlongProcMFPs->clear();
@@ -92,8 +94,10 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
     MyStepTreeBuffer->stepActiveAlongProcNames->push_back(step->alongStepProcNames->at(ip));
     MyStepTreeBuffer->stepActiveAlongProcMFPs->push_back(step->alongStepProcMFPs->at(ip));
-    MyStepTreeBuffer->stepActiveAlongProcLens->push_back(step->postStepProcIntLens->at(ip));
+    MyStepTreeBuffer->stepActiveAlongProcLens->push_back(step->alongStepProcIntLens->at(ip));
+    std::cout << "Got Procs" << std::endl;
   }
+    std::cout << "Got Procs" << std::endl;
 
   std::cout << "STEP LENGTH: " << step->GetStepLength() << std::endl;
 

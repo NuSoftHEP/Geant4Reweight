@@ -4,8 +4,8 @@
 #include "G4SystemOfUnits.hh"
 
 #include "G4String.hh"
-
 #include "G4VProcess.hh"
+#include <math.h>
 
 G4SimSteppingAction::G4SimSteppingAction(TreeBuffer * inputTreeBuffer, StepTreeBuffer * inputStepTreeBuffer, TTree * step) : G4UserSteppingAction(){
 
@@ -63,6 +63,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   MyStepTreeBuffer->stepActivePostProcNames->clear();
   MyStepTreeBuffer->stepActivePostProcMFPs->clear();
+  MyStepTreeBuffer->stepActivePostProcLens->clear();
   for(int ip = 0; ip < nPostProcs; ++ip){
     std::cout << std::setw(15) << step->postStepProcNames->at(ip)  
               << std::setw(15) << step->postStepProcMFPs->at(ip) 
@@ -70,6 +71,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
     
     MyStepTreeBuffer->stepActivePostProcNames->push_back(step->postStepProcNames->at(ip));
     MyStepTreeBuffer->stepActivePostProcMFPs->push_back(step->postStepProcMFPs->at(ip));
+    MyStepTreeBuffer->stepActivePostProcLens->push_back(step->postStepProcIntLens->at(ip));
   }
 
   //MyTreeBuffer->postProcNameToMFP->push_back(tempProcNameToMFP);
@@ -82,6 +84,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   MyStepTreeBuffer->stepActiveAlongProcNames->clear();
   MyStepTreeBuffer->stepActiveAlongProcMFPs->clear();
+  MyStepTreeBuffer->stepActiveAlongProcLens->clear();
   for(int ip = 0; ip < nAlongProcs; ++ip){
     std::cout << std::setw(15) << step->alongStepProcNames->at(ip)  
               << std::setw(15) << step->alongStepProcMFPs->at(ip) 
@@ -89,6 +92,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
     MyStepTreeBuffer->stepActiveAlongProcNames->push_back(step->alongStepProcNames->at(ip));
     MyStepTreeBuffer->stepActiveAlongProcMFPs->push_back(step->alongStepProcMFPs->at(ip));
+    MyStepTreeBuffer->stepActiveAlongProcLens->push_back(step->postStepProcIntLens->at(ip));
   }
 
   std::cout << "STEP LENGTH: " << step->GetStepLength() << std::endl;
@@ -99,6 +103,17 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   MyStepTreeBuffer->postStepPx = poststep->GetMomentum()[0];
   MyStepTreeBuffer->postStepPy = poststep->GetMomentum()[1];
   MyStepTreeBuffer->postStepPz = poststep->GetMomentum()[2];
+
+  double xi,yi,zi;
+  double xf,yf,zf;
+  xi = (prestep->GetPosition().getX() / cm);
+  xf = (poststep->GetPosition().getX() / cm);
+  yi = (prestep->GetPosition().getY() / cm);
+  yf = (poststep->GetPosition().getY() / cm);
+  zi = (prestep->GetPosition().getZ() / cm);
+  zf = (poststep->GetPosition().getZ() / cm);
+
+  MyStepTreeBuffer->stepLen = sqrt( pow((xi - xf),2) + pow((yi - yf),2) + pow((zi - zf),2) );
 
   step_tree_copy->Fill();
   MyStepTreeBuffer->nsteps++;

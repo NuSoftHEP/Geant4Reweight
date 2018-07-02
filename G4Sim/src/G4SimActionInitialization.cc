@@ -64,12 +64,15 @@ G4SimActionInitialization::G4SimActionInitialization() : G4VUserActionInitializa
   step->Branch("stepActiveAlongProcNames", &MyStepTreeBuffer->stepActiveAlongProcNames);
   step->Branch("stepActivePostProcMFPs", &MyStepTreeBuffer->stepActivePostProcMFPs);
   step->Branch("stepActiveAlongProcMFPs", &MyStepTreeBuffer->stepActiveAlongProcMFPs);
+  step->Branch("stepActivePostProcLens", &MyStepTreeBuffer->stepActivePostProcLens);
+  step->Branch("stepActiveAlongProcLens", &MyStepTreeBuffer->stepActiveAlongProcLens);
   step->Branch("preStepPx", &MyStepTreeBuffer->preStepPx);
   step->Branch("preStepPy", &MyStepTreeBuffer->preStepPy);
   step->Branch("preStepPz", &MyStepTreeBuffer->preStepPz);
   step->Branch("postStepPx", &MyStepTreeBuffer->postStepPx);
   step->Branch("postStepPy", &MyStepTreeBuffer->postStepPy);
   step->Branch("postStepPz", &MyStepTreeBuffer->postStepPz);
+  step->Branch("stepLen", &MyStepTreeBuffer->stepLen);
   step->Branch("ekin", &MyStepTreeBuffer->ekin);
   G4cout << "Made step Branches" << G4endl;
   /////////////////////

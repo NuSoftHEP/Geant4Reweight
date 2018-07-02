@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include <string>
 #include "TTree.h"
 #include "TFile.h"
 
@@ -7,9 +8,15 @@
 #include "G4ReweightTraj.hh"
 #include "G4ReweightTreeParser.hh"
 
-int main(){
+std::string fileName = "try.root"; 
 
-  G4ReweightTreeParser * tp = new G4ReweightTreeParser("try.root");
+void parseArgs(int argc, char ** argv);
+
+int main(int argc, char ** argv){
+
+  parseArgs(argc, argv);
+  
+  G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str());
   tp->SetBranches();
   tp->FillCollection();
   tp->SortCollection();
@@ -17,4 +24,13 @@ int main(){
   
 
   return 0;
+}
+
+void parseArgs(int argc, char ** argv){
+  std::cout << "Nargs: " << argc << std::endl;
+  if(argc == 2){
+    std::cout << argv[1] << std::endl;
+  }
+
+  fileName = argv[1];
 }

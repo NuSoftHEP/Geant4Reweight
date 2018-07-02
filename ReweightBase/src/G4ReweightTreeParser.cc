@@ -1,10 +1,15 @@
 #include "G4ReweightTreeParser.hh"
 #include <iostream>
+#include "TH1D.h"
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName){
   fin = new TFile(fInputFileName.c_str()); 
   track = (TTree*)fin->Get("track");
   step = (TTree*)fin->Get("step");
+}
+
+void G4ReweightTreeParser::CloseInput(){
+  fin->Close();  
 }
 
 G4ReweightTreeParser::~G4ReweightTreeParser(){
@@ -38,6 +43,7 @@ void G4ReweightTreeParser::SetBranches(){
   step->SetBranchAddress("stepActiveAlongProcNames", &stepActiveAlongProcNames);
   step->SetBranchAddress("stepActivePostProcMFPs", &stepActivePostProcMFPs);
   step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
+  step->SetBranchAddress("stepLen", &stepLength);
 }
 
 void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
@@ -49,7 +55,7 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
 
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
-                                                  preStepP, postStepP, *stepChosenProc);
+                                                  preStepP, postStepP, stepLength, *stepChosenProc);
 
     Proc theProc;
     for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){
@@ -233,6 +239,8 @@ void G4ReweightTreeParser::Analyze(){
     return;
   }
    
+  TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 100);
+
   //Iterate through the collection events
   for(size_t ie = 0; ie < trajCollection->size(); ++ie){
     auto trajMap = trajCollection->at(ie); 
@@ -252,6 +260,9 @@ void G4ReweightTreeParser::Analyze(){
           std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
         }
       }
+      std::cout << "Total Length" << theTraj->GetTotalLength() << std::endl;
     }
   }
 }
+
+

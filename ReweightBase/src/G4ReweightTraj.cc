@@ -102,3 +102,13 @@ G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic){
 std::string G4ReweightTraj::GetFinalProc(){
   return steps.back()->stepChosenProc;
 }
+
+double G4ReweightTraj::GetTotalLength(){
+  double total = 0.;
+
+  for(size_t is = 0; is < GetNSteps(); ++is){
+    total += steps.at(is)->stepLength;  
+  }
+
+  return total;
+}

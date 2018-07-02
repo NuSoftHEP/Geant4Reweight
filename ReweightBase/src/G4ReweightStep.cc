@@ -7,11 +7,12 @@
 G4ReweightStep::G4ReweightStep(){}
 
 G4ReweightStep::G4ReweightStep(int tid, int pid, int parid, int eventnum,
-                               double preStepP[3], double postStepP[3], std::string chosenProc){
+                               double preStepP[3], double postStepP[3], double len, std::string chosenProc){
   trackID = tid;
   PID = pid;
   parID = parid; 
   eventNum = eventnum; 
+  stepLength = len;
 
   preStepPx = preStepP[0];
   preStepPy = preStepP[1];

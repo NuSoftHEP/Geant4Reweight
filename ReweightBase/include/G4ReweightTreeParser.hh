@@ -17,6 +17,7 @@ class G4ReweightTreeParser{
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
     void Analyze();
+    void CloseInput();
 
     size_t GetNTrajs();
     size_t GetNEvents();
@@ -52,6 +53,8 @@ class G4ReweightTreeParser{
     double postStepPx;
     double postStepPy;
     double postStepPz;  
+
+    double stepLength;
 
     std::vector<std::string> * stepActivePostProcNames = 0;
     std::vector<std::string> * stepActiveAlongProcNames = 0;

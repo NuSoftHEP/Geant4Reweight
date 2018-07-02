@@ -37,10 +37,11 @@ class G4ReweightTraj{
 
     std::string GetFinalProc();
     
+    double GetTotalLength();
+
     //Possibly: 
     
     //Function: append traj
-    //Function: return index of main interaction (i.e. scattering)
 
   protected:
 

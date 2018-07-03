@@ -21,7 +21,10 @@ G4SimSteppingAction::~G4SimSteppingAction(){
 }
 
 void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
+
   G4Track * track = step->GetTrack();
+  if(abs(track->GetDefinition()->GetPDGEncoding()) == 11){return;}
+
   auto prestep = step->GetPreStepPoint(); 
   auto poststep = step->GetPostStepPoint(); 
 
@@ -50,7 +53,6 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   //BEGIN STEP TREE FILLING
 
-  if(abs(track->GetDefinition()->GetPDGEncoding()) == 11){return;}
 
   //PostStep Process
   auto postPro = poststep->GetProcessDefinedStep(); 
@@ -60,17 +62,17 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   ///
 
   int nPostProcs = step->postStepProcNames->size();
-  std::cout << "PostStep Procs" << std::endl;
-  std::cout << std::setw(15) << "Name" <<std::setw(15) << "MFP"  <<std::setw(15) << "IntLen" <<std::endl;
+//  G4cout << "PostStep Procs" << G4endl;
+//  G4cout << std::setw(15) << "Name" <<std::setw(15) << "MFP"  <<std::setw(15) << "IntLen" <<G4endl;
 
   MyStepTreeBuffer->stepActivePostProcNames->clear();
   MyStepTreeBuffer->stepActivePostProcMFPs->clear();
   MyStepTreeBuffer->stepActivePostProcLens->clear();
   for(int ip = 0; ip < nPostProcs; ++ip){
-    std::cout << std::setw(15) << step->postStepProcNames->at(ip)  
+/*    G4cout << std::setw(15) << step->postStepProcNames->at(ip)  
               << std::setw(15) << step->postStepProcMFPs->at(ip) 
-              << std::setw(15) << step->postStepProcIntLens->at(ip) << std::endl;
-    
+              << std::setw(15) << step->postStepProcIntLens->at(ip) << G4endl;
+*/    
     MyStepTreeBuffer->stepActivePostProcNames->push_back(step->postStepProcNames->at(ip));
     MyStepTreeBuffer->stepActivePostProcMFPs->push_back(step->postStepProcMFPs->at(ip));
     MyStepTreeBuffer->stepActivePostProcLens->push_back(step->postStepProcIntLens->at(ip));
@@ -81,27 +83,21 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
 
   int nAlongProcs = step->alongStepProcNames->size();
-  std::cout << "AlongStep Procs" << std::endl;
-  std::cout << "N: " << step->alongStepProcNames->size() << step->alongStepProcMFPs->size() << step->alongStepProcIntLens->size() << std::endl;
-  std::cout << std::setw(15) << "Name" <<std::setw(15) << "MFP"  <<std::setw(15) << "IntLen" <<std::endl;
-
+//  G4cout << "AlongStep Procs" << G4endl;
 
   MyStepTreeBuffer->stepActiveAlongProcNames->clear();
   MyStepTreeBuffer->stepActiveAlongProcMFPs->clear();
   MyStepTreeBuffer->stepActiveAlongProcLens->clear();
   for(int ip = 0; ip < nAlongProcs; ++ip){
-    std::cout << std::setw(15) << step->alongStepProcNames->at(ip)  
+/*    G4cout << std::setw(15) << step->alongStepProcNames->at(ip)  
               << std::setw(15) << step->alongStepProcMFPs->at(ip) 
-              << std::setw(15) << step->alongStepProcIntLens->at(ip) << std::endl;
-
+              << std::setw(15) << step->alongStepProcIntLens->at(ip) << G4endl;
+*/
     MyStepTreeBuffer->stepActiveAlongProcNames->push_back(step->alongStepProcNames->at(ip));
     MyStepTreeBuffer->stepActiveAlongProcMFPs->push_back(step->alongStepProcMFPs->at(ip));
     MyStepTreeBuffer->stepActiveAlongProcLens->push_back(step->alongStepProcIntLens->at(ip));
-    std::cout << "Got Procs" << std::endl;
   }
-    std::cout << "Got Procs" << std::endl;
 
-  std::cout << "STEP LENGTH: " << step->GetStepLength() << std::endl;
 
   MyStepTreeBuffer->preStepPx = prestep->GetMomentum()[0];
   MyStepTreeBuffer->preStepPy = prestep->GetMomentum()[1];

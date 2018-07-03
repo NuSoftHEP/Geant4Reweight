@@ -20,7 +20,7 @@ G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
   
   G4NistManager * nist = G4NistManager::Instance();
 
-  G4double radius = 50.*m, height = 50.*m;
+  G4double radius = 1.5*m, height = 50.*m;
   G4Material * air = nist->FindOrBuildMaterial("G4_AIR");
   G4Material * water = nist->FindOrBuildMaterial("G4_WATER");
   G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);

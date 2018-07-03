@@ -21,6 +21,9 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   int parID = track->GetParentID();
   int trackID = track->GetTrackID();
   int PID = track->GetDefinition()->GetPDGEncoding();
+  MyTrackTreeBuffer->PID = PID;
+
+  if(abs(PID) == 11){return;}
 
 
   MyTreeBuffer->track_tid->push_back(trackID);
@@ -31,10 +34,8 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   MyStepTreeBuffer->PID = PID;
    
   MyTrackTreeBuffer->trackID = trackID;
-  MyTrackTreeBuffer->PID = PID;
   MyTrackTreeBuffer->parID = parID;
 
-  if(abs(MyTrackTreeBuffer->PID) == 11){return;}
 
   //nsteps will be iterated in Stepping Action
   MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 

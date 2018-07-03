@@ -101,7 +101,7 @@ void G4SimActionInitialization::Build() const{
   
   SetUserAction(new G4SimPrimaryGeneratorAction());
   //Pass trees and branches to these
-  std::cout << "Passing tree at " << tree << std::endl;
+  G4cout << "Passing tree at " << tree << G4endl;
   SetUserAction(new G4SimEventAction(tree, MyTreeBuffer, MyStepTreeBuffer, MyTrackTreeBuffer));//Will have to fill tree in this
   SetUserAction(new G4SimSteppingAction(MyTreeBuffer, MyStepTreeBuffer, step));
   SetUserAction(new G4SimTrackingAction(MyTreeBuffer, MyStepTreeBuffer, MyTrackTreeBuffer, track));

@@ -4,7 +4,7 @@ G4SimEventAction::G4SimEventAction(TTree * tree, TreeBuffer * inputTreeBuffer, S
 
   //Pass the pointers to this class;
   tree_copy = tree;  
-  std::cout << "Got tree at " << tree << std::endl;
+  G4cout << "Got tree at " << tree << G4endl;
 
   MyTreeBuffer = inputTreeBuffer;
   MyStepTreeBuffer = inputStepTreeBuffer;

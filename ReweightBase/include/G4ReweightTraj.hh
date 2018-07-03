@@ -39,6 +39,8 @@ class G4ReweightTraj{
     
     double GetTotalLength();
 
+    double GetWeight(double bias);
+
     //Possibly: 
     
     //Function: append traj

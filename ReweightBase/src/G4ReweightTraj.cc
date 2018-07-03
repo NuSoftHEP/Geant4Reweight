@@ -2,6 +2,7 @@
 #include "G4ReweightStep.hh"
 
 #include <iostream>
+#include <math.h>
 
 G4ReweightTraj::G4ReweightTraj(int tid, int pid, int parid, int eventnum, std::pair<int,int> range){
   trackID = tid;
@@ -111,4 +112,30 @@ double G4ReweightTraj::GetTotalLength(){
   }
 
   return total;
+}
+
+double G4ReweightTraj::GetWeight(double bias){
+  double total = 0.;
+  double bias_total = 0.;
+
+  for(size_t is = 0; is < GetNSteps(); ++is){
+    auto theStep = GetStep(is);
+
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      if(theProc.Name == "pi+Inelastic"){
+        total += (theStep->stepLength/theProc.MFP);
+        bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
+      }
+
+    }
+
+  }
+  
+  std::cout << "Total: " << total << std::endl <<
+  "Biased: " << bias_total << std::endl <<
+  "Weight: " << exp(total - bias_total) << std::endl;
+  
+  return exp(total - bias_total);
 }

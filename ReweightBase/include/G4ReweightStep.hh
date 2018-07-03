@@ -45,7 +45,8 @@ class G4ReweightStep{
 
     Proc GetActivePostProc(size_t ip);
     Proc GetActiveAlongProc(size_t ip);
-    
+   
+    //double GetWeight(double bias);
 
     //Function:
     //Return traj: Get pointer to the subsuming trajectory.

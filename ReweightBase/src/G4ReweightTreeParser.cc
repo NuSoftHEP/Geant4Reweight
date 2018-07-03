@@ -268,6 +268,9 @@ void G4ReweightTreeParser::Analyze(){
           std::cout << "Total Length" << len << std::endl;
           lenHist->Fill(len);
         }
+        double w = theTraj->GetWeight(1.5);
+        std::cout << "Weight: " << w << std::endl;
+
       }
     }
   }

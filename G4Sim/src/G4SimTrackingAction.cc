@@ -22,6 +22,7 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   int trackID = track->GetTrackID();
   int PID = track->GetDefinition()->GetPDGEncoding();
 
+
   MyTreeBuffer->track_tid->push_back(trackID);
   MyTreeBuffer->track_pid->push_back(PID);
 
@@ -33,6 +34,8 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   MyTrackTreeBuffer->PID = PID;
   MyTrackTreeBuffer->parID = parID;
 
+  if(abs(MyTrackTreeBuffer->PID) == 11){return;}
+
   //nsteps will be iterated in Stepping Action
   MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
   MyTrackTreeBuffer->xi = track->GetPosition()[0];
@@ -41,6 +44,8 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
 }
 
 void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){  
+
+  if(abs(MyTrackTreeBuffer->PID) == 11){return;}
 
   if(track->GetCreatorProcess()){//Skips primary particles which have no creator process
 

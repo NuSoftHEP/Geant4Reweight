@@ -50,6 +50,8 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   //BEGIN STEP TREE FILLING
 
+  if(abs(track->GetDefinition()->GetPDGEncoding()) == 11){return;}
+
   //PostStep Process
   auto postPro = poststep->GetProcessDefinedStep(); 
   auto postProName = postPro->GetProcessName();

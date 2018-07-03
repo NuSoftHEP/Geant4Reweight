@@ -20,7 +20,7 @@ G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
   
   G4NistManager * nist = G4NistManager::Instance();
 
-  G4double radius = 5*cm, height = .5*mm;
+  G4double radius = 50.*m, height = 50.*m;
   G4Material * air = nist->FindOrBuildMaterial("G4_AIR");
   G4Material * water = nist->FindOrBuildMaterial("G4_WATER");
   G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
@@ -28,7 +28,7 @@ G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
 
   //World
   //
-  G4Tubs * solidWorld = new G4Tubs("World", 0., 10.*radius, 100.*height, 0.*deg, 360.*deg);
+  G4Tubs * solidWorld = new G4Tubs("World", 0., radius, height, 0.*deg, 360.*deg);
   G4LogicalVolume * logicWorld = new G4LogicalVolume(solidWorld, water, "World");
   G4VPhysicalVolume * physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0, checkOverlaps);
 

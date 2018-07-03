@@ -21,7 +21,9 @@ int main(int argc, char ** argv){
   tp->FillCollection();
   tp->SortCollection();
   tp->Analyze();  
-  
+  tp->CloseInput();
+
+  std::cout << "done" << std::endl;
 
   return 0;
 }
@@ -30,7 +32,7 @@ void parseArgs(int argc, char ** argv){
   std::cout << "Nargs: " << argc << std::endl;
   if(argc == 2){
     std::cout << argv[1] << std::endl;
+    fileName = argv[1];
   }
 
-  fileName = argv[1];
 }

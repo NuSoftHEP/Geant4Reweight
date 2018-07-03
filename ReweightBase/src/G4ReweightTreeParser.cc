@@ -96,6 +96,8 @@ void G4ReweightTreeParser::FillCollection(){
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
+    if(!(ie%1000)){std::cout << ie << std::endl;}
+
  
     //First event: prev = -1 -> just use already created pointers
     //Same event: prev = eventNum -> use same pointers
@@ -139,9 +141,9 @@ void G4ReweightTreeParser::FillCollection(){
     }
 
     G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
-    std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
+    //std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
     SetSteps(G4RTraj);
-    std::cout << G4RTraj->GetFinalProc() << std::endl;
+    //std::cout << G4RTraj->GetFinalProc() << std::endl;
    
     (*trajMap)[tTrackID] = G4RTraj;
     prevEvent = tEventNum;
@@ -239,7 +241,8 @@ void G4ReweightTreeParser::Analyze(){
     return;
   }
    
-  TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 100);
+  TFile * fout = new TFile("outtry.root","RECREATE");
+  TH1D * lenHist = new TH1D("lenHist", "", 50, 0., 5.);
 
   //Iterate through the collection events
   for(size_t ie = 0; ie < trajCollection->size(); ++ie){
@@ -259,10 +262,18 @@ void G4ReweightTreeParser::Analyze(){
         for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
           std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
         }
+
+        if(theTraj->GetFinalProc() == "pi+Inelastic"){
+          double len = theTraj->GetTotalLength();
+          std::cout << "Total Length" << len << std::endl;
+          lenHist->Fill(len);
+        }
       }
-      std::cout << "Total Length" << theTraj->GetTotalLength() << std::endl;
     }
   }
+
+  lenHist->Write();
+  fout->Close();
 }
 
 

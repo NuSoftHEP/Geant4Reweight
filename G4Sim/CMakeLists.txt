@@ -53,12 +53,12 @@ else()
   target_link_libraries(G4Sim ${Geant4_LIBRARIES})
 endif()
 
-#add_executable(G4Engine G4Engine.cc ${sources} ${headers})
-#if(ROOT_FOUND)
-#  target_link_libraries(G4Sim ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
-#else()
-#  target_link_libraries(G4Sim ${Geant4_LIBRARIES})
-#endif()
+add_executable(G4Engine G4Engine.cc ${sources} ${headers})
+if(ROOT_FOUND)
+  target_link_libraries(G4Engine ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+else()
+  target_link_libraries(G4Engine ${Geant4_LIBRARIES})
+endif()
 #ROOT HERE?
 
 #----------------------------------------------------------------------------

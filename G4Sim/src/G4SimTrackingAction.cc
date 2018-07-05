@@ -23,7 +23,7 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   int PID = track->GetDefinition()->GetPDGEncoding();
   MyTrackTreeBuffer->PID = PID;
 
-  if(abs(PID) == 11){return;}
+  if((abs(PID) >= 1000000000) || (abs(PID) == 11) || (abs(PID) == 22) ){return;}
 
 
   MyTreeBuffer->track_tid->push_back(trackID);
@@ -46,7 +46,7 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
 
 void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){  
 
-  if(abs(MyTrackTreeBuffer->PID) == 11){return;}
+  if( (abs(MyTrackTreeBuffer->PID) >= 1000000000) || (abs(MyTrackTreeBuffer->PID) == 11) || (abs(MyTrackTreeBuffer->PID) == 22) ){return;}
 
   if(track->GetCreatorProcess()){//Skips primary particles which have no creator process
 

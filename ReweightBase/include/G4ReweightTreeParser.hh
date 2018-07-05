@@ -17,12 +17,13 @@ class G4ReweightTreeParser{
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
     void Analyze();
+    void FillAndAnalyze();
     void CloseInput();
 
     size_t GetNTrajs();
-    size_t GetNEvents();
+  //  size_t GetNEvents();
     G4ReweightTraj * GetTraj(size_t, size_t);
-    void SortCollection();
+//    void SortCollection();
 
     bool skipEM = true;
 
@@ -33,7 +34,7 @@ class G4ReweightTreeParser{
     TTree * track;
     TTree * step;
 
-    std::vector< std::map< int,G4ReweightTraj* >* > * trajCollection = new std::vector< std::map< int, G4ReweightTraj* >* >();
+    std::map< std::pair<size_t,size_t>, G4ReweightTraj*  > * trajCollection = new std::map< std::pair<size_t,size_t>, G4ReweightTraj* >();
     
     //For input tree branches 
     int tPID;

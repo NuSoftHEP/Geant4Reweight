@@ -1,5 +1,6 @@
 #include "G4ReweightTreeParser.hh"
 #include <iostream>
+#include <algorithm>
 #include "TH1D.h"
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName){
@@ -47,8 +48,9 @@ void G4ReweightTreeParser::SetBranches(){
 }
 
 void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
-
+  //std::cout << G4RTraj->stepRange.first << " " << G4RTraj->stepRange.second << std::endl;
   for(int is = G4RTraj->stepRange.first; is < G4RTraj->stepRange.second; ++is){
+    //std::cout << is << std::endl;
     step->GetEntry(is);
 
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
@@ -80,8 +82,6 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
     G4RTraj->AddStep(G4RStep);
   }
 
-//  std::cout << "Got " << G4RTraj->GetNSteps() << " steps for track " << G4RTraj->trackID << std::endl;
-
 }
 
 void G4ReweightTreeParser::FillCollection(){
@@ -90,101 +90,70 @@ void G4ReweightTreeParser::FillCollection(){
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
   
 
-  int prevEvent = -1;
-  std::map<int, G4ReweightTraj*> * trajMap = new std::map<int, G4ReweightTraj*>();
-  std::vector<int> * skipped = new std::vector<int>();
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
     if(!(ie%1000)){std::cout << ie << std::endl;}
 
- 
-    //First event: prev = -1 -> just use already created pointers
-    //Same event: prev = eventNum -> use same pointers
-    //else: we're on a new event and need to make new pointers
-    //      and store the previous map
-    if( (prevEvent != -1) && (tEventNum != prevEvent) ){
-      //store the previous map and make a new one
-      trajCollection->push_back(trajMap);
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
+    SetSteps(G4RTraj);
+   
+    std::pair<size_t,size_t> thisPair = std::make_pair(tTrackID,tEventNum);
+    std::pair<size_t,size_t> parentPair = std::make_pair(tParID,tEventNum);
 
-      std::map<int,G4ReweightTraj*>::iterator itMap;
-/*      for(itMap = trajMap->begin(); itMap != trajMap->end(); ++itMap){
-        std::cout << itMap->first << " " << itMap->second->PID << std::endl;
+    //Primary particle
+    if(tParID == 0){
+      (*trajCollection)[thisPair] = G4RTraj;
+//      std::cout << "Added primary " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
+    }
+    //The particle's parent is in the map
+    else if( trajCollection->count( parentPair ) ){      
+      if( (*trajCollection)[ parentPair ]->AddChild( G4RTraj ) ){
+//        std::cout << "Added child " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
+//        std::cout << "\tTo " << tParID << std::endl;
       }
-*/
-      trajMap = new std::map<int, G4ReweightTraj*>();
-
-      //clear skipped 
-      skipped->clear();
-//      std::cout << "Event: " << tEventNum << std::endl;
-    }
-/*    else if(prevEvent == -1){
-      std::cout << "Event: " << tEventNum << std::endl;
-    }
-*/ 
-    if(skipEM){
-      if( abs(tPID) == 11){
-        skipped->push_back(tTrackID);
-        continue;
+/*      else{
+        std::cout << "Failed to add child " <<tTrackID << " " << tPID << " " << tEventNum << std::endl;
+        std::cout << "\tTo " << tParID << std::endl;
       }     
+*/
+    }
+    else{
+//      std::cout << "Did not find parent " << tParID << " in map" << std::endl;
+//      std::cout << "Deleting traj " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
+      delete G4RTraj;
     }
     
-    std::vector<int>::iterator checkSkipped = skipped->begin();
-    for(checkSkipped; checkSkipped != skipped->end(); ++checkSkipped){
-      if (*checkSkipped == tParID){
-        break;
-      }
-    }
-    if(checkSkipped != skipped->end()){
-      skipped->push_back(tTrackID);
-      continue;
-    }
-
-    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
-    //std::cout << tTrackID << " " << tPID << " " << tParID <<" " << tEventNum << " " <<tSteps->first << " " << tSteps->second << std::endl;
-    SetSteps(G4RTraj);
-    //std::cout << G4RTraj->GetFinalProc() << std::endl;
-   
-    (*trajMap)[tTrackID] = G4RTraj;
-    prevEvent = tEventNum;
   }
 
-//  std::cout<< "Event: " << tEventNum << std::endl;
-  trajCollection->push_back(trajMap);
-  std::map<int,G4ReweightTraj*>::iterator itMap;
-/*  for(itMap = trajMap->begin(); itMap != trajMap->end(); ++itMap){
-    std::cout << itMap->first << " " << itMap->second << std::endl;
-  }
-*/
-  skipped->clear();
   
   std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
   filled = true;
 }
 
 size_t G4ReweightTreeParser::GetNTrajs(){ 
-  size_t nTraj = 0;
+//  size_t nTraj = 0;
   
-  std::cout << trajCollection->size() << " Events" << std::endl;
-  for(size_t i = 0; i < trajCollection->size(); ++i){
+//  std::cout << trajCollection->size() << " Events" << std::endl;
+/*  for(size_t i = 0; i < trajCollection->size(); ++i){
     //Get map at i. Add its size to the count
     nTraj += (trajCollection->at(i))->size();
   }
-
-//  return trajCollection->size();
-  return nTraj;
-}
-
-size_t G4ReweightTreeParser::GetNEvents(){
+*/
   return trajCollection->size();
+//  return nTraj;
 }
+
+/*size_t G4ReweightTreeParser::GetNEvents(){
+  return trajCollection->size();
+}*/
 
 G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackIndex){
   if(!GetNTrajs()){
     std::cout << "Traj collection is empty" << std::endl;
     return NULL;
   }
-  else if(eventIndex > (GetNEvents() - 1) ){
+/*  else if(eventIndex > (GetNEvents() - 1) ){
     std::cout << "Event index out of range. Expecting index between 0 and " <<
     (GetNEvents() - 1) << std::endl;
     return NULL;
@@ -192,13 +161,17 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
   else if( (trajCollection->at(eventIndex))->count(trackIndex) == 0) {
     std::cout << "No trackID matching " << trackIndex << " within Event " << eventIndex << std::endl;
     return NULL;
+  }*/
+  else if( !( trajCollection->count( std::make_pair(trackIndex, eventIndex) ) ) ){
+    std::cout << "No traj matching trackID, eventNum: " << trackIndex << " " << eventIndex << std::endl;
+    return NULL;
   }
   else{
-    return (*(trajCollection->at(eventIndex)))[trackIndex];
+    return (*trajCollection)[std::make_pair(trackIndex, eventIndex)];
   }
 }
 
-void G4ReweightTreeParser::SortCollection(){
+/*void G4ReweightTreeParser::SortCollection(){
   std::cout << "Attempting to sort " << GetNTrajs() << 
   " trajectories and set child-parent relationships" <<std::endl;
 
@@ -233,50 +206,162 @@ void G4ReweightTreeParser::SortCollection(){
   }
 
   sorted = true;
-}
+}*/
 
 void G4ReweightTreeParser::Analyze(){
-  if( !(filled && sorted) ){
-    std::cout << "Please Fill and Sort before analyzing" << std::endl;   
+  if( !filled ){
+    std::cout << "Please Fill before analyzing" << std::endl;   
     return;
   }
    
   TFile * fout = new TFile("outtry.root","RECREATE");
-  TH1D * lenHist = new TH1D("lenHist", "", 50, 0., 5.);
+  TH1D * lenHist = new TH1D("lenHist", "", 250, 0., 50.);
+  TH1D * weightHist = new TH1D("weightHist", "", 500, 0, 5.);
 
-  //Iterate through the collection events
-  for(size_t ie = 0; ie < trajCollection->size(); ++ie){
-    auto trajMap = trajCollection->at(ie); 
+  //Iterate through the collection 
+  std::map< std::pair<size_t,size_t>, G4ReweightTraj*>::iterator itTraj = trajCollection->begin();
+  for(itTraj; itTraj != trajCollection->end(); ++itTraj){
   
-    std::cout << "Event " << ie << std::endl;
-
-    //Get the primary trajs
-    std::map<int,G4ReweightTraj*>::iterator itTraj;
-    for(itTraj = trajMap->begin(); itTraj != trajMap->end(); ++itTraj){
-      auto theTraj = itTraj->second;
-
-      if (theTraj->parID == 0){
-        std::cout << "Found primary " << theTraj->PID << std::endl;
-        std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
-        std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-        for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
-          std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-        }
-
-        if(theTraj->GetFinalProc() == "pi+Inelastic"){
-          double len = theTraj->GetTotalLength();
-          std::cout << "Total Length" << len << std::endl;
-          lenHist->Fill(len);
-        }
-        double w = theTraj->GetWeight(1.5);
-        std::cout << "Weight: " << w << std::endl;
-
-      }
+    auto theTraj = itTraj->second;
+    if (theTraj->parID > 0){ std::cout << "Error! Found non primary traj in collection" << std::endl; break;}
+    std::cout << "Found primary " << theTraj->PID << std::endl;
+    std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+    std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+    for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+      std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
     }
+
+    if(theTraj->GetFinalProc() == "pi+Inelastic"){
+      double len = theTraj->GetTotalLength();
+      std::cout << "Total Length" << len << std::endl;
+      lenHist->Fill(len);
+    }
+    double w = theTraj->GetWeight(1.5);
+    std::cout << "Weight: " << w << std::endl;
   }
+  
 
   lenHist->Write();
   fout->Close();
 }
 
 
+void G4ReweightTreeParser::FillAndAnalyze(){
+
+  TFile * fout = new TFile("outtry.root","RECREATE");
+  TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 40.);
+  TH1D * weightHist = new TH1D("weights", "", 200,0,2.);  
+  TH1D * weightedLen = new TH1D("weightedLen", "", 100, 0, 40.);
+
+  std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
+  if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
+  
+  int prevEvent = -1;
+  for(int ie = 0; ie < track->GetEntries(); ++ie){    
+    track->GetEntry(ie);
+
+    if(!(ie%1000)){std::cout << ie << std::endl;}
+
+    //New event. Do the analysis and Delete the current collection
+    if( (prevEvent > -1) && (prevEvent != tEventNum) ){
+
+//      std::cout << "Event: " << prevEvent << std::endl;
+     
+      //Do analysis here
+      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+      for( ; itTraj != trajCollection->end(); ++itTraj){
+        auto theTraj = itTraj->second; 
+        if (theTraj->parID == 0){
+//          std::cout << "Found primary " << theTraj->PID << std::endl;
+//          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+//          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+          for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+//            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
+          }
+
+          double w = theTraj->GetWeight(1.5);
+          weightHist->Fill(w);
+
+          if(theTraj->GetFinalProc() == "pi+Inelastic"){
+            double len = theTraj->GetTotalLength();
+//            std::cout << "Total Length" << len << std::endl;
+            lenHist->Fill(len);
+            weightedLen->Fill(len,w);
+          }
+//          std::cout << "Weight: " << w << std::endl;
+        }
+      }
+
+      for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
+        //Delete the pointer
+        delete itTraj->second;
+      }
+      //empty the container
+      trajCollection->clear();
+      
+    }
+
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
+    SetSteps(G4RTraj);
+   
+    std::pair<size_t,size_t> thisPair = std::make_pair(tTrackID,tEventNum);
+    std::pair<size_t,size_t> parentPair = std::make_pair(tParID,tEventNum);
+
+    //Add the traj to the map
+    (*trajCollection)[thisPair] = G4RTraj;
+
+    //The particle's parent is in the map
+    if( trajCollection->count( parentPair ) ){      
+       (*trajCollection)[ parentPair ]->AddChild( G4RTraj ); 
+    }
+    else{
+//      std::cout << "Could not find parent" << std::endl;
+//      std::cout << thisPair.first << " " << parentPair.first << " " << thisPair.second << std::endl;
+    }
+        
+    prevEvent = tEventNum;
+  }
+
+  
+  std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
+  filled = true;
+
+  std::cout << "Event: " << prevEvent << std::endl;
+  
+  //Do analysis here
+  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+  for( ; itTraj != trajCollection->end(); ++itTraj){
+    auto theTraj = itTraj->second; 
+    if (theTraj->parID == 0){
+//      std::cout << "Found primary " << theTraj->PID << std::endl;
+//      std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+//      std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+      for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+//        std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
+      }
+
+      double w = theTraj->GetWeight(1.5);
+      weightHist->Fill(w);
+
+      if(theTraj->GetFinalProc() == "pi+Inelastic"){
+        double len = theTraj->GetTotalLength();
+//        std::cout << "Total Length" << len << std::endl;
+        lenHist->Fill(len);
+        weightedLen->Fill(len, w);
+      }
+//      std::cout << "Weight: " << w << std::endl;
+    }
+  }
+
+  for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
+    //Delete the pointer
+    delete itTraj->second;
+  }
+  //empty the container
+  trajCollection->clear();
+
+  lenHist->Write();
+  weightedLen->Write();;
+  weightHist->Write();
+  fout->Close();
+}

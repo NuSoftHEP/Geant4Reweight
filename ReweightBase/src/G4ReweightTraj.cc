@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <algorithm>
 
 G4ReweightTraj::G4ReweightTraj(int tid, int pid, int parid, int eventnum, std::pair<int,int> range){
   trackID = tid;
@@ -14,6 +15,8 @@ G4ReweightTraj::G4ReweightTraj(int tid, int pid, int parid, int eventnum, std::p
 
 G4ReweightTraj::~G4ReweightTraj(){
   children.clear();
+
+  std::for_each(steps.begin(), steps.end(), DeleteVector<G4ReweightStep*>());  
   steps.clear();
 }
 
@@ -120,7 +123,7 @@ double G4ReweightTraj::GetWeight(double bias){
 
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
-
+   
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
 
@@ -128,14 +131,16 @@ double G4ReweightTraj::GetWeight(double bias){
         total += (theStep->stepLength/theProc.MFP);
         bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
       }
-
     }
-
+  }
+  double weight;
+  if(GetFinalProc() == "pi+Inelastic"){
+    weight = (1 - exp( -1*bias_total ));
+    weight = weight / (1 - exp( -1*total ));
+  }
+  else{
+    weight = exp( total - bias_total );
   }
   
-  std::cout << "Total: " << total << std::endl <<
-  "Biased: " << bias_total << std::endl <<
-  "Weight: " << exp(total - bias_total) << std::endl;
-  
-  return exp(total - bias_total);
+  return weight;
 }

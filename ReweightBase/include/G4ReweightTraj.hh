@@ -6,7 +6,18 @@
 #include <string>
 #include <map>
 #include <utility>
-
+// Functor for deleting pointers in vector.
+template<class T> class DeleteVector
+{
+  public:
+    // Overloaded () operator.
+    // This will be called by for_each() function.
+    bool operator()(T x) const{
+      // Delete pointer.
+      delete x;
+      return true;
+    }
+};
 //Forward Declaration to let Traj know of step
 class G4ReweightStep;
 

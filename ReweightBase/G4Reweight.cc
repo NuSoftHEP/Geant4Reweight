@@ -18,9 +18,10 @@ int main(int argc, char ** argv){
   
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str());
   tp->SetBranches();
-  tp->FillCollection();
-  tp->SortCollection();
-  tp->Analyze();  
+  tp->FillAndAnalyze();
+  //tp->FillCollection();
+  //tp->SortCollection();
+  //tp->Analyze();  
   tp->CloseInput();
 
   std::cout << "done" << std::endl;

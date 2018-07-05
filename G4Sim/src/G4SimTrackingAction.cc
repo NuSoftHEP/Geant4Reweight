@@ -36,9 +36,15 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   MyTrackTreeBuffer->trackID = trackID;
   MyTrackTreeBuffer->parID = parID;
 
+  //Only saving steps for primary particles
+  if(parID == 0){
+    //nsteps will be iterated in Stepping Action
+    MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
+  }
+  else{
+    MyTrackTreeBuffer->steps->first = -1;
+  }
 
-  //nsteps will be iterated in Stepping Action
-  MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
   MyTrackTreeBuffer->xi = track->GetPosition()[0];
   MyTrackTreeBuffer->yi = track->GetPosition()[1];
   MyTrackTreeBuffer->zi = track->GetPosition()[2];
@@ -64,7 +70,12 @@ void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){
     }
   }
   
-  MyTrackTreeBuffer->steps->second = MyStepTreeBuffer->nsteps;
+  if(MyTrackTreeBuffer->parID == 0){
+    MyTrackTreeBuffer->steps->second = MyStepTreeBuffer->nsteps;
+  }
+  else{
+    MyTrackTreeBuffer->steps->second = -1;
+  }
   track_tree_copy->Fill();
 
 }

@@ -118,8 +118,15 @@ double G4ReweightTraj::GetTotalLength(){
 }
 
 double G4ReweightTraj::GetWeight(double bias){
-  double total = 0.;
-  double bias_total = 0.;
+  //double total = 0.;
+  //double bias_total = 0.;
+  std::map<std::string,double> total; 
+  std::map<std::string,double> bias_total;  
+
+  for(int i = 0; i < 2; ++i){
+    total[reweightable[i]] = 0.;
+    bias_total[reweightable[i]] = 0.;
+  }
 
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
@@ -127,19 +134,47 @@ double G4ReweightTraj::GetWeight(double bias){
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
 
-      if(theProc.Name == "pi+Inelastic"){
-        total += (theStep->stepLength/theProc.MFP);
-        bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
+//      if(theProc.Name == "pi+Inelastic"){
+//        total += (theStep->stepLength/theProc.MFP);
+//        bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
+//      }
+      
+      if (total.count(theProc.Name)){
+        total[theProc.Name] += (theStep->stepLength/theProc.MFP);
+        bias_total[theProc.Name] += ( (theStep->stepLength*bias) / theProc.MFP);
       }
+
     }
   }
+
+  double xsecTotal = 0.;
+  double bias_xsecTotal = 0.;
+  for(int i = 0; i < 2; ++i){
+    //std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
+    xsecTotal += total[reweightable[i]];
+    bias_xsecTotal += bias_total[reweightable[i]];
+  }
+
   double weight;
-  if(GetFinalProc() == "pi+Inelastic"){
+/*  if(GetFinalProc() == "pi+Inelastic"){
     weight = (1 - exp( -1*bias_total ));
     weight = weight / (1 - exp( -1*total ));
+  }*/
+  double num, denom;
+  if(total.count(GetFinalProc())){
+     num = bias_total[GetFinalProc()];
+     num = num / bias_xsecTotal;
+     num = num * (1 - exp( -1*bias_xsecTotal ) );
+
+     denom = total[GetFinalProc()];
+     denom = num / xsecTotal;
+     denom = denom * (1 - exp( -1*xsecTotal ) );
+
+     weight = num/denom;
   }
   else{
-    weight = exp( total - bias_total );
+    //weight = exp( total - bias_total );
+    weight = exp( xsecTotal - bias_xsecTotal );
   }
   
   return weight;

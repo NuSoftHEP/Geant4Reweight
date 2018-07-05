@@ -62,6 +62,11 @@ class G4ReweightTraj{
     std::vector<G4ReweightStep *> steps;
     std::vector<G4ReweightTraj *> children;
 
+    std::string reweightable[2] = {
+      "pi+Inelastic",
+      "CoulombScat"/*,
+      "Decay"*/
+    };
 };
 
 

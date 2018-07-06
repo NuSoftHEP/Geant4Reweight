@@ -252,6 +252,17 @@ void G4ReweightTreeParser::FillAndAnalyze(){
   TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 40.);
   TH1D * weightHist = new TH1D("weights", "", 200,0,2.);  
   TH1D * weightedLen = new TH1D("weightedLen", "", 100, 0, 40.);
+  TTree * tree = new TTree("tree","");
+  
+  double theLen=0.;
+  double theWeight=0.;
+  double N=0.;
+  std::string theInt = ""; 
+
+  tree->Branch("len", &theLen);  
+  tree->Branch("weight", &theWeight);  
+  tree->Branch("N", &N);
+  tree->Branch("int", &theInt);
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -288,6 +299,12 @@ void G4ReweightTreeParser::FillAndAnalyze(){
             lenHist->Fill(len);
             weightedLen->Fill(len,w);
           }
+          theLen = theTraj->GetTotalLength();
+          theWeight = w;
+          theInt = theTraj->GetFinalProc();
+          tree->Fill();
+
+           
 //          std::cout << "Weight: " << w << std::endl;
         }
       }
@@ -349,6 +366,10 @@ void G4ReweightTreeParser::FillAndAnalyze(){
         lenHist->Fill(len);
         weightedLen->Fill(len, w);
       }
+      theLen = theTraj->GetTotalLength();
+      theWeight = w;
+      theInt = theTraj->GetFinalProc();
+      tree->Fill();
 //      std::cout << "Weight: " << w << std::endl;
     }
   }
@@ -363,5 +384,6 @@ void G4ReweightTreeParser::FillAndAnalyze(){
   lenHist->Write();
   weightedLen->Write();;
   weightHist->Write();
+  tree->Write();
   fout->Close();
 }

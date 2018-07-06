@@ -141,7 +141,13 @@ double G4ReweightTraj::GetWeight(double bias){
       
       if (total.count(theProc.Name)){
         total[theProc.Name] += (theStep->stepLength/theProc.MFP);
-        bias_total[theProc.Name] += ( (theStep->stepLength*bias) / theProc.MFP);
+        
+        if(theProc.Name == "pi+Inelastic"){
+          bias_total[theProc.Name] += ( (theStep->stepLength*bias) / theProc.MFP);
+        }
+        else{
+          bias_total[theProc.Name] += ( (theStep->stepLength) / theProc.MFP);
+        }
       }
 
     }
@@ -150,27 +156,38 @@ double G4ReweightTraj::GetWeight(double bias){
   double xsecTotal = 0.;
   double bias_xsecTotal = 0.;
   for(int i = 0; i < 2; ++i){
-    //std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
+//    std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
     xsecTotal += total[reweightable[i]];
     bias_xsecTotal += bias_total[reweightable[i]];
   }
+ // std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
 
   double weight;
 /*  if(GetFinalProc() == "pi+Inelastic"){
     weight = (1 - exp( -1*bias_total ));
     weight = weight / (1 - exp( -1*total ));
   }*/
-  double num, denom;
+  double num, denom;  
   if(total.count(GetFinalProc())){
+/*     std::cout << "Found final proc " << GetFinalProc() << std::endl;
+     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
+     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
+
+     std::cout << "Total: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
+     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
+*/
      num = bias_total[GetFinalProc()];
      num = num / bias_xsecTotal;
      num = num * (1 - exp( -1*bias_xsecTotal ) );
 
      denom = total[GetFinalProc()];
-     denom = num / xsecTotal;
+     denom = denom / xsecTotal;
      denom = denom * (1 - exp( -1*xsecTotal ) );
 
      weight = num/denom;
+//     std::cout << GetFinalProc() << " " << weight << std::endl;
+
   }
   else{
     //weight = exp( total - bias_total );

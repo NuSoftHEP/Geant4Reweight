@@ -66,7 +66,7 @@ int main(int argc, char ** argv){
   for(int i = 0; i < pv->entries(); ++i){
     auto theProc = (*pv)(i);
     if(theProc->GetProcessName() == "CoulombScat"){
-      theProc->SetParticle(piplus);
+//      theProc->SetParticle(piplus);
     }
     std::cout << theProc->GetProcessName() << std::endl;
     std::cout << theProc->GetMFP(*track, 0., fc) << std::endl;

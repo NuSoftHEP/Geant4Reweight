@@ -123,7 +123,7 @@ double G4ReweightTraj::GetWeight(double bias){
   std::map<std::string,double> total; 
   std::map<std::string,double> bias_total;  
 
-  for(int i = 0; i < 2; ++i){
+  for(int i = 0; i < nRW; ++i){
     total[reweightable[i]] = 0.;
     bias_total[reweightable[i]] = 0.;
   }
@@ -155,12 +155,12 @@ double G4ReweightTraj::GetWeight(double bias){
 
   double xsecTotal = 0.;
   double bias_xsecTotal = 0.;
-  for(int i = 0; i < 2; ++i){
+  for(int i = 0; i < nRW; ++i){
 //    std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
     xsecTotal += total[reweightable[i]];
     bias_xsecTotal += bias_total[reweightable[i]];
   }
- // std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+//  std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
 
   double weight;
 /*  if(GetFinalProc() == "pi+Inelastic"){
@@ -169,14 +169,14 @@ double G4ReweightTraj::GetWeight(double bias){
   }*/
   double num, denom;  
   if(total.count(GetFinalProc())){
-/*     std::cout << "Found final proc " << GetFinalProc() << std::endl;
-     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
-     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
+//     std::cout << "Found final proc " << GetFinalProc() << std::endl;
+//     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
+//     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
+//
+//     std::cout << "Total: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+//     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
+//     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
 
-     std::cout << "Total: " << xsecTotal << " " << bias_xsecTotal << std::endl;
-     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
-     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
-*/
      num = bias_total[GetFinalProc()];
      num = num / bias_xsecTotal;
      num = num * (1 - exp( -1*bias_xsecTotal ) );
@@ -184,6 +184,7 @@ double G4ReweightTraj::GetWeight(double bias){
      denom = total[GetFinalProc()];
      denom = denom / xsecTotal;
      denom = denom * (1 - exp( -1*xsecTotal ) );
+
 
      weight = num/denom;
 //     std::cout << GetFinalProc() << " " << weight << std::endl;

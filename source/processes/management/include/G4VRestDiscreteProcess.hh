@@ -100,6 +100,9 @@ class G4VRestDiscreteProcess : public G4VProcess
 			     const G4Track& ,
 			     const G4Step& 
 			    ) {return 0;};
+     G4double GetMFP(const G4Track& track,
+		      G4double   previousStepSize,
+		      G4ForceCondition* condition);
  
   protected:// with description
      virtual G4double GetMeanFreePath(const G4Track& aTrack,

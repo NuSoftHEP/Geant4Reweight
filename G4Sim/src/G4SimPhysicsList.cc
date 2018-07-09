@@ -18,6 +18,7 @@ G4SimPhysicsList::~G4SimPhysicsList(){}
 
 void G4SimPhysicsList::SetCuts(){
   G4cout << "Set Cuts" << G4endl; 
+  G4VUserPhysicsList::SetCuts();
 }
 
 

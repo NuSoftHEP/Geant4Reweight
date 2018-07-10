@@ -10,11 +10,15 @@ G4SimActionInitialization::G4SimActionInitialization() : G4VUserActionInitializa
   MyTreeBuffer = new TreeBuffer();
   MyStepTreeBuffer = new StepTreeBuffer();
   MyTrackTreeBuffer = new TrackTreeBuffer();
-
+ 
+  G4cout << "Making trees" << G4endl;
+ 
   fout = new TFile("try.root", "RECREATE");
   tree = new TTree("tree","");
   step = new TTree("step","");
   track = new TTree("track","");
+  G4cout << "Done Making trees" << G4endl;
+
 
   //Tree Branches
   G4cout << "Making Branches" << G4endl;

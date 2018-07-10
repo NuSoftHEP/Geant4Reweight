@@ -58,6 +58,7 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
 
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
                                                   preStepP, postStepP, stepLength, *stepChosenProc);
+   // std::cout << is << " " << *stepChosenProc << std::endl;                                                  
 
     Proc theProc;
     for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){

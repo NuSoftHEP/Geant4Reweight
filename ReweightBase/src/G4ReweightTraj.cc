@@ -128,9 +128,13 @@ double G4ReweightTraj::GetWeight(double bias){
     bias_total[reweightable[i]] = 0.;
   }
 
-  for(size_t is = 0; is < GetNSteps(); ++is){
+  for(size_t is = 0; is < GetNSteps(); ++is){   
     auto theStep = GetStep(is);
-   
+        
+/*    std::cout << "P: " << theStep->preStepPx << " " << theStep->preStepPy << " " << theStep->preStepPz << " " << 
+
+    sqrt(theStep->preStepPx*theStep->preStepPx + theStep->preStepPy*theStep->preStepPy + theStep->preStepPz*theStep->preStepPz) <<std::endl;
+    std::cout << "L: " << theStep->stepLength << std::endl;*/
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
 
@@ -139,20 +143,23 @@ double G4ReweightTraj::GetWeight(double bias){
 //        bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
 //      }
       
+//      std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
+
       if (total.count(theProc.Name)){
-        total[theProc.Name] += (theStep->stepLength/theProc.MFP);
+        total[theProc.Name] += (10.*theStep->stepLength/theProc.MFP);
         
         if(theProc.Name == "pi+Inelastic"){
-          bias_total[theProc.Name] += ( (theStep->stepLength*bias) / theProc.MFP);
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength*bias) / theProc.MFP);
         }
         else{
-          bias_total[theProc.Name] += ( (theStep->stepLength) / theProc.MFP);
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength) / theProc.MFP);
         }
       }
 
     }
   }
-
+//  std::cout << "total: " << total["pi+Inelastic"] << std::endl;
+  //std::cout << "? " << exp(-.5*total["pi+Inelastic"]) << std::endl;
   double xsecTotal = 0.;
   double bias_xsecTotal = 0.;
   for(int i = 0; i < nRW; ++i){
@@ -168,7 +175,7 @@ double G4ReweightTraj::GetWeight(double bias){
     weight = weight / (1 - exp( -1*total ));
   }*/
   double num, denom;  
-  if(total.count(GetFinalProc())){
+  if(total.count(GetFinalProc()) && GetStep(GetNSteps() - 1)->stepLength > 0){
 //     std::cout << "Found final proc " << GetFinalProc() << std::endl;
 //     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
 //     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
@@ -194,6 +201,6 @@ double G4ReweightTraj::GetWeight(double bias){
     //weight = exp( total - bias_total );
     weight = exp( xsecTotal - bias_xsecTotal );
   }
-  
+//  std::cout <<"weight " << weight << std::endl; 
   return weight;
 }

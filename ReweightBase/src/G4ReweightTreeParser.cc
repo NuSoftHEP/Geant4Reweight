@@ -53,12 +53,14 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
     //std::cout << is << std::endl;
     step->GetEntry(is);
 
+   // std::cout << preStepPx << " " << preStepPy << " " << preStepPz << std::endl;
+   // std::cout << postStepPx << " " << postStepPy << " " << postStepPz << std::endl;
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
 
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
                                                   preStepP, postStepP, stepLength, *stepChosenProc);
-   // std::cout << is << " " << *stepChosenProc << std::endl;                                                  
+    // std::cout << is << " " << *stepChosenProc << std::endl;                                                  
 
     Proc theProc;
     for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){
@@ -259,11 +261,15 @@ void G4ReweightTreeParser::FillAndAnalyze(){
   double theWeight=0.;
   double N=0.;
   std::string theInt = ""; 
+  double postFinalP=0.;
+  double preFinalP=0.;
 
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
   tree->Branch("N", &N);
   tree->Branch("int", &theInt);
+  tree->Branch("postFinalP", &postFinalP);
+  tree->Branch("preFinalP", &preFinalP);
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -303,6 +309,18 @@ void G4ReweightTreeParser::FillAndAnalyze(){
           theLen = theTraj->GetTotalLength();
           theWeight = w;
           theInt = theTraj->GetFinalProc();
+          //std::cout << "Final " << theInt << std::endl;
+          double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
+          double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
+          double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
+          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          preFinalP = sqrt( px*px + py*py + pz*pz); 
+
+          px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
+          py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
+          pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
+          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          postFinalP = sqrt( px*px + py*py + pz*pz); 
           tree->Fill();
 
            
@@ -370,6 +388,19 @@ void G4ReweightTreeParser::FillAndAnalyze(){
       theLen = theTraj->GetTotalLength();
       theWeight = w;
       theInt = theTraj->GetFinalProc();
+
+      
+      double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
+      double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
+      double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
+      //std::cout << px << " " << py << " " << pz << std::endl;
+      preFinalP = sqrt( px*px + py*py + pz*pz); 
+
+      px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
+      py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
+      pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
+      //std::cout << px << " " << py << " " << pz << std::endl;
+      postFinalP = sqrt( px*px + py*py + pz*pz); 
       tree->Fill();
 //      std::cout << "Weight: " << w << std::endl;
     }

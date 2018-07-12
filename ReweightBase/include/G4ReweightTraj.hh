@@ -51,8 +51,9 @@ class G4ReweightTraj{
     double GetTotalLength();
 
     double GetWeight(double bias);
-    double GetWeight_Elast(double inel_bias, double elast_bias);
-
+    double GetWeight_Elast(double elast_bias);
+    
+    int GetNElastic();
     //Possibly: 
     
     //Function: append traj

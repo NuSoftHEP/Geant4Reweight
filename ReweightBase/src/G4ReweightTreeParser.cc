@@ -259,17 +259,22 @@ void G4ReweightTreeParser::FillAndAnalyze(){
   
   double theLen=0.;
   double theWeight=0.;
+  double theElastWeight = 0.;
   double N=0.;
   std::string theInt = ""; 
   double postFinalP=0.;
   double preFinalP=0.;
+  int nElast;
 
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
+  tree->Branch("elastWeight", &theElastWeight);  
   tree->Branch("N", &N);
+  tree->Branch("nElast", &nElast);
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);
+
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -297,7 +302,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
           }
 
-          double w = theTraj->GetWeight_Elast(1.5,2.);
+          double w = theTraj->GetWeight(1.5);
           weightHist->Fill(w);
 
           if(theTraj->GetFinalProc() == "pi+Inelastic"){
@@ -308,7 +313,9 @@ void G4ReweightTreeParser::FillAndAnalyze(){
           }
           theLen = theTraj->GetTotalLength();
           theWeight = w;
+          theElastWeight = theTraj->GetWeight_Elast(2.0);
           theInt = theTraj->GetFinalProc();
+          nElast = theTraj->GetNElastic();
           //std::cout << "Final " << theInt << std::endl;
           double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
           double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
@@ -376,8 +383,8 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //        std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
       }
 
-//      double w = theTraj->GetWeight(1.5);
-      double w = theTraj->GetWeight_Elast(1.5,2.);
+      double w = theTraj->GetWeight(1.5);
+//      double w = theTraj->GetWeight_Elast(1.5,2.);
       weightHist->Fill(w);
 
       if(theTraj->GetFinalProc() == "pi+Inelastic"){
@@ -388,7 +395,9 @@ void G4ReweightTreeParser::FillAndAnalyze(){
       }
       theLen = theTraj->GetTotalLength();
       theWeight = w;
+      theElastWeight = theTraj->GetWeight_Elast(2.0);
       theInt = theTraj->GetFinalProc();
+      nElast = theTraj->GetNElastic();
 
       
       double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;

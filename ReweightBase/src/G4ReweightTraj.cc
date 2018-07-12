@@ -204,3 +204,89 @@ double G4ReweightTraj::GetWeight(double bias){
 //  std::cout <<"weight " << weight << std::endl; 
   return weight;
 }
+
+double G4ReweightTraj::GetWeight_Elast(double inel_bias, double elast_bias){
+  std::map<std::string,double> total; 
+  std::map<std::string,double> bias_total;  
+
+  double elast_weight = 1.;
+  double elast_total = 0.;
+  double elast_bias_total = 0.;
+
+  for(int i = 0; i < nRW; ++i){
+    total[reweightable[i]] = 0.;
+    bias_total[reweightable[i]] = 0.;
+  }
+
+  for(size_t is = 0; is < GetNSteps(); ++is){   
+    auto theStep = GetStep(is);
+        
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      //Track Killers
+      if (total.count(theProc.Name)){
+        total[theProc.Name] += (10.*theStep->stepLength/theProc.MFP);
+        
+        if(theProc.Name == "pi+Inelastic"){
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength*inel_bias) / theProc.MFP);
+        }
+        else{
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength) / theProc.MFP);
+        }
+      }
+      /////////
+
+      //Elastic
+      else if(theProc.Name == "hadElastic"){
+        elast_total += ( (10.*theStep->stepLength) / theProc.MFP );
+        elast_bias_total += ( (10.*theStep->stepLength*elast_bias) / theProc.MFP );
+      }
+      /////////
+
+    }
+
+    //Assign the weight then reset the totals
+  //  std::cout << theStep->stepChosenProc << std::endl;
+    if(theStep->stepChosenProc == "hadElastic"){
+//        std::cout << "Weighting Elast" << std::endl;
+
+       elast_weight *= ( ( 1 - exp(-1.*elast_bias_total) ) / ( 1 - exp(-1.*elast_total) ) ); 
+       elast_total = 0.;
+       elast_bias_total = 0.;
+    }
+
+  }
+
+  double xsecTotal = 0.;
+  double bias_xsecTotal = 0.;
+  for(int i = 0; i < nRW; ++i){
+    xsecTotal += total[reweightable[i]];
+    bias_xsecTotal += bias_total[reweightable[i]];
+  }
+
+  double weight;
+  double num, denom;  
+  if(total.count(GetFinalProc()) && GetStep(GetNSteps() - 1)->stepLength > 0){
+
+     num = bias_total[GetFinalProc()];
+     num = num / bias_xsecTotal;
+     num = num * (1 - exp( -1*bias_xsecTotal ) );
+
+     denom = total[GetFinalProc()];
+     denom = denom / xsecTotal;
+     denom = denom * (1 - exp( -1*xsecTotal ) );
+
+
+     weight = num/denom;
+
+  }
+  else{
+    weight = exp( xsecTotal - bias_xsecTotal );
+  }
+
+  //Now multiply by the weight from the last elastic scatter
+  elast_weight *= exp( elast_total - elast_bias_total ); 
+
+  return weight*elast_weight;
+}

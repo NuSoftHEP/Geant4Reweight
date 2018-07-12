@@ -297,7 +297,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
           }
 
-          double w = theTraj->GetWeight(1.5);
+          double w = theTraj->GetWeight_Elast(1.5,2.);
           weightHist->Fill(w);
 
           if(theTraj->GetFinalProc() == "pi+Inelastic"){
@@ -376,7 +376,8 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //        std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
       }
 
-      double w = theTraj->GetWeight(1.5);
+//      double w = theTraj->GetWeight(1.5);
+      double w = theTraj->GetWeight_Elast(1.5,2.);
       weightHist->Fill(w);
 
       if(theTraj->GetFinalProc() == "pi+Inelastic"){

@@ -7,8 +7,8 @@
 /run/verbose    1
 /event/verbose  1
 /process/verbose 10
-/random/setSeed 770353837 70597151
-#/random/setSeed 575841909 838392975
+/random/setSeeds 770353837 70597151
+#/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
 /gps/particle    pi+

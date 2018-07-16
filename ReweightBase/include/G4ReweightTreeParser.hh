@@ -17,7 +17,7 @@ class G4ReweightTreeParser{
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
     void Analyze();
-    void FillAndAnalyze();
+    void FillAndAnalyze(double,double);
     void CloseInput();
 
     size_t GetNTrajs();

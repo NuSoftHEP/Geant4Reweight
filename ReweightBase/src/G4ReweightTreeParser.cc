@@ -249,7 +249,7 @@ void G4ReweightTreeParser::Analyze(){
 }
 
 
-void G4ReweightTreeParser::FillAndAnalyze(){
+void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
   TFile * fout = new TFile("outtry.root","RECREATE");
   TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 40.);
@@ -302,7 +302,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
           }
 
-          double w = theTraj->GetWeight(1.);
+          double w = theTraj->GetWeight(bias);
           weightHist->Fill(w);
 
           if(theTraj->GetFinalProc() == "pi+Inelastic"){
@@ -313,7 +313,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
           }
           theLen = theTraj->GetTotalLength();
           theWeight = w;
-          theElastWeight = theTraj->GetWeight_Elast(1.5);
+          theElastWeight = theTraj->GetWeight_Elast(elastBias);
           theInt = theTraj->GetFinalProc();
           nElast = theTraj->GetNElastic();
           //std::cout << "Final " << theInt << std::endl;
@@ -383,7 +383,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
 //        std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
       }
 
-      double w = theTraj->GetWeight(1.);
+      double w = theTraj->GetWeight(bias);
 //      double w = theTraj->GetWeight_Elast(1.5,2.);
       weightHist->Fill(w);
 
@@ -395,7 +395,7 @@ void G4ReweightTreeParser::FillAndAnalyze(){
       }
       theLen = theTraj->GetTotalLength();
       theWeight = w;
-      theElastWeight = theTraj->GetWeight_Elast(1.5);
+      theElastWeight = theTraj->GetWeight_Elast(elastBias);
       theInt = theTraj->GetFinalProc();
       nElast = theTraj->GetNElastic();
 

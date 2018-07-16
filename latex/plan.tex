@@ -1,0 +1,300 @@
+\setlength{\headheight}{15pt}
+\documentclass[12pt]{article}
+\usepackage{fancyhdr}
+\lhead{}
+\chead{}
+\rhead{}
+\renewcommand{\headrulewidth}{0pt}
+\pagestyle{fancy}
+\usepackage{graphicx}
+\usepackage[top=2cm,bottom=3cm]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage[colorlinks=true,linkcolor=DarkBlue,citecolor=DarkBlue]{hyperref}
+\usepackage{xspace}
+\usepackage{rotating}
+\usepackage{units}
+%\usepackage{subfig}
+%\usepackage{amssymb, amsmath}
+\usepackage{amsmath}
+\usepackage{authblk}
+\usepackage{lineno}
+\usepackage{listings} 
+\usepackage[normalem]{ulem}
+\usepackage{adjustbox}
+%\usepackage{placeins}
+\usepackage[section]{placeins}
+\usepackage{qtree}
+\usepackage{SIunits}
+\usepackage{hepunits}
+\usepackage{hepparticles}
+\usepackage{cancel}
+\usepackage{hepnames}
+\usepackage{epstopdf}
+\usepackage{mathtools}
+\usepackage{caption}
+\usepackage[aboveskip=-10pt]{subcaption}
+\usepackage[capitalise]{cleveref}
+\usepackage{braket}
+\usepackage{slashed}
+\usepackage{subfiles}
+
+\usepackage{textcomp}
+\newcommand{\textapprox}{\raisebox{0.5ex}{\texttildelow}}
+
+\newcommand{\todo}[1]{{\color{red} TODO: #1}}
+\newcommand\red[1]{{\color{red}#1}}
+\newcommand{\ccpi}{CC1$\pi^0$\xspace}
+\newcommand{\ccpis}{CC$\pi^0$\xspace}
+\newcommand{\ccpip}{CC1$\pi^+$\xspace}
+\newcommand{\ncpi}{NC1$\pi^0$\xspace}
+\newcommand{\ccqe}{CCQE\xspace}
+\newcommand{\mares}{\ensuremath{M_A^\mathrm{res}}\xspace}
+\newcommand{\ppi}{\ensuremath{|\mathbf{p}_{\pi^0}|}\xspace}
+\newcommand{\mb}{MiniBooNE\xspace}
+\newcommand{\minerva}{MINER\ensuremath{\nu}A\xspace}
+\newcommand{\neut}{\textsc{neut}\xspace}
+\newcommand{\nuance}{\textsc{nuance}\xspace}
+\newcommand{\tmu}{\ensuremath{T_{\mu}}\xspace}
+\newcommand{\pmu}{\ensuremath{|\textbf{p}_{\mu}|}\xspace}
+\newcommand{\cost}{\ensuremath{\cos{\theta_{\mu}}}\xspace}
+\newcommand{\enu}{\ensuremath{E_{\nu}}\xspace}
+\newcommand{\qq}{\ensuremath{Q^{2}}\xspace}
+\newcommand{\qqqe}{\ensuremath{Q^{2}_{\textrm{QE}}}\xspace}
+\newcommand{\pf}{\ensuremath{p_{F}}\xspace}
+\newcommand{\eb}{\ensuremath{E_{b}}\xspace}
+\newcommand{\carb}{C\ensuremath{^{12}}\xspace}
+\newcommand{\oxy}{O\ensuremath{^{16}}\xspace}
+\newcommand{\ie}{i.e.\xspace}
+\newcommand{\eg}{e.g.\xspace}
+\newcommand{\ma}{\ensuremath{M_{\textrm{A}}}\xspace}
+\newcommand{\maqe}{\ensuremath{M_{\textrm{A}}^{\textrm{QE}}}\xspace}
+\newcommand{\numu}{\Pnum}
+\newcommand{\nue}{\Pnue}
+\newcommand{\numubar}{\APnum}
+\newcommand{\nuebar}{\APnue}
+\newcommand{\enuqerfg}{\ensuremath{E^{\nu}_{\textrm{QE,RFG}}}\xspace}
+\newcommand{\enuqe}{\ensuremath{E^{\nu}_{\textrm{QE}}}\xspace}
+\newcommand{\chisq}{\ensuremath{\chi^{2}}\xspace}
+\newcommand{\chisqmin}{\ensuremath{\chi^{2}_{\textrm{min}}}\xspace}
+\newcommand{\chtwo}{CH\ensuremath{_{2}}\xspace}
+\newcommand{\wroclaw}{Wroc{\l}aw\xspace}
+\newcommand{\km}{\kilo\meter\xspace}
+\newcommand{\m}{\meter\xspace}
+\newcommand{\evsq}{\eV\ensuremath{^{2}}\xspace}
+\newcommand{\POD}{P{\O}D\xspace}
+\newcommand{\ecal}{ECal\xspace}
+\newcommand{\ecals}{ECals\xspace}
+\newcommand{\dsecal}{Ds-ECal\xspace}
+\newcommand{\vol}[4]{\ensuremath{#1\times#2\times\unit{#3}{#4}}\xspace}
+\newcommand{\area}[3]{\ensuremath{#1\times\unit{#2}{#3}}\xspace}
+\newcommand{\pizero}{\pi^{0}\xspace}
+\newcommand{\kg}{\kilo\gram\xspace}
+\newcommand{\lep}{\ell}
+\newcommand{\mnn}{multi-nucleon--neutrino\xspace}
+\newcommand{\elt}{\ensuremath{E_{<}}\xspace}
+\newcommand{\egt}{\ensuremath{E_{>}}\xspace}
+
+
+\renewcommand\Im{\operatorname{Im}}
+
+\graphicspath{{figures/}}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+   \pdffalse
+\else
+   \pdfoutput=1
+   \pdftrue
+\fi
+\ifpdf
+   \usepackage{graphicx}
+   \usepackage{epstopdf}
+   %\DeclareGraphicsRule{.eps}{pdf}{.pdf}{`epstopdf #1}
+   \pdfcompresslevel=9
+\else
+   \usepackage{graphicx}
+\fi
+
+\graphicspath{{figs/}}
+
+\title{GeantReweight \\ 
+   \large A Framework for Pion Scattering Reweighting}
+
+\date{}
+\begin{document}
+
+
+\author[1]{Jake Calcutt}
+%\author[1]{Kendall Mahn}
+\affil[1]{Michigan State University}
+
+\maketitle
+\thispagestyle{fancy}
+%\linenumbers
+%\begin{abstract}
+
+\section{Geant4 Simulation Technique}
+\subsection{Tracking and Stepping}
+The main philosophy of Geant4's simulation technique is that of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks created from a configurable source. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs. It is up to the user to handle the step information (by accessing G4StepPoints) before and after the stepping. 
+
+A G4SteppingManager handles the stepping. It stores a set of active processes which are instantiated by the user at runtime(FOOTNOTE: CAN BE TURNED ON/OFF THROUGHOUT RUN), thus allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
+\begin{enumerate}
+	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen(FOOTNOTE: THIS LEADS TO THE MOST CHALLENGE IN CONCEPTUALIZING REWEIGHTING FOR GEANT AND WILL BE ADDRESSED IN SECTION NUMBER)
+	\item "Safety" ($S$) - the distance to the next boundary - is calculated. For charged particles without a field or neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
+	\item If $L_{min} > S$, the distance to the next boundary is re-calculated. 
+	\item The smaller of $L_{min}$ and $S$ is taken as the step length. 
+	\item All active continuous processes are invoked along the step. The particle's Kinetic Energy will be updated after all invoked processes are completed. The change in Kinetic Eneregy will be the sum of all the contributions.
+	\item The G4Track's properties(Kinetic Energy and 4-position) are updated before discrete processes are invoked. At this point, secondary particles created by continuous processes (i.e. ionization electrons) are stored to be given to the G4TrackingManager. 
+	\item Check if it is now at rest, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
+	\item If $L_{min}$ was given by a discrete process, it is now invoked.
+	\item Track properties are updated. Secondaries are stored.
+	\item Check if the discrete process terminated the track.	
+	\item The step is finished.
+\end{enumerate}
+
+MAYBE SOME MORE STUFF HERE ABOUT TRACKING
+
+\subsection{Choosing a Process}
+As stated in the previous section, each active Continuous and Discrete process propose an interaction length before their invocation. The smallest of these interaction lengths is used as the step length. Additionally, if a Discrete process proposed it, that process is invoked after all of the Continuous processes. 
+
+The Discrete processes do not throw a random number at each step as one would usually expect. Rather, each Discrete process samples the distribution 
+\begin{equation}\label{eq:1}
+P(N) = e^{-N}
+\end{equation}
+at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be furthered categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further.\label{fn_Discrete}}. Within one step, the interaction lengths are given by 
+\begin{equation}\label{eq:2}
+L_p = N_p * \lambda_p
+\end{equation}
+where $\lambda_p$ is the Mean Free Path of process $p$ (according to the particle's kinematics and, if applicable, its target). These interaction lengths are compared to each other, the interaction lengths of the Continuous processes, and the distance to the next boundary, and the smallest is chosen. Then, each Discrete process that was not invoked has its $N_p$ reduced by $\frac{L_s}{\lambda_p}$, where $L_s$ is the chosen step length. If any Discrete process was chosen - and if that process does not kill the track - then it is not reduced, and is instead given a newly sampled $N_p$ during the next step. In practice, this results in a static \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (changes of kinematics or target).
+
+It is important to realize the interplay between step sizes and Mean Free Paths. Each process has the same chance of throwing a certain number according to \eqref{eq:1}. However, two processes might throw the same number (unlikely, though instructive), but the deciding factor in a process occuring is based on its Mean Free Paths and the step sizes over the particle's trajectory. This is easily realized when considering $N$ as such:
+\begin{equation}\label{eq:3}
+N = \sum\limits_{s={steps}} \frac{L_{s}}{\lambda_{s}}
+\end{equation}
+or equivalently,
+\begin{equation}\label{eq:4}
+N = \sum\limits_{s={steps}} L_{s} * \sigma_{s}
+\end{equation}
+From this, we can modify \ref{eq:1} as such:
+\begin{equation}\label{eq:5}
+P(\set{L_s} | \set{\sigma_s}) = e^{-\sum L_s * \sigma_s}
+\end{equation}
+
+
+
+
+\section{Weighting Scheme}
+From here, we can start moving toward a reweighting framework for pion interactions. We should keep in mind that reweighting is essentially \textit{determining the probability for the same thing to happen under a varied model}. Weights will be assigned when Discrete processes occur, and will change based on the context of what happens. Additionally, as noted in footnote \ref{fn_Discrete}, there will be some divergence in the treatment of Discrete processes that preserve or kill the track. For now, we only consider the processes that kill the track. A singular weight   will be calculated and applied to the track based on the steps it took and the particle's fate when the track is killed.
+
+\subsection{Particle Fates}
+
+We can think of the simulated particle as having two possible fates: it either undergoes an interaction or "survives" after traveling some distance. However, the definition of "survival" needs clarification. In Geant4, the particle will always do \textit{something}, so we should distinguish the fate based on the process that is invoked. Survival processes should then include the pion exiting the world volume (as it is no longer simulated), as well as decaying at rest or being captured at rest. We count the last two as survival processes because they are previously-described AtRest processes which take precendence only once the particle is stopped. Essentially, they require the pion to move a certain distance without interacting, and should be counted as survival processes. 
+
+All other processes are considered interacting processes (FIX THIS WORDING). This includes decaying in flight, as it is treated similar to the rest of the discrete processes in the sampling scheme described above. 
+
+\subsection{Assigning Weights}
+
+Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. 
+
+Remember the probability for a particle to travel some distance $dL$ before interacting:
+\begin{equation}\label{eq:6}
+P_{int}dL = \sigma e^{-\sigma L}dL
+\end{equation}
+The probability to have interacted in a length $L$ is then given by \\
+\begin{equation}\label{eq:7}
+P_{int}(L) = \int\limits_{0}^{L}\sigma e^{-\sigma L'}dL' = (1 - e^{-\sigma L})
+\end{equation}
+Conversely, the probability for a particle to survive over that distance is simply \\
+\begin{equation}\label{eq:8}
+1 - P_{int}(L) = e^{-\sigma L}
+\end{equation}
+
+Note the similarity between equations \ref{eq:5}, \ref{eq:7}, and \ref{eq:8}. This motivates that, if the particle survives over its track, it should receive the following weight\footnote{The $'$ represents a varied set of cross sections, so any number of the individual process cross sections can be changed.}
+\begin{equation}\label{eq:9}
+W_{surv} = \frac{p'}{p} = \frac{e^{-\sum L_s  \sigma_{tot,s}'} }{e^{-\sum L_s  \sigma_{tot,s}}}
+\end{equation}
+Where $\sigma_{tot,s}$ is the combined cross section of all active Discrete processes for a given step:
+\begin{equation}
+\sigma_{tot,s} = (\sum \limits_i \sigma_i)_s
+\end{equation}
+
+Similary, part of the weight applied to an interacting track should be:
+\begin{equation}\label{eq:10}
+\frac{p'}{p} = \frac{1 - e^{-\sum L_s  \sigma_{tot,s}'}}{1 - e^{-\sum L_s  \sigma_{tot,s}}}
+\end{equation}
+However, to fully encompass what happened to the track, an additional factor should be included to account for the relative populations of the different interactions. In accordance with \ref{eq:6}, the following factor would be used to determine the relative probability for a specific process, $a$, to occur:
+\begin{equation}
+R = \frac{\sigma_a}{\sigma_{tot}}
+\end{equation}
+Then, in a reweighting situation, the following ratio would be used as one factor of the weight:
+\begin{equation}
+\frac{R'}{R} = \big(\frac{\sigma'_a}{\sigma'_{tot}}\big)/\big(\frac{\sigma_a}{\sigma_{tot}}\big)
+\end{equation}
+In our case, we should account for the cross section changing throughout the particle's trajectory. To do this, we should use a step-length-averaged cross section:
+\begin{equation}
+\frac{\sum \limits_{s} L_s \sigma_s}{\sum \limits_{s} L_s}
+\end{equation}
+Such that the factor would be:
+\begin{equation}
+R = \frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}}
+\end{equation}
+The factor assigned to the weight would then be:
+\begin{equation}\label{eq:16}
+\frac{R'}{R} = (\frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}})/(\frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}})
+\end{equation}
+The entire weight for a track that undergoes an interaction is then:
+\begin{equation} \label{eq:17}
+W = \frac{R'p'}{Rp}\\
+= \frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}} / \frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}} * \frac{1 - e^{-\sum L_s  \sigma_{tot,s}'}}{1 - e^{-\sum L_s  \sigma_{tot,s}}}
+\end{equation}
+Note that $\sigma_{a,s}'$ in the numerator of the first term accounts for the case that the cross section for process $a$ is varied. It could be held the same, and would cancel out with the second term. 
+
+\subsection{Track-Preserving Processes}
+
+
+%\begin{figure}
+%\includegraphics[width=.8\textwidth]{full_comparison.pdf}
+%\includegraphics[width=.8\textwidth]{zoomed_comparison.pdf}
+%\end{figure}
+%
+%
+%
+%\begin{figure}
+%\includegraphics[width=\textwidth]{decay_w_len.pdf}
+%\includegraphics[width=\textwidth]{decay_w_p.pdf}
+%\end{figure}
+
+
+%By inspecting equations \ref{eq:1}, \ref{eq:5},  and \ref{eq:6}
+
+
+
+%\appendix
+%\section{Interaction Probability Derivation}
+%the derivation for the probability of interaction given a cross section
+%
+%This is essentially the probability for a particle to travel distance L before interacting
+%$
+%dN = -N \sigma dL \\ 
+%\int\frac{dN}{N} = -\int \sigma dL \\
+%log(\frac{N}{N_0}) = - \sigma L \\
+%\frac{N}{N_0}dL = e^{-\sigma L}dL \\
+%$
+
+%\subfile{DUNE_appendix_eff_plots.tex}
+
+%\begin{thebibliography}{7}
+
+%\bibitem{DUNE_CDR1}
+%The DUNE Collaboration
+%\textit{Long-Baseline Neutrino Facility (LBNF) and Deep Underground Neutrino Experiment (DUNE) Conceptual Design Report Volume 1: The LBNF and DUNE Projects}
+%arXiv:1601.05471v1
+%
+%
+%\end{thebibliography}
+
+\end{document}
+
+
+
+

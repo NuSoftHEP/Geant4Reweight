@@ -4,7 +4,7 @@
 #include "TH1D.h"
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName){
-  fin = new TFile(fInputFileName.c_str()); 
+  fin = new TFile(fInputFileName.c_str(), "READ"); 
   track = (TTree*)fin->Get("track");
   step = (TTree*)fin->Get("step");
 }

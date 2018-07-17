@@ -146,6 +146,7 @@ double G4ReweightTraj::GetWeight(double bias){
 //      std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
 
       if (total.count(theProc.Name)){
+//        std::cout << theProc.Name << " " << theProc.MFP << std::endl;
         total[theProc.Name] += (10.*theStep->stepLength/theProc.MFP);
         
         if(theProc.Name == "pi+Inelastic"){

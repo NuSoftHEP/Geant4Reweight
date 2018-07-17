@@ -22,7 +22,9 @@ int main(int argc, char ** argv){
   //i.e. generating particles
   runManager->SetUserInitialization(new G4SimActionInitialization);
 
+  G4cout << "Init"<<G4endl;
   runManager->Initialize();
+  G4cout << "Done"<< G4endl;
 
  /* G4UImanager * UI = G4UImanager::GetUIpointer();
   UI->ApplyCommand("/run/verbose 1");
@@ -32,7 +34,9 @@ int main(int argc, char ** argv){
   G4UImanager * UI = G4UImanager::GetUIpointer();
   G4String command = "/control/execute ";
   G4String fileName = argv[1];
+  G4cout <<"Applying Command" <<G4endl;
   UI->ApplyCommand(command+fileName);
+  G4cout <<"Done"<<G4endl;
 
 //  int nEvents = 5;
 //  runManager->BeamOn(nEvents);  

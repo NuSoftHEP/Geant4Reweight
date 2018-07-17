@@ -17,7 +17,7 @@ G4SimDetectorConstruction::G4SimDetectorConstruction() : G4VUserDetectorConstruc
 G4SimDetectorConstruction::~G4SimDetectorConstruction() { }
 
 G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
-  
+  G4cout << "Constructing" << G4endl;  
   G4NistManager * nist = G4NistManager::Instance();
 
   G4double radius = 1.5*m, height = 50.*m;

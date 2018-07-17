@@ -10,9 +10,9 @@ class G4SimPhysicsList : public G4VModularPhysicsList
   public:
     G4SimPhysicsList();
     virtual ~G4SimPhysicsList();
-  
+
   protected:
     virtual void SetCuts(); 
-  
+ 
 };
 #endif

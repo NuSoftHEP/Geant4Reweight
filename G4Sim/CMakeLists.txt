@@ -61,6 +61,14 @@ else()
 endif()
 #ROOT HERE?
 
+add_executable(G4Engine_exe G4Engine_exe.cc ${sources} ${headers})
+if(ROOT_FOUND)
+  target_link_libraries(G4Engine_exe ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+else()
+  target_link_libraries(G4Engine_exe ${Geant4_LIBRARIES})
+endif()
+
+
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build G4Sim. This is so that we can run the executable directly because it

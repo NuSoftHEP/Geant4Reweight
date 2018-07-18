@@ -54,9 +54,11 @@ class G4ReweightTraj{
     double GetWeight_Elast(double elast_bias);
     
     int GetNElastic();
-    //Possibly: 
-    
-    //Function: append traj
+    //Returns a vector of the distances between elastic scatters.
+    //Includes from start to first, then between all subsequent elastic scatters
+    //  Start -> First, First -> Second, Second -> Third, etc.
+    //No info from last elastic scatter to end of the list.
+    std::vector<double> GetElastDists();
 
   protected:
 

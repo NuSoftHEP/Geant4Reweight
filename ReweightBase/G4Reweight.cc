@@ -9,6 +9,7 @@
 #include "G4ReweightTreeParser.hh"
 
 std::string fileName = "try.root"; 
+std::string outFileName = "outtry.root";
 double weight = 1.;
 double elastWeight = 1.;
 
@@ -18,7 +19,7 @@ int main(int argc, char ** argv){
 
   parseArgs(argc, argv);
   
-  G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str());
+  G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str(), outFileName.c_str());
   tp->SetBranches();
   tp->FillAndAnalyze(weight,elastWeight);
   //tp->FillCollection();
@@ -36,10 +37,11 @@ void parseArgs(int argc, char ** argv){
   
   std::cout << argv[1] << std::endl;
   fileName = argv[1];
-  
-  if(argc == 4){
-    weight = atof(argv[2]);
-    elastWeight = atof(argv[3]);
+  std::cout << argv[2] << std::endl;
+  outFileName = argv[2];
+  if(argc == 5){
+    weight = atof(argv[3]);
+    elastWeight = atof(argv[4]);
   }
   std::cout << "Weight: " << weight << std::endl;
   std::cout << "Elast Weight: " << elastWeight << std::endl;

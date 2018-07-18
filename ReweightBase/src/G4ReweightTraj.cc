@@ -257,3 +257,19 @@ int G4ReweightTraj::GetNElastic(){
 
   return total;
 }
+
+std::vector<double> G4ReweightTraj::GetElastDists(){
+  std::vector<double>  dists; 
+  double total = 0.;
+  for(size_t is = 0; is < GetNSteps(); ++is){
+    auto theStep = GetStep(is);
+    total += theStep->stepLength;
+    if(theStep->stepChosenProc == "hadElastic"){
+      dists.push_back(total);
+      total = 0.;
+    }     
+  }
+  if(dists.size() != GetNElastic())
+    std::cout << "ERROR WRONG NUMBER OF ELASTS" << std::endl;
+  return dists;
+}

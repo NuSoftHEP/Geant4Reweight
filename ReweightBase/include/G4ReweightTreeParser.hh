@@ -11,12 +11,12 @@ class G4ReweightTreeParser{
 
   public:
     //Functions
-    G4ReweightTreeParser(std::string inputFileName);
+    G4ReweightTreeParser(std::string, std::string);
    ~G4ReweightTreeParser();
     void SetBranches();
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
-    void Analyze();
+    void Analyze(double,double);
     void FillAndAnalyze(double,double);
     void CloseInput();
 
@@ -31,8 +31,20 @@ class G4ReweightTreeParser{
 
     //Data Members
     TFile * fin;
+    TFile * fout;
     TTree * track;
     TTree * step;
+    TTree * tree;
+
+    double theLen;
+    double theWeight;
+    double theElastWeight;
+    double N;
+    std::string theInt; 
+    double postFinalP;
+    double preFinalP;
+    int nElast;
+    std::vector<double> * elastDists;
 
     std::map< std::pair<size_t,size_t>, G4ReweightTraj*  > * trajCollection = new std::map< std::pair<size_t,size_t>, G4ReweightTraj* >();
     

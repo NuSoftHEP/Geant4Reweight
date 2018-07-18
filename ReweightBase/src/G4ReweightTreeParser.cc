@@ -3,10 +3,13 @@
 #include <algorithm>
 #include "TH1D.h"
 
-G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName){
+G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::string fOutputFileName){
   fin = new TFile(fInputFileName.c_str(), "READ"); 
   track = (TTree*)fin->Get("track");
   step = (TTree*)fin->Get("step");
+
+  fout = new TFile(fOutputFileName.c_str(), "RECREATE"); 
+  tree = new TTree("tree","");
 }
 
 void G4ReweightTreeParser::CloseInput(){
@@ -211,66 +214,72 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
   sorted = true;
 }*/
 
-void G4ReweightTreeParser::Analyze(){
-  if( !filled ){
-    std::cout << "Please Fill before analyzing" << std::endl;   
-    return;
-  }
-   
-  TFile * fout = new TFile("outtry.root","RECREATE");
-  TH1D * lenHist = new TH1D("lenHist", "", 250, 0., 50.);
-  TH1D * weightHist = new TH1D("weightHist", "", 500, 0, 5.);
+void G4ReweightTreeParser::Analyze(double bias, double elastBias){
+      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+      for( ; itTraj != trajCollection->end(); ++itTraj){
+        auto theTraj = itTraj->second; 
+        if (theTraj->parID == 0){
+//          std::cout << "Found primary " << theTraj->PID << std::endl;
+//          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+//          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+          for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+//            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
+          }
 
-  //Iterate through the collection 
-  std::map< std::pair<size_t,size_t>, G4ReweightTraj*>::iterator itTraj = trajCollection->begin();
-  for(itTraj; itTraj != trajCollection->end(); ++itTraj){
-  
-    auto theTraj = itTraj->second;
-    if (theTraj->parID > 0){ std::cout << "Error! Found non primary traj in collection" << std::endl; break;}
-    std::cout << "Found primary " << theTraj->PID << std::endl;
-    std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
-    std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-    for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
-      std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-    }
+          double w = theTraj->GetWeight(bias);
 
-    if(theTraj->GetFinalProc() == "pi+Inelastic"){
-      double len = theTraj->GetTotalLength();
-      std::cout << "Total Length" << len << std::endl;
-      lenHist->Fill(len);
-    }
-    double w = theTraj->GetWeight(1.5);
-    std::cout << "Weight: " << w << std::endl;
-  }
-  
+          theLen = theTraj->GetTotalLength();
+          theWeight = w;
+          theElastWeight = theTraj->GetWeight_Elast(elastBias);
+          theInt = theTraj->GetFinalProc();
+          nElast = theTraj->GetNElastic();
+          //std::cout << "Final " << theInt << std::endl;
+          double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
+          double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
+          double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
+          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          preFinalP = sqrt( px*px + py*py + pz*pz); 
 
-  lenHist->Write();
-  fout->Close();
+          px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
+          py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
+          pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
+          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          postFinalP = sqrt( px*px + py*py + pz*pz); 
+          if(elastDists) elastDists->clear();
+          std::vector<double> dists = theTraj->GetElastDists();
+          for(size_t id = 0; id < nElast; ++id){
+            elastDists->push_back(dists[id]);
+          }
+          tree->Fill();
+
+           
+//          std::cout << "Weight: " << w << std::endl;
+        }
+      }
 }
 
 
 void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
-  TFile * fout = new TFile("outtry.root","RECREATE");
-  TH1D * lenHist = new TH1D("lenHist", "", 100, 0, 40.);
-  TH1D * weightHist = new TH1D("weights", "", 200,0,2.);  
-  TH1D * weightedLen = new TH1D("weightedLen", "", 100, 0, 40.);
-  TTree * tree = new TTree("tree","");
+  //TFile * fout = new TFile("outtry.root","RECREATE");
+//  tree = new TTree("tree","");
   
-  double theLen=0.;
-  double theWeight=0.;
-  double theElastWeight = 0.;
-  double N=0.;
-  std::string theInt = ""; 
-  double postFinalP=0.;
-  double preFinalP=0.;
-  int nElast;
+  theLen=0.;
+  theWeight=0.;
+  theElastWeight = 0.;
+  N=0.;
+  theInt = ""; 
+  postFinalP=0.;
+  preFinalP=0.;
+  nElast = 0;
+  elastDists = 0;
 
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
   tree->Branch("elastWeight", &theElastWeight);  
   tree->Branch("N", &N);
   tree->Branch("nElast", &nElast);
+  tree->Branch("elastDists", &elastDists);
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);
@@ -290,7 +299,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
 //      std::cout << "Event: " << prevEvent << std::endl;
      
-      //Do analysis here
+/*      //Do analysis here
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
@@ -328,13 +337,16 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
           pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           postFinalP = sqrt( px*px + py*py + pz*pz); 
+          theTraj->GetElastDists();
           tree->Fill();
 
            
 //          std::cout << "Weight: " << w << std::endl;
         }
       }
-
+*/
+      Analyze(bias,elastBias);
+      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
         //Delete the pointer
         delete itTraj->second;
@@ -372,7 +384,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   std::cout << "Event: " << prevEvent << std::endl;
   
   //Do analysis here
-  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+/*  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( ; itTraj != trajCollection->end(); ++itTraj){
     auto theTraj = itTraj->second; 
     if (theTraj->parID == 0){
@@ -411,11 +423,13 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
       pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
       //std::cout << px << " " << py << " " << pz << std::endl;
       postFinalP = sqrt( px*px + py*py + pz*pz); 
+      theTraj->GetElastDists();
       tree->Fill();
 //      std::cout << "Weight: " << w << std::endl;
     }
-  }
-
+  }*/
+  Analyze(bias,elastBias);
+  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
     //Delete the pointer
     delete itTraj->second;
@@ -423,9 +437,6 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   //empty the container
   trajCollection->clear();
 
-  lenHist->Write();
-  weightedLen->Write();;
-  weightHist->Write();
   tree->Write();
   fout->Close();
 }

@@ -43,7 +43,7 @@ class G4Engine{
 
 };
 
-G4Engine::G4Engine(){
+G4Engine::G4Engine(/*Det Construction, PhysicsList */){
   rm = new G4RunManager();
   rm->SetUserInitialization(detcon = new G4SimDetectorConstruction);
   rm->SetUserInitialization(new G4SimPhysicsList);

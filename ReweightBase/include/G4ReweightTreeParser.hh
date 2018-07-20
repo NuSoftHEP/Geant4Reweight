@@ -45,6 +45,8 @@ class G4ReweightTreeParser{
     double preFinalP;
     int nElast;
     std::vector<double> * elastDists;
+    std::vector<double> * sliceEnergy;
+    std::vector<int> * sliceInts;
 
     std::map< std::pair<size_t,size_t>, G4ReweightTraj*  > * trajCollection = new std::map< std::pair<size_t,size_t>, G4ReweightTraj* >();
     

@@ -60,6 +60,8 @@ class G4ReweightTraj{
     //No info from last elastic scatter to end of the list.
     std::vector<double> GetElastDists();
 
+    std::vector< std::pair<double,int> > ThinSliceMethod(double);
+
   protected:
 
   private:

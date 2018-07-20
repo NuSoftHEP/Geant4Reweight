@@ -218,7 +218,8 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0){
+//        if (theTraj->parID == 0){
+          if (theTraj->PID == 211){
 //          std::cout << "Found primary " << theTraj->PID << std::endl;
 //          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
 //          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
@@ -250,6 +251,17 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           for(size_t id = 0; id < nElast; ++id){
             elastDists->push_back(dists[id]);
           }
+
+          if(sliceEnergy){
+            sliceEnergy->clear();
+            sliceInts->clear();
+          }           
+          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.4);          
+          for(size_t it = 0; it < slices.size(); ++it){
+            sliceEnergy->push_back(slices[it].first); 
+            sliceInts->push_back(slices[it].second); 
+          }
+
           tree->Fill();
 
            
@@ -273,6 +285,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   preFinalP=0.;
   nElast = 0;
   elastDists = 0;
+  sliceEnergy = 0;
+  sliceInts = 0;
 
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
@@ -280,6 +294,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("N", &N);
   tree->Branch("nElast", &nElast);
   tree->Branch("elastDists", &elastDists);
+  tree->Branch("sliceEnergy", &sliceEnergy);
+  tree->Branch("sliceInts", &sliceInts);
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);

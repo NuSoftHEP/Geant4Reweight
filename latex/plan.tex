@@ -242,16 +242,24 @@ The factor assigned to the weight would then be:
 \begin{equation}\label{eq:16}
 \frac{R'}{R} = (\frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}})/(\frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}})
 \end{equation}
-The entire weight for a track that undergoes an interaction is then:
+The entire weight for a track that undergoes an interaction is then\footnote {$\sigma_{a,s}'$ in the numerator of the first term accounts for the case that the cross section for process $a$ is varied. It could be held the same in the case the process which occurred is not varied.}:
 \begin{equation} \label{eq:17}
-W = \frac{R'p'}{Rp}\\
+W_{int} = \frac{R'p'}{Rp}\\
 = \frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}} / \frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}} * \frac{1 - e^{-\sum L_s  \sigma_{tot,s}'}}{1 - e^{-\sum L_s  \sigma_{tot,s}}}
 \end{equation}
-Note that $\sigma_{a,s}'$ in the numerator of the first term accounts for the case that the cross section for process $a$ is varied. It could be held the same, and would cancel out with the second term. 
-
-\subsection{Track-Preserving Processes}
 
 
+\subsection{Track-Preserving Processes - Elastic Scattering}
+Certain discrete processes, such as elastic scattering, preserve the track within the simulation run. This means multiple elastic scatters could occur before the track is killed by a different discrete process or if it leaves the tracking volume. To account for this, we keep the calculation of the elastic weight separate from the track-killing processes above. We leave out the elastic cross sections from the calculation of the total cross sections used in the previous section, and we assign multiple elastic weights to the track. In essence, we have to assign a weight whenever another number is resampled after the elastic process occurs. 
+
+The total elastic weight will always contain a term in the form of equation \ref{eq:9}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
+
+In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take the form of equation \ref{eq:10}. We ignore the $\frac{R'}{R}$ factor used for the other discrete processes, as track-preserving factors can be treated as essentially independent of one another. 
+
+The resulting weight then takes the form of:
+\begin{equation}
+W_{elast} = (\prod \limits_{elast} \frac{1 - e^{-\sum L_s  \sigma_{s}'}}{1 - e^{-\sum L_s  \sigma_{s}}})(\frac{e^{-\sum L_s \sigma_{s}'}}{e^{-\sum L_s \sigma_{s}}})
+\end{equation}
 %\begin{figure}
 %\includegraphics[width=.8\textwidth]{full_comparison.pdf}
 %\includegraphics[width=.8\textwidth]{zoomed_comparison.pdf}

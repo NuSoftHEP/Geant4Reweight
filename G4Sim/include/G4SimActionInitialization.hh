@@ -8,13 +8,13 @@
 
 #include "TTree.h"
 #include "TFile.h"
-
+#include <string>
 
 
 class G4SimActionInitialization : public G4VUserActionInitialization{
 
   public:
-    G4SimActionInitialization();
+    G4SimActionInitialization(std::string);
     virtual ~G4SimActionInitialization();
     
     void Build() const;

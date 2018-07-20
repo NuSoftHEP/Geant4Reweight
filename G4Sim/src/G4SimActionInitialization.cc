@@ -5,7 +5,7 @@
 #include "G4SimEventAction.hh"
 #include "TROOT.h"
 
-G4SimActionInitialization::G4SimActionInitialization() : G4VUserActionInitialization(){
+G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) : G4VUserActionInitialization(){
 
   MyTreeBuffer = new TreeBuffer();
   MyStepTreeBuffer = new StepTreeBuffer();
@@ -13,7 +13,7 @@ G4SimActionInitialization::G4SimActionInitialization() : G4VUserActionInitializa
  
   G4cout << "Making trees" << G4endl;
  
-  fout = new TFile("try.root", "RECREATE");
+  fout = new TFile(fOutFileName.c_str(), "RECREATE");
   tree = new TTree("tree","");
   step = new TTree("step","");
   track = new TTree("track","");

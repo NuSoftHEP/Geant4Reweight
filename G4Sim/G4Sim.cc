@@ -20,7 +20,7 @@ int main(int argc, char ** argv){
 
   //Define the actions taken during various stages of the run
   //i.e. generating particles
-  runManager->SetUserInitialization(new G4SimActionInitialization);
+  runManager->SetUserInitialization(new G4SimActionInitialization(argv[2]));
 
   G4cout << "Init"<<G4endl;
   runManager->Initialize();

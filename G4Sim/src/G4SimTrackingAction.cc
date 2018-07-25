@@ -41,6 +41,9 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
     //nsteps will be iterated in Stepping Action
     MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
   }
+/*  else if(PID == 211){
+    MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
+  }*/
   else{
     MyTrackTreeBuffer->steps->first = -1;
   }

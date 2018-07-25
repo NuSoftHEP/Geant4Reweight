@@ -51,9 +51,9 @@ void G4ReweightTreeParser::SetBranches(){
 }
 
 void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
-  //std::cout << G4RTraj->stepRange.first << " " << G4RTraj->stepRange.second << std::endl;
+//  std::cout << G4RTraj->eventNum << " " << G4RTraj->trackID << " " << G4RTraj->PID << " " << G4RTraj->parID << " " <<G4RTraj->stepRange.first << " " << G4RTraj->stepRange.second << std::endl;
   for(int is = G4RTraj->stepRange.first; is < G4RTraj->stepRange.second; ++is){
-    //std::cout << is << std::endl;
+//    std::cout << is << std::endl;
     step->GetEntry(is);
 
    // std::cout << preStepPx << " " << preStepPy << " " << preStepPz << std::endl;
@@ -219,7 +219,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
 //        if (theTraj->parID == 0){
-          if (theTraj->PID == 211){
+          if (theTraj->parID == 0 && theTraj->PID == 211){
 //          std::cout << "Found primary " << theTraj->PID << std::endl;
 //          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
 //          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
@@ -234,6 +234,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           theElastWeight = theTraj->GetWeight_Elast(elastBias);
           theInt = theTraj->GetFinalProc();
           nElast = theTraj->GetNElastic();
+
           //std::cout << "Final " << theInt << std::endl;
           double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
           double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
@@ -309,7 +310,6 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
     track->GetEntry(ie);
 
     if(!(ie%1000)){std::cout << ie << std::endl;}
-
     //New event. Do the analysis and Delete the current collection
     if( (prevEvent > -1) && (prevEvent != tEventNum) ){
 

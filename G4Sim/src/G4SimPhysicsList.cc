@@ -9,7 +9,7 @@
 #include "G4HadronElasticPhysics.hh"
 #include "G4HadronElasticPhysics_bias.hh"
 
-G4SimPhysicsList::G4SimPhysicsList() : G4VModularPhysicsList(){
+G4SimPhysicsList::G4SimPhysicsList(G4double inelasticBias, G4double elasticBias) : G4VModularPhysicsList(){
   SetVerboseLevel(5);
 
   RegisterPhysics( new G4DecayPhysics );
@@ -17,8 +17,8 @@ G4SimPhysicsList::G4SimPhysicsList() : G4VModularPhysicsList(){
   RegisterPhysics( new G4EmStandardPhysics );
 //  RegisterPhysics( new G4HadronPhysicsQGSP_BERT ); 
   //RegisterPhysics( new G4HadronPhysicsFTFP_BERT );
-  RegisterPhysics( new G4HadronPhysicsFTFP_BERT_bias(1,1.5) );
-  RegisterPhysics( new G4HadronElasticPhysics_bias(1,1.5) );
+  RegisterPhysics( new G4HadronPhysicsFTFP_BERT_bias(1,inelasticBias) );
+  RegisterPhysics( new G4HadronElasticPhysics_bias(1,elasticBias) );
   G4cout << "Finished Physics" << G4endl;
 }
 

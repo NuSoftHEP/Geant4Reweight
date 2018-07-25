@@ -7,7 +7,19 @@
 
 char * n;
 
-int main(int argc, char ** argv){
+std::string macFileName = "../G4Sim/run1.mac";
+std::string outFileName = "try.root";
+double elasticBias = 1.;
+double inelasticBias = 1.;
+
+
+void ParseArgs(int argc, char* argv[]);
+
+int main(int argc, char * argv[]){
+ 
+  std::cout << "parsing" << std::endl;
+  ParseArgs(argc, argv);
+  std::cout << macFileName << " " << outFileName << " " << elasticBias << " " << inelasticBias << std::endl;
 
   G4RunManager * runManager = new G4RunManager;
   
@@ -16,11 +28,11 @@ int main(int argc, char ** argv){
 
   //Define the list of particles to be simulated
   //and on which models their behaviors are based
-  runManager->SetUserInitialization(new G4SimPhysicsList);
+  runManager->SetUserInitialization(new G4SimPhysicsList(inelasticBias, elasticBias));
 
   //Define the actions taken during various stages of the run
   //i.e. generating particles
-  runManager->SetUserInitialization(new G4SimActionInitialization(argv[2]));
+  runManager->SetUserInitialization(new G4SimActionInitialization(outFileName));
 
   G4cout << "Init"<<G4endl;
   runManager->Initialize();
@@ -33,7 +45,7 @@ int main(int argc, char ** argv){
   //read a macro file of commands
   G4UImanager * UI = G4UImanager::GetUIpointer();
   G4String command = "/control/execute ";
-  G4String fileName = argv[1];
+  G4String fileName = macFileName;
   G4cout <<"Applying Command" <<G4endl;
   UI->ApplyCommand(command+fileName);
   G4cout <<"Done"<<G4endl;
@@ -43,6 +55,23 @@ int main(int argc, char ** argv){
 
   delete runManager;
   return 0;
+}
+
+void ParseArgs(int argc, char* argv[]){
+  for(int i = 1; i < argc; ++i){
+    if( strcmp(argv[i], "-c") == 0){
+      macFileName = argv[i+1];      
+    }
+    else if( strcmp(argv[i], "-o") == 0){
+      outFileName = argv[i+1];
+    }
+    else if( strcmp(argv[i], "-e") == 0){
+      elasticBias = atof(argv[i+1]);
+    }
+    else if( strcmp(argv[i], "-i") == 0){
+      inelasticBias = atof(argv[i+1]);
+    }
+  }
 }
 
 

@@ -99,7 +99,7 @@ void G4ReweightTreeParser::FillCollection(){
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%1000)){std::cout << ie << std::endl;}
+    if(!(ie%10000)){std::cout << ie << std::endl;}
 
     G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
     SetSteps(G4RTraj);

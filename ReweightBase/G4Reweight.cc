@@ -13,18 +13,16 @@ std::string outFileName = "outtry.root";
 double weight = 1.;
 double elastWeight = 1.;
 
-void parseArgs(int argc, char ** argv);
+bool parseArgs(int argc, char ** argv);
 
 int main(int argc, char ** argv){
 
-  parseArgs(argc, argv);
+  if(!parseArgs(argc, argv)) {return 0;}
+  std::cout << fileName << " " << outFileName << " " << weight << " " << elastWeight << std::endl;
   
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str(), outFileName.c_str());
   tp->SetBranches();
   tp->FillAndAnalyze(weight,elastWeight);
-  //tp->FillCollection();
-  //tp->SortCollection();
-  //tp->Analyze();  
   tp->CloseInput();
 
   std::cout << "done" << std::endl;
@@ -32,18 +30,25 @@ int main(int argc, char ** argv){
   return 0;
 }
 
-void parseArgs(int argc, char ** argv){
-  std::cout << "Nargs: " << argc << std::endl;
+bool parseArgs(int argc, char ** argv){
   
-  std::cout << argv[1] << std::endl;
-  fileName = argv[1];
-  std::cout << argv[2] << std::endl;
-  outFileName = argv[2];
-  if(argc == 5){
-    weight = atof(argv[3]);
-    elastWeight = atof(argv[4]);
+  for(int i = 1; i < argc; ++i){
+    if( strcmp(argv[i], "--help") == 0){
+      std::cout << "Usage: -f inputFile -o outFile -i inelasticWeight -e elasticWeight" << std::endl;
+      return false;
+    }
+    if( strcmp(argv[i], "-f") == 0){
+      fileName = argv[i + 1];
+    }
+    else if( strcmp(argv[i], "-o") == 0){
+      outFileName = argv[i + 1];       
+    }
+    else if( strcmp(argv[i], "-i") == 0){
+      weight = atof(argv[i + 1]);
+    }
+    else if( strcmp(argv[i], "-e") == 0){
+      elastWeight = atof(argv[i + 1]); 
+    }
   }
-  std::cout << "Weight: " << weight << std::endl;
-  std::cout << "Elast Weight: " << elastWeight << std::endl;
-
+  return true;
 }

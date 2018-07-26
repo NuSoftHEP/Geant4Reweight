@@ -13,12 +13,12 @@ double elasticBias = 1.;
 double inelasticBias = 1.;
 
 
-void ParseArgs(int argc, char* argv[]);
+bool ParseArgs(int argc, char* argv[]);
 
 int main(int argc, char * argv[]){
  
   std::cout << "parsing" << std::endl;
-  ParseArgs(argc, argv);
+  if(!ParseArgs(argc, argv)) {return 0;}
   std::cout << macFileName << " " << outFileName << " " << elasticBias << " " << inelasticBias << std::endl;
 
   G4RunManager * runManager = new G4RunManager;
@@ -57,8 +57,13 @@ int main(int argc, char * argv[]){
   return 0;
 }
 
-void ParseArgs(int argc, char* argv[]){
+bool ParseArgs(int argc, char* argv[]){
+
   for(int i = 1; i < argc; ++i){
+    if( strcmp(argv[i], "--help") == 0){
+      std::cout << "Usage: -c macro file -o outfile -e elasticBias -i inelasticBias" << std::endl;
+      return false;
+    }
     if( strcmp(argv[i], "-c") == 0){
       macFileName = argv[i+1];      
     }
@@ -72,6 +77,7 @@ void ParseArgs(int argc, char* argv[]){
       inelasticBias = atof(argv[i+1]);
     }
   }
+  return true;
 }
 
 

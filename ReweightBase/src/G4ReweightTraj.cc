@@ -128,6 +128,7 @@ double G4ReweightTraj::GetWeight(double bias){
     bias_total[reweightable[i]] = 0.;
   }
 
+//  std::cout << "N steps: " << GetNSteps() << std::endl;
   for(size_t is = 0; is < GetNSteps(); ++is){   
     auto theStep = GetStep(is);
         
@@ -135,6 +136,7 @@ double G4ReweightTraj::GetWeight(double bias){
 
     sqrt(theStep->preStepPx*theStep->preStepPx + theStep->preStepPy*theStep->preStepPy + theStep->preStepPz*theStep->preStepPz) <<std::endl;
     std::cout << "L: " << theStep->stepLength << std::endl;*/
+//    std::cout << theStep->stepChosenProc << " " << is << std::endl;
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
 

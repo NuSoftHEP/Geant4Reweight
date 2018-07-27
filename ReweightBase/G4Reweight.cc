@@ -34,7 +34,7 @@ bool parseArgs(int argc, char ** argv){
   
   for(int i = 1; i < argc; ++i){
     if( strcmp(argv[i], "--help") == 0){
-      std::cout << "Usage: -f inputFile -o outFile -i inelasticWeight -e elasticWeight" << std::endl;
+      std::cout << "Usage: ./G4Reweight -f inputFile -o outFile -i inelasticWeight -e elasticWeight" << std::endl;
       return false;
     }
     if( strcmp(argv[i], "-f") == 0){

@@ -21,6 +21,7 @@ def getChi2(w, v):
 
 f1 = TFile(sys.argv[1],"READ")
 f2 = TFile(sys.argv[2],"READ")
+gStyle.SetOptStat(0)
 
 
 nom = f1.Get("tree")
@@ -47,7 +48,6 @@ w.SetMarkerStyle(20)
 v.SetLineColor(1)
 
 c1 = TCanvas()
-gStyle.SetOptStat(0)
 
 w.SetMinimum(0.)
 v.Draw("e")

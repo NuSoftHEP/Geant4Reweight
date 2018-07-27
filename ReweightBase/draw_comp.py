@@ -8,9 +8,9 @@ f2 = TFile(sys.argv[2],"READ")
 nom = f1.Get("tree")
 var = f2.Get("tree")
 
-nom.Draw("len>>n")
-nom.Draw("len>>w", "weight*elastWeight")
-var.Draw("len>>v")
+nom.Draw("len>>n(50,0,500)")
+nom.Draw("len>>w(50,0,500)", "weight*elastWeight")
+var.Draw("len>>v(50,0,500)")
 
 n = gDirectory.Get("n")
 w = gDirectory.Get("w")
@@ -36,19 +36,20 @@ for i in range(1,w.GetNbinsX()+1):
 
 print chi2/nbins
 #n.SetTitle("#chi^{2}/bin = " + str(chi2/nbins))
-n.SetTitle("#sigma_{inel}x" + str(sys.argv[5]) + ", #sigma_{el}x" +str(sys.argv[6]))
-n.SetXTitle("Track Length (cm)")
+w.SetTitle("#sigma_{inel}x" + str(sys.argv[5]) + ", #sigma_{el}x" +str(sys.argv[6]))
+w.SetXTitle("Track Length (cm)")
 w.SetLineColor(2)
 v.SetLineColor(1)
 
 c1 = TCanvas()
 gStyle.SetOptStat(0)
 
-n.Draw()
-w.Draw("same hist e")
+
+w.Draw(" hist e")
+n.Draw("same")
 v.Draw("same hist e")
 
-l = TLegend(.1,.6,.4,.9)
+l = TLegend(.6,.6,.9,.9)
 l.AddEntry(n, "Nominal","lpf")
 l.AddEntry(w, "Weighted", "lpef")
 l.AddEntry(v, "Varied", "lpef")

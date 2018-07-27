@@ -118,8 +118,6 @@ double G4ReweightTraj::GetTotalLength(){
 }
 
 double G4ReweightTraj::GetWeight(double bias){
-  //double total = 0.;
-  //double bias_total = 0.;
   std::map<std::string,double> total; 
   std::map<std::string,double> bias_total;  
 
@@ -140,12 +138,8 @@ double G4ReweightTraj::GetWeight(double bias){
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
 
-//      if(theProc.Name == "pi+Inelastic"){
-//        total += (theStep->stepLength/theProc.MFP);
-//        bias_total += ( (theStep->stepLength*bias) / theProc.MFP);
-//      }
       
-//      std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
+      //std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
 
       if (total.count(theProc.Name)){
 //        std::cout << theProc.Name << " " << theProc.MFP << std::endl;
@@ -166,11 +160,11 @@ double G4ReweightTraj::GetWeight(double bias){
   double xsecTotal = 0.;
   double bias_xsecTotal = 0.;
   for(int i = 0; i < nRW; ++i){
-//    std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
+    //std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
     xsecTotal += total[reweightable[i]];
     bias_xsecTotal += bias_total[reweightable[i]];
   }
-//  std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+  //std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
 
   double weight;
 /*  if(GetFinalProc() == "pi+Inelastic"){
@@ -187,7 +181,7 @@ double G4ReweightTraj::GetWeight(double bias){
 //     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
 //     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
 
-     num = bias_total[GetFinalProc()];
+/*     num = bias_total[GetFinalProc()];
      num = num / bias_xsecTotal;
      num = num * (1 - exp( -1*bias_xsecTotal ) );
 
@@ -197,6 +191,12 @@ double G4ReweightTraj::GetWeight(double bias){
 
 
      weight = num/denom;
+*/
+     //Alternative Weight
+     weight = exp( xsecTotal - bias_xsecTotal);
+     weight = weight * bias_total[GetFinalProc()] / total[GetFinalProc()];
+//     weight = ( bias_total[GetFinalProc()] / bias_xsecTotal ) * weight;
+//     weight = weight / ( total[GetFinalProc()] / xsecTotal );
 //     std::cout << GetFinalProc() << " " << weight << std::endl;
 
   }
@@ -235,6 +235,10 @@ double G4ReweightTraj::GetWeight_Elast(double elast_bias){
 //        std::cout << "Weighting Elast" << std::endl;
 
        elast_weight *= ( ( 1 - exp(-1.*elast_bias_total) ) / ( 1 - exp(-1.*elast_total) ) ); 
+
+       //Alternative:
+//       elast_weight *= exp(elast_total - elast_bias_total);
+
        elast_total = 0.;
        elast_bias_total = 0.;
     }
@@ -245,6 +249,8 @@ double G4ReweightTraj::GetWeight_Elast(double elast_bias){
   //Now multiply by the weight from the last elastic scatter
   elast_weight *= exp( elast_total - elast_bias_total ); 
 
+  //Alternative: NEED TO FIX THIS LATER
+//  elast_weight *= elast_bias_total / elast_total;
   return elast_weight;
 }
 

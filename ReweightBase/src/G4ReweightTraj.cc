@@ -234,10 +234,11 @@ double G4ReweightTraj::GetWeight_Elast(double elast_bias){
     if(theStep->stepChosenProc == "hadElastic"){
 //        std::cout << "Weighting Elast" << std::endl;
 
-       elast_weight *= ( ( 1 - exp(-1.*elast_bias_total) ) / ( 1 - exp(-1.*elast_total) ) ); 
+//       elast_weight *= ( ( 1 - exp(-1.*elast_bias_total) ) / ( 1 - exp(-1.*elast_total) ) ); 
 
        //Alternative:
-//       elast_weight *= exp(elast_total - elast_bias_total);
+       elast_weight *= exp(elast_total - elast_bias_total);
+       elast_weight *= elast_bias_total / elast_total;
 
        elast_total = 0.;
        elast_bias_total = 0.;

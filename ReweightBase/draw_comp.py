@@ -8,9 +8,9 @@ f2 = TFile(sys.argv[2],"READ")
 nom = f1.Get("tree")
 var = f2.Get("tree")
 
-nom.Draw("len>>n(50,0,500)")
-nom.Draw("len>>w(50,0,500)", "weight*elastWeight")
-var.Draw("len>>v(50,0,500)")
+nom.Draw("len>>n(25,0,500)")
+nom.Draw("len>>w(25,0,500)", "weight*elastWeight")
+var.Draw("len>>v(25,0,500)")
 
 n = gDirectory.Get("n")
 w = gDirectory.Get("w")

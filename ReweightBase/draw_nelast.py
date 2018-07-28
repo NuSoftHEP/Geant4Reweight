@@ -51,8 +51,9 @@ c1 = TCanvas()
 
 w.SetMinimum(0.)
 v.Draw("e")
-n.Draw("same")
 w.Draw("same hist e")
+n.Draw("same")
+
 
 l = TLegend(.6,.6,.9,.9)
 l.AddEntry(n, "Nominal","lpf")

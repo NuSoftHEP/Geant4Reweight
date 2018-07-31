@@ -44,6 +44,7 @@ class G4ReweightTreeParser{
     double postFinalP;
     double preFinalP;
     int nElast;
+    double cosTheta;
     std::vector<double> * elastDists;
     std::vector<double> * sliceEnergy;
     std::vector<int> * sliceInts;

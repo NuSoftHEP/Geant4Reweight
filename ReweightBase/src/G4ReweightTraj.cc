@@ -328,3 +328,13 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
   
   return result;
 }
+
+std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPID){
+  std::vector<G4ReweightTraj*> childTrajs; 
+  for(size_t ic = 0; ic < GetNChilds(); ++ic){
+    if( GetChild(ic)->PID == childPID){
+      childTrajs.push_back(GetChild(ic));
+    }
+  }
+  return childTrajs;
+}

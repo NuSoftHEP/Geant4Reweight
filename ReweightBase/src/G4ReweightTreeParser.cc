@@ -115,8 +115,9 @@ void G4ReweightTreeParser::FillCollection(){
     //The particle's parent is in the map
     else if( trajCollection->count( parentPair ) ){      
       if( (*trajCollection)[ parentPair ]->AddChild( G4RTraj ) ){
-//        std::cout << "Added child " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
-//        std::cout << "\tTo " << tParID << std::endl;
+        (*trajCollection)[thisPair] = G4RTraj;
+        std::cout << "Added child " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
+        std::cout << "\tTo " << tParID << std::endl;
       }
 /*      else{
         std::cout << "Failed to add child " <<tTrackID << " " << tPID << " " << tEventNum << std::endl;
@@ -177,55 +178,18 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
   }
 }
 
-/*void G4ReweightTreeParser::SortCollection(){
-  std::cout << "Attempting to sort " << GetNTrajs() << 
-  " trajectories and set child-parent relationships" <<std::endl;
-
-  //Go through each event
-  for( size_t ie = 0; ie < GetNEvents(); ++ie){
-    auto trajMap = trajCollection->at(ie);
-
-//    std::cout << "Event " << ie << std::endl;
-
-    for(auto itTraj = trajMap->begin(); itTraj != trajMap->end(); ++itTraj){
-      size_t checkID = (itTraj->second)->parID;
-      if(checkID == 0){
-        continue;
-      }
-      else if( trajMap->count(checkID) == 0 ){
-        std::cout << "Parent ID " << checkID << " Not in map" << std::endl;
-        continue;
-      }
-
-      //Should be the parent
-      auto tryTraj = (*trajMap)[checkID];
-      if( (itTraj->second)->SetParent(tryTraj) ){
-        std::cout << "SetParent for " << itTraj->first << " and " << checkID << std::endl;
-  //      break;
-      }
-      else{
-        std::cout << "meh" << itTraj->first << " and " << checkID << std::endl;
-      }
-    }
-    
-    
-  }
-
-  sorted = true;
-}*/
 
 void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-//        if (theTraj->parID == 0){
-          if (theTraj->parID == 0 && theTraj->PID == 211){
+        if (theTraj->parID == 0 && theTraj->PID == 211){
 //          std::cout << "Found primary " << theTraj->PID << std::endl;
 //          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
 //          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-          for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+//         for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
 //            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-          }
+//         }
 
           double w = theTraj->GetWeight(bias);
 
@@ -241,6 +205,26 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           preFinalP = sqrt( px*px + py*py + pz*pz); 
+
+          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+             //Now check the scattering angle 
+             auto products = theTraj->HasChild(theTraj->PID);
+             if( products.size() == 1){
+//               std::cout << "Found inelastic scatter" << std::endl;
+               auto theChild = products[0];
+               double childPx = theChild->GetStep(0)->preStepPx;
+               double childPy = theChild->GetStep(0)->preStepPy;
+               double childPz = theChild->GetStep(0)->preStepPz;
+               cosTheta = (px*childPx + py*childPy + pz*childPz);
+               cosTheta = cosTheta/preFinalP;
+               cosTheta = cosTheta/sqrt(childPx*childPx + childPy*childPy + childPz*childPz);
+//               std::cout << cosTheta << std::endl;
+               
+             }
+          }
+          else{
+            cosTheta = 0.;
+          }
 
           px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
           py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
@@ -264,9 +248,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           }
 
           tree->Fill();
-
            
-//          std::cout << "Weight: " << w << std::endl;
         }
       }
 }
@@ -288,6 +270,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   elastDists = 0;
   sliceEnergy = 0;
   sliceInts = 0;
+  cosTheta = 0.;
 
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
@@ -300,7 +283,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);
-
+  tree->Branch("cosTheta", &cosTheta);
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -315,52 +298,6 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
 //      std::cout << "Event: " << prevEvent << std::endl;
      
-/*      //Do analysis here
-      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
-      for( ; itTraj != trajCollection->end(); ++itTraj){
-        auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0){
-//          std::cout << "Found primary " << theTraj->PID << std::endl;
-//          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
-//          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-          for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
-//            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-          }
-
-          double w = theTraj->GetWeight(bias);
-          weightHist->Fill(w);
-
-          if(theTraj->GetFinalProc() == "pi+Inelastic"){
-            double len = theTraj->GetTotalLength();
-//            std::cout << "Total Length" << len << std::endl;
-            lenHist->Fill(len);
-            weightedLen->Fill(len,w);
-          }
-          theLen = theTraj->GetTotalLength();
-          theWeight = w;
-          theElastWeight = theTraj->GetWeight_Elast(elastBias);
-          theInt = theTraj->GetFinalProc();
-          nElast = theTraj->GetNElastic();
-          //std::cout << "Final " << theInt << std::endl;
-          double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
-          double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
-          double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
-          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
-          preFinalP = sqrt( px*px + py*py + pz*pz); 
-
-          px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
-          py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
-          pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
-          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
-          postFinalP = sqrt( px*px + py*py + pz*pz); 
-          theTraj->GetElastDists();
-          tree->Fill();
-
-           
-//          std::cout << "Weight: " << w << std::endl;
-        }
-      }
-*/
       Analyze(bias,elastBias);
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
@@ -374,6 +311,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
     G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
     SetSteps(G4RTraj);
+    //std::cout << tTrackID << " " << tPID << " " << tParID << " " << tSteps->first << " " << tSteps->second << std::endl;
    
     std::pair<size_t,size_t> thisPair = std::make_pair(tTrackID,tEventNum);
     std::pair<size_t,size_t> parentPair = std::make_pair(tParID,tEventNum);
@@ -399,51 +337,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
   std::cout << "Event: " << prevEvent << std::endl;
   
-  //Do analysis here
-/*  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
-  for( ; itTraj != trajCollection->end(); ++itTraj){
-    auto theTraj = itTraj->second; 
-    if (theTraj->parID == 0){
-//      std::cout << "Found primary " << theTraj->PID << std::endl;
-//      std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
-//      std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-      for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
-//        std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-      }
 
-      double w = theTraj->GetWeight(bias);
-//      double w = theTraj->GetWeight_Elast(1.5,2.);
-      weightHist->Fill(w);
-
-      if(theTraj->GetFinalProc() == "pi+Inelastic"){
-        double len = theTraj->GetTotalLength();
-//        std::cout << "Total Length" << len << std::endl;
-        lenHist->Fill(len);
-        weightedLen->Fill(len, w);
-      }
-      theLen = theTraj->GetTotalLength();
-      theWeight = w;
-      theElastWeight = theTraj->GetWeight_Elast(elastBias);
-      theInt = theTraj->GetFinalProc();
-      nElast = theTraj->GetNElastic();
-
-      
-      double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
-      double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
-      double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
-      //std::cout << px << " " << py << " " << pz << std::endl;
-      preFinalP = sqrt( px*px + py*py + pz*pz); 
-
-      px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
-      py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
-      pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
-      //std::cout << px << " " << py << " " << pz << std::endl;
-      postFinalP = sqrt( px*px + py*py + pz*pz); 
-      theTraj->GetElastDists();
-      tree->Fill();
-//      std::cout << "Weight: " << w << std::endl;
-    }
-  }*/
   Analyze(bias,elastBias);
   std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){

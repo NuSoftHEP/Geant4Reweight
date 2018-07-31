@@ -45,6 +45,7 @@ class G4ReweightTraj{
     bool AddChild(G4ReweightTraj *);
     size_t GetNChilds();
     G4ReweightTraj * GetChild(size_t);
+    std::vector<G4ReweightTraj*> HasChild(int); 
 
     std::string GetFinalProc();
     

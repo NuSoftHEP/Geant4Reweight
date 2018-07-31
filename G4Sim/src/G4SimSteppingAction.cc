@@ -23,10 +23,11 @@ G4SimSteppingAction::~G4SimSteppingAction(){
 void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   G4Track * track = step->GetTrack();
-  if( track->GetParentID() > 0){return;}
+//  if( track->GetParentID() > 0){return;}
 
-  if( (abs(track->GetDefinition()->GetPDGEncoding()) >= 1000000000) || (abs(track->GetDefinition()->GetPDGEncoding()) == 11) || (abs(track->GetDefinition()->GetPDGEncoding()) == 22)){return;}
+ // if( (abs(track->GetDefinition()->GetPDGEncoding()) >= 1000000000) || (abs(track->GetDefinition()->GetPDGEncoding()) == 11) || (abs(track->GetDefinition()->GetPDGEncoding()) == 22)){return;}
 
+  if( !((abs(track->GetDefinition()->GetPDGEncoding()) == 211) || (track->GetDefinition()->GetPDGEncoding() == 111)) ){return;}
 
   auto prestep = step->GetPreStepPoint(); 
   auto poststep = step->GetPostStepPoint(); 

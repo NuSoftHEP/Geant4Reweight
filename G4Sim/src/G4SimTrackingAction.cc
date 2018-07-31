@@ -25,7 +25,6 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
 
   if((abs(PID) >= 1000000000) || (abs(PID) == 11) || (abs(PID) == 22) ){return;}
 
-
   MyTreeBuffer->track_tid->push_back(trackID);
   MyTreeBuffer->track_pid->push_back(PID);
 
@@ -36,14 +35,12 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   MyTrackTreeBuffer->trackID = trackID;
   MyTrackTreeBuffer->parID = parID;
 
-  //Only saving steps for primary particles
-  if(parID == 0){
+  //if(parID == 0){
+  //Now saving steps for any pions
+  if( (abs(PID) == 211) || (PID == 111) ){
     //nsteps will be iterated in Stepping Action
     MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
   }
-/*  else if(PID == 211){
-    MyTrackTreeBuffer->steps->first = MyStepTreeBuffer->nsteps; 
-  }*/
   else{
     MyTrackTreeBuffer->steps->first = -1;
   }
@@ -73,7 +70,8 @@ void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){
     }
   }
   
-  if(MyTrackTreeBuffer->parID == 0){
+  //if(MyTrackTreeBuffer->parID == 0){  
+  if( (abs(MyTrackTreeBuffer->PID) == 211) || (MyTrackTreeBuffer->PID == 111) ){
     MyTrackTreeBuffer->steps->second = MyStepTreeBuffer->nsteps;
   }
   else{

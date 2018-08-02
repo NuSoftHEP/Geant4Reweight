@@ -71,6 +71,12 @@ class G4ReweightTreeParser{
     double postStepPz;  
 
     double stepLength;
+     
+    int nPiPlus;
+    int nPiMinus;
+    int nPi0;
+    int nProton;
+    int nNeutron;
 
     std::vector<std::string> * stepActivePostProcNames = 0;
     std::vector<std::string> * stepActiveAlongProcNames = 0;

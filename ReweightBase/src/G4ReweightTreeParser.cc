@@ -247,6 +247,19 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceInts->push_back(slices[it].second); 
           }
 
+          std::map<int, int*> mapPIDtoN = { {211, &nPiPlus},
+                                            {-211, &nPiMinus},
+                                            {111, &nPi0},
+                                            {2212, &nProton},
+                                            {2112, &nNeutron} };
+//          std::cout << "New Track" << std::endl;
+          std::map<int, int*>::iterator itN = mapPIDtoN.begin();
+          for(; itN != mapPIDtoN.end(); ++itN){
+            *(itN->second) = (theTraj->HasChild(itN->first)).size();
+//            std::cout << "This track has " << *(itN->second) << " " << itN->first << std::endl;
+          }
+          
+
           tree->Fill();
            
         }
@@ -272,6 +285,12 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   sliceInts = 0;
   cosTheta = 0.;
 
+  nPiPlus = 0;
+  nPiMinus = 0;
+  nPi0 = 0;
+  nProton = 0;
+  nNeutron = 0;
+
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
   tree->Branch("elastWeight", &theElastWeight);  
@@ -284,6 +303,12 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);
   tree->Branch("cosTheta", &cosTheta);
+
+  tree->Branch("nPiPlus", &nPiPlus);
+  tree->Branch("nPiMinus", &nPiMinus);
+  tree->Branch("nPi0", &nPi0);
+  tree->Branch("nProton", &nProton);
+  tree->Branch("nNeutron", &nNeutron);
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}

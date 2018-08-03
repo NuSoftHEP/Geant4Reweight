@@ -7,6 +7,14 @@
 #include "TFile.h"
 #include "TTree.h"
 
+enum interactionType {
+      kNone,
+      kInel,
+      kCEX,
+      kABS,
+      kOther 
+};
+
 class G4ReweightTreeParser{
 
   public:
@@ -19,6 +27,7 @@ class G4ReweightTreeParser{
     void Analyze(double,double);
     void FillAndAnalyze(double,double);
     void CloseInput();
+    void GetInteractionType(int);
 
     size_t GetNTrajs();
   //  size_t GetNEvents();
@@ -48,7 +57,7 @@ class G4ReweightTreeParser{
     std::vector<double> * elastDists;
     std::vector<double> * sliceEnergy;
     std::vector<int> * sliceInts;
-
+    
     std::map< std::pair<size_t,size_t>, G4ReweightTraj*  > * trajCollection = new std::map< std::pair<size_t,size_t>, G4ReweightTraj* >();
     
     //For input tree branches 
@@ -77,6 +86,10 @@ class G4ReweightTreeParser{
     int nPi0;
     int nProton;
     int nNeutron;
+
+    std::map<int, int*> mapPIDtoN;
+    int intType; 
+
 
     std::vector<std::string> * stepActivePostProcNames = 0;
     std::vector<std::string> * stepActiveAlongProcNames = 0;

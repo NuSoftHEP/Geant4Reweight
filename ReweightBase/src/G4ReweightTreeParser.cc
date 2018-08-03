@@ -10,6 +10,12 @@ G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::stri
 
   fout = new TFile(fOutputFileName.c_str(), "RECREATE"); 
   tree = new TTree("tree","");
+
+  mapPIDtoN = { {211, &nPiPlus},
+                {-211, &nPiMinus},
+                {111, &nPi0},
+                {2212, &nProton},
+                {2112, &nNeutron} };
 }
 
 void G4ReweightTreeParser::CloseInput(){
@@ -229,7 +235,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
           py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
           pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
-          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+//          std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           postFinalP = sqrt( px*px + py*py + pz*pz); 
           if(elastDists) elastDists->clear();
           std::vector<double> dists = theTraj->GetElastDists();
@@ -247,23 +253,54 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceInts->push_back(slices[it].second); 
           }
 
-          std::map<int, int*> mapPIDtoN = { {211, &nPiPlus},
-                                            {-211, &nPiMinus},
-                                            {111, &nPi0},
-                                            {2212, &nProton},
-                                            {2112, &nNeutron} };
 //          std::cout << "New Track" << std::endl;
           std::map<int, int*>::iterator itN = mapPIDtoN.begin();
           for(; itN != mapPIDtoN.end(); ++itN){
             *(itN->second) = (theTraj->HasChild(itN->first)).size();
 //            std::cout << "This track has " << *(itN->second) << " " << itN->first << std::endl;
           }
+          GetInteractionType(theTraj->PID);
           
 
           tree->Fill();
            
         }
       }
+}
+
+void G4ReweightTreeParser::GetInteractionType(int thePID){
+ 
+//  std::cout << thePID << std::endl;
+
+  if( abs(thePID) != 211 ) intType = kNone; 
+  else{
+//    std::cout << thePID << " " << (*mapPIDtoN[thePID]) << std::endl;
+//    std::cout << -1*thePID << " " << (*mapPIDtoN[-1*thePID]) << std::endl;
+//    std::cout << 111 << " " << (*mapPIDtoN[111]) << std::endl;
+
+    if( !(theInt.find("Inelastic")) ) intType = kNone;
+    else{      
+
+      if ( ( (*mapPIDtoN[thePID])    == 1 ) &&
+           ( (*mapPIDtoN[-1*thePID]) == 0 ) && 
+           ( (*mapPIDtoN[111])     == 0 ) ){
+        intType = kInel;
+      }
+      else if( ( (*mapPIDtoN[thePID])    == 0 ) &&
+               ( (*mapPIDtoN[-1*thePID]) == 0 ) && 
+               ( (*mapPIDtoN[111])     == 0 ) ){
+        intType = kABS;
+      }    
+      else if( ( (*mapPIDtoN[thePID])      == 0 ) &&
+                 ( (*mapPIDtoN[-1*thePID]) == 0 ) && 
+                 ( (*mapPIDtoN[111])     == 1 ) ){
+        intType = kCEX;
+      }
+      else intType = kOther;
+
+    }
+
+  }
 }
 
 
@@ -309,6 +346,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("nPi0", &nPi0);
   tree->Branch("nProton", &nProton);
   tree->Branch("nNeutron", &nNeutron);
+
+  tree->Branch("intType", &intType);
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}

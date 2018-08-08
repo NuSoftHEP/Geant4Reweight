@@ -3,6 +3,7 @@
 #include "G4Track.hh"
 #include "G4VProcess.hh"
 #include "G4String.hh"
+#include "G4SystemOfUnits.hh"
 
 G4SimTrackingAction::G4SimTrackingAction(TreeBuffer * inputTreeBuffer, StepTreeBuffer * inputStepTreeBuffer, TrackTreeBuffer * inputTrackTreeBuffer, TTree * track) : G4UserTrackingAction(){
 
@@ -45,9 +46,9 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
     MyTrackTreeBuffer->steps->first = -1;
   }
 
-  MyTrackTreeBuffer->xi = track->GetPosition()[0];
-  MyTrackTreeBuffer->yi = track->GetPosition()[1];
-  MyTrackTreeBuffer->zi = track->GetPosition()[2];
+  MyTrackTreeBuffer->xi = track->GetPosition()[0] / cm;
+  MyTrackTreeBuffer->yi = track->GetPosition()[1] / cm;
+  MyTrackTreeBuffer->zi = track->GetPosition()[2] / cm;
 }
 
 void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){  

@@ -310,6 +310,7 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
     sliceEnergy = sqrt( (px*px + py*py + pz*pz) + 139.57*139.57);
 
     std::string theProc = theStep->stepChosenProc; 
+//    std::cout << "StepLen: " << theStep->stepLength << " Proc: " << theProc << std::endl;
     if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;
     //std::cout << nextPos << " " << sliceEdge << " " << theProc << std::endl;
      

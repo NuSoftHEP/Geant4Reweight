@@ -27,8 +27,9 @@ struct StepTreeBuffer{
   double postStepPx, postStepPy, postStepPz; 
 
   double stepLen;
+  double dX, dY, dZ;
 
-  double ekin;
+  double deltaE;
 
   int nsteps;
  

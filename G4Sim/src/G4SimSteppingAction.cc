@@ -21,8 +21,10 @@ G4SimSteppingAction::~G4SimSteppingAction(){
 }
 
 void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
-
+ 
   G4Track * track = step->GetTrack();
+  
+//  G4cout << track->GetMaterial()->GetName() << G4endl;
 //  if( track->GetParentID() > 0){return;}
 
  // if( (abs(track->GetDefinition()->GetPDGEncoding()) >= 1000000000) || (abs(track->GetDefinition()->GetPDGEncoding()) == 11) || (abs(track->GetDefinition()->GetPDGEncoding()) == 22)){return;}
@@ -31,6 +33,10 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 
   auto prestep = step->GetPreStepPoint(); 
   auto poststep = step->GetPostStepPoint(); 
+
+//  std::cout << prestep->GetMaterial() << " "<< poststep->GetMaterial() << std::endl;
+//  MyTreeBuffer->preStepMat->push_back( prestep->GetMaterial()->GetName()) ;
+//  MyTreeBuffer->postStepMat->push_back( poststep->GetMaterial()->GetName());
 
   MyTreeBuffer->tid->push_back(track->GetTrackID());
   MyTreeBuffer->pid->push_back(track->GetDefinition()->GetPDGEncoding());
@@ -42,7 +48,8 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   MyTreeBuffer->xs->push_back(prestep->GetPosition().getX() / cm);
   MyTreeBuffer->ys->push_back(prestep->GetPosition().getY() / cm);
   MyTreeBuffer->zs->push_back(prestep->GetPosition().getZ() / cm);
-
+  
+  //G4cout <<MyTreeBuffer->zs  << G4endl;
   //Prestep Process
   auto prePro = prestep->GetProcessDefinedStep();
   if(prePro){
@@ -109,18 +116,24 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   MyStepTreeBuffer->postStepPx = poststep->GetMomentum()[0];
   MyStepTreeBuffer->postStepPy = poststep->GetMomentum()[1];
   MyStepTreeBuffer->postStepPz = poststep->GetMomentum()[2];
+  //G4cout << MyStepTreeBuffer->postStepPz << G4endl;
 
-  double xi,yi,zi;
+  /*double xi,yi,zi;
   double xf,yf,zf;
-  xi = (prestep->GetPosition().getX() / cm);
+  xi = (prestep->GetPosition().getX()  / cm);
   xf = (poststep->GetPosition().getX() / cm);
-  yi = (prestep->GetPosition().getY() / cm);
+  yi = (prestep->GetPosition().getY()  / cm);
   yf = (poststep->GetPosition().getY() / cm);
-  zi = (prestep->GetPosition().getZ() / cm);
+  zi = (prestep->GetPosition().getZ()  / cm);
   zf = (poststep->GetPosition().getZ() / cm);
 
   MyStepTreeBuffer->stepLen = sqrt( pow((xi - xf),2) + pow((yi - yf),2) + pow((zi - zf),2) );
-
+  std::cout << MyStepTreeBuffer->stepLen << " " << step->GetStepLength() / cm << std::endl;*/
+  MyStepTreeBuffer->stepLen = step->GetStepLength() / cm; 
+  MyStepTreeBuffer->dX = step->GetDeltaPosition()[0] / cm;
+  MyStepTreeBuffer->dY = step->GetDeltaPosition()[1] / cm;
+  MyStepTreeBuffer->dZ = step->GetDeltaPosition()[2] / cm;
+  MyStepTreeBuffer->deltaE = ( step->GetTotalEnergyDeposit() - step->GetNonIonizingEnergyDeposit() ) / MeV;
   step_tree_copy->Fill();
   MyStepTreeBuffer->nsteps++;
 }

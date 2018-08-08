@@ -77,7 +77,10 @@ G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) :
   step->Branch("postStepPy", &MyStepTreeBuffer->postStepPy);
   step->Branch("postStepPz", &MyStepTreeBuffer->postStepPz);
   step->Branch("stepLen", &MyStepTreeBuffer->stepLen);
-  step->Branch("ekin", &MyStepTreeBuffer->ekin);
+  step->Branch("deltaX", &MyStepTreeBuffer->dX);
+  step->Branch("deltaY", &MyStepTreeBuffer->dY);
+  step->Branch("deltaZ", &MyStepTreeBuffer->dZ);
+  step->Branch("deltaE", &MyStepTreeBuffer->deltaE);
   G4cout << "Made step Branches" << G4endl;
   /////////////////////
 

@@ -5,7 +5,6 @@
 #
 
 /run/verbose    1
-/run/setCut     0.01 mm
 /event/verbose  1
 /process/verbose 10
 /random/setSeeds 770353837 70597151
@@ -29,6 +28,5 @@
 # Set the initial kinematic and run 3 events
 #
 
-#/run/beamOn 100000
-#/run/beamOn 5000
-/run/beamOn 1
+/run/beamOn 25000
+#/run/beamOn 1

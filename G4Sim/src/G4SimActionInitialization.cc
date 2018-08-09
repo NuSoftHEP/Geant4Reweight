@@ -93,6 +93,7 @@ G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) :
   track->Branch("xi", &MyTrackTreeBuffer->xi);
   track->Branch("yi", &MyTrackTreeBuffer->yi);
   track->Branch("zi", &MyTrackTreeBuffer->zi);
+  track->Branch("Energy", &MyTrackTreeBuffer->Energy);
   G4cout << "Made track Branches" << G4endl;
   /////////////////////
 }

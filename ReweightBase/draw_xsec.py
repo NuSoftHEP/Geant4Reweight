@@ -1,6 +1,14 @@
 from ROOT import * 
 import sys
 from draw_utils import * 
+from math import log
+
+def LogIt(h):
+  for i in range(1,h.GetNbinsX() + 1):
+    content = h.GetBinContent(i)
+#    if(content == 0): continue
+    content = log(1. / ( 1. - content) )
+    h.SetBinContent(i,content)
 
 #def getChi2(w, v):
 #  result = []  
@@ -52,9 +60,14 @@ wr.Divide(wd)
 vr = vn.Clone()
 vr.Divide(vd)
 
-nr.Scale( 1./ ( 1. * 1.401 * 6.02E23 / 40 ) )
-vr.Scale( 1./ ( 1. * 1.401 * 6.02E23 / 40 ) )
-wr.Scale( 1./ ( 1. * 1.401 * 6.02E23 / 40 ) )
+#LogIt(nr)
+#LogIt(vr)
+#LogIt(wr)
+
+nr.Scale( 1./ ( float(sys.argv[6]) * 1.390 * 6.022E23 / 39.95 ) )
+vr.Scale( 1./ ( float(sys.argv[6]) * 1.390 * 6.022E23 / 39.95 ) )
+wr.Scale( 1./ ( float(sys.argv[6]) * 1.390 * 6.022E23 / 39.95 ) )
+
 
 chi2_result = getChi2(wr,vr)
 

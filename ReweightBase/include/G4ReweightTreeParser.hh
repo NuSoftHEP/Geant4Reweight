@@ -57,6 +57,8 @@ class G4ReweightTreeParser{
     std::vector<double> * elastDists;
     std::vector<double> * sliceEnergy;
     std::vector<int> * sliceInts;
+
+    double Energy;
     
     std::map< std::pair<size_t,size_t>, G4ReweightTraj*  > * trajCollection = new std::map< std::pair<size_t,size_t>, G4ReweightTraj* >();
     
@@ -65,6 +67,7 @@ class G4ReweightTreeParser{
     int tTrackID;
     int tEventNum;
     int tParID;
+    double tEnergy;
     std::pair<int,int> * tSteps = new std::pair<int,int>(0,0); 
   
     int sPID;
@@ -78,6 +81,10 @@ class G4ReweightTreeParser{
     double postStepPx;
     double postStepPy;
     double postStepPz;  
+
+    double deltaX;
+    double deltaY;
+    double deltaZ;
 
     double stepLength;
      

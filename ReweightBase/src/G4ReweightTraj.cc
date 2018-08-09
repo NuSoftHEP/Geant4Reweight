@@ -303,7 +303,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
   for(size_t is = 0; is < GetNSteps(); ++is){
     
     auto theStep = GetStep(is);
-    nextPos = lastPos + theStep->stepLength; 
+    nextPos = lastPos + theStep->deltaZ; 
+    //nextPos = lastPos + theStep->stepLength; 
     px = theStep->preStepPx; 
     py = theStep->preStepPy; 
     pz = theStep->preStepPz; 

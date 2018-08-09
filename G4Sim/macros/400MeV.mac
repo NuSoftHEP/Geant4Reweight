@@ -8,8 +8,8 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-#/random/setSeeds 770353837 70597151
-/random/setSeeds 575841909 838392975
+/random/setSeeds 770353837 70597151
+#/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
 /gps/particle    pi+
@@ -19,15 +19,16 @@
 /gps/pos/centre  0 0 0 mm
 /gps/pos/radius  5 cm
 
-#/gps/ene/type    Mono
-#/gps/ene/mono    100 MeV
-/gps/ene/type    Lin
-/gps/ene/min     300 MeV
-/gps/ene/max     1100 MeV
-/gps/ene/gradient 7.33
-/gps/ene/intercept 1
+/gps/ene/type    Mono
+/gps/ene/mono    400 MeV
+#/gps/ene/type    Lin
+#/gps/ene/min     900 MeV
+#/gps/ene/max     1100 MeV
+#/gps/ene/gradient 0
+#/gps/ene/intercept 1
 # Set the initial kinematic and run 3 events
 #
 
-/run/beamOn 25000
+/run/beamOn 1000000
+#/run/beamOn 5000
 #/run/beamOn 1

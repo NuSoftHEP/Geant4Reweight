@@ -13,6 +13,8 @@ struct TrackTreeBuffer{
   int eventNum;  
   double xi, yi, zi;
 
+  double Energy;
+
   //Gives bounds for entries within step tree
   std::pair<int,int> * steps;
 };

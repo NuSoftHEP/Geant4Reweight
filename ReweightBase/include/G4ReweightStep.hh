@@ -32,6 +32,10 @@ class G4ReweightStep{
     double postStepPy;
     double postStepPz;
 
+    double deltaX;
+    double deltaY;
+    double deltaZ;
+
     double stepLength;
 
     std::string stepChosenProc;

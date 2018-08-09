@@ -33,6 +33,8 @@ class G4ReweightTraj{
     int PID;
     int parID;
   
+    double Energy; 
+
     std::pair<int,int> stepRange;
 
     G4ReweightTraj * parent;

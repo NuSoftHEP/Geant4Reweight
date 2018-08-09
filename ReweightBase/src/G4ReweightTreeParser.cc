@@ -37,6 +37,7 @@ void G4ReweightTreeParser::SetBranches(){
   track->SetBranchAddress("steps", &tSteps);
   track->SetBranchAddress("parID", &tParID);
   track->SetBranchAddress("eventNum", &tEventNum);
+  track->SetBranchAddress("Energy", &tEnergy);
 
   step->SetBranchAddress("PID", &sPID);
   step->SetBranchAddress("trackID", &sTrackID);
@@ -54,6 +55,9 @@ void G4ReweightTreeParser::SetBranches(){
   step->SetBranchAddress("stepActivePostProcMFPs", &stepActivePostProcMFPs);
   step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
   step->SetBranchAddress("stepLen", &stepLength);
+  step->SetBranchAddress("deltaX", &deltaX);
+  step->SetBranchAddress("deltaY", &deltaY);
+  step->SetBranchAddress("deltaZ", &deltaZ);
 }
 
 void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
@@ -70,6 +74,10 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
                                                   preStepP, postStepP, stepLength, *stepChosenProc);
     // std::cout << is << " " << *stepChosenProc << std::endl;                                                  
+
+    G4RStep->deltaX = deltaX;
+    G4RStep->deltaY = deltaY;
+    G4RStep->deltaZ = deltaZ;
 
     Proc theProc;
     for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){
@@ -247,7 +255,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceEnergy->clear();
             sliceInts->clear();
           }           
-          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.4);          
+          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.5);          
           for(size_t it = 0; it < slices.size(); ++it){
             sliceEnergy->push_back(slices[it].first); 
             sliceInts->push_back(slices[it].second); 
@@ -260,7 +268,8 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
 //            std::cout << "This track has " << *(itN->second) << " " << itN->first << std::endl;
           }
           GetInteractionType(theTraj->PID);
-          
+         
+          Energy = theTraj->Energy;
 
           tree->Fill();
            
@@ -328,6 +337,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   nProton = 0;
   nNeutron = 0;
 
+  Energy = 0.;
+
   tree->Branch("len", &theLen);  
   tree->Branch("weight", &theWeight);  
   tree->Branch("elastWeight", &theElastWeight);  
@@ -335,6 +346,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("nElast", &nElast);
   tree->Branch("elastDists", &elastDists);
   tree->Branch("sliceEnergy", &sliceEnergy);
+  tree->Branch("Energy", &Energy);
   tree->Branch("sliceInts", &sliceInts);
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
@@ -374,6 +386,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
     }
 
     G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
+    G4RTraj->Energy = tEnergy;
+
     SetSteps(G4RTraj);
     //std::cout << tTrackID << " " << tPID << " " << tParID << " " << tSteps->first << " " << tSteps->second << std::endl;
    

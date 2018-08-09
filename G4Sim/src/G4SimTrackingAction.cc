@@ -49,6 +49,7 @@ void G4SimTrackingAction::PreUserTrackingAction(const G4Track * track){
   MyTrackTreeBuffer->xi = track->GetPosition()[0] / cm;
   MyTrackTreeBuffer->yi = track->GetPosition()[1] / cm;
   MyTrackTreeBuffer->zi = track->GetPosition()[2] / cm;
+  MyTrackTreeBuffer->Energy = track->GetTotalEnergy() / MeV;
 }
 
 void G4SimTrackingAction::PostUserTrackingAction(const G4Track * track){  

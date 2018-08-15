@@ -32,45 +32,24 @@ cd ${_CONDOR_SCRATCH_DIR}
 mkdir ${_CONDOR_SCRATCH_DIR}/code/
 echo ${_CONDOR_SCRATCH_DIR}
 
+ifdh cp ${MYDIR}/GRWTar/GRWTar.tar ${_CONDOR_SCRATCH_DIR}/code/GRWTar.tar
 cd ${_CONDOR_SCRATCH_DIR}/code/
-ifdh cp ${MYDIR}/geant/geant4.10.03.p03-edit/geant4.10.03.p03-install/geant4_new_install.tar ${_CONDOR_SCRATCH_DIR}/code/geant4_new_install.tar
-mkdir geant4-install/
-ls .
-cd geant4-install 
-tar -xvf ${_CONDOR_SCRATCH_DIR}/code/geant4_new_install.tar 
-ls . 
+tar -xf GRWTar.tar 
 
-cd ${_CONDOR_SCRATCH_DIR}/code/
-ifdh cp ${MYDIR}/geant/geant4.10.03.p03-edit/geant4.10.03.p03-build/geant4_build.tar ${_CONDOR_SCRATCH_DIR}/code/geant4_build.tar
-mkdir geant-build
-ls .
-cd geant-build
-tar -xvf ${_CONDOR_SCRATCH_DIR}/code/geant4_build.tar 
-ls . 
+cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/
+tar -xf geant4_new_install.tar
 
-cd ${_CONDOR_SCRATCH_DIR}/code/
-ifdh cp ${MYDIR}/geant/GeantReweight/G4Sim-build/G4Sim_build.tar ${_CONDOR_SCRATCH_DIR}/code/G4Sim_build.tar
-mkdir G4Sim-build 
-ls . 
-cd G4Sim-build 
-tar -xvf ${_CONDOR_SCRATCH_DIR}/code/G4Sim_build.tar 
-ls . 
+cd ${_CONDOR_SCRATCH_DIR}/code/geant-build
+tar -xf geant4_build.tar
 
-cd ${_CONDOR_SCRATCH_DIR}/code/
-ifdh cp ${MYDIR}/geant/GeantReweight/ReweightBase-build/G4Reweight.tar ${_CONDOR_SCRATCH_DIR}/code/G4Reweight.tar
-mkdir ReweightBase-build 
-ls . 
-cd ReweightBase-build 
-tar -xvf ${_CONDOR_SCRATCH_DIR}/code/G4Reweight.tar 
-ls . 
+cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
+tar -xf G4Sim_build.tar 
 
-cd ${_CONDOR_SCRATCH_DIR}/code/
-ifdh cp ${MYDIR}/geant/GeantReweight/G4Sim/macros.tar ${_CONDOR_SCRATCH_DIR}/code/macros.tar
-mkdir macros
-ls .
-cd macros
-tar -xvf ${_CONDOR_SCRATCH_DIR}/code/macros.tar
-ls .
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
+tar -xf G4Reweight.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/macros/
+tar -xf macros.tar
 
 
 ######################

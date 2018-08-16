@@ -194,28 +194,13 @@ All other processes are considered interacting processes (FIX THIS WORDING). Thi
 
 \subsection{Assigning Weights}
 
-Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. 
-
-%Remember the probability for a particle to travel some distance $dL$ before interacting:
-%\begin{equation}\label{eq:6}
-%P_{int}dL = \sigma e^{-\sigma L}dL
-%\end{equation}
-%The probability to have interacted in a length $L$ is then given by \\
-%\begin{equation}\label{eq:7}
-%P_{int}(L) = \int\limits_{0}^{L}\sigma e^{-\sigma L'}dL' = (1 - e^{-\sigma L})
-%\end{equation}
-%Conversely, the probability for a particle to survive over that distance is simply \\
-%\begin{equation}\label{eq:8}
-%1 - P_{int}(L) = e^{-\sigma L}
-%\end{equation}
-
-Geant4 throws numbers according to Equation \ref{eq:1} each time it determines if (or, practically, when) a specific interaction occurs. We should then use this as part of the weight to be applied to the tracks. Combining this with Equation \ref{eq:3}, the weight then becomes
+Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. Whether the tracks survive or interact, they receive a weight that effectively changes the probability to have traveled a specific distance - the track's length - without interacting. Classically, this is the same distribution as in Equation \ref{eq:5}, and should be used in this context. A surviving track will then receive the following weight: 
 
 \begin{equation}\label{eq:surv_weight}
   W_{surv} = \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
 \end{equation}
 
-Note that this is only for tracks that undergo a survival process. This effectively changes the distribution of surviving track lengths according to the overall change in the total cross section. 
+This will change the distribution of track lengths according to the change in the total cross section\footnote{$\sigma_{tot,s}'$ represents the variation of the total cross section, where any or all of the individual cross sections have been varied.}.
 
 Interacting tracks, however, need to be distinguished according to which type of interaction occured (i.e. inelastic scatter vs. decay-in-flight). Normally, this is done using the individual cross sections. The probability for a specific interaction ($a$) to occur given any interaction happened is $\frac{\sigma_a}{\sigma_{tot}}$. However, to account for the cross section changing throughout the particle's travel, we use the step-length-averaged cross sections. Thus, we give this additional factor\footnote{The $'$ in the numerator of the first term is there to account for the case that the interaction that occured is weighted. If that interaction was not weighted, only the total cross section would be varied.} to tracks that underwent interaction $a$:
 
@@ -228,57 +213,19 @@ Making the total weight applied to interacting tracks:
 \begin{equation}\label{eq:int_weight_pop}
   W_{int} = \big(\frac{\sigma'_a}{\sigma'_{tot}}\big)/\big(\frac{\sigma_a}{\sigma_{tot}}\big) * \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
 \end{equation}
-%Note the similarity between equations \ref{eq:5}, \ref{eq:7}, and \ref{eq:8}. This motivates that, if the particle survives over its track, it should receive the following weight\footnote{The $'$ represents a varied set of cross sections, so any number of the individual process cross sections can be changed.}
-%\begin{equation}\label{eq:9}
-%W_{surv} = \frac{p'}{p} = \frac{e^{-\sum L_s  \sigma_{tot,s}'} }{e^{-\sum L_s  \sigma_{tot,s}}}
-%\end{equation}
-%Where $\sigma_{tot,s}$ is the combined cross section of all active Discrete processes for a given step:
-%\begin{equation}
-%\sigma_{tot,s} = (\sum \limits_i \sigma_i)_s
-%\end{equation}
-%
-%Similary, part of the weight applied to an interacting track should be:
-%\begin{equation}\label{eq:10}
-%\frac{p'}{p} = \frac{1 - e^{-\sum L_s  \sigma_{tot,s}'}}{1 - e^{-\sum L_s  \sigma_{tot,s}}}
-%\end{equation}
-%However, to fully encompass what happened to the track, an additional factor should be included to account for the relative populations of the different interactions. In accordance with \ref{eq:6}, the following factor would be used to determine the relative probability for a specific process, $a$, to occur:
-%\begin{equation}
-%R = \frac{\sigma_a}{\sigma_{tot}}
-%\end{equation}
-%Then, in a reweighting situation, the following ratio would be used as one factor of the weight:
-%\begin{equation}
-%\frac{R'}{R} = \big(\frac{\sigma'_a}{\sigma'_{tot}}\big)/\big(\frac{\sigma_a}{\sigma_{tot}}\big)
-%\end{equation}
-%In our case, we should account for the cross section changing throughout the particle's trajectory. To do this, we should use a step-length-averaged cross section:
-%\begin{equation}
-%\frac{\sum \limits_{s} L_s \sigma_s}{\sum \limits_{s} L_s}
-%\end{equation}
-%Such that the factor would be:
-%\begin{equation}
-%R = \frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}}
-%\end{equation}
-%The factor assigned to the weight would then be:
-%\begin{equation}\label{eq:16}
-%\frac{R'}{R} = (\frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}})/(\frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}})
-%\end{equation}
-%The entire weight for a track that undergoes an interaction is then\footnote {$\sigma_{a,s}'$ in the numerator of the first term accounts for the case that the cross section for process $a$ is varied. It could be held the same in the case the process which occurred is not varied.}:
-%\begin{equation} \label{eq:17}
-%W_{int} = \frac{R'p'}{Rp}\\
-%= \frac{ \sum	\limits_{s} L_s \sigma'_{a,s}}{\sum	\limits_{s} L_s \sigma'_{tot,s}} / \frac{ \sum	\limits_{s} L_s \sigma_{a,s}}{\sum	\limits_{s} L_s \sigma_{tot,s}} * \frac{1 - e^{-\sum L_s  \sigma_{tot,s}'}}{1 - e^{-\sum L_s  \sigma_{tot,s}}}
-%\end{equation}
-
 
 \subsection{Track-Preserving Processes - Elastic Scattering}
 Certain discrete processes, such as elastic scattering, preserve the track within the simulation run. This means multiple elastic scatters could occur before the track is killed by a different discrete process or if it leaves the tracking volume. To account for this, we keep the calculation of the elastic weight separate from the track-killing processes above. We leave out the elastic cross sections from the calculation of the total cross sections used in the previous section, and we assign multiple elastic weights to the track. In essence, we have to assign a weight whenever another number is resampled after the elastic process occurs. 
 
 The total elastic weight will always contain a term in the form of equation \ref{eq:9}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
 
-In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to equation \ref{eq:int_weight_pop}, but with only a ratio of the varied and nominal individual cross sections, in effect renormalizing the weights. 
+In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to equation \ref{eq:int_weight_pop}, but with only a ratio of the varied and nominal individual cross sections.
 
 The resulting weight then takes the form of:
-\begin{equation}
+\begin{equation}\label{ref:elastFull}
 W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} \frac{e^{-\sum L_s  \sigma_{s}'}}{e^{-\sum L_s  \sigma_{s}}})(\frac{e^{-\sum L_s \sigma_{s}'}}{e^{-\sum L_s \sigma_{s}}})
 \end{equation}
+Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight.
 %\begin{figure}
 %\includegraphics[width=.8\textwidth]{full_comparison.pdf}
 %\includegraphics[width=.8\textwidth]{zoomed_comparison.pdf}

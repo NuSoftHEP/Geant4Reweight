@@ -37,7 +37,7 @@
 \usepackage{braket}
 \usepackage{slashed}
 \usepackage{subfiles}
-
+\usepackage{graphicx}
 \usepackage{textcomp}
 \newcommand{\textapprox}{\raisebox{0.5ex}{\texttildelow}}
 
@@ -226,21 +226,69 @@ The resulting weight then takes the form of:
 W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} \frac{e^{-\sum L_s  \sigma_{s}'}}{e^{-\sum L_s  \sigma_{s}}})(\frac{e^{-\sum L_s \sigma_{s}'}}{e^{-\sum L_s \sigma_{s}}})
 \end{equation}
 Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight.
-%\begin{figure}
-%\includegraphics[width=.8\textwidth]{full_comparison.pdf}
-%\includegraphics[width=.8\textwidth]{zoomed_comparison.pdf}
-%\end{figure}
-%
-%
-%
-%\begin{figure}
-%\includegraphics[width=\textwidth]{decay_w_len.pdf}
-%\includegraphics[width=\textwidth]{decay_w_p.pdf}
-%\end{figure}
+
+\section{Testing and Validation}
+
+\subsection{Thin Target Scattering}
+A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction
+processes on Ar in the 0.2 - 2.0 GeV
+energy range through combined
+information from ionization free charge
+and scintillation light}. The thin target was a disk of .5cm in thickness and 1.5m in radius. Monoenergetic beams\footnote{{50, 100, 150, 200, 250, 300, 400, 500, 600, 700, and 800} MeV } of 1E6 pions were sent toward the target and tracked through the volume. 
+
+The number of elastic scatters and the final fate (i.e. Inelastic Scatter, Decay, Transportation\footnote{Leaving the tracking volume}) of each pion was recorded to determine if an interaction occured. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the reactive cross section at each energy: 
+
+\begin{equation}\label{ref:reactive_xsec}
+\sigma_{reac} = \frac{N_{inel}}{N_{inc}}\frac{1}{Nx}
+\end{equation}
+Additionally, the total cross section was determined by including the rate of elastic scattering:
+\begin{equation}\label{ref:total_xsec}
+\sigma_{total} = \frac{N_{scat}}{N_{inc}}\frac{1}{Nx}
+\end{equation}
+Here, $N_{scat}$ is defined as the number of pions that had any amount of elastic scatters within the volume or whose final fate was an inelastic scatter. 
+
+The simulation was ran with both the nominal inelastic and elastic scattering cross sections, as well as with 3 sets of variations consisting of scaling the inelastic and elastic cross sections separately. These sets are detailed in Table \ref{ref:variations}. 
+
+\begin{center}\label{ref:variations}
+  \begin{tabular}{| c | c  c |}
+  \hline
+  Set & Inelastic Scale & Elastic Scale  \\
+  \hline
+  1 & 1.5 & 1. \\ 
+  \hline
+  2 & 1.  & 1.5 \\
+  \hline	
+  3 & 1.5 & 1.5 \\
+  \hline  
+  \end{tabular}
+\end{center}
+
+Figures ... show the reactive cross sections produced by the nominal and varied simulations, as well as with weighting applied to the nominal simulation. They also compares these to the reactive cross section as extracted by Nutini.
+
+\begin{center}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1_elast1.5}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1.5}.pdf}
+\end{center}
+
+Figures ... show the total cross sections produced by the nominal and varied simulations, as well as with weighting applied to the nominal simulation. They also compares these to the total cross section as extracted by Nutini.
+
+Figures ... show the ratio between the weighted and varied samples for both the reactive and total cross sections
 
 
-%By inspecting equations \ref{eq:1}, \ref{eq:5},  and \ref{eq:6}
+\begin{center}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1_elast1.5}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1.5}.pdf}
+\end{center}
 
+
+\begin{center}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1.5_elast1}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1_elast1.5}.pdf}
+\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1.5_elast1.5}.pdf}
+\end{center}
+\section{Edits to Geant4.10.03.p03}
 
 
 %\appendix

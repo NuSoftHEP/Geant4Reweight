@@ -1,8 +1,16 @@
 #!/bin/bash
 
-folder=$1
-
-infile=${folder}_bad_samples.txt
+input=$1
+#folder=$1
+IFS="_" read -ra folder_split <<< "$input"
+echo "${folder_split[0]}"
+echo "${folder_split[1]}"
+folder=""
+for split in "${folder_split[@]}"; do
+  folder="$folder$split/" 
+done
+echo "$folder"
+infile=${input}_bad_samples.txt
 while read line; do
   echo $line
   stringarray=($line)

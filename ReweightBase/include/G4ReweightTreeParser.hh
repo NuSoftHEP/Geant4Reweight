@@ -57,6 +57,8 @@ class G4ReweightTreeParser{
     std::vector<double> * elastDists;
     std::vector<double> * sliceEnergy;
     std::vector<int> * sliceInts;
+    std::vector<double> * sliceEnergyInelastic;
+    std::vector<int> * sliceIntsInelastic;
 
     double Energy;
     

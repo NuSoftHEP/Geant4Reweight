@@ -283,7 +283,6 @@ std::vector<double> G4ReweightTraj::GetElastDists(){
   return dists;
 }
 
-
 std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res){
 //  std::cout <<"NEW" << std::endl;
 
@@ -328,6 +327,43 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
 
 
   
+  return result;
+}
+
+std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethodInelastic(double res){
+
+  std::vector< std::pair<double, int> > result;
+  double sliceEnergy = 0.;  
+  
+  //First slice position
+  double sliceEdge = res;
+  double lastPos = 0.;
+  double nextPos = 0.;
+  double px,py,pz;
+  
+  int interactInSlice = 0;
+
+  for(size_t is = 0; is < GetNSteps(); ++is){
+    
+    auto theStep = GetStep(is);
+    nextPos = lastPos + theStep->deltaZ; 
+    px = theStep->preStepPx; 
+    py = theStep->preStepPy; 
+    pz = theStep->preStepPz; 
+    sliceEnergy = sqrt( (px*px + py*py + pz*pz) + 139.57*139.57);
+
+    std::string theProc = theStep->stepChosenProc; 
+    if( (theProc == "pi+Inelastic") ) interactInSlice++;
+     
+    //Passed the slice edge or it's the last step, save Energy
+    if( nextPos > sliceEdge || is == (GetNSteps() - 1) ){
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) ); 
+      interactInSlice = 0;
+      sliceEdge = res*ceil(nextPos/res);
+    }
+
+    lastPos = nextPos;
+  }
   return result;
 }
 

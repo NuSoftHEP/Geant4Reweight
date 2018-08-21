@@ -64,6 +64,7 @@ class G4ReweightTraj{
     std::vector<double> GetElastDists();
 
     std::vector< std::pair<double,int> > ThinSliceMethod(double);
+    std::vector< std::pair<double,int> > ThinSliceMethodInelastic(double);
 
   protected:
 

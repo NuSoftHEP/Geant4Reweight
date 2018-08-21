@@ -290,6 +290,20 @@ Figures ... show the ratio between the weighted and varied samples for both the 
 \end{center}
 \section{Edits to Geant4.10.03.p03}
 
+As well as creating the simulation and reweighting packge, I also made edits to Geant4's base code. The edits are summarized here:
+\begin{enumerate}
+\item Added two extra physics list based off of the G4HadronPhysicsFTFP\_BERT and G4HadronElasticPhysics lists. 
+	\begin{enumerate}
+	\item These allow the user to specify - at run-time - a factor that scales the inelastic and elastic pion cross sections, respectively. 
+	\item Additionally, had to add versions of respective 'particle builder' and 'list constructor' classes. 
+	\end{enumerate}
+\item Implemented methods in various physics process classes that extract the mean free path of the particle in its current state.
+	\begin{enumerate}
+	\item The original methods that do this were private within their respective classes, and so could not be called by higher levels of Geant.
+
+	\end{enumerate}
+\item Edited the G4SteppingManager to handle extracting information about active processes (name and Mean Free Path) at each step.
+\end{enumerate}
 
 %\appendix
 %\section{Interaction Probability Derivation}

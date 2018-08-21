@@ -255,12 +255,23 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceEnergy->clear();
             sliceInts->clear();
           }           
+           
           std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.5);          
           for(size_t it = 0; it < slices.size(); ++it){
             sliceEnergy->push_back(slices[it].first); 
             sliceInts->push_back(slices[it].second); 
           }
 
+          if(sliceEnergyInelastic){
+            sliceEnergyInelastic->clear();
+            sliceIntsInelastic->clear();
+          }
+
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          for(size_t it = 0; it < slicesInelastic.size(); ++it){
+            sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
+            sliceIntsInelastic->push_back(slicesInelastic[it].second); 
+          }
 //          std::cout << "New Track" << std::endl;
           std::map<int, int*>::iterator itN = mapPIDtoN.begin();
           for(; itN != mapPIDtoN.end(); ++itN){
@@ -329,6 +340,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   elastDists = 0;
   sliceEnergy = 0;
   sliceInts = 0;
+  sliceEnergyInelastic = 0;
+  sliceIntsInelastic = 0;
   cosTheta = 0.;
 
   nPiPlus = 0;
@@ -346,8 +359,10 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("nElast", &nElast);
   tree->Branch("elastDists", &elastDists);
   tree->Branch("sliceEnergy", &sliceEnergy);
+  tree->Branch("sliceEnergyInelastic", &sliceEnergyInelastic);
   tree->Branch("Energy", &Energy);
   tree->Branch("sliceInts", &sliceInts);
+  tree->Branch("sliceIntsInelastic", &sliceIntsInelastic);
   tree->Branch("int", &theInt);
   tree->Branch("postFinalP", &postFinalP);
   tree->Branch("preFinalP", &preFinalP);

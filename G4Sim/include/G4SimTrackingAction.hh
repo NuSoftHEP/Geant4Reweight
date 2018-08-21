@@ -14,13 +14,13 @@
 class G4SimTrackingAction : public G4UserTrackingAction{
 
   public:
-    G4SimTrackingAction(TreeBuffer *, StepTreeBuffer *, TrackTreeBuffer *, TTree*);
+    G4SimTrackingAction(/*TreeBuffer *,*/ StepTreeBuffer *, TrackTreeBuffer *, TTree*);
     virtual ~G4SimTrackingAction();
 
     virtual void PreUserTrackingAction(const G4Track *);  
     virtual void PostUserTrackingAction(const G4Track *);  
   private:
-    TreeBuffer * MyTreeBuffer;
+//    TreeBuffer * MyTreeBuffer;
     StepTreeBuffer * MyStepTreeBuffer;
     TrackTreeBuffer * MyTrackTreeBuffer;
 

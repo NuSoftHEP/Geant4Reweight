@@ -7,14 +7,14 @@
 
 G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) : G4VUserActionInitialization(){
 
-  MyTreeBuffer = new TreeBuffer();
+//  MyTreeBuffer = new TreeBuffer();
   MyStepTreeBuffer = new StepTreeBuffer();
   MyTrackTreeBuffer = new TrackTreeBuffer();
  
   G4cout << "Making trees" << G4endl;
  
   fout = new TFile(fOutFileName.c_str(), "RECREATE");
-  tree = new TTree("tree","");
+//  tree = new TTree("tree","");
   step = new TTree("step","");
   track = new TTree("track","");
   G4cout << "Done Making trees" << G4endl;
@@ -22,7 +22,7 @@ G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) :
 
   //Tree Branches
   G4cout << "Making Branches" << G4endl;
-  tree->Branch("pid", &MyTreeBuffer->pid);
+/*  tree->Branch("pid", &MyTreeBuffer->pid);
   tree->Branch("tid", &MyTreeBuffer->tid);
   tree->Branch("track_pid", &MyTreeBuffer->track_pid);
   tree->Branch("track_tid", &MyTreeBuffer->track_tid);
@@ -55,7 +55,7 @@ G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) :
   tree->Branch("preProcess", &MyTreeBuffer->preStepProcess);
   tree->Branch("preMat", &MyTreeBuffer->preStepMat);
   tree->Branch("postMat", &MyTreeBuffer->postStepMat);
-  G4cout << "Made tree Branches" << G4endl;
+  G4cout << "Made tree Branches" << G4endl;*/
   /////////////////////
   
   //Step Tree Branches
@@ -99,7 +99,7 @@ G4SimActionInitialization::G4SimActionInitialization(std::string fOutFileName) :
 }
 
 G4SimActionInitialization::~G4SimActionInitialization(){
-  tree->Write();
+//  tree->Write();
   step->Write();
   track->Write();
   fout->Close();
@@ -109,8 +109,8 @@ void G4SimActionInitialization::Build() const{
   
   SetUserAction(new G4SimPrimaryGeneratorAction());
   //Pass trees and branches to these
-  G4cout << "Passing tree at " << tree << G4endl;
-  SetUserAction(new G4SimEventAction(tree, MyTreeBuffer, MyStepTreeBuffer, MyTrackTreeBuffer));//Will have to fill tree in this
-  SetUserAction(new G4SimSteppingAction(MyTreeBuffer, MyStepTreeBuffer, step));
-  SetUserAction(new G4SimTrackingAction(MyTreeBuffer, MyStepTreeBuffer, MyTrackTreeBuffer, track));
+//  G4cout << "Passing tree at " << tree << G4endl;
+  SetUserAction(new G4SimEventAction(/*tree, MyTreeBuffer,*/ MyStepTreeBuffer, MyTrackTreeBuffer));//Will have to fill tree in this
+  SetUserAction(new G4SimSteppingAction(/*MyTreeBuffer,*/ MyStepTreeBuffer, step));
+  SetUserAction(new G4SimTrackingAction(/*MyTreeBuffer,*/ MyStepTreeBuffer, MyTrackTreeBuffer, track));
 }

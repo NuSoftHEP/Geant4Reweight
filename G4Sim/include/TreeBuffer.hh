@@ -49,9 +49,9 @@ struct TreeBuffer{
 
   std::vector<int> * secondaryProductIDs;
   std::vector<int> * secondaryProductPIDs;
-  std::string * secondaryProcess;
+  std::string secondaryProcess;
   
-  std::string * interactionModeName;
+  std::string interactionModeName;
   int interactionMode;
   int nPi0, nPiPlus, nPiMinus, nProton, nNeutron, nNuclear, nGamma;
 

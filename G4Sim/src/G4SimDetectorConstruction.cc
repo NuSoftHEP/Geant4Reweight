@@ -28,9 +28,11 @@ G4VPhysicalVolume * G4SimDetectorConstruction::Construct(){
 
   //World
   //
-  G4Box * solidWorld = new G4Box("World", 4*height, 4*height, 4*height);
+  //G4Box * solidWorld = new G4Box("World", 4*height, 4*height, 4*height);
+  G4Box * solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
   G4LogicalVolume * logicWorld = new G4LogicalVolume(solidWorld, LAr, "World");
   G4VPhysicalVolume * physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0, checkOverlaps);
+  //G4VPhysicalVolume * physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0, checkOverlaps);
 
 /*  //Argon box
   G4Box * argonBox = new G4Box("ArBox", height, height, 5.*m);

@@ -1,12 +1,12 @@
 #include "G4SimEventAction.hh"
 
-G4SimEventAction::G4SimEventAction(TTree * tree, TreeBuffer * inputTreeBuffer, StepTreeBuffer * inputStepTreeBuffer, TrackTreeBuffer * inputTrackTreeBuffer) : G4UserEventAction(){
+G4SimEventAction::G4SimEventAction(/*TTree * tree, TreeBuffer * inputTreeBuffer, */StepTreeBuffer * inputStepTreeBuffer, TrackTreeBuffer * inputTrackTreeBuffer) : G4UserEventAction(){
 
   //Pass the pointers to this class;
-  tree_copy = tree;  
+/*  tree_copy = tree;  
   G4cout << "Got tree at " << tree << G4endl;
 
-  MyTreeBuffer = inputTreeBuffer;
+  MyTreeBuffer = inputTreeBuffer;*/
   MyStepTreeBuffer = inputStepTreeBuffer;
   MyTrackTreeBuffer = inputTrackTreeBuffer;
   
@@ -16,7 +16,7 @@ G4SimEventAction::~G4SimEventAction(){
 }
 
 void G4SimEventAction::BeginOfEventAction(const G4Event * event){
-  MyTreeBuffer->tid->clear();
+  /*MyTreeBuffer->tid->clear();
   MyTreeBuffer->pid->clear();
   MyTreeBuffer->track_tid->clear();
   MyTreeBuffer->track_pid->clear();
@@ -24,9 +24,9 @@ void G4SimEventAction::BeginOfEventAction(const G4Event * event){
 
   MyTreeBuffer->secondaryProductIDs->clear();
   MyTreeBuffer->secondaryProductPIDs->clear();
-  MyTreeBuffer->secondaryProcess->clear();
+  MyTreeBuffer->secondaryProcess = "";
 
-  MyTreeBuffer->interactionModeName->clear();
+  MyTreeBuffer->interactionModeName = "";
   MyTreeBuffer->interactionMode = 0;
 
   (MyTreeBuffer->nPi0) = 0;   
@@ -50,14 +50,14 @@ void G4SimEventAction::BeginOfEventAction(const G4Event * event){
 
   MyTreeBuffer->postStepProcess->clear();
   MyTreeBuffer->preStepProcess->clear();
-
+*/
   MyStepTreeBuffer->eventNum  = event->GetEventID();
   MyTrackTreeBuffer->eventNum = event->GetEventID();
 }
 
 void G4SimEventAction::EndOfEventAction(const G4Event * event){
 
-  G4PrimaryVertex* vtx = event->GetPrimaryVertex();
+/*  G4PrimaryVertex* vtx = event->GetPrimaryVertex();
 
   //Positions
   MyTreeBuffer->xi = vtx->GetX0();
@@ -74,15 +74,15 @@ void G4SimEventAction::EndOfEventAction(const G4Event * event){
     MyTreeBuffer->primaryEnergy->push_back(part->GetTotalEnergy());
   }
 
-  G4cout << "track vec size" << MyTreeBuffer->track_tid->size() << G4endl; 
+//  G4cout << "track vec size" << MyTreeBuffer->track_tid->size() << G4endl; 
 
-  MyTreeBuffer->fEvent = event->GetEventID();
+  MyTreeBuffer->fEvent = event->GetEventID();*/
 
   G4cout << "Event: " << event->GetEventID() << G4endl;
-  G4cout << "Event: " << MyTreeBuffer->fEvent << G4endl;
+/*  G4cout << "Event: " << MyTreeBuffer->fEvent << G4endl;
   G4cout << "primarypdgs " << MyTreeBuffer->primaryPDGs << G4endl;
 
-  //Secondary Interaction:
+  //Secondary Interaction: 
   int nSecondary = MyTreeBuffer->secondaryProductPIDs->size();
   int nPi0 = 0;
   int nPiPlus = 0;
@@ -189,5 +189,5 @@ void G4SimEventAction::EndOfEventAction(const G4Event * event){
   (MyTreeBuffer->nNeutron) = nNeutron;
   (MyTreeBuffer->nNuclear) = nNuclear;
   (MyTreeBuffer->nGamma)   = nGamma;  
-  tree_copy->Fill();
+  tree_copy->Fill();*/
 }

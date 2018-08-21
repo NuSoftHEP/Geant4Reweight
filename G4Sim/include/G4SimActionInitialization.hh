@@ -20,11 +20,11 @@ class G4SimActionInitialization : public G4VUserActionInitialization{
     void Build() const;
 
     TFile * fout;
-    TTree * tree;
+//    TTree * tree;
     TTree * step;
     TTree * track;
 
-    TreeBuffer * MyTreeBuffer;
+//    TreeBuffer * MyTreeBuffer;
     StepTreeBuffer * MyStepTreeBuffer;
     TrackTreeBuffer * MyTrackTreeBuffer;
 };

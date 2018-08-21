@@ -14,7 +14,7 @@
 class G4SimEventAction : public G4UserEventAction{
 
   public:
-    G4SimEventAction(TTree *, TreeBuffer *, StepTreeBuffer *, TrackTreeBuffer *);
+    G4SimEventAction(/*TTree * , TreeBuffer *,*/ StepTreeBuffer *, TrackTreeBuffer *);
     virtual ~G4SimEventAction();
 
     virtual void BeginOfEventAction(const G4Event *);
@@ -23,8 +23,8 @@ class G4SimEventAction : public G4UserEventAction{
     G4EventManager * fpEventManager;
 
   private: 
-    TTree * tree_copy;
-    TreeBuffer * MyTreeBuffer;
+//    TTree * tree_copy;
+//    TreeBuffer * MyTreeBuffer;
     StepTreeBuffer * MyStepTreeBuffer;
     TrackTreeBuffer * MyTrackTreeBuffer;
 

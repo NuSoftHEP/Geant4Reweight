@@ -13,13 +13,13 @@
 class G4SimSteppingAction : public G4UserSteppingAction{
 
   public:
-    G4SimSteppingAction(TreeBuffer *, StepTreeBuffer *, TTree *);
+    G4SimSteppingAction(/*TreeBuffer *,*/ StepTreeBuffer *, TTree *);
     virtual ~G4SimSteppingAction();
 
     virtual void UserSteppingAction(const G4Step*);  
 
   private:
-    TreeBuffer * MyTreeBuffer;
+//    TreeBuffer * MyTreeBuffer;
     StepTreeBuffer * MyStepTreeBuffer;
     TTree * step_tree_copy;
 

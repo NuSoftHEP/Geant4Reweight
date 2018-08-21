@@ -13,7 +13,7 @@ struct StepTreeBuffer{
   int PID;
   int parID;
 
-  std::string * stepChosenProc;
+  std::string  stepChosenProc;
 
   std::vector<std::string> * stepActivePostProcNames;
   std::vector<std::string> * stepActiveAlongProcNames;

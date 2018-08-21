@@ -7,9 +7,9 @@
 #include "G4VProcess.hh"
 #include <math.h>
 
-G4SimSteppingAction::G4SimSteppingAction(TreeBuffer * inputTreeBuffer, StepTreeBuffer * inputStepTreeBuffer, TTree * step) : G4UserSteppingAction(){
+G4SimSteppingAction::G4SimSteppingAction(/*TreeBuffer * inputTreeBuffer, */StepTreeBuffer * inputStepTreeBuffer, TTree * step) : G4UserSteppingAction(){
 
-  MyTreeBuffer = inputTreeBuffer;
+//  MyTreeBuffer = inputTreeBuffer;
   MyStepTreeBuffer = inputStepTreeBuffer;
 
   G4cout << "Initializing stepping action" << G4endl;
@@ -38,7 +38,7 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
 //  MyTreeBuffer->preStepMat->push_back( prestep->GetMaterial()->GetName()) ;
 //  MyTreeBuffer->postStepMat->push_back( poststep->GetMaterial()->GetName());
 
-  MyTreeBuffer->tid->push_back(track->GetTrackID());
+ /* MyTreeBuffer->tid->push_back(track->GetTrackID());
   MyTreeBuffer->pid->push_back(track->GetDefinition()->GetPDGEncoding());
   MyTreeBuffer->parid->push_back(track->GetParentID());
   MyTreeBuffer->ekin->push_back(prestep->GetKineticEnergy() / GeV);
@@ -48,18 +48,18 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   MyTreeBuffer->xs->push_back(prestep->GetPosition().getX() / cm);
   MyTreeBuffer->ys->push_back(prestep->GetPosition().getY() / cm);
   MyTreeBuffer->zs->push_back(prestep->GetPosition().getZ() / cm);
-  
+  */
   //G4cout <<MyTreeBuffer->zs  << G4endl;
   //Prestep Process
   auto prePro = prestep->GetProcessDefinedStep();
-  if(prePro){
+/*  if(prePro){
     auto preProName = prePro->GetProcessName(); 
     MyTreeBuffer->preStepProcess->push_back(preProName); 
   }
   else{
     MyTreeBuffer->preStepProcess->push_back("NULL"); 
   }
-
+*/
 
 
   //BEGIN STEP TREE FILLING
@@ -68,8 +68,8 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   //PostStep Process
   auto postPro = poststep->GetProcessDefinedStep(); 
   auto postProName = postPro->GetProcessName();
-  MyTreeBuffer->postStepProcess->push_back(postProName); 
-  MyStepTreeBuffer->stepChosenProc = new std::string(postProName);
+//  MyTreeBuffer->postStepProcess->push_back(postProName); 
+  MyStepTreeBuffer->stepChosenProc = /*new*/ std::string(postProName);
   ///
 
   int nPostProcs = step->postStepProcNames->size();

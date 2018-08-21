@@ -2,6 +2,7 @@
 
 input=$1
 timeout=$2
+memory=$3
 #folder=$1
 IFS="_" read -ra folder_split <<< "$input"
 echo "${folder_split[0]}"
@@ -22,7 +23,7 @@ while read line; do
     makeup=$i
     export MAKEUP=$makeup
     echo $MAKEUP
-    jobsub_submit -N 1 -M --OS=SL6 --group=dune --memory=1GB --timeout=$timeout -e MAKEUP --resource-provides=usage_model=OPPORTUNISTIC file:///dune/app/users/calcuttj/geant/GeantReweight/subs/$folder/$sample
+    jobsub_submit -N 1 -M --OS=SL6 --group=dune --memory=$memory --timeout=$timeout -e MAKEUP --resource-provides=usage_model=OPPORTUNISTIC file:///dune/app/users/calcuttj/geant/GeantReweight/subs/$folder/$sample
   done
 done <$infile  
 

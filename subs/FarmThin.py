@@ -55,11 +55,11 @@ for folder in folders:
         print nomvar
         jobid_pre = jobid.split("@")[0]
         print jobid.split("@")
-        output.write(' <Sub="' + theSub +'">\n')
+        output.write(' <Sub Name="' + theSub +'">\n')
         for i in range(0,int(nJobs)):
           jobid_end_num = int(jobid_pre[-1]) + i 
           new_jobid = jobid_pre[0:-1] + str(jobid_end_num)
-          outline = '\t<Job ID="' + new_jobid + '" N="' + str(i) + '" Sub="' + theSub  +'" Type="' + nomvar  + '"/>\n '
+          outline = '\t<Job ID="' + new_jobid + '" N="' + str(i) + '" Type="' + nomvar  + '"/>\n '
           output.write(outline)
         output.write("</Sub>\n")
       else: print "Error\n", stderr            

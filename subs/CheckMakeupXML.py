@@ -31,7 +31,7 @@ for sub in theXML.findall('Sub'):
 
     files = ls(folder + "/" + theID + "/*")
     
-    if len(files) > 1:
+    if len(files) > 0:
       if "nom" in theType :
         if not ( len(files) == 4): 
           out.write(theN+" ")

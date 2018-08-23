@@ -25,12 +25,16 @@ theXML = parse(xml_file)
 
 variations = ["inel1.5_elast1_", "inel1_elast1.5_", "inel1.5_elast1.5_"]
 
+all_dirs = []
+
+
 for sub in theXML.findall('Sub'):
   print sub.get('Name')
   makeup.write(sub.get('Name') + " ")
   for job in sub.findall('Job'):
     print job.get('ID'), job.get('N'), job.get('Type')
     theID = job.get('ID')
+    all_dirs.append(theID)
     theN = job.get('N')
     theType = job.get('Type')
     files = ls(folder + "/" + theID + "/*")
@@ -75,4 +79,4 @@ for sub in theXML.findall('Sub'):
         print "Missing Sim file" 
   makeup.write("\n")
 
- 
+print all_dirs 

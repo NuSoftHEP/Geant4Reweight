@@ -36,7 +36,7 @@ for folder in folders:
   for samp in samps:
     if ("makeup" in samp): continue
 #    if ( "_50MeV" in samples):
-    check = check_samples(samples,samp))
+    check = check_samples(samples,samp)
     if(check):
       print "Sending sample", samp
       #call(["jobsub_submit","-N","5","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC","file:///dune/app/users/calcuttj/geant/GeantReweight/subs/"+folder+"/"+samp])
@@ -56,7 +56,7 @@ for folder in folders:
         print nomvar
         jobid_pre = jobid.split("@")[0]
         print jobid.split("@")
-        output.write(' <Sub Name="' + theSub +'" Sample="' + check '">\n')
+        output.write(' <Sub Name="' + theSub +'" Sample="' + check + '">\n')
         for i in range(0,int(nJobs)):
           jobid_end_num = int(jobid_pre[-1]) + i 
           new_jobid = jobid_pre[0:-1] + str(jobid_end_num)

@@ -30,14 +30,14 @@ cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
 
 ifdh cp ${MYDIR}/GRWTar/ReweightBase-build/G4Reweight.tar ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/G4Reweight.tar
 
-tar -xf G4Reweight.tar
+tar -xvf G4Reweight.tar
 
 
 ######################
 
 cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
-
+echo /pnfs/dune/scratch/users/calcuttj/GeantReweight/${INPUTDIR}/${INPUTFILE}
 ifdh cp /pnfs/dune/scratch/users/calcuttj/GeantReweight/${INPUTDIR}/${INPUTFILE} ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/${INPUTFILE}
 
-./G4Reweightj -f ${INPUTFILE} -o ${OUTPUTFILE} -i ${INEL} -e ${ELAST}
+./G4Reweight -f ${INPUTFILE} -o ${OUTPUTFILE} -i ${INEL} -e ${ELAST}
 ifdh cp ${OUTPUTFILE} /pnfs/dune/scratch/users/calcuttj/GeantReweight/${INPUTDIR}/${OUTPUTFILE} 

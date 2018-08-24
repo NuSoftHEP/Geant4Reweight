@@ -39,7 +39,6 @@ for folder in folders:
     check = check_samples(samples,samp)
     if(check):
       print "Sending sample", samp
-      #call(["jobsub_submit","-N","5","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC","file:///dune/app/users/calcuttj/geant/GeantReweight/subs/"+folder+"/"+samp])
       theSub = samp.replace("batch","makeup")
       p = Popen(["jobsub_submit","-N","5","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC","file:///dune/app/users/calcuttj/geant/GeantReweight/subs/"+folder+"/"+samp], stdout=PIPE, stderr=PIPE)
       stdout, stderr = p.communicate()

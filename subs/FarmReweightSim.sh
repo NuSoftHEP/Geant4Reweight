@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 input=$1
 folder=$2 #Sim or Thin, etc.
@@ -27,5 +27,4 @@ while read line; do
  # done
 done <$infile  
 
-#echo $folder $sample $proc
-#jobsub_submit -N 1 -M --OS=SL6 --group=dune --memory=1GB --timeout=600s -e MAKEUP --resource-provides=usage_model=OPPORTUNISTIC file:///dune/app/users/calcuttj/geant/GeantReweight/subs/$folder/$sample
+

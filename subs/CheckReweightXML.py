@@ -46,37 +46,64 @@ for sub in theXML.findall('Sub'):
         for f in trimmed_files:
           if(theType in f.split("_")[1]):
             template = f.split("_")
-             
-
+ 
         for v in variations:
           check = False
-
+  
           for f in trimmed_files:
             if(theType in f.split("_")[1]): continue 
-
+  
             if v in f:                
               check = True
-
+  
           if not check: 
             #form v
             split_v = v.split("_")
             inel = split_v[0].replace("inel","")
             elast = split_v[1].replace("elast","")
-
+  
             reweight.write(theID + " " + ("_").join(template) + " " + inel + " " + elast + " ")
             newline = False
             print "Missing variation", v 
-
+  
             filename = "_".join([template[0],template[2],template[1],v[0:-1],template[3]])
-            reweight.write(filename + " ")
-
-          if not newline: reweight.write("\n")
-#          else:
-#            print "Good Variation", v
-         
+            reweight.write(filename + "\n")
+      else:
+        makeup.write(theN)
+        print "Missing Sim file" 
+    elif "var" in theType:
+      if len(trimmed_files) > 0:
+        template = [] 
+        for f in trimmed_files:
+          if(theType in f.split("_")[1]):
+            template = f.split("_")
+        
+        for v in variations:
+          if v in (sub.get('Name')).replace(".sh","_"):
+            check = False
+      
+            for f in trimmed_files:
+              if(theType in f.split("_")[1]): continue 
+      
+              if v in f:                
+                check = True
+      
+            if not check: 
+              #form v
+              split_v = v.split("_")
+              inel = split_v[0].replace("inel","")
+              elast = split_v[1].replace("elast","")
+      
+              reweight.write(theID + " " + ("_").join(template) + " " + inel + " " + elast + " ")
+              newline = False
+              print "Missing variation", v 
+      
+              filename = "_".join([template[0],template[4],template[1],v[0:-1],template[-1]])
+              reweight.write(filename + "\n")
+            break
       else:
         makeup.write(theN + " ")
-        print "Missing Sim file" 
+        print "Missing Sim file", theN
+  
   makeup.write("\n")
 
-print all_dirs 

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup ifdhc 
+echo "setup"
+
+MYDIR=/dune/app/users/calcuttj/
+
+
+###MOVE CODE OVER
+
+mkdir ${_CONDOR_SCRATCH_DIR}/myproducts/
+mkdir ${_CONDOR_SCRATCH_DIR}/myproducts/.upsfiles
+cat > ${_CONDOR_SCRATCH_DIR}/myproducts/.upsfiles/dbconfig << 'EOF'
+FILE = DBCONFIG
+AUTHORIZED_NODES = *
+VERSION_SUBDIR = 1
+PROD_DIR_PREFIX = ${UPS_THIS_DB}
+UPD_USERCODE_DIR = ${UPS_THIS_DB}/.updfiles
+EOF
+
+setup -B root v6_12_04e -q e15:prof
+
+cd ${_CONDOR_SCRATCH_DIR}
+mkdir ${_CONDOR_SCRATCH_DIR}/code/
+echo ${_CONDOR_SCRATCH_DIR}
+
+ifdh cp ${MYDIR}/GNomTar/GNomTar.tar ${_CONDOR_SCRATCH_DIR}/code/GNomTar.tar
+cd ${_CONDOR_SCRATCH_DIR}/code/
+tar -xf GNomTar.tar 
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/
+tar -xf geant4_new_install.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant-build
+tar -xf geant4_build.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/macros/
+tar -xf macros.tar
+
+
+######################
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/bin/
+source geant4.sh
+
+cd ${_CONDOR_SCRATCH_DIR}/code/G4Nom-build/
+
+./G4Thin -c ${_CONDOR_SCRATCH_DIR}/code/macros/macros/${SAMPLE}/${SAMPLE}_${PROCESS}_nom.mac -o thin_nom_${SAMPLE}_${PROCESS}.root -i 1. -e 1.
+
+ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin/default/${JOBSUBJOBID:0:10}/
+
+ifdh cp thin_nom_${SAMPLE}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin/default/${JOBSUBJOBID:0:10}/thin_nom_${SAMPLE}_${PROCESS}.root 
+
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
+
+./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Nom-build/thin_nom_${SAMPLE}_${PROCESS}.root -o thin_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root -i 1. -e 1. 
+ifdh cp thin_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin/default/${JOBSUBJOBID:0:10}/thin_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root

@@ -27,7 +27,7 @@ print "Config file: ", xml_file
 theXML = parse(xml_file)
 
 
-variations = [["1.5","1"], ["1","1.5"], ["1.5","1.5"]]
+variations = [["1","1"]] #[["1.5","1"], ["1","1.5"], ["1.5","1.5"]]
 
 all_dirs = []
 

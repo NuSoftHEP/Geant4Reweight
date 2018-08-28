@@ -24,8 +24,8 @@ def getChi2(w, v):
 
 def init_parser():
   parser = ArgumentParser()
-  parser.add_argument('-i', type=str, help='Inelastic variation factor', default=1.0)
-  parser.add_argument('-e', type=str, help='Elastic variation factor', default=1.0)
+  parser.add_argument('-i', type=str, help='Inelastic variation factor', default="1")
+  parser.add_argument('-e', type=str, help='Elastic variation factor', default="1")
   parser.add_argument('--loc', type=str, help='Location of samples')
   parser.add_argument('-d', type=str, help='Location of dataset')
   parser.add_argument('-t', type=str, help='Location of total dataset')

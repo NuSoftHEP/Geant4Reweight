@@ -198,6 +198,14 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
         if (theTraj->parID == 0 && theTraj->PID == 211){
+          //Skip any that exit out the back
+          double totalDeltaZ = 0.;
+          for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
+            auto theStep = theTraj->GetStep(is);
+            totalDeltaZ += theStep->deltaZ;
+          }
+          if(totalDeltaZ < 0.) continue;
+
 //          std::cout << "Found primary " << theTraj->PID << std::endl;
 //          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
 //          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
@@ -256,7 +264,8 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceInts->clear();
           }           
            
-          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.5);          
+//          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.5); 
+          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceBetheBloch(.5); 
           for(size_t it = 0; it < slices.size(); ++it){
             sliceEnergy->push_back(slices[it].first); 
             sliceInts->push_back(slices[it].second); 

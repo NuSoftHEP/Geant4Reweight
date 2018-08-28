@@ -330,6 +330,175 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
   return result;
 }
 
+std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double res){
+
+  std::vector< std::pair<double, int> > result;
+  
+  //First slice position
+  double sliceEdge = res;
+  double lastPos = 0.;
+  double nextPos = 0.;
+  double px,py,pz; 
+  int interactInSlice = 0;
+
+  //Get total distance traveled in z
+  double totalDeltaZ = 0.;
+  double disp = 0.;
+  double oldDisp = 0.;
+  int crossedSlices = 0; 
+
+  int currentSlice = 0;
+  int oldSlice = 0;
+
+  double sliceEnergy = Energy;
+  for(size_t is = 0; is < GetNSteps(); ++is){
+    auto theStep = GetStep(is);
+
+    disp += theStep->deltaZ;
+    currentSlice = floor(disp/res);
+    
+    std::string theProc = theStep->stepChosenProc; 
+    
+    //Check to see if in a new slice and it's not the end
+    if( oldSlice != currentSlice && is < GetNSteps() - 1){ 
+
+
+      //Save Interaction info of the prev slice
+      //and reset
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+      interactInSlice = 0;
+
+      //Update the energy
+      sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+      if( sliceEnergy - 139.57 < 0.){
+        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        sliceEnergy = 0.0001;
+      }    
+      //If it's more than 1 slice, add in non-interacting slices
+      for(int ic = 1; ic < abs( oldSlice - currentSlice ); ++ic){
+
+        result.push_back( std::make_pair(sliceEnergy, 0.) );
+
+        //Update the energy again
+        sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+        if( sliceEnergy - 139.57 < 0.){
+          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          sliceEnergy = 0.0001;
+        }
+      }      
+      
+      if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;      
+    }
+    //It's crossed a slice and it's the last step. Save both info
+    else if( oldSlice != currentSlice && is == GetNSteps() - 1 ){
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+      interactInSlice = 0;
+      
+      //Update the energy
+      sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+      if( sliceEnergy - 139.57 < 0.){
+        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        sliceEnergy = 0.0001;
+      }
+      //If it's more than 1 slice, add in non-interacting slices
+      for(int ic = 1; ic < abs( oldSlice - currentSlice ); ++ic){
+
+        result.push_back( std::make_pair(sliceEnergy, 0.) );
+
+        //Update the energy again
+        sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+        if( sliceEnergy - 139.57 < 0.){
+          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          sliceEnergy = 0.0001;
+        }
+      }
+      
+      //Save the last slice
+      if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+    }
+    //It's the end, so just save this last info
+    else if( oldSlice == currentSlice && is == GetNSteps() - 1 ){
+      if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+    }
+    //Same slice, not the end. Check for interactions
+    else{
+      if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;
+    }
+
+    //Update oldslice
+    oldSlice = currentSlice;
+  }
+
+/*
+  std::cout << "totalDeltaZ: " << totalDeltaZ << std::endl;
+  //Use this to determine how many slices have been crossed
+  int nSlices = ceil(totalDeltaZ/res);
+  std::cout << "slices: " << nSlices << std::endl;
+  //Fill initial vectors
+  double sliceEnergy = Energy; //Initial energy of track
+//  std::cout << "Total Dist: " << totalDeltaZ << " Res: " << res << std::endl;
+//  std::cout << "nSlices: " << nSlices << std::endl;
+  for(int iSlice = 0; iSlice < nSlices; ++iSlice){
+    std::cout << iSlice << std::endl;
+    result.push_back( std::make_pair(sliceEnergy, 0) );
+    std::cout << "Made pair" << std::endl;
+    sliceEnergy = sliceEnergy - BetheBloch(sliceEnergy) * res;
+  }
+
+  //Find where interactions occured
+  int currentSlice, oldSlice;
+  double currentDeltaZ;
+  for(size_t is = 0; is < GetNSteps(); ++is){
+
+    auto theStep = GetStep(is);
+    currentDeltaZ += theStep->deltaZ;
+   
+    //Use floor to use this as index 
+    //Of the vectors
+    currentSlice = floor(currentDeltaZ/res);
+//    std::cout << currentSlice <<" ";
+    std::cout << "Step " << is << " slice: " << currentSlice << std::endl;
+    
+    std::string theProc = theStep->stepChosenProc; 
+    if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ){     
+      result[currentSlice].second++;
+    }
+
+  }*/
+//  std::cout << std::endl;
+
+
+  return result;
+}
+
+double G4ReweightTraj::BetheBloch(double energy){
+  
+  double K = .307075;   
+  double rho = 1.390; 
+  double Z = 18;
+  double A = 40;
+  double I = 188E-6;
+  double mass = 139.57;
+  double me = .511;
+  //Need to make sure this is total energy, not KE
+  double gamma = energy/mass;
+  double beta = sqrt( 1. - (1. / (gamma*gamma)) );  double Tmax = 2 * me * beta*beta * gamma*gamma;
+
+
+
+  double first = K * (Z/A) * rho / (beta*beta);
+  double second = .5 * log(Tmax*Tmax/(I*I)) - beta*beta;
+
+  double dEdX = first*second;
+  return dEdX;  
+}
+
 std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethodInelastic(double res){
 
   std::vector< std::pair<double, int> > result;

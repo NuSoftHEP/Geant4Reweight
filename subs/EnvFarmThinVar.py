@@ -15,6 +15,7 @@ def init_parser():
   parser.add_argument('-m', type=str, help='Memory Limit')
   parser.add_argument('-o', type=str, help='Name of makeup file list')
   parser.add_argument('-b', type=str, help='Batch File')
+  parser.add_argument('--name', type=str, help='Name of submission')
   return parser
 
 def check_samples(samples, samp):
@@ -53,7 +54,7 @@ for var in variations:
           jobid = (line.split(":")[1]).strip(" ")
         if "job(s)" in line:
           nJobs = (line.split(" ")[0]).strip(" ")
-      theSub = "Thin_"+sample+"_var"
+      theSub = args.name 
       print theSub 
       print "Found jobid:", jobid
       print "nJobs: ", nJobs
@@ -65,7 +66,7 @@ for var in variations:
       for i in range(0,int(nJobs)):
         jobid_end_num = int(jobid_pre[-1]) + i 
         new_jobid = jobid_pre[0:-1] + str(jobid_end_num)
-        builder.start("Job", {"ID": "new_jobid" , "N":str(i)})
+        builder.start("Job", {"ID": new_jobid , "N":str(i)})
         builder.end("Job")
       builder.end("Sub")
     else: print "Error\n", stderr            

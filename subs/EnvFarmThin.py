@@ -13,6 +13,7 @@ def init_parser():
   parser.add_argument('-m', type=str, help='Memory Limit')
   parser.add_argument('-o', type=str, help='Name of makeup file list')
   parser.add_argument('-b', type=str, help='Batch File')
+  parser.add_argument('--name', type=str, help='Name of submission')
   return parser
 
 def check_samples(samples, samp):
@@ -49,7 +50,7 @@ for sample in samples:
         jobid = (line.split(":")[1]).strip(" ")
       if "job(s)" in line:
         nJobs = (line.split(" ")[0]).strip(" ")
-    theSub = "Thin_"+sample+"_nom"
+    theSub = args.name 
     print theSub 
     print "Found jobid:", jobid
     print "nJobs: ", nJobs

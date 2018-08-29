@@ -435,45 +435,6 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
     oldSlice = currentSlice;
   }
 
-/*
-  std::cout << "totalDeltaZ: " << totalDeltaZ << std::endl;
-  //Use this to determine how many slices have been crossed
-  int nSlices = ceil(totalDeltaZ/res);
-  std::cout << "slices: " << nSlices << std::endl;
-  //Fill initial vectors
-  double sliceEnergy = Energy; //Initial energy of track
-//  std::cout << "Total Dist: " << totalDeltaZ << " Res: " << res << std::endl;
-//  std::cout << "nSlices: " << nSlices << std::endl;
-  for(int iSlice = 0; iSlice < nSlices; ++iSlice){
-    std::cout << iSlice << std::endl;
-    result.push_back( std::make_pair(sliceEnergy, 0) );
-    std::cout << "Made pair" << std::endl;
-    sliceEnergy = sliceEnergy - BetheBloch(sliceEnergy) * res;
-  }
-
-  //Find where interactions occured
-  int currentSlice, oldSlice;
-  double currentDeltaZ;
-  for(size_t is = 0; is < GetNSteps(); ++is){
-
-    auto theStep = GetStep(is);
-    currentDeltaZ += theStep->deltaZ;
-   
-    //Use floor to use this as index 
-    //Of the vectors
-    currentSlice = floor(currentDeltaZ/res);
-//    std::cout << currentSlice <<" ";
-    std::cout << "Step " << is << " slice: " << currentSlice << std::endl;
-    
-    std::string theProc = theStep->stepChosenProc; 
-    if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ){     
-      result[currentSlice].second++;
-    }
-
-  }*/
-//  std::cout << std::endl;
-
-
   return result;
 }
 
@@ -489,8 +450,6 @@ double G4ReweightTraj::BetheBloch(double energy){
   //Need to make sure this is total energy, not KE
   double gamma = energy/mass;
   double beta = sqrt( 1. - (1. / (gamma*gamma)) );  double Tmax = 2 * me * beta*beta * gamma*gamma;
-
-
 
   double first = K * (Z/A) * rho / (beta*beta);
   double second = .5 * log(Tmax*Tmax/(I*I)) - beta*beta;

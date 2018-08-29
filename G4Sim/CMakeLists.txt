@@ -60,6 +60,13 @@ else()
   target_link_libraries(G4Thin ${Geant4_LIBRARIES})
 endif()
 
+add_executable(G4WatAr G4WatAr.cc ${sources} ${headers})
+if(ROOT_FOUND)
+  target_link_libraries(G4WatAr ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+else()
+  target_link_libraries(G4WatAr ${Geant4_LIBRARIES})
+endif()
+
 add_executable(G4Engine G4Engine.cc ${sources} ${headers})
 if(ROOT_FOUND)
   target_link_libraries(G4Engine ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})

@@ -34,7 +34,13 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   auto prestep = step->GetPreStepPoint(); 
   auto poststep = step->GetPostStepPoint(); 
 
-//  std::cout << prestep->GetMaterial() << " "<< poststep->GetMaterial() << std::endl;
+/*  if(prestep->GetMaterial()){
+    std::cout << prestep->GetMaterial()->GetName() << " " << prestep->GetPosition().getZ() << " ";
+  }
+  if(poststep->GetMaterial()){
+    std::cout << poststep->GetMaterial()->GetName() << " " << prestep->GetPosition().getZ(); 
+  }
+  std::cout << std::endl;*/
 //  MyTreeBuffer->preStepMat->push_back( prestep->GetMaterial()->GetName()) ;
 //  MyTreeBuffer->postStepMat->push_back( poststep->GetMaterial()->GetName());
 

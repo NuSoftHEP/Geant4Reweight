@@ -52,10 +52,13 @@ if (args.cmd == "Draw" or args.cmd == "draw"):
   xsec_total_n.SetMarkerStyle(20) 
   xsec_total_w.SetMarkerStyle(21)
   xsec_total_v.SetMarkerStyle(22)
+  xsec_total_n.SetMarkerSize(.4) 
+  xsec_total_w.SetMarkerSize(.4)
+  xsec_total_v.SetMarkerSize(.4)
 
-  xsec_total_n.SetTitle(xsec_total_n.GetTitle() + " - Total")
-  xsec_total_w.SetTitle(xsec_total_w.GetTitle() + " - Total")
-  xsec_total_v.SetTitle(xsec_total_v.GetTitle() + " - Total")
+  xsec_total_n.SetTitle(xsec_total_n.GetTitle() + " - LAr Slice Total XSec")
+  xsec_total_w.SetTitle(xsec_total_w.GetTitle() + " - LAr Slice Total XSec")
+  xsec_total_v.SetTitle(xsec_total_v.GetTitle() + " - LAr Slice Total XSec")
 
   reactive_data = inFile.Get("data")
   reactive_data.SetMarkerStyle(27)
@@ -81,6 +84,35 @@ if (args.cmd == "Draw" or args.cmd == "draw"):
 #  total_leg.SetTextFont()
 #  total_leg.Draw("same")
   c1.SaveAs("total_"+args.plot)
+
+elif (args.cmd == "ratio" or args.cmd == "Ratio"):
+
+  inFile = TFile(args.f, "READ") 
+
+  xsec_total_w = inFile.Get("wr")  
+  xsec_total_v = inFile.Get("vr")  
+
+  total_ratio = xsec_total_w.Clone()
+
+  total_ratio.Divide(xsec_total_v)  
+
+  total_ratio.SetMinimum(.9)
+  total_ratio.SetMaximum(1.1)
+
+  total_ratio.Fit("pol1")
+
+  c1 = TCanvas()
+  total_ratio.Draw("p")
+
+  f = TF1("line", "1", 0, 900.)
+  f.SetLineColor(1)
+  f.Draw("same")
+
+  #leg = TLegend(.55,.7,.9,.9)
+  #leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+  #leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
+  #leg.Draw("same")
+  c1.SaveAs(args.plot)
 
 else:  
   samps = [s for s in (args.samps).split(",")]

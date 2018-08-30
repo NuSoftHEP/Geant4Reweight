@@ -347,7 +347,7 @@ else:
   leg.AddEntry(finalNReactive,"Nominal","p")
   leg.AddEntry(finalWReactive,"Weighted","p")
   leg.AddEntry(finalVReactive,"Varied","p")
-  leg.AddEntry(data,"Nutini","p")
+  leg.AddEntry(data,"Validation","p")
   leg.Write()
 
 
@@ -357,5 +357,5 @@ else:
   leg.AddEntry(finalNTotal,"Nominal","p")
   leg.AddEntry(finalWTotal,"Weighted","p")
   leg.AddEntry(finalVTotal,"Varied","p")
-  leg.AddEntry(total_data,"Nutini","p")
+  leg.AddEntry(total_data,"Validation","p")
   leg.Write()

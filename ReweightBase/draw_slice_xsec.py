@@ -39,6 +39,8 @@ def ratio_scale_errors(n, d, scale, name="r"):
 
   return r
 
+gStyle.SetPadTickX(1)
+gStyle.SetPadTickY(1)
 
 args = init_parser().parse_args()
 if (args.cmd == "Draw" or args.cmd == "draw"):
@@ -67,7 +69,12 @@ if (args.cmd == "Draw" or args.cmd == "draw"):
 
   total_chi2 = str(total_result[0]/total_result[1])[0:4]
 
-#  total_leg = inFile.Get("total_leg")
+  leg = TLegend(.55,.7,.9,.9)  
+  leg.AddEntry(xsec_total_n, "Nominal", "lp")
+  leg.AddEntry(xsec_total_w, "Weighted", "lp")
+  leg.AddEntry(xsec_total_v, "Varied", "lp")
+  leg.AddEntry(total_data, "Validation", "p")
+
 #  total_leg.AddEntry(None, "#chi^{2}/DOF = " + (total_chi2) )
 
   c1 = TCanvas()
@@ -80,6 +87,7 @@ if (args.cmd == "Draw" or args.cmd == "draw"):
   xsec_total_w.Draw("pE same")
   xsec_total_n.Draw("pE same")
   total_data.Draw("p same")
+  leg.Draw("same")
 #  reactive_data.Draw("p same")
 #  total_leg.SetTextFont()
 #  total_leg.Draw("same")
@@ -216,10 +224,10 @@ else:
   #print chi2_result[0]/chi2_result[1]
   vr.SetTitle("#sigma_{inel}x" + args.i + ", #sigma_{el}x" +args.e)
   vr.SetXTitle("Pion Kinetic Energy (MeV)")
-  vr.SetYTitle("XSec (cm^{2})")
+  vr.SetYTitle("#sigma (barn)")
   wr.SetTitle("#sigma_{inel}x" + args.i + ", #sigma_{el}x" +args.e)
   wr.SetXTitle("Pion Kinetic Energy (MeV)")
-  wr.SetYTitle("XSec (cm^{2})")
+  wr.SetYTitle("#sigma (barn)")
   #wr.SetLineColor(2)
   #vr.SetLineColor(1)
   drawStyle(nr,wr,vr)

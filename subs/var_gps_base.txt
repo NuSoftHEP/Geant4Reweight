@@ -2,6 +2,7 @@
 
 source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
 setup ifdhc 
+export IFDH_CP_MAXRETRIES=2
 echo "setup"
 
 MYDIR=/dune/app/users/calcuttj/
@@ -53,14 +54,14 @@ source geant4.sh
 
 cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
 
-./G4Sim -c ${_CONDOR_SCRATCH_DIR}/code/macros/macros/gps_var_${PROCESS}.mac -o gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -i ${INEL} -e ${ELAST}
+./${EXE} -c ${_CONDOR_SCRATCH_DIR}/code/macros/macros/gps_var_${PROCESS}.mac -o ${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -i ${INEL} -e ${ELAST}
 
 ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/
 
-ifdh cp gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root 
+ifdh cp ${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root 
 
 cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
 
-./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -o rw_gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -i 1. -e 1. 
-ifdh cp rw_gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_gps_var_inel${INEL}_elast${ELAST}_${PROCESS}.root
+./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -o rw_${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root -i 1. -e 1. 
+ifdh cp rw_${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_var_inel${INEL}_elast${ELAST}_${PROCESS}.root
 

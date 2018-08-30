@@ -14,6 +14,7 @@ def init_parser():
   parser.add_argument('-o', type=str, help='Name of makeup file list')
   parser.add_argument('-b', type=str, help='Batch File')
   parser.add_argument('--name', type=str, help='Name of submission')
+  parser.add_argument('--exe', type=str, help='Which executable')
   return parser
 
 def check_samples(samples, samp):
@@ -30,6 +31,7 @@ samples = samples.split(",")
 timeout = args.t
 memory = args.m
 batch = args.b
+exe = args.exe
 
 builder = TreeBuilder()
 builder.start("Jobs",{})
@@ -40,8 +42,10 @@ builder.start("Jobs",{})
 for sample in samples:
   my_env = environ
   my_env["SAMPLE"] = sample 
+  my_env["EXE"] = exe
+  my_env["NAME"] = args.name
   print "Sending sample", sample
-  command = ["jobsub_submit","-N","5","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC", "-e", "SAMPLE", "file:///dune/app/users/calcuttj/geant/GeantReweight/subs/" + batch]
+  command = ["jobsub_submit","-N","5","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC", "-e", "SAMPLE", "-e", "NAME", "-e", "EXE", "file:///dune/app/users/calcuttj/geant/GeantReweight/subs/" + batch]
   p = Popen(command, env = my_env, stdout=PIPE, stderr=PIPE)
   stdout, stderr = p.communicate()
   if not stderr: 

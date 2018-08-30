@@ -38,7 +38,7 @@ for sub in theXML.findall('Sub'):
     if not (theInel == variations[0] and theElast == variations[1]): 
       continue
 
-  fileName = theSub + "_inel" + variations[0] + "_elast" + variations[1] +"_"
+  fileName = theSub + "_" + theType  + "_inel" + variations[0] + "_elast" + variations[1] +"_"
   print fileName
 #  out.write(fileName + " ")
 
@@ -48,10 +48,10 @@ for sub in theXML.findall('Sub'):
     print job.get('ID'), job.get('N')
     theID = job.get('ID')
     theN = job.get('N')   
-    #print folder + "/" + theID + "/" + fileName + theN + ".root"
+    print folder + "/" + theID + "/" + fileName + theN + ".root"
 #    if(theN > args.limit - 1): continue
-    files = ls(folder + "/" + theID + "/" + fileName + theN + ".root")
-    #print files    
+    files = ls(folder + "/" + theID + "/rw_"  + fileName + theN + ".root")
+    print files    
     if len(files) > 0:
       #out.write(files[0] + " ")
       command.append(files[0])

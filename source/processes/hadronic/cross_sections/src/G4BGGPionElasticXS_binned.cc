@@ -40,7 +40,7 @@
 // -------------------------------------------------------------------
 //
 
-#include "G4BGGPionElasticXS.hh"
+#include "G4BGGPionElasticXS_binned.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4ComponentGGHadronNucleusXsc.hh"
 #include "G4UPiNuclearCrossSection.hh"
@@ -53,8 +53,8 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4BGGPionElasticXS::G4BGGPionElasticXS(const G4ParticleDefinition*) 
- : G4VCrossSectionDataSet("Barashenkov-Glauber") 
+G4BGGPionElasticXS_binned::G4BGGPionElasticXS_binned(const G4ParticleDefinition*, G4ReweightHist * bias_hist) 
+ : G4VCrossSectionDataSet("Barashenkov-Glauber"), theBias(bias_hist) 
 {
   verboseLevel = 0;
   fGlauberEnergy = 91.*GeV;
@@ -80,7 +80,7 @@ G4BGGPionElasticXS::G4BGGPionElasticXS(const G4ParticleDefinition*)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4BGGPionElasticXS::~G4BGGPionElasticXS()
+G4BGGPionElasticXS_binned::~G4BGGPionElasticXS_binned()
 {
   delete fSAID;
   delete fHadron;
@@ -91,7 +91,7 @@ G4BGGPionElasticXS::~G4BGGPionElasticXS()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4bool 
-G4BGGPionElasticXS::IsElementApplicable(const G4DynamicParticle*, G4int,
+G4BGGPionElasticXS_binned::IsElementApplicable(const G4DynamicParticle*, G4int,
 					   const G4Material*)
 {
   return true;
@@ -99,7 +99,7 @@ G4BGGPionElasticXS::IsElementApplicable(const G4DynamicParticle*, G4int,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4bool G4BGGPionElasticXS::IsIsoApplicable(const G4DynamicParticle*, 
+G4bool G4BGGPionElasticXS_binned::IsIsoApplicable(const G4DynamicParticle*, 
 					      G4int Z, G4int A,  
 					      const G4Element*,
 					      const G4Material*)
@@ -110,7 +110,7 @@ G4bool G4BGGPionElasticXS::IsIsoApplicable(const G4DynamicParticle*,
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4double
-G4BGGPionElasticXS::GetElementCrossSection(const G4DynamicParticle* dp,
+G4BGGPionElasticXS_binned::GetElementCrossSection(const G4DynamicParticle* dp,
 					   G4int ZZ, const G4Material*)
 {
   // this method should be called only for Z > 1
@@ -132,7 +132,7 @@ G4BGGPionElasticXS::GetElementCrossSection(const G4DynamicParticle* dp,
     }
   }
   if(verboseLevel > 1) {
-    G4cout << "G4BGGPionElasticXS::GetElementCrossSection  for "
+    G4cout << "G4BGGPionElasticXS_binned::GetElementCrossSection  for "
 	   << dp->GetDefinition()->GetParticleName()
 	   << "  Ekin(GeV)= " << dp->GetKineticEnergy()
 	   << " in nucleus Z= " << Z << "  A= " << theA[Z]
@@ -140,12 +140,22 @@ G4BGGPionElasticXS::GetElementCrossSection(const G4DynamicParticle* dp,
 	   << G4endl;
   }
   //G4cout << "Returning cross" << G4endl;
+  //G4cout << "Bias: " << theBias << G4endl;
   //return cross;
-  return cross;
+  
+  G4double momentum = dp->GetTotalMomentum();
+  int theBin = theBias->FindBin(momentum);
+//  if( theBin < theBias->GetNbinsX() || theBin > theBias->GetNbinsX() ){
+  if( theBin == -1 ){ 
+    std::cout << "Out of momentum range. Should scale by x1" << std::endl
+              << theBias->GetBinContent( theBin )             << std::endl;
+  }
+  
+  return theBias->GetBinContent( theBin )*cross;
 }
 
 G4double
-G4BGGPionElasticXS::GetIsoCrossSection(const G4DynamicParticle* dp, 
+G4BGGPionElasticXS_binned::GetIsoCrossSection(const G4DynamicParticle* dp, 
 				       G4int Z, G4int A, 
 				       const G4Isotope*,
 				       const G4Element*,
@@ -178,7 +188,7 @@ G4BGGPionElasticXS::GetIsoCrossSection(const G4DynamicParticle* dp,
   }
   */
   if(verboseLevel > 1) {
-    G4cout << "G4BGGPionElasticXS::GetIsoCrossSection  for "
+    G4cout << "G4BGGPionElasticXS_binned::GetIsoCrossSection  for "
 	   << dp->GetDefinition()->GetParticleName()
 	   << "  Ekin(GeV)= " << dp->GetKineticEnergy()
 	   << " in nucleus Z= " << Z << "  A= " << A
@@ -190,7 +200,7 @@ G4BGGPionElasticXS::GetIsoCrossSection(const G4DynamicParticle* dp,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void G4BGGPionElasticXS::BuildPhysicsTable(const G4ParticleDefinition& p)
+void G4BGGPionElasticXS_binned::BuildPhysicsTable(const G4ParticleDefinition& p)
 {
 
   G4cout << "BUILT BGG TABLE" << G4endl;
@@ -198,11 +208,11 @@ void G4BGGPionElasticXS::BuildPhysicsTable(const G4ParticleDefinition& p)
   if(&p == G4PionPlus::PionPlus() || &p == G4PionMinus::PionMinus()) {
     particle = &p;
   } else {
-    G4cout << "### G4BGGPionElasticXS WARNING: is not applicable to " 
+    G4cout << "### G4BGGPionElasticXS_binned WARNING: is not applicable to " 
 	   << p.GetParticleName()
 	   << G4endl;
     throw G4HadronicException(__FILE__, __LINE__,
-	  "G4BGGPionElasticXS::BuildPhysicsTable is used for wrong particle");
+	  "G4BGGPionElasticXS_binned::BuildPhysicsTable is used for wrong particle");
     return;
   }
 
@@ -228,7 +238,7 @@ void G4BGGPionElasticXS::BuildPhysicsTable(const G4ParticleDefinition& p)
   G4int A;
 
   if(verboseLevel > 0) {
-    G4cout << "### G4BGGPionElasticXS::Initialise for "
+    G4cout << "### G4BGGPionElasticXS_binned::Initialise for "
 	   << particle->GetParticleName() << G4endl;
   }
   for(G4int iz=2; iz<93; iz++) {
@@ -267,7 +277,7 @@ void G4BGGPionElasticXS::BuildPhysicsTable(const G4ParticleDefinition& p)
 }
 
 void
-G4BGGPionElasticXS::CrossSectionDescription(std::ostream& outFile) const 
+G4BGGPionElasticXS_binned::CrossSectionDescription(std::ostream& outFile) const 
 {
   outFile << "The Barashenkov-Glauber-Gribov cross section handles elastic\n"
           << "scattering of pions from nuclei at all energies. The\n"

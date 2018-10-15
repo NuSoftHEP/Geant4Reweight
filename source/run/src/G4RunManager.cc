@@ -261,6 +261,7 @@ void G4RunManager::DeleteUserInitializations()
 
 void G4RunManager::BeamOn(G4int n_event,const char* macroFile,G4int n_select)
 {
+  G4cout << "BEAM ON " << G4endl;
   if(n_event<=0) { fakeRun = true; }
   else { fakeRun = false; }
   G4bool cond = ConfirmBeamOnCondition();
@@ -268,8 +269,11 @@ void G4RunManager::BeamOn(G4int n_event,const char* macroFile,G4int n_select)
   {
     numberOfEventToBeProcessed = n_event;
     numberOfEventProcessed = 0;
+    G4cout <<"construct" << G4endl;
     ConstructScoringWorlds();
+    G4cout <<"runinit" << G4endl;
     RunInitialization();
+    G4cout <<"doeventloop" << G4endl;
     DoEventLoop(n_event,macroFile,n_select);
     RunTermination();
   }

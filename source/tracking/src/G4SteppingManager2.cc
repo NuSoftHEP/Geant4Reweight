@@ -176,11 +176,12 @@ void G4SteppingManager::GetProcessNumber()
        continue;
      }   // NULL means the process is inactivated by a user on fly.
 
+     //G4cout << "GPIL" << G4endl;
      physIntLength = fCurrentProcess->
                      PostStepGPIL( *fTrack,
                                    fPreviousStepSize,
                                    &fCondition );
-     
+     //G4cout << "MFP" << G4endl; 
      double MFP = fCurrentProcess->GetMFP( *fTrack,
                                            fPreviousStepSize,
                                            &fCondition );

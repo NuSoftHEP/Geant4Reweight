@@ -104,6 +104,8 @@ GEANT4_DEFINE_MODULE(NAME G4phys_builders
         G4BertiniNeutronBuilder.hh
         G4BertiniPiKBuilder.hh
         G4BertiniPionBuilder.hh
+        G4BertiniPionBuilder_bias.hh
+        G4BertiniPionBuilder_binned.hh
         G4BertiniProtonBuilder.hh
         G4BinaryNeutronBuilder.hh
         G4BinaryPiKBuilder.hh
@@ -121,6 +123,8 @@ GEANT4_DEFINE_MODULE(NAME G4phys_builders
         G4FTFPNeutronBuilder.hh
         G4FTFPPiKBuilder.hh
         G4FTFPPionBuilder.hh
+        G4FTFPPionBuilder_bias.hh
+        G4FTFPPionBuilder_binned.hh
         G4FTFPProtonBuilder.hh
         G4HyperonFTFPBuilder.hh
         G4INCLXXNeutronBuilder.hh
@@ -180,6 +184,8 @@ GEANT4_DEFINE_MODULE(NAME G4phys_builders
         G4BertiniNeutronBuilder.cc
         G4BertiniPiKBuilder.cc
         G4BertiniPionBuilder.cc
+        G4BertiniPionBuilder_bias.cc
+        G4BertiniPionBuilder_binned.cc
         G4BertiniProtonBuilder.cc
         G4BinaryNeutronBuilder.cc
         G4BinaryPiKBuilder.cc
@@ -196,6 +202,8 @@ GEANT4_DEFINE_MODULE(NAME G4phys_builders
         G4FTFPNeutronBuilder.cc
         G4FTFPPiKBuilder.cc
         G4FTFPPionBuilder.cc
+        G4FTFPPionBuilder_bias.cc
+        G4FTFPPionBuilder_binned.cc
         G4FTFPProtonBuilder.cc
         G4HyperonFTFPBuilder.cc
         G4INCLXXNeutronBuilder.cc

@@ -37,6 +37,9 @@ include_directories(${CMAKE_SOURCE_DIR}/source/processes/hadronic/util/include)
 include_directories(${CMAKE_SOURCE_DIR}/source/processes/management/include)
 include_directories(${CMAKE_SOURCE_DIR}/source/track/include)
 
+#new
+include_directories(${CMAKE_SOURCE_DIR}/source/physics_lists/util/include)
+
 #
 # Define the Geant4 Module.
 #
@@ -46,6 +49,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4BGGNucleonElasticXS.hh
 	G4BGGNucleonInelasticXS.hh
 	G4BGGPionElasticXS.hh
+	G4BGGPionElasticXS_bias.hh
+	G4BGGPionElasticXS_binned.hh
 	G4BGGPionInelasticXS.hh
 	G4ChipsAntiBaryonElasticXS.hh
 	G4ChipsAntiBaryonInelasticXS.hh
@@ -77,6 +82,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4CrossSectionFactory.hh
 	G4CrossSectionInelastic.hh
 	G4CrossSectionPairGG.hh
+	G4CrossSectionPairGG_bias.hh
+	G4CrossSectionPairGG_binned.hh
 	G4ElectroNuclearCrossSection.hh
         G4DiffElasticRatio.hh
 	G4EMDissociationCrossSection.hh
@@ -101,6 +108,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4PhotoNuclearCrossSection.hh
 	G4PiData.hh
 	G4PiNuclearCrossSection.hh
+	G4PiNuclearCrossSection_bias.hh
+	G4PiNuclearCrossSection_binned.hh
 	G4ProjectileFragmentCrossSection.hh
 	G4ProtonInelasticCrossSection.hh
 	G4TripathiCrossSection.hh
@@ -116,6 +125,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4BGGNucleonElasticXS.cc
 	G4BGGNucleonInelasticXS.cc
 	G4BGGPionElasticXS.cc
+	G4BGGPionElasticXS_bias.cc
+	G4BGGPionElasticXS_binned.cc
 	G4BGGPionInelasticXS.cc
 	G4ChipsAntiBaryonElasticXS.cc
 	G4ChipsAntiBaryonInelasticXS.cc
@@ -146,6 +157,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4CrossSectionElastic.cc
 	G4CrossSectionInelastic.cc
 	G4CrossSectionPairGG.cc
+	G4CrossSectionPairGG_bias.cc
+	G4CrossSectionPairGG_binned.cc
         G4DiffElasticRatio.cc
 	G4ElectroNuclearCrossSection.cc
 	G4EMDissociationCrossSection.cc
@@ -170,6 +183,8 @@ GEANT4_DEFINE_MODULE(NAME G4hadronic_xsect
 	G4PhotoNuclearCrossSection.cc
 	G4PiData.cc
 	G4PiNuclearCrossSection.cc
+	G4PiNuclearCrossSection_bias.cc
+	G4PiNuclearCrossSection_binned.cc
 	G4ProtonInelasticCrossSection.cc
 	G4TripathiCrossSection.cc
 	G4TripathiLightCrossSection.cc

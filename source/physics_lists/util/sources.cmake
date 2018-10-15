@@ -99,9 +99,11 @@ GEANT4_DEFINE_MODULE(NAME G4physlist_util
 	CompileTimeConstraints.hh
 	G4DataQuestionaire.hh
 	G4PhysListUtil.hh
+	G4ReweightHist.hh
 	G4WarnPLStatus.hh
     SOURCES
 	G4PhysListUtil.cc
+	G4ReweightHist.cc
 	G4WarnPLStatus.cc
     GRANULAR_DEPENDENCIES
         G4baryons

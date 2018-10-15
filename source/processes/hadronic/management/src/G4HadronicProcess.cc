@@ -229,11 +229,13 @@ GetMeanFreePath(const G4Track &aTrack, G4double, G4ForceCondition *)
 {
   //G4cout << "GetMeanFreePath " << aTrack.GetDefinition()->GetParticleName()
   //	 << " Ekin= " << aTrack.GetKineticEnergy() << G4endl;
+  //G4cout << this->GetProcessName() << G4endl; 
   try
   {
     theLastCrossSection = aScaleFactor*
       theCrossSectionDataStore->GetCrossSection(aTrack.GetDynamicParticle(),
 						aTrack.GetMaterial());
+    //G4cout << "xsec: " << theLastCrossSection/aScaleFactor << G4endl;
   }
   catch(G4HadronicException aR)
   {
@@ -244,7 +246,8 @@ GetMeanFreePath(const G4Track &aTrack, G4double, G4ForceCondition *)
     G4Exception("G4HadronicProcess::GetMeanFreePath", "had002", FatalException,
 		ed);
   }
-  G4double res = (theLastCrossSection > 0.0) ? 1.0/theLastCrossSection : DBL_MAX;
+  //G4double res = (theLastCrossSection > 0.0) ? 1.0/(1.5*theLastCrossSection) : DBL_MAX;
+  G4double res = (theLastCrossSection > 0.0) ? 1.0/(theLastCrossSection) : DBL_MAX;
   //G4cout << "         xsection= " << res << G4endl;
   return res;
 }

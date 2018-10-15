@@ -23,10 +23,10 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: G4CrossSectionPairGG.cc 94961 2016-01-08 16:31:48Z gcosmo $
+// $Id: G4CrossSectionPairGG_binned.cc 94961 2016-01-08 16:31:48Z gcosmo $
 // $ GEANT4 tag $Name: not supported by cvs2svn $
 //
-//   Class G4CrossSectionPairGG
+//   Class G4CrossSectionPairGG_binned
 //
 //     smoothly join two cross section sets by scaling the second at a given 
 //       transition energy to match the first.
@@ -35,8 +35,8 @@
 //           November 2009
 //
 
-#include "G4CrossSectionPairGG.hh"
-
+#include "G4CrossSectionPairGG_binned.hh"
+#include "G4VCrossSectionDataSet.hh"
 #include "globals.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
@@ -47,23 +47,27 @@
 #include "G4ComponentGGHadronNucleusXsc.hh"
 
 
-G4CrossSectionPairGG::G4CrossSectionPairGG(G4VCrossSectionDataSet* low,
+G4CrossSectionPairGG_binned::G4CrossSectionPairGG_binned(G4PiNuclearCrossSection_binned* low,
       G4double Etransit) :
-      G4VCrossSectionDataSet("G4CrossSectionPairGG"), theLowX(low), ETransition(
+      G4VCrossSectionDataSet("G4CrossSectionPairGG_binned"), theLowX(low), ETransition(
             Etransit) {
    NistMan = G4NistManager::Instance();
    theHighX = new G4ComponentGGHadronNucleusXsc();
    verboseLevel = 0;
 }
 
-G4CrossSectionPairGG::~G4CrossSectionPairGG() {
+G4CrossSectionPairGG_binned::~G4CrossSectionPairGG_binned() {
    delete theHighX;
    // The cross section registry will delete theLowX
 }
 
-void G4CrossSectionPairGG::CrossSectionDescription(
+void G4CrossSectionPairGG_binned::SetBias(G4ReweightHist * bias_hist){
+  theLowX->SetBias(bias_hist);
+}
+
+void G4CrossSectionPairGG_binned::CrossSectionDescription(
       std::ostream& outFile) const {
-   outFile << "G4CrossSectionPairGG is used to add the relativistic rise to\n"
+   outFile << "G4CrossSectionPairGG_binned is used to add the relativistic rise to\n"
          << "hadronic cross section data sets above a given energy.  In this\n"
          << "case, the Glauber-Gribov cross section is used above 91 GeV.\n"
          << "At this energy the low energy cross section is smoothly joined\n"
@@ -74,7 +78,7 @@ void G4CrossSectionPairGG::CrossSectionDescription(
          << "section is used for neutrons (G4NeutronInelasticCrossSection).\n";
 }
 
-G4bool G4CrossSectionPairGG::IsElementApplicable(
+G4bool G4CrossSectionPairGG_binned::IsElementApplicable(
       const G4DynamicParticle* aParticle, G4int Z, const G4Material* mat) {
    G4bool isApplicable(false);
    G4double Ekin = aParticle->GetKineticEnergy();
@@ -86,10 +90,10 @@ G4bool G4CrossSectionPairGG::IsElementApplicable(
    return isApplicable;
 }
 
-G4double G4CrossSectionPairGG::GetElementCrossSection(
+G4double G4CrossSectionPairGG_binned::GetElementCrossSection(
       const G4DynamicParticle* aParticle, G4int ZZ, const G4Material* mat)
 {
-   G4cout << "GG XSEC" << G4endl;
+//   G4cout << "GG_binned XSEC" << G4endl;
    G4double Xsec(0.);
 
    if (aParticle->GetKineticEnergy() < ETransition)
@@ -126,13 +130,13 @@ G4double G4CrossSectionPairGG::GetElementCrossSection(
    return Xsec;
 }
 
-void G4CrossSectionPairGG::BuildPhysicsTable(const G4ParticleDefinition& pDef) {
-G4cout << "BGG TBALLEEEEE" << G4endl; 
+void G4CrossSectionPairGG_binned::BuildPhysicsTable(const G4ParticleDefinition& pDef) {
+G4cout << "BGG_binned TBALLEEEEE" << G4endl; 
    theLowX->BuildPhysicsTable(pDef);
    theHighX->BuildPhysicsTable(pDef);
 
    if (verboseLevel > 0) {
-      G4cout << "G4CrossSectionPairGG::BuildPhysicsTable "
+      G4cout << "G4CrossSectionPairGG_binned::BuildPhysicsTable "
             << theLowX->GetName() << "  " << theHighX->GetName() << G4endl;
    }
 
@@ -154,7 +158,7 @@ G4cout << "BGG TBALLEEEEE" << G4endl;
       G4DynamicParticle DynPart(myDef, mom, ETransition); // last is kinetic Energy
 
       if (verboseLevel > 0) {
-         G4cout << "G4CrossSectionPairGG::BuildPhysicsTable for particle "
+         G4cout << "G4CrossSectionPairGG_binned::BuildPhysicsTable for particle "
                << pDef.GetParticleName() << G4endl;
       }
       for (G4int aZ = 1; aZ < 93; ++aZ) {
@@ -191,18 +195,9 @@ G4cout << "BGG TBALLEEEEE" << G4endl;
    }
 }
 
-/*
- void G4CrossSectionPairGG::DumpHtml(const G4ParticleDefinition&,
- std::ofstream outFile)
- {
- outFile << "         <li><b>"
- << " G4CrossSectionPairGG: " << theLowX->GetName() << " cross sections \n";
- outFile << "below " << ETransition/GeV << " GeV, Glauber-Gribov above \n";
- }
- */
 
-void G4CrossSectionPairGG::DumpPhysicsTable(const G4ParticleDefinition&) {
-   G4cout << std::setw(24) << " " << " G4CrossSectionPairGG: "
+void G4CrossSectionPairGG_binned::DumpPhysicsTable(const G4ParticleDefinition&) {
+   G4cout << std::setw(24) << " " << " G4CrossSectionPairGG_binned: "
          << theLowX->GetName() << " cross sections " << G4endl;
    G4cout << std::setw(27) << " " << "below " << ETransition / GeV
          << " GeV, Glauber-Gribov above " << G4endl;

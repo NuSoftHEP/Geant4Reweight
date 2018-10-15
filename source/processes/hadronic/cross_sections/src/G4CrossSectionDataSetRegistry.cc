@@ -69,6 +69,8 @@ G4_REFERENCE_XS_FACTORY(G4NucleonNuclearCrossSection);
 G4_REFERENCE_XS_FACTORY(G4ElectroNuclearCrossSection);
 G4_REFERENCE_XS_FACTORY(G4PhotoNuclearCrossSection);
 G4_REFERENCE_XS_FACTORY(G4PiNuclearCrossSection);
+G4_REFERENCE_XS_FACTORY(G4PiNuclearCrossSection_bias);
+G4_REFERENCE_XS_FACTORY(G4PiNuclearCrossSection_binned);
 G4_REFERENCE_XS_FACTORY(G4NeutronInelasticXS);
 G4_REFERENCE_XS_FACTORY(G4NeutronElasticXS);
 G4_REFERENCE_XS_FACTORY(G4NeutronCaptureXS);

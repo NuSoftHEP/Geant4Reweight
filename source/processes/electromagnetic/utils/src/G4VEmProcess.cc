@@ -268,6 +268,7 @@ G4VEmModel* G4VEmProcess::GetModelByIndex(G4int idx, G4bool ver) const
 
 void G4VEmProcess::PreparePhysicsTable(const G4ParticleDefinition& part)
 {
+
   G4bool isMaster = true;
   const G4VEmProcess* masterProcess = 
     static_cast<const G4VEmProcess*>(GetMasterProcess());
@@ -308,7 +309,7 @@ void G4VEmProcess::PreparePhysicsTable(const G4ParticleDefinition& part)
   const G4ProductionCutsTable* theCoupleTable=
     G4ProductionCutsTable::GetProductionCutsTable();
   size_t n = theCoupleTable->GetTableSize();
-
+  
   theEnergyOfCrossSectionMax.resize(n, 0.0);
   theCrossSectionMax.resize(n, DBL_MAX);
 

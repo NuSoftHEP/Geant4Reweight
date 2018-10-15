@@ -203,8 +203,8 @@ class G4VProcess
 
 
       virtual G4double GetMFP( const G4Track& track,
-                                        G4double   previousStepSize,
-                                        G4ForceCondition* condition );
+                                   G4double   previousStepSize,
+                             G4ForceCondition* condition );
 
   ////////////////////// 
       virtual G4bool IsApplicable(const G4ParticleDefinition&){return true;}
@@ -575,8 +575,8 @@ void G4VProcess::SubtractNumberOfInteractionLengthLeft(
 
 inline
 G4double G4VProcess::GetMFP( const G4Track& track,
-                                      G4double   previousStepSize,
-                                      G4ForceCondition* condition ){
+                                   G4double   previousStepSize,
+                             G4ForceCondition* condition ){
   return 0.;
 }
 #endif

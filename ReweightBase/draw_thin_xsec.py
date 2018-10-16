@@ -32,6 +32,8 @@ def init_parser():
   parser.add_argument('--cmd', type=str, help='Which command to execute ', default=" ")
   parser.add_argument('-f', type=str, help='Which input file')
   parser.add_argument('--plot',type=str, help='Plot name')
+  parser.add_argument('--reactive',type=str, help='reactive')
+  parser.add_argument('--total',type=str, help='total')
   return parser
 
 def SetStyle(h):
@@ -146,6 +148,46 @@ elif (cmd == "ratio" or cmd == "Ratio"):
 
   leg = TLegend(.55,.7,.9,.9)
   leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+  leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
+  leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
+  leg.Draw("same")
+  c1.SaveAs(args.plot)
+
+elif (cmd == "can_ratio" or cmd == "can_Ratio"):
+  totalFile = TFile(args.total, "READ") 
+  reacFile = TFile(args.reactive, "READ") 
+  total_can = totalFile.Get("c1")
+  reactive_can = reacFile.Get("c1")
+
+  thin_xsec_reactive_w = reactive_can.GetPrimitive("thin_reactive_xsec_w")  
+  thin_xsec_reactive_v = reactive_can.GetPrimitive("thin_reactive_xsec_v")  
+
+  thin_xsec_total_w = total_can.GetPrimitive("thin_total_xsec_w")  
+  thin_xsec_total_v = total_can.GetPrimitive("thin_total_xsec_v")  
+
+  total_ratio = thin_xsec_total_w.Clone()
+  reactive_ratio = thin_xsec_reactive_w.Clone()
+
+  total_ratio.Divide(thin_xsec_total_v)  
+  reactive_ratio.Divide(thin_xsec_reactive_v)  
+
+  total_ratio.SetMinimum(0.)
+  total_ratio.SetMaximum(2.0)
+  reactive_ratio.SetMinimum(0.)
+  reactive_ratio.SetMaximum(2.0)
+
+  c1 = TCanvas()
+  total_ratio.SetTitle("Pi+ Ar - Thin Target Scattering - Ratios")
+  total_ratio.Draw("p")
+  reactive_ratio.Draw("p same")
+
+  f = TF1("line", "1", 0, 900.)
+  f.SetLineColor(1)
+  f.Draw("same")
+
+  leg = TLegend(.55,.7,.9,.9)
+  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+#  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast)
   leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
   leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
   leg.Draw("same")

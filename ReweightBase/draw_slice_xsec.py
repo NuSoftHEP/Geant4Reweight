@@ -252,5 +252,52 @@ else:
   nr.Write()
   wr.Write()
   vr.Write()
+
+  ###Momentum
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnd(13,0,1300)","","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwd(13,0,1300)", "weight*elastWeight","goff")
+  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvd(13,0,1300)","","goff")
+  
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnn(13,0,1300)", "(sliceInts > 0)","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwn(13,0,1300)", "weight*elastWeight*(sliceInts > 0)","goff")
+  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvn(13,0,1300)", "(sliceInts > 0)","goff")
+  
+  pnd = gDirectory.Get("pnd")
+  pwd = gDirectory.Get("pwd")
+  pvd = gDirectory.Get("pvd")
+  pnd.Write()
+  pwd.Write()
+  pvd.Write()
+  pvd.Sumw2()
+  
+  pnn = gDirectory.Get("pnn")
+  pwn = gDirectory.Get("pwn")
+  pvn = gDirectory.Get("pvn")
+  pnn.Write()
+  pwn.Write()
+  pvn.Write()
+  pvn.Sumw2()
+  
+  pnr = ratio_scale_errors(pnn, pnd, scale, "pnr")
+  pwr = ratio_scale_errors(pwn, pwd, scale, "pwr")
+  pvr = ratio_scale_errors(pvn, pvd, scale, "pvr")
+
+  pvr.SetTitle("#sigma_{inel}x" + args.i + ", #sigma_{el}x" +args.e)
+  pvr.SetXTitle("Pion Kinetic Energy (MeV)")
+  pvr.SetYTitle("#sigma (barn)")
+  pwr.SetTitle("#sigma_{inel}x" + args.i + ", #sigma_{el}x" +args.e)
+  pwr.SetXTitle("Pion Kinetic Energy (MeV)")
+  pwr.SetYTitle("#sigma (barn)")
+  drawStyle(pnr,pwr,pvr)
+  
+  #c1 = TCanvas()
+  gStyle.SetOptStat(0)
+  
+  drawThis = getMax(pnr,pwr,pvr)
+
+  pnr.Write()
+  pwr.Write()
+  pvr.Write()
+  
   outfile.Close()
 

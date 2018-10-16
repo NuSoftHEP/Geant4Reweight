@@ -6,6 +6,7 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1F.h"
 
 enum interactionType {
       kNone,
@@ -24,8 +25,12 @@ class G4ReweightTreeParser{
     void SetBranches();
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
-    void Analyze(double,double);
-    void FillAndAnalyze(double,double);
+
+    void Analyze(double, double);
+    void Analyze(TH1F *, TH1F *);
+    void FillAndAnalyze(double, double);
+    void FillAndAnalyze(TH1F *, TH1F *);
+
     void CloseInput();
     void GetInteractionType(int);
 

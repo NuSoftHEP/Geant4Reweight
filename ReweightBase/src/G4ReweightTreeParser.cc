@@ -192,7 +192,6 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
   }
 }
 
-
 void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
@@ -220,6 +219,109 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           theElastWeight = theTraj->GetWeight_Elast(elastBias);
           theInt = theTraj->GetFinalProc();
           nElast = theTraj->GetNElastic();
+
+          //std::cout << "Final " << theInt << std::endl;
+          double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
+          double py = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPy;
+          double pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPz;
+          //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          preFinalP = sqrt( px*px + py*py + pz*pz); 
+
+          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+             //Now check the scattering angle 
+             auto products = theTraj->HasChild(theTraj->PID);
+             if( products.size() == 1){
+//               std::cout << "Found inelastic scatter" << std::endl;
+               auto theChild = products[0];
+               double childPx = theChild->GetStep(0)->preStepPx;
+               double childPy = theChild->GetStep(0)->preStepPy;
+               double childPz = theChild->GetStep(0)->preStepPz;
+               cosTheta = (px*childPx + py*childPy + pz*childPz);
+               cosTheta = cosTheta/preFinalP;
+               cosTheta = cosTheta/sqrt(childPx*childPx + childPy*childPy + childPz*childPz);
+//               std::cout << cosTheta << std::endl;
+               
+             }
+          }
+          else{
+            cosTheta = 0.;
+          }
+
+          px = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPx;
+          py = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPy;
+          pz = theTraj->GetStep( theTraj->GetNSteps() - 1)->postStepPz;
+//          std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
+          postFinalP = sqrt( px*px + py*py + pz*pz); 
+          if(elastDists) elastDists->clear();
+          std::vector<double> dists = theTraj->GetElastDists();
+          for(size_t id = 0; id < nElast; ++id){
+            elastDists->push_back(dists[id]);
+          }
+
+          if(sliceEnergy){
+            sliceEnergy->clear();
+            sliceInts->clear();
+          }           
+           
+//          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceMethod(.5); 
+          std::vector< std::pair<double, int> > slices = theTraj->ThinSliceBetheBloch(.5); 
+          for(size_t it = 0; it < slices.size(); ++it){
+            sliceEnergy->push_back(slices[it].first); 
+            sliceInts->push_back(slices[it].second); 
+          }
+
+          if(sliceEnergyInelastic){
+            sliceEnergyInelastic->clear();
+            sliceIntsInelastic->clear();
+          }
+
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          for(size_t it = 0; it < slicesInelastic.size(); ++it){
+            sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
+            sliceIntsInelastic->push_back(slicesInelastic[it].second); 
+          }
+//          std::cout << "New Track" << std::endl;
+          std::map<int, int*>::iterator itN = mapPIDtoN.begin();
+          for(; itN != mapPIDtoN.end(); ++itN){
+            *(itN->second) = (theTraj->HasChild(itN->first)).size();
+//            std::cout << "This track has " << *(itN->second) << " " << itN->first << std::endl;
+          }
+          GetInteractionType(theTraj->PID);
+         
+          Energy = theTraj->Energy;
+
+          tree->Fill();
+           
+        }
+      }
+}
+
+void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
+
+      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+      for( ; itTraj != trajCollection->end(); ++itTraj){
+        auto theTraj = itTraj->second; 
+        if (theTraj->parID == 0 && theTraj->PID == 211){
+          //Skip any that exit out the back
+          double totalDeltaZ = 0.;
+          for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
+            auto theStep = theTraj->GetStep(is);
+            totalDeltaZ += theStep->deltaZ;
+          }
+          if(totalDeltaZ < 0.) continue;
+
+//          std::cout << "Found primary " << theTraj->PID << std::endl;
+//          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
+//          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
+//         for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
+//            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
+//         }
+
+          theLen         = theTraj->GetTotalLength();
+          theWeight      = theTraj->GetWeight(inelBiasHist);
+          theElastWeight = theTraj->GetWeight_Elast(elastBiasHist);
+          theInt         = theTraj->GetFinalProc();
+          nElast         = theTraj->GetNElastic();
 
           //std::cout << "Final " << theInt << std::endl;
           double px = theTraj->GetStep( theTraj->GetNSteps() - 1)->preStepPx;
@@ -331,7 +433,6 @@ void G4ReweightTreeParser::GetInteractionType(int thePID){
 
   }
 }
-
 
 void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
@@ -449,6 +550,125 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   //empty the container
   trajCollection->clear();
 
+  fout->cd();
+  tree->Write();
+  fout->Close();
+}
+
+void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
+  
+  theLen=0.;
+  theWeight=0.;
+  theElastWeight = 0.;
+  N=0.;
+  theInt = ""; 
+  postFinalP=0.;
+  preFinalP=0.;
+  nElast = 0;
+  elastDists = 0;
+  sliceEnergy = 0;
+  sliceInts = 0;
+  sliceEnergyInelastic = 0;
+  sliceIntsInelastic = 0;
+  cosTheta = 0.;
+
+  nPiPlus = 0;
+  nPiMinus = 0;
+  nPi0 = 0;
+  nProton = 0;
+  nNeutron = 0;
+
+  Energy = 0.;
+
+  tree->Branch("len", &theLen);  
+  tree->Branch("weight", &theWeight);  
+  tree->Branch("elastWeight", &theElastWeight);  
+  tree->Branch("N", &N);
+  tree->Branch("nElast", &nElast);
+  tree->Branch("elastDists", &elastDists);
+  tree->Branch("sliceEnergy", &sliceEnergy);
+  tree->Branch("sliceEnergyInelastic", &sliceEnergyInelastic);
+  tree->Branch("Energy", &Energy);
+  tree->Branch("sliceInts", &sliceInts);
+  tree->Branch("sliceIntsInelastic", &sliceIntsInelastic);
+  tree->Branch("int", &theInt);
+  tree->Branch("postFinalP", &postFinalP);
+  tree->Branch("preFinalP", &preFinalP);
+  tree->Branch("cosTheta", &cosTheta);
+
+  tree->Branch("nPiPlus", &nPiPlus);
+  tree->Branch("nPiMinus", &nPiMinus);
+  tree->Branch("nPi0", &nPi0);
+  tree->Branch("nProton", &nProton);
+  tree->Branch("nNeutron", &nNeutron);
+
+  tree->Branch("intType", &intType);
+
+  std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
+  if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
+  
+  int prevEvent = -1;
+  for(int ie = 0; ie < track->GetEntries(); ++ie){    
+    track->GetEntry(ie);
+
+    if(!(ie%1000)){std::cout << ie << std::endl;}
+    //New event. Do the analysis and Delete the current collection
+    if( (prevEvent > -1) && (prevEvent != tEventNum) ){
+
+//      std::cout << "Event: " << prevEvent << std::endl;
+     
+      Analyze(inelBiasHist, elastBiasHist);
+      std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+      for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
+        //Delete the pointer
+        delete itTraj->second;
+      }
+      //empty the container
+      trajCollection->clear();
+      
+    }
+
+    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
+    G4RTraj->Energy = tEnergy;
+
+    SetSteps(G4RTraj);
+    //std::cout << tTrackID << " " << tPID << " " << tParID << " " << tSteps->first << " " << tSteps->second << std::endl;
+   
+    std::pair<size_t,size_t> thisPair = std::make_pair(tTrackID,tEventNum);
+    std::pair<size_t,size_t> parentPair = std::make_pair(tParID,tEventNum);
+
+    //Add the traj to the map
+    (*trajCollection)[thisPair] = G4RTraj;
+
+    //The particle's parent is in the map
+    if( trajCollection->count( parentPair ) ){      
+       (*trajCollection)[ parentPair ]->AddChild( G4RTraj ); 
+    }
+    else{
+//      std::cout << "Could not find parent" << std::endl;
+//      std::cout << thisPair.first << " " << parentPair.first << " " << thisPair.second << std::endl;
+    }
+        
+    prevEvent = tEventNum;
+  }
+
+  
+  std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
+  filled = true;
+
+  std::cout << "Event: " << prevEvent << std::endl;
+  
+
+  Analyze(inelBiasHist, elastBiasHist);
+  std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+  for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
+    //Delete the pointer
+    delete itTraj->second;
+  }
+  //empty the container
+  trajCollection->clear();
+
+  fout->cd();
   tree->Write();
   fout->Close();
 }

@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 
+#include <cmath>
+
 struct Proc{
   std::string Name;
   double MFP;
@@ -31,6 +33,9 @@ class G4ReweightStep{
     double postStepPx;
     double postStepPy;
     double postStepPz;
+
+    double GetFullPreStepP()  { return sqrt( preStepPx*preStepPx + preStepPy*preStepPy + preStepPz*preStepPz ); };
+    double GetFullPostStepP() { return sqrt( postStepPx*postStepPx + postStepPy*postStepPy + postStepPz*postStepPz ); };
 
     double deltaX;
     double deltaY;

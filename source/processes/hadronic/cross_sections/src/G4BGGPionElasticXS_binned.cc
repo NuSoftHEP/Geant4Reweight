@@ -143,7 +143,7 @@ G4BGGPionElasticXS_binned::GetElementCrossSection(const G4DynamicParticle* dp,
   //G4cout << "Bias: " << theBias << G4endl;
   //return cross;
   
-  G4double momentum = dp->GetTotalMomentum();
+  G4double momentum = dp->GetTotalMomentum() / MeV;
   int theBin = theBias->FindBin(momentum);
 //  if( theBin < theBias->GetNbinsX() || theBin > theBias->GetNbinsX() ){
   if( theBin == -1 ){ 

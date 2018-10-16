@@ -597,8 +597,10 @@ G4PiNuclearCrossSection_binned::GetElementCrossSection(const G4DynamicParticle* 
 //  G4cout << result << G4endl;
 
 
-  G4double momentum = particle->GetTotalMomentum();
+  G4double momentum = particle->GetTotalMomentum() / MeV;
+  G4cout << "Scaling for momentum " << momentum << std::endl;
   int theBin = theBias->FindBin(momentum);
+  G4cout << "Bin: " << theBin << std::endl;
 //  if( theBin < theBias.GetNbinsX() || theBin > theBias.GetNbinsX() ){
   if( theBin == -1 ){ 
     std::cout << "Out of momentum range. Should scale by x1" << std::endl

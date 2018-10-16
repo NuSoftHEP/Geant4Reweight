@@ -135,37 +135,45 @@
 
 \section{Geant4 Simulation Technique}
 \subsection{Tracking and Stepping}
-The main philosophy of Geant4's simulation technique is that of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks created from a configurable source. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs. It is up to the user to handle the step information (by accessing G4StepPoints) before and after the stepping. 
+The foundation of Geant4's simulation technique is the concept of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs. It is up to the user to access the step information via G4StepPoints before and after the stepping. 
 
-A G4SteppingManager handles the stepping. It stores a set of active processes which are instantiated by the user at runtime(FOOTNOTE: CAN BE TURNED ON/OFF THROUGHOUT RUN), thus allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
+A G4SteppingManager handles the stepping. It stores a set of active processes which are instantiated by the user at runtime, thus allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
 \begin{enumerate}
-	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen(FOOTNOTE: THIS LEADS TO THE MOST CHALLENGE IN CONCEPTUALIZING REWEIGHTING FOR GEANT AND WILL BE ADDRESSED IN SECTION NUMBER)
-	\item "Safety" ($S$) - the distance to the next boundary - is calculated. For charged particles without a field or neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
-	\item If $L_{min} > S$, the distance to the next boundary is re-calculated. 
+	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen.
+	\item "Safety" ($S$) - the distance to the next boundary - is calculated. %For charged particles without a field or for neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
+	\item If $L_{min} > S$, the distance to the next volume boundary is re-calculated. 
 	\item The smaller of $L_{min}$ and $S$ is taken as the step length. 
 	\item All active continuous processes are invoked along the step. The particle's Kinetic Energy will be updated after all invoked processes are completed. The change in Kinetic Eneregy will be the sum of all the contributions.
 	\item The G4Track's properties(Kinetic Energy and 4-position) are updated before discrete processes are invoked. At this point, secondary particles created by continuous processes (i.e. ionization electrons) are stored to be given to the G4TrackingManager. 
-	\item Check if it is now at rest, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
+	\item If, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
 	\item If $L_{min}$ was given by a discrete process, it is now invoked.
 	\item Track properties are updated. Secondaries are stored.
-	\item Check if the discrete process terminated the track.	
+	\item The track is checked for termination by the invoked discrete process.
 	\item The step is finished.
 \end{enumerate}
 
-MAYBE SOME MORE STUFF HERE ABOUT TRACKING
 
 \subsection{Choosing a Process}
-As stated in the previous section, each active Continuous and Discrete process propose an interaction length before their invocation. The smallest of these interaction lengths is used as the step length. Additionally, if a Discrete process proposed it, that process is invoked after all of the Continuous processes. 
+As stated in the previous section, each active Continuous and Discrete process propose an interaction length before their invocation. The smallest of these interaction lengths is used as the step length. %Additionally, if a Discrete process proposed it, that process is invoked after all of the Continuous processes. 
+It is important to understand how these interaction lengths are proposed and compared to one another.
 
-The Discrete processes do not throw a random number at each step as one would usually expect. Rather, each Discrete process samples the distribution 
-\begin{equation}\label{eq:1}
+The Discrete processes do not throw a random number at each step. Rather, each Discrete process simply samples the distribution 
+\begin{equation}\label{eq:sample}
 P(N) = e^{-N}
 \end{equation}
-at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be furthered categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further.\label{fn_Discrete}}. Within one step, the interaction lengths are given by 
-\begin{equation}\label{eq:2}
+at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be furthered categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further.\label{fn_Discrete}}. This number, $N_p$ for a given Discrete process, is used indirectly in determining the proposed interaction length for that process each step. In a specific step, each active Discrete process has an interaction length $L_p$ which is determined by the mean free path of that process as such: 
+\begin{equation}
 L_p = N_p * \lambda_p
 \end{equation}
-where $\lambda_p$ is the Mean Free Path of process $p$ (according to the particle's kinematics and, if applicable, its target). These interaction lengths are compared to each other, the interaction lengths of the Continuous processes, and the distance to the next boundary, and the smallest is chosen. Then, each Discrete process that was not invoked has its $N_p$ reduced by $\frac{L_s}{\lambda_p}$, where $L_s$ is the chosen step length. If any Discrete process was chosen - and if that process does not kill the track - then it is not reduced, and is instead given a newly sampled $N_p$ during the next step. In practice, this results in a static \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (changes of kinematics or target).
+Each Continuous process also proposes an interaction length. The smallest option out of the Discrete and Continous processes and of the distance to the next boundary is chosen. If a Discrete process was chosen (and if the track is still alive), that process has another $N_p$ sampled from \ref{eq:sample}. Each Discrete process which was not chosen to occur has its own previously-sampled $N_p$ reduced by an amount equal to $\frac{L_s}{\lambda_p}$, where $L_s$ is the step length which was chosen in that step. These new $N_p$ are then used in the next step in determining the interaction lengths.
+
+%This number, $N$, is essentially the number of interaction lengths - for a given process - through which the particle will travel, after which that process will be invoked. It is instructive to view N as such: 
+%\begin{equation}\label{eq:3}
+%N = \sum\limits_{s={steps}} \frac{L_{s}}{\lambda_{s}}
+%\end{equation}
+%where $N$ is the sampled number for a given process, $\lambda_s$ is the mean free path of that same process in any specific step, and $L_s$ is the length traveled for that specific step. An important point is that each specific $L_s$ is the same for all processes active in that step. 
+
+In practice, this results in a static \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (changes of kinematics or target).
 
 It is important to realize the interplay between step sizes and Mean Free Paths. Each process has the same chance of throwing a certain number according to \eqref{eq:1}. However, two processes might throw the same number (unlikely, though instructive), but the deciding factor in a process occuring is based on its Mean Free Paths and the step sizes over the particle's trajectory. This is easily realized when considering $N$ as such:
 \begin{equation}\label{eq:3}
@@ -230,11 +238,9 @@ Where the $\sigma_s$ corresponds to the cross section for a given elastic-type p
 \section{Testing and Validation}
 
 \subsection{Thin Target Scattering}
-A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction
-processes on Ar in the 0.2 - 2.0 GeV
-energy range through combined
-information from ionization free charge
-and scintillation light}. The thin target was a disk of .5cm in thickness and 1.5m in radius. Monoenergetic beams\footnote{{50, 100, 150, 200, 250, 300, 400, 500, 600, 700, and 800} MeV } of 1E6 pions were sent toward the target and tracked through the volume. 
+A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. %This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction processes on Ar in the 0.2 - 2.0 GeV energy range through combined information from ionization free charge and scintillation light}. 
+This was checked against Geant4 validation conducted by a previous summer student\footnote{Isaac Harris - Geant4 Liquid Argon Validations}.
+The thin target was a disk of .5cm in thickness and 1.5m in radius. Monoenergetic beams\footnote{{50, 100, 150, 200, 250, 300, 400, 500, 600, 700, and 800} MeV } of 1E6 pions were sent toward the target and tracked through the volume. 
 
 The number of elastic scatters and the final fate (i.e. Inelastic Scatter, Decay, Transportation\footnote{Leaving the tracking volume}) of each pion was recorded to determine if an interaction occured. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the reactive cross section at each energy: 
 
@@ -263,31 +269,128 @@ The simulation was ran with both the nominal inelastic and elastic scattering cr
   \end{tabular}
 \end{center}
 
-Figures ... show the reactive cross sections produced by the nominal and varied simulations, as well as with weighting applied to the nominal simulation. They also compares these to the reactive cross section as extracted by Nutini.
+Figures \ref{ref:thin_1.5_1} through \ref{ref:thin_1.5_1.5} compare the nominal cross sections to the varied and weighted samples from Table \ref{ref:variations}.
 
-\begin{center}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1_elast1.5}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1.5}.pdf}
-\end{center}
+\begin{figure}[htpb]\label{ref:thin_1.5_1}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1.5_elast1}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1.5_elast1}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1}
+\end{figure}
 
-Figures ... show the total cross sections produced by the nominal and varied simulations, as well as with weighting applied to the nominal simulation. They also compares these to the total cross section as extracted by Nutini.
+\begin{figure}[htpb]\label{ref:thin_1_1.5}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1_elast1.5}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1_elast1.5}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1_elast1.5}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1, Elastic Scale: 1.5}
+\end{figure}
 
-Figures ... show the ratio between the weighted and varied samples for both the reactive and total cross sections
+\begin{figure}[htpb]\label{ref:thin_1.5_1.5}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1.5_elast1.5}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1.5_elast1.5}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1.5}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}
+\end{figure}
 
 
-\begin{center}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1_elast1.5}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1.5}.pdf}
-\end{center}
+\subsection{Scattering in a Volume}
+In addition to simulated scattering off a thin target, pions were simulated within a LArIAT-sized\footnote{40cm x 47cm x 90cm} volume of LAr. The total and reactive cross sections were extracted via the 'thin-slice method' developed for LArIAT's analysis\footnote{Put in some link here}. This essentially treats the bulk volume of LAr as many subsequent thin targets. Each time the pion enters into a new slice, a new independent thin-target experiment is performed. (CAN ADD MORE EXPLANATIONS LATER)
 
+The results of this are shown in Figures asdfadsf through asdfasdf
 
-\begin{center}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1.5_elast1}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1_elast1.5}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/thin_ratio_inel1.5_elast1.5}.pdf}
-\end{center}
+\begin{figure}[htpb]\label{ref:slice_1.5_1}
+	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_slice_xsec_inel1.5_elast1}.pdf}
+%	\end{subfigure}
+%	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_slice_xsec_inel1.5_elast1}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/slice_ratio_inel1.5_elast1}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1}
+\end{figure}
+
+\begin{figure}[htpb]\label{ref:slice_1_1.5}
+	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_slice_xsec_inel1_elast1.5}.pdf}
+%	\end{subfigure}
+%	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_slice_xsec_inel1_elast1.5}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/slice_ratio_inel1_elast1.5}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1, Elastic Scale: 1.5}
+\end{figure}
+
+\begin{figure}[htpb]\label{ref:slice_1.5_1.5}
+	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_slice_xsec_inel1.5_elast1.5}.pdf}
+%	\end{subfigure}
+%	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_slice_xsec_inel1.5_elast1.5}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/slice_ratio_inel1.5_elast1.5}.pdf}
+	\end{subfigure}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}
+\end{figure}
+
 \section{Edits to Geant4.10.03.p03}
 
 As well as creating the simulation and reweighting packge, I also made edits to Geant4's base code. The edits are summarized here:
@@ -297,12 +400,44 @@ As well as creating the simulation and reweighting packge, I also made edits to 
 	\item These allow the user to specify - at run-time - a factor that scales the inelastic and elastic pion cross sections, respectively. 
 	\item Additionally, had to add versions of respective 'particle builder' and 'list constructor' classes. 
 	\end{enumerate}
+	
+\item The G4Step object now contains information related to the various active process names, as well as their mean free paths (dependent on surrounding material and current momentum)
 \item Implemented methods in various physics process classes that extract the mean free path of the particle in its current state.
 	\begin{enumerate}
 	\item The original methods that do this were private within their respective classes, and so could not be called by higher levels of Geant.
 
 	\end{enumerate}
 \item Edited the G4SteppingManager to handle extracting information about active processes (name and Mean Free Path) at each step.
+	\begin{enumerate}
+	\item The last three changes are what enable the reweighting process. The package needs to know the cross section (mean free path) and step length at runtime. 
+	\end{enumerate}
+\end{enumerate}
+
+\section{What We Need From Geant4 Developers}
+
+\subsection{Releasing GeantReweight}
+Two options for releasing this code:
+\begin{enumerate}
+\item It is released as part of Geant4. It can be integrated into the package in various ways
+\item It is released standalone to Geant4.
+\end{enumerate}
+
+\subsection{Changes to Geant4}
+Both options require specific changes to Geant4's base build:
+\begin{enumerate}
+\item The G4Step object needs to include:
+	\begin{itemize}
+	\item Active process names
+	\item The current mean free path of each process
+	\end{itemize}
+	
+\item The G4SteppingManager class must place the new information listed in 1. into the G4Step object. 
+
+\item Some methods need to be added or changed from private/protected to public within various hadronic process classes in order to perform 2.
+	\begin{itemize}
+	\item These are used to extract the mean free path/cross section of the process at a given point in the simulation.
+	\end{itemize}	
+	
 \end{enumerate}
 
 \newpage
@@ -328,6 +463,8 @@ As well as creating the simulation and reweighting packge, I also made edits to 
 \includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/abs_WatAr}.pdf}
 \includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/prod_WatAr}.pdf}
 \end{center}
+
+
 %\appendix
 %\section{Interaction Probability Derivation}
 %the derivation for the probability of interaction given a cross section

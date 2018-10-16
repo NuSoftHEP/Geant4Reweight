@@ -45,6 +45,8 @@ class G4ReweightHist
 
   public:
            G4ReweightHist(std::string name, std::string title, std::vector< double > bins);
+	  ~G4ReweightHist();
+
     int    FindBin( double ); 
     double GetBinContent( int );
     void   SetBinContent( int, double );
@@ -52,7 +54,6 @@ class G4ReweightHist
   private:
           // no instance needed
 //  	G4ReweightHist(std::string name, std::string title, int nBins, double binLow, double binHigh);
-	~G4ReweightHist();
 
         std::string histName;
         std::string histTitle;

@@ -34,6 +34,8 @@ def ratio_scale_errors(n, d, scale, name="r"):
   r.Scale(scale)
 
   for ix in range(1, n.GetNbinsX() + 1):
+    if(n.GetBinContent(ix) == 0): continue
+    if(d.GetBinContent(ix) == 0): continue
     error =  r.GetBinContent(ix) * sqrt( 1/n.GetBinContent(ix) + 1/d.GetBinContent(ix) )
     r.SetBinError(ix, error)
 
@@ -254,13 +256,13 @@ else:
   vr.Write()
 
   ###Momentum
-  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnd(13,0,1300)","","goff")
-  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwd(13,0,1300)", "weight*elastWeight","goff")
-  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvd(13,0,1300)","","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnd(52,0,1300)","","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwd(52,0,1300)", "weight*elastWeight","goff")
+  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvd(52,0,1300)","","goff")
   
-  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnn(13,0,1300)", "(sliceInts > 0)","goff")
-  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwn(13,0,1300)", "weight*elastWeight*(sliceInts > 0)","goff")
-  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvn(13,0,1300)", "(sliceInts > 0)","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pnn(52,0,1300)", "(sliceInts > 0)","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pwn(52,0,1300)", "weight*elastWeight*(sliceInts > 0)","goff")
+  var.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>pvn(52,0,1300)", "(sliceInts > 0)","goff")
   
   pnd = gDirectory.Get("pnd")
   pwd = gDirectory.Get("pwd")

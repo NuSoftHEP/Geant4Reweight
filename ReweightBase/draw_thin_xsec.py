@@ -38,7 +38,7 @@ def init_parser():
 
 def SetStyle(h):
   h.SetTitle("Pi+ Ar - Thin Target Scattering")
-  h.SetXTitle("KE (MeV)")
+  h.SetXTitle("Pion Kinetic Energy (MeV)")
   h.SetYTitle("#sigma (barn)")
   h.GetXaxis().SetTitleSize(.05)
   h.GetYaxis().SetTitleSize(.05)
@@ -150,6 +150,7 @@ elif (cmd == "ratio" or cmd == "Ratio"):
   leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
   leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
   leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
+  leg.SetTextFont()
   leg.Draw("same")
   c1.SaveAs(args.plot)
 
@@ -190,6 +191,7 @@ elif (cmd == "can_ratio" or cmd == "can_Ratio"):
 #  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast)
   leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
   leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
+  leg.SetTextFont()
   leg.Draw("same")
   c1.SaveAs(args.plot)
 

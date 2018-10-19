@@ -120,38 +120,32 @@ if (cmd == "Draw" or cmd == "draw"):
 
 
 elif (cmd == "ratio" or cmd == "Ratio"):
-  inFile = TFile(args.f, "READ") 
-  thin_xsec_reactive_w = inFile.Get("thin_reactive_xsec_w")  
-  thin_xsec_reactive_v = inFile.Get("thin_reactive_xsec_v")  
+  inFile = TFile(loc + "/" + args.f, "READ") 
+  for name in names:
+    w = inFile.Get("w"+name)  
+    v = inFile.Get("v"+name)  
 
-  thin_xsec_total_w = inFile.Get("thin_total_xsec_w")  
-  thin_xsec_total_v = inFile.Get("thin_total_xsec_v")  
+    r = w.Clone()
 
-  total_ratio = thin_xsec_total_w.Clone()
-  reactive_ratio = thin_xsec_reactive_w.Clone()
+    r.Divide(v)  
 
-  total_ratio.Divide(thin_xsec_total_v)  
-  reactive_ratio.Divide(thin_xsec_reactive_v)  
+    r.SetMinimum(0.)
+    r.SetMaximum(2.0)
 
-  total_ratio.SetMinimum(0.)
-  total_ratio.SetMaximum(2.0)
-  reactive_ratio.SetMinimum(0.)
-  reactive_ratio.SetMaximum(2.0)
+    c1 = TCanvas()
+    r.SetTitle(titles[name])
+    r.Draw("p")
 
-  c1 = TCanvas()
-  total_ratio.Draw("p")
-  reactive_ratio.Draw("p same")
+    f = TF1("line", "1", 0, 1200.)
+    f.SetLineColor(1)
+    f.Draw("same")
 
-  f = TF1("line", "1", 0, 900.)
-  f.SetLineColor(1)
-  f.Draw("same")
-
-  leg = TLegend(.55,.7,.9,.9)
-  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
-  leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
-  leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
-  leg.Draw("same")
-  c1.SaveAs(args.plot)
+#    leg = TLegend(.55,.7,.9,.9)
+#    leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+#    leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
+#    leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
+#    leg.Draw("same")
+    c1.SaveAs(name+"_ratio_"+plot)
 
 else:
   surv_cut = "(int != \"pi+Inelastic\" && nElast == 0)"
@@ -205,9 +199,12 @@ else:
   wStack = THStack("wStack", "")
   vStack = THStack("vStack", "")
 
-  nomTree.Draw("Energy - 139.57>>nTotal(20,100,1100)","","goff")
-  nomTree.Draw("Energy - 139.57>>wTotal(20,100,1100)","weight*elastWeight","goff")
-  varTree.Draw("Energy - 139.57>>vTotal(20,100,1100)","","goff")
+  #nomTree.Draw("Energy - 139.57>>nTotal(20,100,1100)","","goff")
+  #nomTree.Draw("Energy - 139.57>>wTotal(20,100,1100)","weight*elastWeight","goff")
+  #varTree.Draw("Energy - 139.57>>vTotal(20,100,1100)","","goff")
+  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>nTotal(21,100,1200)","","goff")
+  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>wTotal(21,100,1200)","weight*elastWeight","goff")
+  varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>vTotal(21,100,1200)","","goff")
 
   nTotal = gDirectory.Get("nTotal")
   wTotal = gDirectory.Get("wTotal")
@@ -219,9 +216,12 @@ else:
   for name in names:
     cut = cuts[name]
     print name, cut
-    nomTree.Draw("Energy - 139.57>>n"+name+"(20,100,1100)", cut,"goff")
-    nomTree.Draw("Energy - 139.57>>w"+name+"(20,100,1100)","weight*elastWeight*" + cut,"goff")
-    varTree.Draw("Energy - 139.57>>v"+name+"(20,100,1100)", cut,"goff")
+    #nomTree.Draw("Energy - 139.57>>n"+name+"(20,100,1100)", cut,"goff")
+    #nomTree.Draw("Energy - 139.57>>w"+name+"(20,100,1100)","weight*elastWeight*" + cut,"goff")
+    #varTree.Draw("Energy - 139.57>>v"+name+"(20,100,1100)", cut,"goff")
+    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>n"+name+"(21,100,1200)", cut,"goff")
+    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>w"+name+"(21,100,1200)","weight*elastWeight*" + cut,"goff")
+    varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>v"+name+"(21,100,1200)", cut,"goff")
   
     nhists[name] = gDirectory.Get("n"+name) 
     nhists[name].Sumw2()

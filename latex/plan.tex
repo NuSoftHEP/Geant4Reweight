@@ -161,32 +161,30 @@ The Discrete processes do not throw a random number at each step. Rather, each D
 \begin{equation}\label{eq:sample}
 P(N) = e^{-N}
 \end{equation}
-at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be furthered categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further.\label{fn_Discrete}}. This number, $N_p$ for a given Discrete process, is used indirectly in determining the proposed interaction length for that process each step. In a specific step, each active Discrete process has an interaction length $L_p$ which is determined by the mean free path of that process as such: 
+at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be further categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further in a later section.\label{fn_Discrete}}. This number, $N_{p,s}$ for a given Discrete process at a specific step in the track, is used indirectly in determining the proposed interaction length for that process each step. In a specific step, each active Discrete process has an interaction length $L_{p,s}$ which is determined by the mean free path $\lambda_{p,s}$ of that process as such: 
 \begin{equation}
-L_p = N_p * \lambda_p
+L_{p,s} = N_{p,s} * \lambda_{p,s}
 \end{equation}
-Each Continuous process also proposes an interaction length. The smallest option out of the Discrete and Continous processes and of the distance to the next boundary is chosen. If a Discrete process was chosen (and if the track is still alive), that process has another $N_p$ sampled from \ref{eq:sample}. Each Discrete process which was not chosen to occur has its own previously-sampled $N_p$ reduced by an amount equal to $\frac{L_s}{\lambda_p}$, where $L_s$ is the step length which was chosen in that step. These new $N_p$ are then used in the next step in determining the interaction lengths.
+Each Continuous process also proposes an interaction length. The smallest option out of the Discrete and Continous processes and of the distance to the next boundary is chosen and invoked. If a Discrete process was chosen (and if the track is still alive after invocation), that process has another $N_{p,s}$ sampled from \ref{eq:sample}. Each Discrete process which was not chosen to occur has its own previously-sampled $N_{p,s}$ reduced by an amount equal to $\frac{L_s}{\lambda_{p,s}}$, where $L_s$ is the step length which was chosen in that step\footnote{At this point, $L_s$ is the same for each process, as it is the step that was physically taken.}. These new $N_{p,s}$ are then used in the next step in determining the interaction lengths.
 
-%This number, $N$, is essentially the number of interaction lengths - for a given process - through which the particle will travel, after which that process will be invoked. It is instructive to view N as such: 
+In practice, this results in a \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (due to changes of kinematics or target). This number can be represented as such:
+
+\begin{equation}\label{eq:Nint}
+N_p = \sum\limits_{s=steps} \frac{L_s}{\lambda_{p,s}} = \sum\limits_{s=steps} L_s * \sigma_{p,s}
+\end{equation}
+
+%It is important to realize the interplay between step sizes and Mean Free Paths. Each process has the same chance of throwing a certain number according to \eqref{eq:1}. However, two processes might throw the same number (unlikely, though instructive), but the deciding factor in a process occuring is based on its Mean Free Paths and the step sizes over the particle's trajectory. This is easily realized when considering $N$ as such:
 %\begin{equation}\label{eq:3}
 %N = \sum\limits_{s={steps}} \frac{L_{s}}{\lambda_{s}}
 %\end{equation}
-%where $N$ is the sampled number for a given process, $\lambda_s$ is the mean free path of that same process in any specific step, and $L_s$ is the length traveled for that specific step. An important point is that each specific $L_s$ is the same for all processes active in that step. 
-
-In practice, this results in a static \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (changes of kinematics or target).
-
-It is important to realize the interplay between step sizes and Mean Free Paths. Each process has the same chance of throwing a certain number according to \eqref{eq:1}. However, two processes might throw the same number (unlikely, though instructive), but the deciding factor in a process occuring is based on its Mean Free Paths and the step sizes over the particle's trajectory. This is easily realized when considering $N$ as such:
-\begin{equation}\label{eq:3}
-N = \sum\limits_{s={steps}} \frac{L_{s}}{\lambda_{s}}
-\end{equation}
-or equivalently,
-\begin{equation}\label{eq:4}
-N = \sum\limits_{s={steps}} L_{s} * \sigma_{s}
-\end{equation}
-From this, we can modify \ref{eq:1} as such:
-\begin{equation}\label{eq:5}
-P(\set{L_s} | \set{\sigma_s}) = e^{-\sum L_s * \sigma_s}
-\end{equation}
+%or equivalently,
+%\begin{equation}\label{eq:4}
+%N = \sum\limits_{s={steps}} L_{s} * \sigma_{s}
+%\end{equation}
+%From this, we can modify \ref{eq:1} as such:
+%\begin{equation}\label{eq:5}
+%P(\set{L_s} | \set{\sigma_s}) = e^{-\sum L_s * \sigma_s}
+%\end{equation}
 
 
 
@@ -198,42 +196,46 @@ From here, we can start moving toward a reweighting framework for pion interacti
 
 We can think of the simulated particle as having two possible fates: it either undergoes an interaction or "survives" after traveling some distance. However, the definition of "survival" needs clarification. In Geant4, the particle will always do \textit{something}, so we should distinguish the fate based on the process that is invoked. Survival processes should then include the pion exiting the world volume (as it is no longer simulated), as well as decaying at rest or being captured at rest. We count the last two as survival processes because they are previously-described AtRest processes which take precendence only once the particle is stopped. Essentially, they require the pion to move a certain distance without interacting, and should be counted as survival processes. 
 
-All other processes are considered interacting processes (FIX THIS WORDING). This includes decaying in flight, as it is treated similar to the rest of the discrete processes in the sampling scheme described above. 
+All other processes\footnote{Such as pion-inelastic scattering, and ... This also includes decaying in flight, as it is treated similar to the rest of the discrete processes in the sampling scheme described above. } 
+are considered "interacting" processes. 
 
 \subsection{Assigning Weights}
 
-Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. Whether the tracks survive or interact, they receive a weight that effectively changes the probability to have traveled a specific distance - the track's length - without interacting. Classically, this is the same distribution as in Equation \ref{eq:5}, and should be used in this context. A surviving track will then receive the following weight: 
-
+Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. Whether the tracks survive or interact, they receive a weight that effectively changes the probability to have traveled a specific distance - the track's length - without interacting. Classically, this distributions is given by:
+\begin{equation}\label{eq:dist_prob}
+P(L) \propto e^{-L \sigma}
+\end{equation}
+By inspection, the exponent is similar to Equation \ref{eq:Nint}, motivating that we can use this in our weighting scheme. Since we would like to change the distribution of distances before an interaction occurs, both interacting and surviving tracks should include this in their weight. For surviving tracks, the weight is solely based on this factor:
 \begin{equation}\label{eq:surv_weight}
   W_{surv} = \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
 \end{equation}
+Here, $\sigma_{tot,s}$ is the sum of all active discrete cross sections at a given step, and the sums run over the steps in the track. This will change the distribution of track lengths according to the change in the total cross section\footnote{$\sigma_{tot,s}'$ represents the variation of the total cross section, where any or all of the individual cross sections have been varied.}.
 
-This will change the distribution of track lengths according to the change in the total cross section\footnote{$\sigma_{tot,s}'$ represents the variation of the total cross section, where any or all of the individual cross sections have been varied.}.
-
-Interacting tracks, however, need to be distinguished according to which type of interaction occured (i.e. inelastic scatter vs. decay-in-flight). Normally, this is done using the individual cross sections. The probability for a specific interaction ($a$) to occur given any interaction happened is $\frac{\sigma_a}{\sigma_{tot}}$. However, to account for the cross section changing throughout the particle's travel, we use the step-length-averaged cross sections. Thus, we give this additional factor\footnote{The $'$ in the numerator of the first term is there to account for the case that the interaction that occured is weighted. If that interaction was not weighted, only the total cross section would be varied.} to tracks that underwent interaction $a$:
+Additionally, interacting tracks need to be given a factor that scales their specific fate's probability by the change to the cross section. This would normally be done by a ratio of the new cross section to the old: $\frac{\sigma'}{\sigma}$. However, to account for the cross section changing throughout the particle's travel, as well as variations relative to the kinematics of the track at each step, we use the step-length-averaged cross sections. Thus, we give this additional factor\footnote{The $'$ in the numerator of the first term is there to account for the case that the interaction that occured is weighted. If that interaction was not weighted, $ R = 1$.} to tracks that underwent interaction $a$:
 
 \begin{equation}
-\frac{R'}{R} = \big(\frac{\sigma'_a}{\sigma'_{tot}}\big)/\big(\frac{\sigma_a}{\sigma_{tot}}\big)
+\frac{R'}{R} = \frac{\sum L_s \sigma'_a}{\sum L_s \sigma_a}
 \end{equation}
 
 Making the total weight applied to interacting tracks:
 
 \begin{equation}\label{eq:int_weight_pop}
-  W_{int} = \big(\frac{\sigma'_a}{\sigma'_{tot}}\big)/\big(\frac{\sigma_a}{\sigma_{tot}}\big) * \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
+  W_{int} = \frac{\sum L_s \sigma'_a}{\sum L_s \sigma_a} * \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
 \end{equation}
+This encapsulates both the change to the distribution of track lengths, as well as the relative rates of specific types of interactions. 
 
 \subsection{Track-Preserving Processes - Elastic Scattering}
 Certain discrete processes, such as elastic scattering, preserve the track within the simulation run. This means multiple elastic scatters could occur before the track is killed by a different discrete process or if it leaves the tracking volume. To account for this, we keep the calculation of the elastic weight separate from the track-killing processes above. We leave out the elastic cross sections from the calculation of the total cross sections used in the previous section, and we assign multiple elastic weights to the track. In essence, we have to assign a weight whenever another number is resampled after the elastic process occurs. 
 
 The total elastic weight will always contain a term in the form of equation \ref{eq:9}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
 
-In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to equation \ref{eq:int_weight_pop}, but with only a ratio of the varied and nominal individual cross sections.
+In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight_pop}, but with only a ratio of the varied and nominal individual cross sections.
 
 The resulting weight then takes the form of:
 \begin{equation}\label{ref:elastFull}
 W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} \frac{e^{-\sum L_s  \sigma_{s}'}}{e^{-\sum L_s  \sigma_{s}}})(\frac{e^{-\sum L_s \sigma_{s}'}}{e^{-\sum L_s \sigma_{s}}})
 \end{equation}
-Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight.
+Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight, and contribute to the total weight given to the track.
 
 \section{Testing and Validation}
 
@@ -269,9 +271,10 @@ The simulation was ran with both the nominal inelastic and elastic scattering cr
   \end{tabular}
 \end{center}
 
-Figures \ref{ref:thin_1.5_1} through \ref{ref:thin_1.5_1.5} compare the nominal cross sections to the varied and weighted samples from Table \ref{ref:variations}.
+Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal cross sections to the varied and weighted samples from Table \ref{ref:variations}.
 
-\begin{figure}[htpb]\label{ref:thin_1.5_1}
+
+\begin{figure}[htpb]
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
@@ -287,10 +290,10 @@ Figures \ref{ref:thin_1.5_1} through \ref{ref:thin_1.5_1.5} compare the nominal 
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1}.pdf}
 	\end{subfigure}
-\caption{Inelastic Scale: 1.5, Elastic Scale: 1}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1}\label{fig:thin_1.5_1}
 \end{figure}
 
-\begin{figure}[htpb]\label{ref:thin_1_1.5}
+\begin{figure}[htpb]
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
@@ -306,10 +309,10 @@ Figures \ref{ref:thin_1.5_1} through \ref{ref:thin_1.5_1.5} compare the nominal 
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1_elast1.5}.pdf}
 	\end{subfigure}
-\caption{Inelastic Scale: 1, Elastic Scale: 1.5}
+\caption{Inelastic Scale: 1, Elastic Scale: 1.5}\label{fig:thin_1_1.5}
 \end{figure}
 
-\begin{figure}[htpb]\label{ref:thin_1.5_1.5}
+\begin{figure}[htpb]
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
@@ -325,14 +328,14 @@ Figures \ref{ref:thin_1.5_1} through \ref{ref:thin_1.5_1.5} compare the nominal 
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1.5}.pdf}
 	\end{subfigure}
-\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}\label{fig:thin_1.5_1.5}
 \end{figure}
-
+\newpage
 
 \subsection{Scattering in a Volume}
 In addition to simulated scattering off a thin target, pions were simulated within a LArIAT-sized\footnote{40cm x 47cm x 90cm} volume of LAr. The total and reactive cross sections were extracted via the 'thin-slice method' developed for LArIAT's analysis\footnote{Put in some link here}. This essentially treats the bulk volume of LAr as many subsequent thin targets. Each time the pion enters into a new slice, a new independent thin-target experiment is performed. (CAN ADD MORE EXPLANATIONS LATER)
 
-The results of this are shown in Figures asdfadsf through asdfasdf
+The results of this are shown in Figures \ref{ref:slice_1.5_1} through \ref{ref:slice_1.5_1.5}
 
 \begin{figure}[htpb]\label{ref:slice_1.5_1}
 	\centering
@@ -390,6 +393,30 @@ The results of this are shown in Figures asdfadsf through asdfasdf
 	\end{subfigure}
 \caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}
 \end{figure}
+
+Additionally, the relative rates of pion fates were investigated. This was done by categorizing the pions by their initial kinematics and by whether they underwent an inelastic scatter, any number of elastic scatters, or if they had no interaction before stopping or exiting the volume. For pions that underwent an inelastic scatter, the final state was categorized\footnote{Inelastic scatters also include any number of elastic scatters.}. Table \ref{table:fates} lists the definitions for the various pion fates. The results are shown in Figures 
+\begin{center}\label{table:fates}
+  \begin{tabular}{| c | c |}
+  \hline
+  Pion Fate & Definition  \\
+  \hline
+  No Interaction & No inelastic or elastic scatters \\ 
+  \hline
+  Elastic Scatters & No inelastic scatter, any number of elastic scatters \\
+  \hline	
+  Inelastic Scatter & 1 same-charge pion \& no other pions \\
+  \hline  
+  Absorption & No pions in final state \\
+  \hline
+  Single Charge Exchange & 1 neutral pion \& no other pions \\
+  \hline
+  Double Charge Exchange & 1 opposite-charge pion \& no other pions \\
+  \hline
+  Pion Production & $>$1 pions of any charge \\
+  \hline
+  \end{tabular}
+\end{center}
+\newpage
 
 \section{Edits to Geant4.10.03.p03}
 

@@ -93,6 +93,53 @@ int main(int argc, char ** argv){
     tp->FillAndAnalyze(inelasticHist, elasticHist);
     
   }
+  else if(weightType == "func"){
+
+    std::cout << "Doing funced reweight" << std::endl;
+    std::cout << "Inelastic Bias: " << inelasticBiasFile << " " << inelasticBiasName << std::endl; 
+    std::cout << "Elastic Bias:   " << elasticBiasFile   << " " << elasticBiasName   << std::endl; 
+
+
+    //Getting inelastic bias info
+    //
+    inelasticFile = new TFile(inelasticBiasFile.c_str());
+    if( !inelasticFile->IsOpen() ){
+      std::cout << "Error: Couldn't open the inelastic bias file " << inelasticBiasFile << std::endl;
+      return 0;
+    }
+    
+    std::cout << "Opened inelastic file: " << inelasticBiasFile << std::endl;
+    inelasticHist = (TH1F*)inelasticFile->Get(inelasticBiasName.c_str());
+    if( !inelasticHist ){
+      std::cout << "Error: Couldn't find hist " << inelasticBiasName << " in the inelastic file" << std::endl;
+      return 0;
+    }
+
+    std::cout << "Got inelastic hist: " << inelasticBiasName << std::endl;
+    //////////////////////////////////
+
+
+    //Getting elastic bias info
+    //
+    elasticFile   = new TFile(elasticBiasFile.c_str());
+    if( !elasticFile->IsOpen() ){
+      std::cout << "Error: Couldn't open the elastic bias file " << elasticBiasFile << std::endl;
+      return 0;
+    }
+
+    std::cout << "Opened elastic file: " << elasticBiasFile << std::endl;
+    elasticHist = (TH1F*)elasticFile->Get(elasticBiasName.c_str());
+    if( !elasticHist ){
+      std::cout << "Error: Couldn't find hist " << elasticBiasName << " in the elastic file" << std::endl;
+      return 0;
+    }
+
+    std::cout << "Got elastic hist: " << elasticBiasName << std::endl;
+    //////////////////////////////////
+
+    tp->FillAndAnalyzeFunc(inelasticHist, elasticHist);
+    
+  }
 
   tp->CloseInput();
 

@@ -62,6 +62,9 @@ class G4ReweightTraj{
     double GetWeight(TH1F *);
     double GetWeight_Elast(TH1F *);
     
+    double GetWeightFunc(TH1F *);
+    double GetWeightFunc_Elast(TH1F *);
+    
     int GetNElastic();
     //Returns a vector of the distances between elastic scatters.
     //Includes from start to first, then between all subsequent elastic scatters

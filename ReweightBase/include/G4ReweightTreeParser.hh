@@ -28,8 +28,10 @@ class G4ReweightTreeParser{
 
     void Analyze(double, double);
     void Analyze(TH1F *, TH1F *);
+    void AnalyzeFunc(TH1F *, TH1F *);
     void FillAndAnalyze(double, double);
     void FillAndAnalyze(TH1F *, TH1F *);
+    void FillAndAnalyzeFunc(TH1F *, TH1F *);
 
     void CloseInput();
     void GetInteractionType(int);

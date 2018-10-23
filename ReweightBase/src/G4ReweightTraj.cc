@@ -244,7 +244,7 @@ double G4ReweightTraj::GetWeight(TH1F * biasHist){
 //                    << "Bin: " << theBin;
                     
           double bias;
-          if(theBin < 0 || theBin > biasHist->GetNbinsX() ){
+          if(theBin < 1 || theBin > biasHist->GetNbinsX() ){
             bias = 1.;
 //            std::cout << "Out of bounds of hist. Setting bias to 1" << std::endl;
 //            std::cout << "\t" << theBin << " " << theMom << std::endl;
@@ -252,6 +252,183 @@ double G4ReweightTraj::GetWeight(TH1F * biasHist){
           else{
             bias = biasHist->GetBinContent(theBin); 
 //            std::cout << "Got bias: " << bias << std::endl;
+          }
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength*bias) / theProc.MFP);
+        }
+        else{
+          bias_total[theProc.Name] += ( (10.*theStep->stepLength) / theProc.MFP);
+        }
+      }
+
+    }
+  }
+//  std::cout << "total: " << total["pi+Inelastic"] << std::endl;
+  //std::cout << "? " << exp(-.5*total["pi+Inelastic"]) << std::endl;
+  double xsecTotal = 0.;
+  double bias_xsecTotal = 0.;
+  for(int i = 0; i < nRW; ++i){
+    //std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
+    xsecTotal += total[reweightable[i]];
+    bias_xsecTotal += bias_total[reweightable[i]];
+  }
+  //std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+
+  double weight;
+/*  if(GetFinalProc() == "pi+Inelastic"){
+    weight = (1 - exp( -1*bias_total ));
+    weight = weight / (1 - exp( -1*total ));
+  }*/
+  double num, denom;  
+  if(total.count(GetFinalProc()) && GetStep(GetNSteps() - 1)->stepLength > 0){
+//     std::cout << "Found final proc " << GetFinalProc() << std::endl;
+//     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
+//     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
+//
+//     std::cout << "Total: " << xsecTotal << " " << bias_xsecTotal << std::endl;
+//     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
+//     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
+
+/*     num = bias_total[GetFinalProc()];
+     num = num / bias_xsecTotal;
+     num = num * (1 - exp( -1*bias_xsecTotal ) );
+
+     denom = total[GetFinalProc()];
+     denom = denom / xsecTotal;
+     denom = denom * (1 - exp( -1*xsecTotal ) );
+
+
+     weight = num/denom;
+*/
+     //Alternative Weight
+     weight = exp( xsecTotal - bias_xsecTotal);
+     weight = weight * bias_total[GetFinalProc()] / total[GetFinalProc()];
+//     weight = ( bias_total[GetFinalProc()] / bias_xsecTotal ) * weight;
+//     weight = weight / ( total[GetFinalProc()] / xsecTotal );
+//     std::cout << GetFinalProc() << " " << weight << std::endl;
+
+  }
+  else{
+    //weight = exp( total - bias_total );
+    weight = exp( xsecTotal - bias_xsecTotal );
+  }
+//  std::cout <<"weight " << weight << std::endl; 
+  return weight;
+}
+
+double G4ReweightTraj::GetWeightFunc(TH1F * biasHist){
+  std::map<std::string,double> total; 
+  std::map<std::string,double> bias_total;  
+
+  for(int i = 0; i < nRW; ++i){
+    total[reweightable[i]] = 0.;
+    bias_total[reweightable[i]] = 0.;
+  }
+
+//  std::cout << "N steps: " << GetNSteps() << std::endl;
+  for(size_t is = 0; is < GetNSteps(); ++is){   
+    auto theStep = GetStep(is);
+        
+/*    std::cout << "P: " << theStep->preStepPx << " " << theStep->preStepPy << " " << theStep->preStepPz << " " << 
+
+    sqrt(theStep->preStepPx*theStep->preStepPx + theStep->preStepPy*theStep->preStepPy + theStep->preStepPz*theStep->preStepPz) <<std::endl;
+    std::cout << "L: " << theStep->stepLength << std::endl;*/
+//    std::cout << theStep->stepChosenProc << " " << is << std::endl;
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      
+      //std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
+
+      if (total.count(theProc.Name)){
+        total[theProc.Name] += (10.*theStep->stepLength/theProc.MFP);
+        
+        if(theProc.Name == "pi+Inelastic"){
+          double theMom = theStep->GetFullPreStepP();
+          int theBin    = biasHist->FindBin(theMom);
+          
+          double bias;
+          if(theBin < 1 || theBin > biasHist->GetNbinsX() ){
+            bias = 1.;
+          }
+          else{
+
+            //Lowest bin. 
+            if(theBin == 1){
+              // Interpolate from 1 at low bin edge
+              if(theMom < biasHist->GetBinCenter(theBin)){
+                double deltaX = theMom - biasHist->GetBinLowEdge(theBin);
+                double width  = biasHist->GetBinCenter(theBin) - biasHist->GetBinLowEdge(theBin);
+                double deltaY = biasHist->GetBinContent(theBin) - 1.;
+
+                bias = (deltaY/width)*deltaX + 1.;
+              }
+              else{
+                //This is the only bin. Interpolate from bin content at center
+                //to 1 at edge
+                if(biasHist->GetNbinsX() == 1){
+
+                  double deltaX = theMom - biasHist->GetBinCenter(theBin);
+//                  double width  = biasHist->GetBinHighEdge(theBin) - biasHist->GetBinCenter(theBin);
+                  double width = biasHist->GetBinWidth(theBin) / 2.;
+                  double deltaY = 1. - biasHist->GetBinContent(theBin);
+
+                  bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin);
+                }
+                //Interpolate from bin content at center 
+                //to bin content at the next center
+                else{
+                  double deltaX = theMom - biasHist->GetBinCenter(theBin);
+                  double width  = biasHist->GetBinCenter(theBin + 1) - biasHist->GetBinCenter(theBin);
+                  double deltaY = biasHist->GetBinContent(theBin + 1) - biasHist->GetBinContent(theBin);
+
+                  bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin);
+                }
+              }
+            }
+            //Highest bin
+            else if(theBin == biasHist->GetNbinsX()){
+              //Interpolate from bin content at center to 1
+              //at edge
+              if(theMom > biasHist->GetBinCenter(theBin)){
+                double deltaX = theMom - biasHist->GetBinCenter(theBin);
+//                double width  = biasHist->GetBinHighEdge(theBin) - biasHist->GetBinCenter(theBin);
+                double width = biasHist->GetBinWidth(theBin) / 2.;
+                double deltaY = 1. - biasHist->GetBinContent(theBin);
+
+                bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin);
+              }
+              //interpolate from bin content at last center
+              //To bin content at current center
+              else{
+                double deltaX = theMom - biasHist->GetBinCenter(theBin - 1);
+                double width  = biasHist->GetBinCenter(theBin) - biasHist->GetBinCenter(theBin - 1);
+                double deltaY = biasHist->GetBinContent(theBin) - biasHist->GetBinContent(theBin - 1);
+
+                bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin - 1);
+              }
+            }
+            //Somewhere in the middle
+            else{
+              //Interpolate from bin content at center 
+              //to bin content at the next center
+              if(theMom > biasHist->GetBinCenter(theBin)){
+                double deltaX = theMom - biasHist->GetBinCenter(theBin);
+                double width  = biasHist->GetBinCenter(theBin + 1) - biasHist->GetBinCenter(theBin);
+                double deltaY = biasHist->GetBinContent(theBin + 1) - biasHist->GetBinContent(theBin);
+
+                bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin);
+              }
+              //interpolate from bin content at last center
+              //To bin content at current center
+              else{
+                double deltaX = theMom - biasHist->GetBinCenter(theBin - 1);
+                double width  = biasHist->GetBinCenter(theBin) - biasHist->GetBinCenter(theBin - 1);
+                double deltaY = biasHist->GetBinContent(theBin) - biasHist->GetBinContent(theBin - 1);
+
+                bias = (deltaY/width)*deltaX + biasHist->GetBinContent(theBin - 1);
+              }
+
+            }
           }
           bias_total[theProc.Name] += ( (10.*theStep->stepLength*bias) / theProc.MFP);
         }
@@ -383,7 +560,71 @@ double G4ReweightTraj::GetWeight_Elast(TH1F * elastBiasHist){
 //                  << "Bin: " << theBin;
                   
         double elastBias;
-        if(theBin < 0 || theBin > elastBiasHist->GetNbinsX() ){
+        if(theBin < 1 || theBin > elastBiasHist->GetNbinsX() ){
+          elastBias = 1.;
+//          std::cout << "Out of bounds of hist. Setting elastBias to 1" << std::endl;
+//          std::cout << "\t" << theBin << " " << theMom << std::endl;
+        }
+        else{
+          elastBias = elastBiasHist->GetBinContent(theBin); 
+//          std::cout << "Got elastBias: " << elastBias << std::endl;
+        }
+
+        elast_total += ( (10.*theStep->stepLength) / theProc.MFP );
+        elast_bias_total += ( (10.*theStep->stepLength*elastBias) / theProc.MFP );
+      }
+      /////////
+
+    }
+
+    //Assign the weight then reset the totals
+  //  std::cout << theStep->stepChosenProc << std::endl;
+    if(theStep->stepChosenProc == "hadElastic"){
+//        std::cout << "Weighting Elast" << std::endl;
+
+//       elast_weight *= ( ( 1 - exp(-1.*elast_bias_total) ) / ( 1 - exp(-1.*elast_total) ) ); 
+
+       //Alternative:
+       elast_weight *= exp(elast_total - elast_bias_total);
+       elast_weight *= elast_bias_total / elast_total;
+
+       elast_total = 0.;
+       elast_bias_total = 0.;
+    }
+
+  }
+
+
+  //Now multiply by the weight from the last elastic scatter
+  elast_weight *= exp( elast_total - elast_bias_total ); 
+
+  //Alternative: NEED TO FIX THIS LATER
+//  elast_weight *= elast_bias_total / elast_total;
+  return elast_weight;
+}
+
+double G4ReweightTraj::GetWeightFunc_Elast(TH1F * elastBiasHist){
+
+  double elast_weight = 1.;
+  double elast_total = 0.;
+  double elast_bias_total = 0.;
+
+  for(size_t is = 0; is < GetNSteps(); ++is){   
+    auto theStep = GetStep(is);
+        
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      //Elastic
+      if(theProc.Name == "hadElastic"){
+        double theMom = theStep->GetFullPreStepP();
+        int theBin    = elastBiasHist->FindBin(theMom);
+        
+//        std::cout << "Finding elastic bias for momentum: " << theMom << std::endl
+//                  << "Bin: " << theBin;
+                  
+        double elastBias;
+        if(theBin < 1 || theBin > elastBiasHist->GetNbinsX() ){
           elastBias = 1.;
 //          std::cout << "Out of bounds of hist. Setting elastBias to 1" << std::endl;
 //          std::cout << "\t" << theBin << " " << theMom << std::endl;

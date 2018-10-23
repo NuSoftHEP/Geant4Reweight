@@ -3,6 +3,8 @@
 
 #include "G4SimDetectorConstruction.hh"
 #include "G4SimPhysicsList.hh"
+#include "G4SimPhysicsListBinned.hh"
+#include "G4SimPhysicsListFunc.hh"
 #include "G4SimActionInitialization.hh"
 
 #include "G4ReweightHist.hh"
@@ -22,6 +24,12 @@ std::string inelasticBiasFile = "bias.root";
 std::string elasticBiasName = "elastic";
 std::string inelasticBiasName = "inelastic";
 
+double inelasticBiasFlat = 1.;
+double elasticBiasFlat = 1.;
+
+
+std::string varType = "flat";
+
 bool ParseArgs(int argc, char* argv[]);
 G4ReweightHist * GetHist(std::string, std::string);
 
@@ -32,33 +40,44 @@ int main(int argc, char * argv[]){
   std::cout << macFileName << " " << outFileName << " " << elasticBiasFile << " " << inelasticBiasFile << std::endl;
   std::cout << elasticBiasName << " " << inelasticBiasName << std::endl;
 
-  std::cout << "Making vectors" << std::endl;
-  std::vector<double> elasticBiasBins;
-  std::vector<double> inelasticBiasBins = {0.0,500,1200.};
-  
-  std::cout << "Making hists" << std::endl;
-  //G4ReweightHist* elasticBias = new G4ReweightHist("","",elasticBiasBins);
-  //G4ReweightHist* inelasticBias = new G4ReweightHist("","",inelasticBiasBins);
-
-  G4ReweightHist * elasticBias   = GetHist(elasticBiasFile,   elasticBiasName);
-  G4ReweightHist * inelasticBias = GetHist(inelasticBiasFile, inelasticBiasName);
-
-  std::cout << "Made Hists" << std::endl;
-
-//  std::cout << "Setting bins" << std::endl;
-//  inelasticBias->SetBinContent(0, .75);
-//  inelasticBias->SetBinContent(1, 1.25);
-//  std::cout << "Set Bins" << std::endl;
-
-
   G4RunManager * runManager = new G4RunManager;
   
   //Define and create detector volume  
   runManager->SetUserInitialization(new G4SimDetectorConstruction);
 
-  //Define the list of particles to be simulated
-  //and on which models their behaviors are based
-  runManager->SetUserInitialization(new G4SimPhysicsList(inelasticBias, elasticBias));
+  if(varType == "func" ){
+    std::cout << "Making hists" << std::endl;
+    G4ReweightHist * elasticBias   = GetHist(elasticBiasFile,   elasticBiasName);
+    G4ReweightHist * inelasticBias = GetHist(inelasticBiasFile, inelasticBiasName);
+
+    std::cout << "Made Hists" << std::endl;
+
+
+    //Define the list of particles to be simulated
+    //and on which models their behaviors are based
+    runManager->SetUserInitialization(new G4SimPhysicsListBinned(inelasticBias, elasticBias));
+  }
+  else if(varType == "binned" ){
+    std::cout << "Making hists" << std::endl;
+    G4ReweightHist * elasticBias   = GetHist(elasticBiasFile,   elasticBiasName);
+    G4ReweightHist * inelasticBias = GetHist(inelasticBiasFile, inelasticBiasName);
+
+    std::cout << "Made Hists" << std::endl;
+
+
+    //Define the list of particles to be simulated
+    //and on which models their behaviors are based
+    runManager->SetUserInitialization(new G4SimPhysicsListFunc(inelasticBias, elasticBias));
+  }
+  else if(varType == "flat" ){
+    runManager->SetUserInitialization(new G4SimPhysicsList(inelasticBiasFlat, elasticBiasFlat));
+  }
+  else{
+    std::cout << "Unknown variation type: " << varType << std::endl;
+    std::cout << "Exiting" << std::endl;
+
+    return 0;
+  }
 
   //Define the actions taken during various stages of the run
   //i.e. generating particles
@@ -68,10 +87,6 @@ int main(int argc, char * argv[]){
   runManager->Initialize();
   G4cout << "Done"<< G4endl;
 
-
- /* G4UImanager * UI = G4UImanager::GetUIpointer();
-  UI->ApplyCommand("/run/verbose 1");
-  UI->ApplyCommand("/event/verbose 1");*/
 
   //read a macro file of commands
   G4UImanager * UI = G4UImanager::GetUIpointer();
@@ -98,6 +113,8 @@ bool ParseArgs(int argc, char* argv[]){
     else if( strcmp(argv[i], "-o") == 0){
       outFileName = argv[i+1];
     }
+
+    //Binned or Functional variations
     else if( strcmp(argv[i], "--eFile") == 0){      
       elasticBiasFile = argv[i+1];
     }
@@ -109,6 +126,20 @@ bool ParseArgs(int argc, char* argv[]){
     }
     else if( strcmp(argv[i], "--iName") == 0){      
       inelasticBiasName = argv[i+1];
+    }
+
+    //Flat Reweighting
+    else if( strcmp(argv[i], "-i") == 0){
+      inelasticBiasFlat = atof(argv[i+1]);
+    }
+    else if( strcmp(argv[i], "-e") == 0){
+      elasticBiasFlat = atof(argv[i+1]);
+    }
+
+
+    //Options: flat(default), binned, func
+    else if( strcmp(argv[i], "--type") == 0){ 
+      varType = argv[i+1];
     }
   }
   return true;

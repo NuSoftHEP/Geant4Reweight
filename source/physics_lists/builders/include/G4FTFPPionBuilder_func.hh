@@ -23,88 +23,66 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id$
+//
 //---------------------------------------------------------------------------
 //
+// ClassName:   G4FTFPPionBuilder_func
 //
-// Author: 2018 Jake Calcutt 
+// Author: 14-Mar-2013 A. Ribon
+//
+// Description: Modified version of G4FTFPPiKBuilder to include on pions.
 //
 // Modified:
 //
 //----------------------------------------------------------------------------
 //
+#ifndef G4FTFPPionBuilder_func_h
+#define G4FTFPPionBuilder_func_h 1
+
+#include "globals.hh"
+
+#include "G4HadronElasticProcess.hh"
+#include "G4VPionBuilder.hh"
+
+#include "G4TheoFSGenerator.hh"
+#include "G4GeneratorPrecompoundInterface.hh"
+#include "G4FTFModel.hh"
+#include "G4LundStringFragmentation.hh"
+#include "G4ExcitedStringDecay.hh"
+#include "G4QuasiElasticChannel.hh"
+
+//#include "G4VCrossSectionDataSet.hh"
+#include "G4CrossSectionPairGG_func.hh"
 
 #include "G4ReweightHist.hh"
 
- 
-G4ReweightHist::G4ReweightHist(std::string name, std::string title, std::vector< double > bins) :
-  histName(name), histTitle(title) {
-  
-  //pass the bin edges
-  histBinEdges = bins;
+class G4FTFPPionBuilder_func : public G4VPionBuilder
+{
+  public: 
+    G4FTFPPionBuilder_func(G4bool quasiElastic=false, G4ReweightHist * bias_hist = NULL);
+    virtual ~G4FTFPPionBuilder_func();
 
-  //initialize the bin values
-  if ( bins.size() > 0 )  histBinValues = std::vector< double >(bins.size() - 1, 0.);
-  else histBinValues = std::vector< double >();
-}
+  public: 
+    virtual void Build(G4HadronElasticProcess * aP);
+    virtual void Build(G4PionPlusInelasticProcess * aP);
+    virtual void Build(G4PionMinusInelasticProcess * aP);
+    
+    void SetMinEnergy(G4double aM) {theMin = aM;}
+    void SetMaxEnergy(G4double aM) {theMax = aM;}
 
-int G4ReweightHist::FindBin( double input ){
+  private:
+    G4TheoFSGenerator * theModel;
+    G4GeneratorPrecompoundInterface * theCascade;
+    G4FTFModel * theStringModel;
+    G4ExcitedStringDecay * theStringDecay;
+    G4QuasiElasticChannel * theQuasiElastic;
+    G4LundStringFragmentation * theLund;
 
-  if(histBinEdges.size() == 0) return -1;
+    G4CrossSectionPairGG_func* thePiData;
+    G4double theMin;
+    G4double theMax;
 
-  for(int i = 0; i < histBinEdges.size() - 1; ++i){
-    if( (input > histBinEdges[i]) && (input < histBinEdges[i+1]) ){
-      return i;    
-    }
-  }
+};
 
-  return -1;
-
-}
-
-double G4ReweightHist::GetBinContent( int theBin ){
-  if (theBin == -1) return 1.;
-
-  return histBinValues[theBin];
-}
-
-double G4ReweightHist::GetBinCenter( int theBin ){
-
-  if (theBin == -1 || theBin > histBinValues.size()){
-//    std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
-
-  double binLowEdge  = histBinEdges[theBin];
-  double binHighEdge = histBinEdges[theBin + 1];
-  
-  return binLowEdge + (binHighEdge - binLowEdge)/2;  
-
-}
-
-double G4ReweightHist::GetBinLowEdge( int theBin ){
-  if (theBin == -1 || theBin > histBinValues.size()){
-    //std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
-
-  return histBinEdges[theBin];
-}
-
-double G4ReweightHist::GetBinHighEdge( int theBin ){
-  if (theBin == -1 || theBin > histBinValues.size()){
-    //std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
-
-  return histBinEdges[theBin + 1];
-}
-
-void G4ReweightHist::SetBinContent( int theBin, double theContent){
-  if ( ( theBin < 0 ) || ( theBin > histBinValues.size() - 1 ) ) return;
-
-  histBinValues[theBin] = theContent;
-}
-
-int G4ReweightHist::GetNBins(){
-  return histBinValues.size();
-}
+#endif

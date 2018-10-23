@@ -23,48 +23,73 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: G4BertiniPionBuilder_func.cc 83699 2014-09-10 07:18:25Z gcosmo $
 //
 //---------------------------------------------------------------------------
 //
-// ClassName: G4ReweightHist:
-//     Class to give histogram functionality for Geant4
+// ClassName:   G4BertiniPionBuilder_func
 //
-// Author: 2018 Jake Calcutt
+// Author: 2010 G.Folger
+//  devired from G4BertiniPiKBuilder_func
 //
 // Modified:
+// 02.04.2009 V.Ivanchenko remove add cross section, string builderis reponsible 
 //
 //----------------------------------------------------------------------------
 //
-#ifndef G4ReweightHist_h
-#define G4ReweightHist_h
+#include "G4BertiniPionBuilder_func.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4ParticleTable.hh"
+#include "G4ProcessManager.hh"
+#include "G4CrossSectionDataSetRegistry.hh"
 
-#include <vector>
-#include <string>
-class G4ReweightHist
+
+/*G4BertiniPionBuilder_func::
+G4BertiniPionBuilder_func() 
+ {
+   thePiData = (G4PiNuclearCrossSection_func*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection_func::Default_Name());
+   theMin = 0*GeV;
+   theMax = 9.9*GeV;
+   theModel = new G4CascadeInterface;
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax); 
+ }*/
+
+G4BertiniPionBuilder_func::
+G4BertiniPionBuilder_func(G4ReweightHist * bias_hist) 
+ {
+   thePiData = (G4PiNuclearCrossSection_func*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection_func::Default_Name());
+   thePiData->SetBias(bias_hist);
+   std::cout << "SetBias" << std::endl;
+   theMin = 0*GeV;
+   theMax = 9.9*GeV;
+   theModel = new G4CascadeInterface;
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax); 
+ }
+
+G4BertiniPionBuilder_func::~G4BertiniPionBuilder_func() 
 {
+}
 
-  public:
-           G4ReweightHist(std::string name, std::string title, std::vector< double > bins);
-	  ~G4ReweightHist();
+void G4BertiniPionBuilder_func::
+Build(G4PionPlusInelasticProcess * aP)
+ {
+   aP->RegisterMe(theModel);
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax);
+ }
 
-    int    FindBin( double ); 
-    double GetBinContent( int );
-    double GetBinCenter( int );
-    double GetBinLowEdge( int );
-    double GetBinHighEdge( int );
-    void   SetBinContent( int, double );
-    int    GetNBins();
+void G4BertiniPionBuilder_func::
+Build(G4PionMinusInelasticProcess * aP)
+ {
+   aP->RegisterMe(theModel);
+   theModel->SetMinEnergy(theMin);
+   theModel->SetMaxEnergy(theMax);
+ }
 
-  private:
-          // no instance needed
-//  	G4ReweightHist(std::string name, std::string title, int nBins, double binLow, double binHigh);
+void G4BertiniPionBuilder_func::
+Build(G4HadronElasticProcess * ) {}
 
-        std::string histName;
-        std::string histTitle;
-
-        std::vector< double > histBinEdges;
-        std::vector< double > histBinValues;
-
-        
-};
-#endif
+         

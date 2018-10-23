@@ -92,6 +92,7 @@ GEANT4_DEFINE_MODULE(NAME G4phys_ctor_hinelastic
         G4HadronPhysicsFTFP_BERT.hh
         G4HadronPhysicsFTFP_BERT_bias.hh
         G4HadronPhysicsFTFP_BERT_binned.hh
+        G4HadronPhysicsFTFP_BERT_func.hh
         G4HadronPhysicsFTFP_BERT_HP.hh
         G4HadronPhysicsFTFP_BERT_TRV.hh
         G4HadronPhysicsFTFP_BERT_ATL.hh
@@ -112,6 +113,7 @@ GEANT4_DEFINE_MODULE(NAME G4phys_ctor_hinelastic
         G4HadronPhysicsFTFP_BERT.cc
         G4HadronPhysicsFTFP_BERT_bias.cc
         G4HadronPhysicsFTFP_BERT_binned.cc
+        G4HadronPhysicsFTFP_BERT_func.cc
         G4HadronPhysicsFTFP_BERT_HP.cc
         G4HadronPhysicsFTFP_BERT_TRV.cc
         G4HadronPhysicsFTFP_BERT_ATL.cc

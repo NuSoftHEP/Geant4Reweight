@@ -23,88 +23,75 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: G4HadronElasticPhysics.hh 81758 2014-06-05 08:12:06Z gcosmo $
+//
 //---------------------------------------------------------------------------
 //
+// ClassName:   G4HadronElasticPhysics
 //
-// Author: 2018 Jake Calcutt 
+// Author: 23 November 2006 V. Ivanchenko
 //
 // Modified:
+// 29.07.2010 V.Ivanchenko rename this class from G4HadronHElasticPhysics to
+//                         G4HadronElasticPhysics, old version of the class
+//                         is renamed to G4HadronElasticPhysics93
+// 03.06.2011 V.Ivanchenko change design - added access to pointers of the
+//                         neutron process and model
 //
 //----------------------------------------------------------------------------
 //
 
+#ifndef G4HadronElasticPhysics_func_h
+#define G4HadronElasticPhysics_func_h 1
+
+#include "globals.hh"
+#include "G4VPhysicsConstructor.hh"
+#include "G4HadronElastic.hh"
+#include "G4HadronicProcess.hh"
+
 #include "G4ReweightHist.hh"
 
+class G4HadronElasticPhysics_func : public G4VPhysicsConstructor
+{
+public: 
+
+  G4HadronElasticPhysics_func(G4int ver = 0, G4ReweightHist * bias_hist = NULL); 
+
+  virtual ~G4HadronElasticPhysics_func();
+
+  // This method will be invoked in the Construct() method. 
+  // each particle type will be instantiated
+  virtual void ConstructParticle();
  
-G4ReweightHist::G4ReweightHist(std::string name, std::string title, std::vector< double > bins) :
-  histName(name), histTitle(title) {
-  
-  //pass the bin edges
-  histBinEdges = bins;
+  // This method will be invoked in the Construct() method.
+  // each physics process will be instantiated and
+  // registered to the process manager of each particle type 
+  virtual void ConstructProcess();
 
-  //initialize the bin values
-  if ( bins.size() > 0 )  histBinValues = std::vector< double >(bins.size() - 1, 0.);
-  else histBinValues = std::vector< double >();
-}
+  G4HadronElastic* GetNeutronModel();
 
-int G4ReweightHist::FindBin( double input ){
+  G4HadronicProcess* GetNeutronProcess();
 
-  if(histBinEdges.size() == 0) return -1;
+private:
 
-  for(int i = 0; i < histBinEdges.size() - 1; ++i){
-    if( (input > histBinEdges[i]) && (input < histBinEdges[i+1]) ){
-      return i;    
-    }
-  }
+  // copy constructor and hide assignment operator
+  G4HadronElasticPhysics_func(G4HadronElasticPhysics_func &);
+  G4HadronElasticPhysics_func & operator=(const G4HadronElasticPhysics_func &right);
 
-  return -1;
+  G4int    verbose;
+  G4ReweightHist *   theBias;
+  static G4ThreadLocal G4bool   wasActivated;
 
-}
+  static G4ThreadLocal G4HadronElastic*   neutronModel;
+  static G4ThreadLocal G4HadronicProcess* neutronProcess;
 
-double G4ReweightHist::GetBinContent( int theBin ){
-  if (theBin == -1) return 1.;
+};
+#endif
 
-  return histBinValues[theBin];
-}
 
-double G4ReweightHist::GetBinCenter( int theBin ){
 
-  if (theBin == -1 || theBin > histBinValues.size()){
-//    std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
 
-  double binLowEdge  = histBinEdges[theBin];
-  double binHighEdge = histBinEdges[theBin + 1];
-  
-  return binLowEdge + (binHighEdge - binLowEdge)/2;  
 
-}
 
-double G4ReweightHist::GetBinLowEdge( int theBin ){
-  if (theBin == -1 || theBin > histBinValues.size()){
-    //std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
 
-  return histBinEdges[theBin];
-}
 
-double G4ReweightHist::GetBinHighEdge( int theBin ){
-  if (theBin == -1 || theBin > histBinValues.size()){
-    //std::cout << "Warning. Getting bin out of range" << std::endl;
-    return -1.;
-  }
-
-  return histBinEdges[theBin + 1];
-}
-
-void G4ReweightHist::SetBinContent( int theBin, double theContent){
-  if ( ( theBin < 0 ) || ( theBin > histBinValues.size() - 1 ) ) return;
-
-  histBinValues[theBin] = theContent;
-}
-
-int G4ReweightHist::GetNBins(){
-  return histBinValues.size();
-}

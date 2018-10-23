@@ -66,6 +66,7 @@ GEANT4_DEFINE_MODULE(NAME G4phys_ctor_helastic
         G4HadronElasticPhysics.hh
         G4HadronElasticPhysics_bias.hh
         G4HadronElasticPhysics_binned.hh
+        G4HadronElasticPhysics_func.hh
         G4HadronElasticPhysicsHP.hh
         G4HadronElasticPhysicsLEND.hh
         G4HadronElasticPhysicsXS.hh
@@ -78,6 +79,7 @@ GEANT4_DEFINE_MODULE(NAME G4phys_ctor_helastic
         G4HadronElasticPhysics.cc
         G4HadronElasticPhysics_bias.cc
         G4HadronElasticPhysics_binned.cc
+        G4HadronElasticPhysics_func.cc
         G4HadronElasticPhysicsHP.cc
         G4HadronElasticPhysicsLEND.cc
         G4HadronElasticPhysicsXS.cc

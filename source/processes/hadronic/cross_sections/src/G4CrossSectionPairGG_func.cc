@@ -61,8 +61,8 @@ G4CrossSectionPairGG_func::~G4CrossSectionPairGG_func() {
    // The cross section registry will delete theLowX
 }
 
-void G4CrossSectionPairGG_func::SetBias(G4ReweightHist * bias_hist){
-  theLowX->SetBias(bias_hist);
+void G4CrossSectionPairGG_func::SetBias(G4ReweightInter * bias){
+  theLowX->SetBias(bias);
 }
 
 void G4CrossSectionPairGG_func::CrossSectionDescription(

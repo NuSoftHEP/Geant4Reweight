@@ -41,10 +41,10 @@
 #include "G4CrossSectionDataSetRegistry.hh"
 
 G4FTFPPionBuilder_func::
-G4FTFPPionBuilder_func(G4bool quasiElastic, G4ReweightHist * bias_hist) 
+G4FTFPPionBuilder_func(G4bool quasiElastic, G4ReweightInter * bias) 
 {
   thePiData = new G4CrossSectionPairGG_func((G4PiNuclearCrossSection_func*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection_func::Default_Name()), 91*GeV);
-  thePiData->SetBias(bias_hist);
+  thePiData->SetBias(bias);
   theMin = 4*GeV;
   theMax = 100*TeV;
   theModel = new G4TheoFSGenerator("FTFP");

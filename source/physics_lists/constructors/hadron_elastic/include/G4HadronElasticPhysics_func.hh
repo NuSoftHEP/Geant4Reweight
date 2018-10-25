@@ -49,13 +49,13 @@
 #include "G4HadronElastic.hh"
 #include "G4HadronicProcess.hh"
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4HadronElasticPhysics_func : public G4VPhysicsConstructor
 {
 public: 
 
-  G4HadronElasticPhysics_func(G4int ver = 0, G4ReweightHist * bias_hist = NULL); 
+  G4HadronElasticPhysics_func(G4int ver = 0, G4ReweightInter * bias = NULL); 
 
   virtual ~G4HadronElasticPhysics_func();
 
@@ -79,7 +79,7 @@ private:
   G4HadronElasticPhysics_func & operator=(const G4HadronElasticPhysics_func &right);
 
   G4int    verbose;
-  G4ReweightHist *   theBias;
+  G4ReweightInter *   theBias;
   static G4ThreadLocal G4bool   wasActivated;
 
   static G4ThreadLocal G4HadronElastic*   neutronModel;

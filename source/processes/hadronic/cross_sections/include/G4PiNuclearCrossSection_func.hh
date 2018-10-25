@@ -34,7 +34,7 @@
 #include "G4PiData.hh"
 #include "G4HadTmpUtil.hh"
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4PiNuclearCrossSection_func : public G4VCrossSectionDataSet
 {
@@ -45,7 +45,7 @@ class G4PiNuclearCrossSection_func : public G4VCrossSectionDataSet
     
     static const char* Default_Name() {return "G4PiNuclearCrossSection_func";}
 
-    void SetBias(G4ReweightHist * bias_hist);
+    void SetBias(G4ReweightInter * bias);
 
     virtual
     G4bool IsElementApplicable(const G4DynamicParticle* aParticle,
@@ -65,7 +65,7 @@ class G4PiNuclearCrossSection_func : public G4VCrossSectionDataSet
   
   private:
     G4double Interpolate(G4int Z1, G4int Z2, G4int Z, G4double x1, G4double x2);
-    G4ReweightHist * theBias;
+    G4ReweightInter * theBias;
 
     // add Hydrogen from PDG group.
 

@@ -69,8 +69,8 @@ G4_DECLARE_PHYSCONSTR_FACTORY(G4HadronPhysicsFTFP_BERT_func);
 
 G4ThreadLocal G4HadronPhysicsFTFP_BERT_func::ThreadPrivate* G4HadronPhysicsFTFP_BERT_func::tpdata=0;
 
-G4HadronPhysicsFTFP_BERT_func::G4HadronPhysicsFTFP_BERT_func(G4int, G4ReweightHist * bias_hist)
-    :  G4VPhysicsConstructor("hInelastic FTFP_BERT_func"), theBias(bias_hist)
+G4HadronPhysicsFTFP_BERT_func::G4HadronPhysicsFTFP_BERT_func(G4int, G4ReweightInter * bias)
+    :  G4VPhysicsConstructor("hInelastic FTFP_BERT_func"), theBias(bias)
 /*    , theNeutrons(0)
     , theBertiniNeutron(0)
     , theFTFPNeutron(0)
@@ -92,8 +92,8 @@ G4HadronPhysicsFTFP_BERT_func::G4HadronPhysicsFTFP_BERT_func(G4int, G4ReweightHi
     , xsNeutronCaptureXS(0)*/
 {std::cout << "BIAS LIST" << std::endl;}
 
-G4HadronPhysicsFTFP_BERT_func::G4HadronPhysicsFTFP_BERT_func(const G4String& name, G4bool quasiElastic, G4ReweightHist * bias_hist)
-    :  G4VPhysicsConstructor(name), theBias(bias_hist)
+G4HadronPhysicsFTFP_BERT_func::G4HadronPhysicsFTFP_BERT_func(const G4String& name, G4bool quasiElastic, G4ReweightInter * bias)
+    :  G4VPhysicsConstructor(name), theBias(bias)
 /*    , theNeutrons(0)
     , theBertiniNeutron(0)
     , theFTFPNeutron(0)

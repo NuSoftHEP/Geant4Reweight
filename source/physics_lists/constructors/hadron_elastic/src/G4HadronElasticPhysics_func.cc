@@ -86,8 +86,8 @@ G4ThreadLocal G4bool G4HadronElasticPhysics_func::wasActivated = false;
 G4ThreadLocal G4HadronElastic* G4HadronElasticPhysics_func::neutronModel = 0;
 G4ThreadLocal G4HadronicProcess* G4HadronElasticPhysics_func::neutronProcess = 0;
 
-G4HadronElasticPhysics_func::G4HadronElasticPhysics_func(G4int ver, G4ReweightHist * bias_hist)
-  : G4VPhysicsConstructor("hElasticWEL_CHIPS"), verbose(ver), theBias(bias_hist)
+G4HadronElasticPhysics_func::G4HadronElasticPhysics_func(G4int ver, G4ReweightInter * bias)
+  : G4VPhysicsConstructor("hElasticWEL_CHIPS"), verbose(ver), theBias(bias)
 {
   if(verbose > 1) { 
     G4cout << "### G4HadronElasticPhysics_func: " << GetPhysicsName() 

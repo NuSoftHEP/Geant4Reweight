@@ -443,8 +443,8 @@ G4PiNuclearCrossSection_func::G4PiNuclearCrossSection_func()
   theZ.push_back(92); // U
 }
 
-void G4PiNuclearCrossSection_func::SetBias(G4ReweightHist * bias_hist){
-  theBias = bias_hist;
+void G4PiNuclearCrossSection_func::SetBias(G4ReweightInter * bias){
+  theBias = bias;
 }
 
 G4PiNuclearCrossSection_func::
@@ -599,95 +599,9 @@ G4PiNuclearCrossSection_func::GetElementCrossSection(const G4DynamicParticle* pa
 
   G4double momentum = particle->GetTotalMomentum() / MeV;
   G4cout << "Scaling for momentum " << momentum << std::endl;
-  int theBin = theBias->FindBin(momentum);
-  G4cout << "Bin: " << theBin << std::endl;
-  
-  //Just scale by 1
-  if (theBin == -1){
-    return result;
-  }
-  else if(theBin == 0){
-
-    //Interpolate from 1 at the low bin edge
-    if(momentum < theBias->GetBinCenter(theBin)){
-      double deltaX = momentum - theBias->GetBinLowEdge( theBin ); 
-      double width  = theBias->GetBinCenter( theBin ) - theBias->GetBinLowEdge( theBin );
-      double deltaY = theBias->GetBinContent( theBin ) - 1.;
-
-      double val = (deltaY / width) * deltaX + 1.;
-      return val * result;
-    }    
-    //Interpolate towards the next bin edge
-    else{
-      
-      //Check if there's only 1 bin
-      //If so, interpolate towards 1 at the high bin edge
-      if(theBias->GetNBins() == 1){
-        double deltaX = momentum - theBias->GetBinCenter( theBin ); 
-        double width  = theBias->GetBinHighEdge( theBin ) - theBias->GetBinCenter( theBin);
-        double deltaY = 1. - theBias->GetBinContent( theBin );
-
-        double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin );
-        return val * result;
-      }
-
-      //else interpolate towards the higher bin's center       
-      double deltaX = momentum - theBias->GetBinCenter( theBin );
-      double width  = theBias->GetBinCenter( theBin + 1 )  - theBias->GetBinCenter( theBin ); 
-      double deltaY = theBias->GetBinContent( theBin + 1 ) - theBias->GetBinContent( theBin );
-
-      double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin );
-      return val * result;
-    }
-  }
-  //If we're at the highest bin
-  else if(theBin == theBias->GetNBins() - 1){
-
-    //Interpolate towards 1 at the highest bin edge
-    if( momentum > theBias->GetBinCenter( theBin ) ){     
-      double deltaX = momentum - theBias->GetBinCenter( theBin );
-      double width  = theBias->GetBinHighEdge( theBin ) - theBias->GetBinCenter( theBin);
-      double deltaY = 1. - theBias->GetBinContent( theBin );
-
-      double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin );
-      return val * result;
-    }
-
-    //Else interpolate towards the lower bin's center
-    double deltaX = momentum - theBias->GetBinCenter( theBin - 1 );
-    double width  = theBias->GetBinCenter( theBin )  - theBias->GetBinCenter( theBin - 1 ); 
-    double deltaY = theBias->GetBinContent( theBin ) - theBias->GetBinContent( theBin - 1);
-
-    double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin - 1 ); 
-    return val * result;
-  }
-  //We're somewhere in the middle
-  else{
-    
-    //Interpolate from center of this bin 
-    //towards center of next
-    if( momentum > theBias->GetBinCenter( theBin ) ){
-      double deltaX = momentum - theBias->GetBinCenter( theBin );
-      double width  = theBias->GetBinCenter( theBin + 1 )  - theBias->GetBinCenter( theBin );
-      double deltaY = theBias->GetBinContent( theBin + 1 ) - theBias->GetBinContent( theBin );
-
-      double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin );
-      return val * result;
-    }
-    //Interpolate to center of this bin
-    //from center of lower
-    else{
-      double deltaX = momentum - theBias->GetBinCenter( theBin - 1 );
-      double width  = theBias->GetBinCenter( theBin )  - theBias->GetBinCenter( theBin - 1);
-      double deltaY = theBias->GetBinContent( theBin ) - theBias->GetBinContent( theBin - 1);  
-
-      double val = (deltaY / width) * deltaX + theBias->GetBinContent( theBin - 1 );
-      return val * result;
-    }
-  }
-
-  
-  //return theBias->GetBinContent( theBin )*result;
+  G4cout << "Scale: " << theBias->GetContent( momentum ) << std::endl;
+ 
+  return theBias->GetContent( momentum )*result;
   //return result;
 }
 

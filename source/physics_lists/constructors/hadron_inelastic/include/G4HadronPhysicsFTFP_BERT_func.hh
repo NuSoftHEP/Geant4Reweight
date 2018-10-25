@@ -67,7 +67,7 @@
 #include "G4AntiBarionBuilder.hh"
 #include "G4FTFPAntiBarionBuilder.hh"
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4ComponentGGHadronNucleusXsc;
 
@@ -75,8 +75,8 @@ class G4ComponentGGHadronNucleusXsc;
 class G4HadronPhysicsFTFP_BERT_func : public G4VPhysicsConstructor
 {
   public: 
-    G4HadronPhysicsFTFP_BERT_func(G4int verbose =1, G4ReweightHist * bias_hist = NULL);
-    G4HadronPhysicsFTFP_BERT_func(const G4String& name, G4bool quasiElastic=false, G4ReweightHist * bias_hist = NULL);
+    G4HadronPhysicsFTFP_BERT_func(G4int verbose =1, G4ReweightInter * bias = NULL);
+    G4HadronPhysicsFTFP_BERT_func(const G4String& name, G4bool quasiElastic=false, G4ReweightInter * bias = NULL);
     virtual ~G4HadronPhysicsFTFP_BERT_func();
 
   public: 
@@ -86,7 +86,7 @@ class G4HadronPhysicsFTFP_BERT_func : public G4VPhysicsConstructor
   private:
     void CreateModels();
     G4bool QuasiElastic;
-    G4ReweightHist * theBias;
+    G4ReweightInter * theBias;
 
     // Simplify handling of TLS data, encapsulate everyhing in a structure
     struct ThreadPrivate { 

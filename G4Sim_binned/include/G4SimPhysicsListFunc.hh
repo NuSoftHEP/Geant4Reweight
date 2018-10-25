@@ -4,13 +4,13 @@
 #include "G4VUserPhysicsList.hh"
 #include "G4VModularPhysicsList.hh"
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4SimPhysicsListFunc : public G4VModularPhysicsList
 {
 
   public:
-    G4SimPhysicsListFunc(G4ReweightHist * inelasticBias, G4ReweightHist * elasticBias);
+    G4SimPhysicsListFunc(G4ReweightInter * inelasticBias, G4ReweightInter * elasticBias);
     virtual ~G4SimPhysicsListFunc();
 
   protected:

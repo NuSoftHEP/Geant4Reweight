@@ -10,7 +10,7 @@
 #include "G4HadronElasticPhysics_func.hh"
 
 
-G4SimPhysicsListFunc::G4SimPhysicsListFunc(G4ReweightHist * inelasticBias, G4ReweightHist * elasticBias) : G4VModularPhysicsList(){
+G4SimPhysicsListFunc::G4SimPhysicsListFunc(G4ReweightInter * inelasticBias, G4ReweightInter * elasticBias) : G4VModularPhysicsList(){
   SetVerboseLevel(5);
 
   RegisterPhysics( new G4DecayPhysics );

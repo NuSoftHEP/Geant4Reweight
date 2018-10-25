@@ -57,10 +57,10 @@ G4BertiniPionBuilder_func()
  }*/
 
 G4BertiniPionBuilder_func::
-G4BertiniPionBuilder_func(G4ReweightHist * bias_hist) 
+G4BertiniPionBuilder_func(G4ReweightInter * bias) 
  {
    thePiData = (G4PiNuclearCrossSection_func*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection_func::Default_Name());
-   thePiData->SetBias(bias_hist);
+   thePiData->SetBias(bias);
    std::cout << "SetBias" << std::endl;
    theMin = 0*GeV;
    theMax = 9.9*GeV;

@@ -23,66 +23,57 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id$
-//
 //---------------------------------------------------------------------------
 //
-// ClassName:   G4FTFPPionBuilder_func
 //
-// Author: 14-Mar-2013 A. Ribon
-//
-// Description: Modified version of G4FTFPPiKBuilder to include on pions.
+// Author: 2018 Jake Calcutt 
 //
 // Modified:
 //
 //----------------------------------------------------------------------------
 //
-#ifndef G4FTFPPionBuilder_func_h
-#define G4FTFPPionBuilder_func_h 1
-
-#include "globals.hh"
-
-#include "G4HadronElasticProcess.hh"
-#include "G4VPionBuilder.hh"
-
-#include "G4TheoFSGenerator.hh"
-#include "G4GeneratorPrecompoundInterface.hh"
-#include "G4FTFModel.hh"
-#include "G4LundStringFragmentation.hh"
-#include "G4ExcitedStringDecay.hh"
-#include "G4QuasiElasticChannel.hh"
-
-//#include "G4VCrossSectionDataSet.hh"
-#include "G4CrossSectionPairGG_func.hh"
 
 #include "G4ReweightInter.hh"
 
-class G4FTFPPionBuilder_func : public G4VPionBuilder
-{
-  public: 
-    G4FTFPPionBuilder_func(G4bool quasiElastic=false, G4ReweightInter * bias = NULL);
-    virtual ~G4FTFPPionBuilder_func();
+ 
+G4ReweightInter::G4ReweightInter(std::vector< std::pair< double, double > > input) : content(input) { }
 
-  public: 
-    virtual void Build(G4HadronElasticProcess * aP);
-    virtual void Build(G4PionPlusInelasticProcess * aP);
-    virtual void Build(G4PionMinusInelasticProcess * aP);
-    
-    void SetMinEnergy(G4double aM) {theMin = aM;}
-    void SetMaxEnergy(G4double aM) {theMax = aM;}
+double G4ReweightInter::GetContent( double inputPoint){
 
-  private:
-    G4TheoFSGenerator * theModel;
-    G4GeneratorPrecompoundInterface * theCascade;
-    G4FTFModel * theStringModel;
-    G4ExcitedStringDecay * theStringDecay;
-    G4QuasiElasticChannel * theQuasiElastic;
-    G4LundStringFragmentation * theLund;
+  if( GetNPoints() <= 1 ) return 1.;
 
-    G4CrossSectionPairGG_func* thePiData;
-    G4double theMin;
-    G4double theMax;
+  if( inputPoint < GetPoint(0) || inputPoint > GetPoint( GetNPoints() - 1 ) ) return 1.;
 
-};
 
-#endif
+  for(size_t i = 0; i < (GetNPoints() - 1); ++i){
+    if ( inputPoint > GetPoint(i) && inputPoint < GetPoint(i+1) ){
+      double lowerPoint = GetPoint(i);
+      double upperPoint = GetPoint(i+1);
+
+      double lowerValue = GetValue(i);
+      double upperValue = GetValue(i+1);
+
+      double slope = upperValue - lowerValue;
+      slope = slope / ( upperPoint - lowerPoint );
+
+      double deltaX = inputPoint - lowerPoint;
+
+      return lowerValue + slope * deltaX;
+    }
+  }
+  
+
+  return 1.;
+}
+
+double G4ReweightInter::GetPoint( size_t i ){
+  if( i >= GetNPoints() ) return -1.;
+
+  return content[i].first;
+}
+
+double G4ReweightInter::GetValue( size_t i ){
+  if( i >= GetNPoints() ) return -1.;
+
+  return content[i].second;
+}

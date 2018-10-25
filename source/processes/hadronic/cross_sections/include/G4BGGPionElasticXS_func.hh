@@ -53,7 +53,7 @@
 #include "G4VCrossSectionDataSet.hh"
 #include "G4ParticleDefinition.hh"
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4ComponentGGHadronNucleusXsc;
 class G4UPiNuclearCrossSection;
@@ -67,7 +67,7 @@ class G4BGGPionElasticXS_func : public G4VCrossSectionDataSet
 {
 public:
 
-  G4BGGPionElasticXS_func (const G4ParticleDefinition*, G4ReweightHist * bias_hist);
+  G4BGGPionElasticXS_func (const G4ParticleDefinition*, G4ReweightInter * bias);
 
   virtual ~G4BGGPionElasticXS_func();
    
@@ -97,7 +97,7 @@ public:
 
 private:
 
-  G4ReweightHist * theBias;
+  G4ReweightInter * theBias;
   G4BGGPionElasticXS_func & operator=(const G4BGGPionElasticXS_func &right);
   G4BGGPionElasticXS_func(const G4BGGPionElasticXS_func&);
 

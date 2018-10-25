@@ -46,7 +46,7 @@
 #include <valarray>
 #include <iostream>
 
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4NistManager;
 class G4ComponentGGHadronNucleusXsc;
@@ -63,7 +63,7 @@ class G4CrossSectionPairGG_func : public G4VCrossSectionDataSet
   G4CrossSectionPairGG_func(G4PiNuclearCrossSection_func * low,
 //  	             G4VCrossSectionDataSet * high,
 		     G4double Etransit);
-  void SetBias(G4ReweightHist * bias_hist);			      
+  void SetBias(G4ReweightInter * bias);			      
   virtual ~G4CrossSectionPairGG_func();
 
   virtual void CrossSectionDescription(std::ostream&) const;

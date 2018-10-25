@@ -51,13 +51,13 @@
 #include "G4PiNuclearCrossSection_func.hh"
 #include "G4PiNuclearCrossSection.hh"
 #include "G4CascadeInterface.hh"   
-#include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
 class G4BertiniPionBuilder_func : public G4VPionBuilder
 {
   public: 
 //    G4BertiniPionBuilder_func();
-    G4BertiniPionBuilder_func(G4ReweightHist * bias_hist = NULL);
+    G4BertiniPionBuilder_func(G4ReweightInter * bias = NULL);
     virtual ~G4BertiniPionBuilder_func();
 
   public: 

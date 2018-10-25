@@ -8,7 +8,11 @@
 #include "G4SimActionInitialization.hh"
 
 #include "G4ReweightHist.hh"
+#include "G4ReweightInter.hh"
 
+#include <utility>
+#include <iostream>
+#include <fstream>
 
 #include "TH1F.h"
 #include "TFile.h"
@@ -32,6 +36,7 @@ std::string varType = "flat";
 
 bool ParseArgs(int argc, char* argv[]);
 G4ReweightHist * GetHist(std::string, std::string);
+G4ReweightInter * GetInter(std::string);
 
 int main(int argc, char * argv[]){
 
@@ -46,16 +51,39 @@ int main(int argc, char * argv[]){
   runManager->SetUserInitialization(new G4SimDetectorConstruction);
 
   if(varType == "func" ){
-    std::cout << "Making hists" << std::endl;
-    G4ReweightHist * elasticBias   = GetHist(elasticBiasFile,   elasticBiasName);
-    G4ReweightHist * inelasticBias = GetHist(inelasticBiasFile, inelasticBiasName);
 
-    std::cout << "Made Hists" << std::endl;
+/*    std::vector< std::pair< double, double > > inel_input = { 
+       std::make_pair(000.  , 1.00),
+       std::make_pair(200.  , 0.75),
+       std::make_pair(600.  , 1.25),
+       std::make_pair(1000. , 0.75),
+       std::make_pair(1200. , 1.00)
+    };
+*/
+    std::vector< std::pair< double, double > > elast_input; 
+
+    std::cout << "Making interpolated weights" << std::endl;
+//    G4ReweightInter * elasticBias   = new G4ReweightInter(elast_input);
+//    G4ReweightInter * inelasticBias = new G4ReweightInter(inel_input);
+    G4ReweightInter * inelasticBias = GetInter( inelasticBiasFile );
+    G4ReweightInter * elasticBias = GetInter( elasticBiasFile );
+
+    std::cout << "Made interpolated weights" << std::endl;
+
+    std::cout << "Inelastic:" << std::endl;
+    for(size_t i = 0; i < inelasticBias->GetNPoints(); ++i){
+      std::cout << inelasticBias->GetPoint(i) << " " << inelasticBias->GetValue(i) << std::endl;
+    }
+    std::cout << "Elastic:" << std::endl;
+    for(size_t i = 0; i < elasticBias->GetNPoints(); ++i){
+      std::cout << elasticBias->GetPoint(i) << " " << elasticBias->GetValue(i) << std::endl;
+    }
 
 
     //Define the list of particles to be simulated
     //and on which models their behaviors are based
-    runManager->SetUserInitialization(new G4SimPhysicsListBinned(inelasticBias, elasticBias));
+    runManager->SetUserInitialization(new G4SimPhysicsListFunc(inelasticBias, elasticBias));
+
   }
   else if(varType == "binned" ){
     std::cout << "Making hists" << std::endl;
@@ -67,9 +95,10 @@ int main(int argc, char * argv[]){
 
     //Define the list of particles to be simulated
     //and on which models their behaviors are based
-    runManager->SetUserInitialization(new G4SimPhysicsListFunc(inelasticBias, elasticBias));
+    runManager->SetUserInitialization(new G4SimPhysicsListBinned(inelasticBias, elasticBias));
   }
   else if(varType == "flat" ){
+    std::cout << "inel, elast: " << inelasticBiasFlat << " " << elasticBiasFlat << std::endl;
     runManager->SetUserInitialization(new G4SimPhysicsList(inelasticBiasFlat, elasticBiasFlat));
   }
   else{
@@ -170,4 +199,45 @@ G4ReweightHist * GetHist(std::string fileName, std::string histName){
 
   return outHist;
 
+}
+
+G4ReweightInter * GetInter(std::string fileName){
+  std::ifstream inputFile;  
+  inputFile.open(fileName);
+
+  std::string line;
+
+  if (inputFile.is_open()){
+
+    std::vector< std::pair< double, double > > result;
+
+    while( std::getline( inputFile, line) ){
+      std::string::iterator it;
+      std::string pos = "", val = "";
+      bool found = false;
+      for( it = line.begin(); it < line.end(); ++it){
+        if (*it == ',') found = true;
+        else{
+          if(!found) pos += *it;
+          else val += *it;
+        }
+      }
+      std::cout << pos << " " << val << std::endl;
+      result.push_back( std::make_pair(std::stod(pos), std::stod(val) ));
+      
+    }
+    inputFile.close();
+   
+    G4ReweightInter * theInter = new G4ReweightInter( result );
+    return theInter;
+  }
+  else{
+    std::cout << "Unable to open file" << std::endl;
+    std::cout << "Returning empty Interpolater. Will return biases of 1. for all momentum values" << std::endl;
+
+    G4ReweightInter * theInter = new G4ReweightInter( std::vector<std::pair<double, double> >() );
+    return theInter;
+  }
+
+  
 }

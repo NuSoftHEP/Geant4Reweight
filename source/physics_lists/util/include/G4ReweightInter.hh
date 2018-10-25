@@ -23,66 +23,38 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id$
 //
 //---------------------------------------------------------------------------
 //
-// ClassName:   G4FTFPPionBuilder_func
+// ClassName: G4ReweightInter:
+//     Class to give histogram functionality for Geant4
 //
-// Author: 14-Mar-2013 A. Ribon
-//
-// Description: Modified version of G4FTFPPiKBuilder to include on pions.
+// Author: 2018 Jake Calcutt
 //
 // Modified:
 //
 //----------------------------------------------------------------------------
 //
-#ifndef G4FTFPPionBuilder_func_h
-#define G4FTFPPionBuilder_func_h 1
+#ifndef G4ReweightInter_h
+#define G4ReweightInter_h
 
-#include "globals.hh"
-
-#include "G4HadronElasticProcess.hh"
-#include "G4VPionBuilder.hh"
-
-#include "G4TheoFSGenerator.hh"
-#include "G4GeneratorPrecompoundInterface.hh"
-#include "G4FTFModel.hh"
-#include "G4LundStringFragmentation.hh"
-#include "G4ExcitedStringDecay.hh"
-#include "G4QuasiElasticChannel.hh"
-
-//#include "G4VCrossSectionDataSet.hh"
-#include "G4CrossSectionPairGG_func.hh"
-
-#include "G4ReweightInter.hh"
-
-class G4FTFPPionBuilder_func : public G4VPionBuilder
+#include <vector>
+#include <string>
+class G4ReweightInter
 {
-  public: 
-    G4FTFPPionBuilder_func(G4bool quasiElastic=false, G4ReweightInter * bias = NULL);
-    virtual ~G4FTFPPionBuilder_func();
 
-  public: 
-    virtual void Build(G4HadronElasticProcess * aP);
-    virtual void Build(G4PionPlusInelasticProcess * aP);
-    virtual void Build(G4PionMinusInelasticProcess * aP);
-    
-    void SetMinEnergy(G4double aM) {theMin = aM;}
-    void SetMaxEnergy(G4double aM) {theMax = aM;}
+  public:
+           G4ReweightInter(std::vector< std::pair<double, double> > pts);
+	  ~G4ReweightInter();
+
+           size_t GetNPoints(){ return content.size(); };
+           double GetContent( double );
+           double GetPoint( size_t );
+           double GetValue( size_t ); 
 
   private:
-    G4TheoFSGenerator * theModel;
-    G4GeneratorPrecompoundInterface * theCascade;
-    G4FTFModel * theStringModel;
-    G4ExcitedStringDecay * theStringDecay;
-    G4QuasiElasticChannel * theQuasiElastic;
-    G4LundStringFragmentation * theLund;
 
-    G4CrossSectionPairGG_func* thePiData;
-    G4double theMin;
-    G4double theMax;
-
+           std::vector< std::pair< double, double > > content;
+        
 };
-
 #endif

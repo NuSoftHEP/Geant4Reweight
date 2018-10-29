@@ -26,6 +26,7 @@ def init_parser():
   parser.add_argument('-f', type=str, help='Which input file')
   parser.add_argument('--plot',type=str, help='Plot name')
   parser.add_argument('-x', type=str, help='XML File')
+  parser.add_argument('--title',type=str, help='Append to title')
   return parser
 
 def ratio_scale_errors(n, d, scale, name="r"):
@@ -99,22 +100,28 @@ elif (args.cmd == "ratio" or args.cmd == "Ratio"):
 
   inFile = TFile(args.f, "READ") 
 
-  xsec_total_w = inFile.Get("wr")  
-  xsec_total_v = inFile.Get("vr")  
+  xsec_total_w = inFile.Get("pwr")  
+  xsec_total_v = inFile.Get("pvr")  
 
   total_ratio = xsec_total_w.Clone()
 
   total_ratio.Divide(xsec_total_v)  
 
-  total_ratio.SetMinimum(.9)
-  total_ratio.SetMaximum(1.1)
+  total_ratio.SetMinimum(.5)
+  total_ratio.SetMaximum(1.5)
 
-  total_ratio.Fit("pol1")
+  total_ratio.SetTitle("Weighted/Varied: " + args.title + ";Pion Momentum (MeV/c); Ratio") 
+  total_ratio.GetXaxis().SetTitleSize(.05)
+  total_ratio.GetYaxis().SetTitleSize(.05)
+  total_ratio.GetXaxis().SetTitleOffset(.75)
+  total_ratio.GetYaxis().SetTitleOffset(.75)
+
+#  total_ratio.Fit("pol1")
 
   c1 = TCanvas()
   total_ratio.Draw("p")
 
-  f = TF1("line", "1", 0, 900.)
+  f = TF1("line", "1", 0, 1300.)
   f.SetLineColor(1)
   f.Draw("same")
 

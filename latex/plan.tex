@@ -237,7 +237,15 @@ W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} 
 \end{equation}
 Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight, and contribute to the total weight given to the track.
 
-\section{Testing and Validation}
+\subsection{Plan for Reweighting Final States}
+The fraction of inelastic scatters ending in a specific final state can also be changed. First, one must define the nominal values for these fractions ($f_{FS}$ for a specific final state), which will satisfy the condition $1 = \sum\limits_{FS} f_{FS}$ Then, knowing the relative populations of the final state, one can assign new fractions to the individual final states. These can be represented, for a specific final state, as $f'_{FS} = v_{FS}f_{FS}$. These will sum to a value $V = \sum\limits_{FS}f'_{FS} = \sum\limits_{FS}v_{FS}f_{FS}$, which may or may not be equal to $1$. Once the new values for the fractions of final states are determined, one can start reweighting the output of a simulation. 
+
+The sample will be reweighted according to the previous sections for a variation in the inelastic scattering cross section such that $\sigma'_{inel} = V\sigma_{inel}$. In addition to the weight received from this method, each inelastic scatter will be scaled by the specific $v_{FS}$ corresponding to the particular final state of the inelastic scatter.
+
+
+\section{Testing and Validation - Flat Variations}
+The first implemenation of the reweighting consisted of flat variations across all momenta.
+
 
 \subsection{Thin Target Scattering}
 A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. %This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction processes on Ar in the 0.2 - 2.0 GeV energy range through combined information from ionization free charge and scintillation light}. 
@@ -377,11 +385,6 @@ The results of this are shown in Figures \ref{ref:slice_1.5_1} through \ref{ref:
 
 \begin{figure}[htpb]\label{ref:slice_1.5_1.5}
 	\centering
-%	\begin{subfigure}[t!]{.45\textwidth}
-%		\centering
-%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_slice_xsec_inel1.5_elast1.5}.pdf}
-%	\end{subfigure}
-%	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_slice_xsec_inel1.5_elast1.5}.pdf}
@@ -394,7 +397,7 @@ The results of this are shown in Figures \ref{ref:slice_1.5_1} through \ref{ref:
 \caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}
 \end{figure}
 
-Additionally, the relative rates of pion fates were investigated. This was done by categorizing the pions by their initial kinematics and by whether they underwent an inelastic scatter, any number of elastic scatters, or if they had no interaction before stopping or exiting the volume. For pions that underwent an inelastic scatter, the final state was categorized\footnote{Inelastic scatters also include any number of elastic scatters.}. Table \ref{table:fates} lists the definitions for the various pion fates. The results are shown in Figures 
+Additionally, the relative rates of pion fates were investigated. This was done by categorizing the pions by their initial kinematics and by whether they underwent an inelastic scatter, any number of elastic scatters, or if they had no interaction before stopping or exiting the volume. For pions that underwent an inelastic scatter, the final state was categorized\footnote{Inelastic scatters also include any number of elastic scatters.}. Table \ref{table:fates} lists the definitions for the various pion fates. The results are shown in subsection \ref{ref:LAr_probs}. Subsection \ref{subsec:WatAr} shows the results for a similar test in a volume of alternating slabs of LAr and water. 
 \begin{center}\label{table:fates}
   \begin{tabular}{| c | c |}
   \hline
@@ -417,6 +420,150 @@ Additionally, the relative rates of pion fates were investigated. This was done 
   \end{tabular}
 \end{center}
 \newpage
+
+%\subsection{LAr}\label{subsec:LAr}
+%\begin{center}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/surv_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/elast_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/inel_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/cex_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/dcex_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/abs_LAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/prod_LAr}.pdf}
+%\end{center}
+
+\begin{figure}[htpb]\label{ref:LAr_probs}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/surv_LAr}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/elast_LAr}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/inel_LAr}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/cex_LAr}.pdf}
+	\end{subfigure}		
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/dcex_LAr}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/abs_LAr}.pdf}
+	\end{subfigure}	
+	~	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/prod_LAr}.pdf}
+	\end{subfigure}			
+\caption{Relative fractions of events within LArIAT-like volume }
+\end{figure}
+
+%\newpage
+%\subsection{WatAr}\label{subsec:WatAr}
+%\begin{center}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/surv_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/elast_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/inel_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/cex_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/dcex_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/abs_WatAr}.pdf}
+%\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/prod_WatAr}.pdf}
+%\end{center}
+%\newpage
+
+\section{Testing and Validation - Multiple Variations}
+In addition to the flat variations, allowing for multiple variations over a momentum range was also implemented. This first came in the form of binned variations, as shown in Figure \ref{fig:inel_vars}\footnote{The variations go to 1 outside of the bin region shown}.  
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/inel_vars}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/GeantReweight/bin_xsec}.pdf}
+	\end{subfigure}
+	~	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/GeantReweight/bin_ratio}.pdf}
+	\end{subfigure}
+
+\caption{•}\label{fig:binned}
+\end{figure}
+
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/GeantReweight/inel_vars_func}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/GeantReweight/func_xsec}.pdf}
+	\end{subfigure}
+	~	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/GeantReweight/func_ratio}.pdf}
+	\end{subfigure}
+
+\caption{Inelastic Scale: 1.5, Elastic Scale: 1}\label{fig:func}
+\end{figure}
+
+\begin{figure}[htpb]\label{ref:LAr_probs}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/surv_funced}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/elast_funced}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/inel_funced}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/cex_funced}.pdf}
+	\end{subfigure}		
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/dcex_funced}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/abs_funced}.pdf}
+	\end{subfigure}	
+	~	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/prod_funced}.pdf}
+	\end{subfigure}			
+\caption{Relative fractions of events within LArIAT-like volume }
+\end{figure}
 
 \section{Edits to Geant4.10.03.p03}
 
@@ -467,29 +614,7 @@ Both options require specific changes to Geant4's base build:
 	
 \end{enumerate}
 
-\newpage
-\subsection{LAr}
-\begin{center}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/surv_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/elast_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/inel_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/cex_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/dcex_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/abs_LAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/prod_LAr}.pdf}
-\end{center}
 
-\newpage
-\subsection{WatAr}
-\begin{center}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/surv_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/elast_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/inel_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/cex_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/dcex_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/abs_WatAr}.pdf}
-\includegraphics[width=.75\textwidth]{{/home/jake/comp_pdfs/probs/prod_WatAr}.pdf}
-\end{center}
 
 
 %\appendix

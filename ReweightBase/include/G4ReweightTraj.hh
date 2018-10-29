@@ -2,6 +2,8 @@
 #define G4ReweightTraj_h 1
 
 
+#include "G4ReweightInter.hh"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -62,8 +64,8 @@ class G4ReweightTraj{
     double GetWeight(TH1F *);
     double GetWeight_Elast(TH1F *);
     
-    double GetWeightFunc(TH1F *);
-    double GetWeightFunc_Elast(TH1F *);
+    double GetWeightFunc(G4ReweightInter *);
+    double GetWeightFunc_Elast(G4ReweightInter *);
     
     int GetNElastic();
     //Returns a vector of the distances between elastic scatters.

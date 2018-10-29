@@ -399,7 +399,7 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
       }
 }
 
-void G4ReweightTreeParser::AnalyzeFunc(TH1F * inelBiasHist, TH1F * elastBiasHist){
+void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
 
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
@@ -421,8 +421,8 @@ void G4ReweightTreeParser::AnalyzeFunc(TH1F * inelBiasHist, TH1F * elastBiasHist
 //         }
 
           theLen         = theTraj->GetTotalLength();
-          theWeight      = theTraj->GetWeightFunc(inelBiasHist);
-          theElastWeight = theTraj->GetWeightFunc_Elast(elastBiasHist);
+          theWeight      = theTraj->GetWeightFunc(inelBias);
+          theElastWeight = theTraj->GetWeightFunc_Elast(elastBias);
           theInt         = theTraj->GetFinalProc();
           nElast         = theTraj->GetNElastic();
 
@@ -776,7 +776,7 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
   fout->Close();
 }
 
-void G4ReweightTreeParser::FillAndAnalyzeFunc(TH1F * inelBiasHist, TH1F * elastBiasHist){
+void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
   
   theLen=0.;
   theWeight=0.;
@@ -838,7 +838,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(TH1F * inelBiasHist, TH1F * elastB
 
 //      std::cout << "Event: " << prevEvent << std::endl;
      
-      AnalyzeFunc(inelBiasHist, elastBiasHist);
+      AnalyzeFunc(inelBias, elastBias);
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
         //Delete the pointer
@@ -880,7 +880,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(TH1F * inelBiasHist, TH1F * elastB
   std::cout << "Event: " << prevEvent << std::endl;
   
 
-  AnalyzeFunc(inelBiasHist, elastBiasHist);
+  AnalyzeFunc(inelBias, elastBias);
   std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
     //Delete the pointer

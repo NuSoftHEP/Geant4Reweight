@@ -1,6 +1,8 @@
 #include <iostream>
 #include <utility>
 #include <string>
+#include <fstream>
+#include <iostream>
 #include "TTree.h"
 #include "TFile.h"
 #include "TH1F.h"
@@ -8,6 +10,8 @@
 #include "G4ReweightStep.hh"
 #include "G4ReweightTraj.hh"
 #include "G4ReweightTreeParser.hh"
+
+#include "G4ReweightInter.hh"
 
 std::string fileName = "try.root"; 
 std::string outFileName = "outtry.root";
@@ -24,6 +28,7 @@ std::string weightType        = "flat";
 
 
 bool parseArgs(int argc, char ** argv);
+G4ReweightInter * GetInter(std::string);
 
 int main(int argc, char ** argv){
 
@@ -96,48 +101,28 @@ int main(int argc, char ** argv){
   else if(weightType == "func"){
 
     std::cout << "Doing funced reweight" << std::endl;
-    std::cout << "Inelastic Bias: " << inelasticBiasFile << " " << inelasticBiasName << std::endl; 
-    std::cout << "Elastic Bias:   " << elasticBiasFile   << " " << elasticBiasName   << std::endl; 
-
-
+    std::cout << "Inelastic Bias: " << inelasticBiasFile << std::endl; 
     //Getting inelastic bias info
     //
-    inelasticFile = new TFile(inelasticBiasFile.c_str());
-    if( !inelasticFile->IsOpen() ){
-      std::cout << "Error: Couldn't open the inelastic bias file " << inelasticBiasFile << std::endl;
-      return 0;
-    }
-    
-    std::cout << "Opened inelastic file: " << inelasticBiasFile << std::endl;
-    inelasticHist = (TH1F*)inelasticFile->Get(inelasticBiasName.c_str());
-    if( !inelasticHist ){
-      std::cout << "Error: Couldn't find hist " << inelasticBiasName << " in the inelastic file" << std::endl;
-      return 0;
-    }
-
-    std::cout << "Got inelastic hist: " << inelasticBiasName << std::endl;
+    G4ReweightInter * inelasticBias   = GetInter(inelasticBiasFile);
+    std::cout << "Got inelastic : " << std::endl;
+    for(size_t i = 0; i < inelasticBias->GetNPoints(); ++i){
+      std::cout << inelasticBias->GetPoint(i) << " " << inelasticBias->GetValue(i) << std::endl;
+    } 
     //////////////////////////////////
 
-
+    std::cout << "Elastic Bias:   " << elasticBiasFile   << std::endl; 
     //Getting elastic bias info
     //
-    elasticFile   = new TFile(elasticBiasFile.c_str());
-    if( !elasticFile->IsOpen() ){
-      std::cout << "Error: Couldn't open the elastic bias file " << elasticBiasFile << std::endl;
-      return 0;
+    G4ReweightInter * elasticBias   = GetInter(elasticBiasFile);
+    std::cout << "Got elastic : " << std::endl;
+    for(size_t i = 0; i < elasticBias->GetNPoints(); ++i){
+      std::cout << elasticBias->GetPoint(i) << " " << elasticBias->GetValue(i) << std::endl;
     }
-
-    std::cout << "Opened elastic file: " << elasticBiasFile << std::endl;
-    elasticHist = (TH1F*)elasticFile->Get(elasticBiasName.c_str());
-    if( !elasticHist ){
-      std::cout << "Error: Couldn't find hist " << elasticBiasName << " in the elastic file" << std::endl;
-      return 0;
-    }
-
-    std::cout << "Got elastic hist: " << elasticBiasName << std::endl;
     //////////////////////////////////
 
-    tp->FillAndAnalyzeFunc(inelasticHist, elasticHist);
+//    return 0;
+    tp->FillAndAnalyzeFunc(inelasticBias, elasticBias);
     
   }
 
@@ -189,4 +174,45 @@ bool parseArgs(int argc, char ** argv){
 
   }
   return true;
+}
+
+G4ReweightInter * GetInter(std::string fileName){
+  std::ifstream inputFile;  
+  inputFile.open(fileName);
+
+  std::string line;
+
+  if (inputFile.is_open()){
+
+    std::vector< std::pair< double, double > > result;
+
+    while( std::getline( inputFile, line) ){
+      std::string::iterator it;
+      std::string pos = "", val = "";
+      bool found = false;
+      for( it = line.begin(); it < line.end(); ++it){
+        if (*it == ',') found = true;
+        else{
+          if(!found) pos += *it;
+          else val += *it;
+        }
+      }
+      std::cout << pos << " " << val << std::endl;
+      result.push_back( std::make_pair(std::stod(pos), std::stod(val) ));
+      
+    }
+    inputFile.close();
+   
+    G4ReweightInter * theInter = new G4ReweightInter( result );
+    return theInter;
+  }
+  else{
+    std::cout << "Unable to open file" << std::endl;
+    std::cout << "Returning empty Interpolater. Will return biases of 1. for all momentum values" << std::endl;
+
+    G4ReweightInter * theInter = new G4ReweightInter( std::vector<std::pair<double, double> >() );
+    return theInter;
+  }
+
+  
 }

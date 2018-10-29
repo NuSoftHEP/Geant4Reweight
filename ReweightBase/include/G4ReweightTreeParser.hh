@@ -3,6 +3,7 @@
 
 #include "G4ReweightStep.hh"
 #include "G4ReweightTraj.hh"
+#include "G4ReweightInter.hh"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -28,10 +29,10 @@ class G4ReweightTreeParser{
 
     void Analyze(double, double);
     void Analyze(TH1F *, TH1F *);
-    void AnalyzeFunc(TH1F *, TH1F *);
+    void AnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
     void FillAndAnalyze(double, double);
     void FillAndAnalyze(TH1F *, TH1F *);
-    void FillAndAnalyzeFunc(TH1F *, TH1F *);
+    void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
 
     void CloseInput();
     void GetInteractionType(int);

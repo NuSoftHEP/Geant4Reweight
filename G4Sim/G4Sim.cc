@@ -55,8 +55,6 @@ int main(int argc, char * argv[]){
     std::vector< std::pair< double, double > > elast_input; 
 
     std::cout << "Making interpolated weights" << std::endl;
-//    G4ReweightInter * elasticBias   = new G4ReweightInter(elast_input);
-//    G4ReweightInter * inelasticBias = new G4ReweightInter(inel_input);
     G4ReweightInter * inelasticBias = GetInter( inelasticBiasFile );
     G4ReweightInter * elasticBias = GetInter( elasticBiasFile );
 

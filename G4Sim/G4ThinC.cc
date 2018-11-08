@@ -1,7 +1,7 @@
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 
-#include "ThinDetector.hh"
+#include "ThinCDetector.hh"
 #include "G4SimPhysicsList.hh"
 #include "G4SimPhysicsListBinned.hh"
 #include "G4SimPhysicsListFunc.hh"
@@ -44,7 +44,7 @@ int main(int argc, char * argv[]){
   G4RunManager * runManager = new G4RunManager;
   
   //Define and create detector volume  
-  runManager->SetUserInitialization(new ThinDetector);
+  runManager->SetUserInitialization(new ThinCDetector);
 
   if(varType == "func" ){
 

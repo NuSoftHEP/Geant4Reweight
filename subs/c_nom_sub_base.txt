@@ -1,0 +1,68 @@
+#!/bin/bash
+
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+setup ifdhc 
+export IFDH_CP_MAXRETRIES=2
+echo "setup"
+
+MYDIR=/dune/app/users/calcuttj/
+
+
+###MOVE CODE OVER
+
+mkdir ${_CONDOR_SCRATCH_DIR}/myproducts/
+mkdir ${_CONDOR_SCRATCH_DIR}/myproducts/.upsfiles
+cat > ${_CONDOR_SCRATCH_DIR}/myproducts/.upsfiles/dbconfig << 'EOF'
+FILE = DBCONFIG
+AUTHORIZED_NODES = *
+VERSION_SUBDIR = 1
+PROD_DIR_PREFIX = ${UPS_THIS_DB}
+UPD_USERCODE_DIR = ${UPS_THIS_DB}/.updfiles
+EOF
+
+setup -B root v6_12_04e -q e15:prof
+
+cd ${_CONDOR_SCRATCH_DIR}
+mkdir ${_CONDOR_SCRATCH_DIR}/code/
+echo ${_CONDOR_SCRATCH_DIR}
+
+ifdh cp ${MYDIR}/GRWTar/GRWTar.tar ${_CONDOR_SCRATCH_DIR}/code/GRWTar.tar
+cd ${_CONDOR_SCRATCH_DIR}/code/
+tar -xf GRWTar.tar 
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/
+tar -xf geant4_new_install.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant-build
+tar -xf geant4_build.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
+tar -xf G4Sim_build.tar 
+
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
+tar -xf G4Reweight.tar
+
+cd ${_CONDOR_SCRATCH_DIR}/code/macros/
+tar -xf macros.tar
+
+
+######################
+
+cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/bin/
+#source geant4_lite.sh
+source geant4.sh
+
+cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
+
+./${EXE} -c ${_CONDOR_SCRATCH_DIR}/code/macros/macros/C/${SAMPLE}_${PROCESS}_nom.mac -o ${NAME}_nom_${SAMPLE}_${PROCESS}.root -i 1. -e 1.
+
+ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin_C/${JOBSUBJOBID:0:10}/
+
+ifdh cp ${NAME}_nom_${SAMPLE}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin_C/${JOBSUBJOBID:0:10}/${NAME}_nom_${SAMPLE}_${PROCESS}.root 
+
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
+
+./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${SAMPLE}_${PROCESS}.root -o ${NAME}_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root --type flat -i 1. -e 1. 
+ifdh cp ${NAME}_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Thin_C/${JOBSUBJOBID:0:10}/${NAME}_${SAMPLE}_nom_inel1_elast1_${PROCESS}.root
+
+

@@ -13,7 +13,7 @@ def init_parser():
   parser.add_argument('-m', type=str, help='Memory Limit')
   parser.add_argument('-o', type=str, help='Name of makeup file list')
   parser.add_argument('-b', type=str, help='Batch File')
-  parser.add_argument('--name', type=str, help='Name of submission')
+  parser.add_argument('--name', type=str, help='Name of submission', default="")
   parser.add_argument('--exe', type=str, help='Which executable')
   return parser
 

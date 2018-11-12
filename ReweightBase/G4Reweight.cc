@@ -11,6 +11,8 @@
 #include "G4ReweightTraj.hh"
 #include "G4ReweightTreeParser.hh"
 
+#include "G4ReweightFinalState.hh"
+
 #include "G4ReweightInter.hh"
 
 std::string fileName = "try.root"; 
@@ -25,6 +27,11 @@ std::string inelasticBiasName = "inelastic";
 std::string elasticBiasName   = "elastic";
 
 std::string weightType        = "flat";
+
+bool enableFS = false;
+
+std::string FinalStateFracsFile = "FinalStateFile.root";
+std::string FinalStateVarsFile  = "try.xml";
 
 
 bool parseArgs(int argc, char ** argv);
@@ -44,6 +51,18 @@ int main(int argc, char ** argv){
 
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str(), outFileName.c_str());
   tp->SetBranches();
+  if(enableFS){
+    std::cout << "Enabling Final State Reweighting" << std::endl;
+    std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;
+    std::cout << "Using FinalStateVarsFile: " << FinalStateVarsFile << std::endl;
+
+    G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
+
+    tp->FillAndAnalyzeFS(theFS);
+
+    return 0;
+  }
+
   if(weightType == "flat"){
 
     std::cout << "Doing flat reweighting" << std::endl;
@@ -170,6 +189,18 @@ bool parseArgs(int argc, char ** argv){
 
     else if( strcmp(argv[i], "--type") == 0){
       weightType = argv[i + 1];
+    }
+
+    else if( strcmp(argv[i], "--FS") == 0){
+      enableFS = atoi( argv[i + 1] );
+    }
+
+    else if( strcmp(argv[i], "--FSFracs") == 0){
+      FinalStateFracsFile = argv[i + 1];
+    }
+
+    else if( strcmp(argv[i], "--FSVars") == 0){
+      FinalStateVarsFile = argv[i + 1];
     }
 
   }

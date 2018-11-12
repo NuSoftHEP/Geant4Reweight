@@ -3,7 +3,7 @@
  
 G4ReweightInter::G4ReweightInter(std::vector< std::pair< double, double > > input) : content(input) { }
 
-double G4ReweightInter::GetContent( double inputPoint){
+double G4ReweightInter::GetContent( double inputPoint ){
 
   if( GetNPoints() <= 1 ) return 1.;
 

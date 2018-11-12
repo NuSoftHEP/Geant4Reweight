@@ -4,6 +4,7 @@
 #include "G4ReweightStep.hh"
 #include "G4ReweightTraj.hh"
 #include "G4ReweightInter.hh"
+#include "G4ReweightFinalState.hh"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -34,6 +35,10 @@ class G4ReweightTreeParser{
     void FillAndAnalyze(TH1F *, TH1F *);
     void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
 
+    void FillAndAnalyzeFS( G4ReweightFinalState * );
+    void AnalyzeFS( G4ReweightFinalState * );
+    void GetWeightFS( G4ReweightFinalState *, double );
+
     void CloseInput();
     void GetInteractionType(int);
 
@@ -55,6 +60,7 @@ class G4ReweightTreeParser{
 
     double theLen;
     double theWeight;
+    double theFSWeight;
     double theElastWeight;
     double N;
     std::string theInt; 

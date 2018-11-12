@@ -1,8 +1,8 @@
 #ifndef G4ReweightTraj_h
 #define G4ReweightTraj_h 1
 
-
 #include "G4ReweightInter.hh"
+#include "G4ReweightFinalState.hh"
 
 #include <vector>
 #include <string>
@@ -67,6 +67,8 @@ class G4ReweightTraj{
     double GetWeightFunc(G4ReweightInter *);
     double GetWeightFunc_Elast(G4ReweightInter *);
     
+    double GetWeightFS(G4ReweightFinalState *);
+
     int GetNElastic();
     //Returns a vector of the distances between elastic scatters.
     //Includes from start to first, then between all subsequent elastic scatters

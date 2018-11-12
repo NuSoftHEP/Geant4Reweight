@@ -824,3 +824,9 @@ std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPID){
   }
   return childTrajs;
 }
+
+
+
+double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
+  return 0.;
+}

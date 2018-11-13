@@ -22,14 +22,14 @@ class G4ReweightFinalState{
     void GetMaxAndMin( std::string );
     double GetWeight( std::string, double );
 
-    TH1D * GetTotalRatio(){ return totalRatio; };
-    TH1D * GetIntRatio( std::string );
+    TH1D * GetTotalVariation(){ return totalVariation; };
+    TH1D * GetExclusiveVariation( std::string );
 
   private:
     
-    std::map< std::string, TH1D* > ratios; 
+    std::map< std::string, TH1D* > exclusiveVariations; 
 
-    TH1D * totalRatio;
+    TH1D * totalVariation;
 
     double Maximum;
     double Minimum;

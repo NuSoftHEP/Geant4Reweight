@@ -199,7 +199,7 @@ We can think of the simulated particle as having two possible fates: it either u
 All other processes\footnote{Such as pion-inelastic scattering, and ... This also includes decaying in flight, as it is treated similar to the rest of the discrete processes in the sampling scheme described above. } 
 are considered "interacting" processes. 
 
-\subsection{Assigning Weights}
+\subsection{Assigning Weights}\label{subsec:inel_weights}
 
 Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. Whether the tracks survive or interact, they receive a weight that effectively changes the probability to have traveled a specific distance - the track's length - without interacting. Classically, this distributions is given by:
 \begin{equation}\label{eq:dist_prob}
@@ -238,10 +238,13 @@ W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} 
 Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight, and contribute to the total weight given to the track.
 
 \subsection{Plan for Reweighting Final States}
-The fraction of inelastic scatters ending in a specific final state can also be changed\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. First, one must define the nominal values for these fractions ($f_{FS}$ for a specific final state). This will - by definition - satisfy the condition $1 = \sum\limits_{FS} f_{FS}$ Then, knowing the relative populations of the final state, one can assign new fractions to the individual final states. These can be represented, for a specific final state, as $f'_{FS} = v_{FS}f_{FS}$. These will sum to a value $V = \sum\limits_{FS}f'_{FS} = \sum\limits_{FS}v_{FS}f_{FS}$, which may or may not be equal to $1$. Once the new values for the fractions of final states are determined, one can start reweighting the output of a simulation. 
+The exclusive channels\footnote{The definitions of these can be found in Table \ref{table:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. 
 
-The sample will be reweighted according to the previous sections for a variation in the inelastic scattering cross section such that $\sigma'_{inel} = V\sigma_{inel}$. In addition to the weight received from this method, each inelastic scatter will be scaled by the specific $v_{FS}$ corresponding to the particular final state of the inelastic scatter.
+First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$. User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
+From here, the total cross section variation, $c_{inel}$, is used to vary the nominal simulation according to the technique described in Section \ref{subsec:inel_weights}. Events ending in a specific exclusive channel $i$ are given an additional weight $W_{i} = \frac{c_i}{c_{inel}}$. The presence of $c_{inel}$ in the denominator is due to the event already being weighted as an inelastic interaction. 
+
+Testing and validation can be seen in \ref{subsec:exclusive_validation}
 
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta.
@@ -565,6 +568,39 @@ Additionally, variations according to interpolated between pion momentum were im
 		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/probs/func/prod_funced}.pdf}
 	\end{subfigure}			
 \caption{Relative fractions of events within LArIAT-like volume }
+\end{figure}
+
+\section{Testing and Validation - Varying Exclusive Channels}\label{subsec:exclusive_validation}
+A thin target of Carbon was used to test the exclusive channel reweighting. The setup is identical to the thin target described above, but with a graphite-like material rather than LAr. 
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/inel_exclusive_rw}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/abs_exclusive_rw}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/cex_exclusive_rw}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/dcex_exclusive_rw}.pdf}
+	\end{subfigure}		
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/prod_exclusive_rw}.pdf}
+	\end{subfigure}
+
+\caption{Exclusive Reweighting in Carbon }
 \end{figure}
 
 \section{Edits to Geant4.10.03.p03}

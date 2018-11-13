@@ -1071,7 +1071,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 //         }
 
           theLen         = theTraj->GetTotalLength();
-          theWeight      = 1.; 
+          theWeight      = theTraj->GetWeight( (TH1F*)theFS->GetTotalVariation() );
 //          theFSWeight    = theTraj->GetWeightFS(theFS);
           theElastWeight = 1.;
           theInt         = theTraj->GetFinalProc();
@@ -1145,7 +1145,6 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
           }
           GetInteractionType(theTraj->PID);         
           Energy = theTraj->Energy;
-
 
           GetWeightFS( theFS, preFinalP );
 

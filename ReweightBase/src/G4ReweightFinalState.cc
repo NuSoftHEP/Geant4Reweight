@@ -10,54 +10,69 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
 
   TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
-  std::map< std::string, TH1D* > oldFracs;
-  std::map< std::string, TH1D* > newFracs;
+  std::map< std::string, TH1D* > oldHists;
+  std::map< std::string, TH1D* > newHists;
+  std::map< std::string, G4ReweightInter* > theVariations;
 
   GetMaxAndMin( FSScaleFileName );
   
-  //Open up the FSScaleFile and load the variations
+  //Just for loading. Could do everything in one shot, but it's
+  //more understandable if it's compartmentalized like this
   for( size_t i = 0; i < theInts.size(); ++i ){
+    //Open up the FSScaleFile and load the variations
     G4ReweightInter * theInter = GetInter( FSScaleFileName, theInts.at(i) );
-    TH1D * theHist = (TH1D*)FinalStateFile->Get( theInts.at(i).c_str() );
-    
-    std::string newName = "new_" + theInts.at(i);
-    TH1D * newHist = (TH1D*)theHist->Clone(newName.c_str());
-    TH1D * oldHist = (TH1D*)theHist->Clone();
+    theVariations[ theInts.at(i) ] = theInter;
 
-    oldFracs[ theInts.at(i) ] = oldHist;
+    //Load the Hists
+    TH1D * theHist = (TH1D*)FinalStateFile->Get( theInts.at(i).c_str() );
+    newHists[ theInts.at(i) ] = (TH1D*)theHist->Clone( ("new_" + theInts.at(i)).c_str() );
+    oldHists[ theInts.at(i) ] = (TH1D*)theHist->Clone();
+  }
+
+  fout->cd();
+
+  //Now go through and vary the exclusive channels  
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    G4ReweightInter * theVar = theVariations.at( theInts.at(i) );
+    TH1D * theHist = newHists.at( theInts.at(i) );
 
     for( int bin = 1; bin <= theHist->GetNbinsX(); ++bin ){
       
       double histContent = theHist->GetBinContent( bin );
       double binCenter   = theHist->GetBinCenter( bin );
-      double theScale    = theInter->GetContent( binCenter ); 
+      double theScale    = theVar->GetContent( binCenter ); 
 
-      if( ( newHist->GetBinCenter( bin ) < Minimum ) 
-      ||  ( newHist->GetBinCenter( bin ) > Maximum ) ){
-        newHist->SetBinContent( bin, histContent );
+      if( ( theHist->GetBinCenter( bin ) < Minimum ) 
+      ||  ( theHist->GetBinCenter( bin ) > Maximum ) ){
+        theHist->SetBinContent( bin, histContent );
       }
       else{
-        newHist->SetBinContent( bin, theScale * histContent ); 
+        theHist->SetBinContent( bin, theScale * histContent ); 
       }
     }
-    
-    newFracs[ theInts.at(i) ] = newHist; 
 
-    fout->cd();
-    oldHist->Write();
+    //Save the varied and nominal
+    theHist->Write();
+    oldHists.at( theInts.at(i) )->Write();
   }
+
+  //Form the total cross sections from 
+  //the nominal and varied exlcusive channels
+  TH1D * oldTotal = (TH1D*)oldHists[ theInts.at(0) ]->Clone("oldTotal");
+  TH1D * newTotal = (TH1D*)newHists[ theInts.at(0) ]->Clone("newTotal");
+  
+  for(size_t i = 1; i < theInts.size(); ++i){
+    oldTotal->Add( oldHists[ theInts.at(i) ] );
+    newTotal->Add( newHists[ theInts.at(i) ] );
+  }
+
+  //Save the Totals
+  oldTotal->Write();
+  newTotal->Write();
 
   //Need to make this smarter when going through the bins.
   //What if there's an empty bin?
-
-  TH1D * oldTotal = (TH1D*)oldFracs[ theInts.at(0) ]->Clone("oldTotal");
-  TH1D * newTotal = (TH1D*)newFracs[ theInts.at(0) ]->Clone("newTotal");
-  
-  for(size_t i = 1; i < theInts.size(); ++i){
-    oldTotal->Add( oldFracs[ theInts.at(i) ] );
-    newTotal->Add( newFracs[ theInts.at(i) ] );
-  }
-
+/*
   for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
 
     if( oldTotal->GetBinContent( bin ) == 0. ){
@@ -69,24 +84,47 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
       newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
     }
   }
+*/
 
-  totalRatio = (TH1D*)newTotal->Clone("totalRatio");
-  totalRatio->Divide( oldTotal );
+  //Form the variation from the new and old totals 
+  totalVariation = (TH1D*)newTotal->Clone("totalVariation");
+  totalVariation->Divide( oldTotal );
+  for( int bin = 1; bin <= totalVariation->GetNbinsX(); ++bin ){
 
-  oldTotal->Write();
-  newTotal->Write();
-  totalRatio->Write();
+    if( ( totalVariation->GetBinCenter( bin ) < Minimum ) 
+    ||  ( totalVariation->GetBinCenter( bin ) > Maximum ) ){
 
+      if( totalVariation->GetBinContent( bin ) < .000000001 ){
+        totalVariation->SetBinContent( bin, 1. );
+      }
+
+    }
+  }
+  totalVariation->Write();
+
+  //Now go back through the varied exclusive channels
+  //and compute the final scale
   for( size_t i = 0; i < theInts.size(); ++i ){
-     newFracs[ theInts.at(i) ]->Divide( newTotal );    
-     newFracs[ theInts.at(i) ]->Write();
+    TH1D * exclusiveVariation = (TH1D*)newHists.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
 
-     std::string ratioName = "ratio_" + theInts.at(i);
-     TH1D * ratio = (TH1D*)newFracs[ theInts.at(i) ]->Clone(ratioName.c_str());
-     ratio->Divide(oldFracs.at( theInts.at(i) ) );
-     ratios[ theInts.at(i) ] = ratio;
-     ratio->Write();
- 
+    exclusiveVariation->Divide( oldHists.at( theInts.at(i) ) );
+
+    for( int bin = 1; bin <= exclusiveVariation->GetNbinsX(); ++bin ){
+
+      if( ( exclusiveVariation->GetBinCenter( bin ) < Minimum ) 
+      ||  ( exclusiveVariation->GetBinCenter( bin ) > Maximum ) ){
+
+        if( exclusiveVariation->GetBinContent( bin ) < .000000001 ){
+          exclusiveVariation->SetBinContent( bin, 1. );
+        }
+
+      }
+    }
+
+    exclusiveVariation->Divide( totalVariation );
+    exclusiveVariation->Write();
+
+    exclusiveVariations[ theInts.at(i) ] = exclusiveVariation; 
   }
 
   //fout->Close();
@@ -182,7 +220,7 @@ double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum )
   }
 
   //std::cout << "Getting hist for interaction: " << theInt << std::endl;
-  TH1D * theHist = ratios.at( theInt );
+  TH1D * theHist = GetExclusiveVariation( theInt ); 
   //std::cout << "Hist exists: " << theHist << std::endl;
   int theBin = theHist->FindBin( theMomentum );
   //std::cout << "Bin: " << theBin << std::endl;
@@ -192,10 +230,10 @@ double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum )
   return theWeight;
 }
 
-TH1D * G4ReweightFinalState::GetIntRatio( std::string theInt ){
+TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){
   //Add in check
   
-  return ratios.at( theInt ); 
+  return exclusiveVariations.at( theInt ); 
 }
 
 G4ReweightFinalState::~G4ReweightFinalState(){}

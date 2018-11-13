@@ -8,11 +8,8 @@ from math import log, sqrt
 
 def init_parser():
   parser = ArgumentParser()
-#  parser.add_argument('-i', type=str, help='Inelastic variation factor', default="1")
-#  parser.add_argument('-e', type=str, help='Elastic variation factor', default="1")
   parser.add_argument('--loc', type=str, help='Location of samples')
   parser.add_argument('--nom', type=str, help='nom File name')
-#  parser.add_argument('--var', type=str, help='var File name')
   parser.add_argument('--cmd', type=str, help='Which command to execute ', default=" ")
   parser.add_argument('-f', type=str, help='Which input file')
   parser.add_argument('--plot',type=str, help='Plot name')
@@ -31,8 +28,6 @@ gStyle.SetLabelFont(62,"XYZ")
 gStyle.SetTitleFont(62,"XYZ")
  
 args = init_parser().parse_args()
-#inel = args.i
-#elast = args.e
 loc = args.loc
 cmd = args.cmd
 plot = args.plot
@@ -101,37 +96,36 @@ if (cmd == "Draw" or cmd == "draw"):
 
 else:
 
-#  surv_cut = "(int != \"pi+Inelastic\" && nElast == 0)"
   reac_cut = "(int == \"pi+Inelastic\")"
-  abs_cut =  "(int == \"pi+Inelastic\" && (nPi0 + nPiPlus + nPiMinus) == 0)"
-  inel_cut = "(int == \"pi+Inelastic\" && (nPi0 + nPiMinus) == 0 && (nPiPlus == 1))"
-  cex_cut =  "(int == \"pi+Inelastic\" && (nPiPlus + nPiMinus) == 0 && (nPi0 == 1))"
-  dcex_cut = "(int == \"pi+Inelastic\" && (nPiPlus + nPi0) == 0 && (nPiMinus == 1))"
-  prod_cut = "(int == \"pi+Inelastic\" && (nPiPlus + nPi0 + nPiMinus) > 1)"
-#  elast_cut = "(int != \"pi+Inelastic\" && nElast > 0)"
+  abs_cut =  "(int == \"pi+Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )"
+  inel_cut = "(int == \"pi+Inelastic\" && ( (nPi0 + nPiMinus) == 0 ) && (nPiPlus == 1))"
+  cex_cut =  "(int == \"pi+Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))"
+  dcex_cut = "(int == \"pi+Inelastic\" && ( (nPiPlus + nPi0) == 0 ) && (nPiMinus == 1))"
+  prod_cut = "(int == \"pi+Inelastic\" && ( (nPiPlus + nPi0 + nPiMinus) > 1) )"
 
 
-  cuts = {#"surv":surv_cut,
-    "abs":abs_cut,
+  cuts = {"abs":abs_cut,
     "inel":inel_cut,
     "cex":cex_cut,
     "dcex":dcex_cut,
-    "prod":prod_cut#,
-#    "elast":elast_cut
+    "prod":prod_cut
   }
 
+#  scale =1.E24/ (.5 * 2.266 * 6.022E23 / 12.01 )
 
-  hists = dict()
+  nhists = dict()
+  whists = dict()
 
   outfile = TFile(loc+"/"+args.f,"RECREATE")
   fileName = loc + "/" + args.nom 
 
   nomFile = TFile(fileName,"READ")
   nomTree = nomFile.Get("tree")
+  nIncident = nomTree.GetEntries()
   
   outfile.cd()
   
-  nomTree.Draw("preFinalP>>reac(50,0,300)",reac_cut,"goff")
+  nomTree.Draw("preFinalP>>reac(75,0,450)",reac_cut,"goff")
   reac = gDirectory.Get("reac")
 
   reac.Sumw2() 
@@ -141,15 +135,11 @@ else:
   for name in names:
     cut = cuts[name]
     print name, cut
-    nomTree.Draw("preFinalP>>"+name+"(50,0,300)", cut,"goff")
+    nomTree.Draw("preFinalP>>"+name+"(75,0,450)", cut,"goff")
   
-    hists[name] = gDirectory.Get(name) 
-    hists[name].Sumw2()
-    hists[name].Divide(reac)
-
-
-    print hists[name].Integral()
-    hists[name].Write() 
+    nhists[name] = gDirectory.Get(name) 
+    nhists[name].Sumw2()
+    nhists[name].Write() 
 
   outfile.Close()
 

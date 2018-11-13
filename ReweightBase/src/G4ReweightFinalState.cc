@@ -6,8 +6,6 @@
 
 G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string FSScaleFileName ){
   
-  std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
-
   TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
   std::map< std::string, TH1D* > oldHists;
@@ -184,7 +182,6 @@ G4ReweightInter * G4ReweightFinalState::GetInter(std::string FileName, std::stri
   }
   
   tinyxml2::XMLElement * thePoint = theElement->FirstChildElement("Point");
-
   while( thePoint ){
    
 

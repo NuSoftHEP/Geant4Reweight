@@ -33,8 +33,9 @@ class G4ReweightFinalState{
 
     double Maximum;
     double Minimum;
+  
+    std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
 
-    //std::map< std::string, G4ReweightInter* > FSInters;
 };
 
 #endif

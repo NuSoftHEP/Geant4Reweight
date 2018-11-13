@@ -1,34 +1,22 @@
 <FinalStates>
-  <inel itemCount="2" Minimum="0." Maximum="300.">
-<!--    <Point Momentum="000." Variation="1.0"/>
-     <Point Momentum="300." Variation="1.0"/>
--->
+  <inel>
   </inel>
 
-  <cex itemCount="2" Minimum="200." Maximum="300.">
-    <Point Momentum="000." Variation="1.0"/>
+  <cex>
     <Point Momentum="200." Variation=".75"/>
     <Point Momentum="300." Variation=".75"/>
   </cex>
 
-  <abs itemCount="3" Minimum="200." Maximum="300.">
-    <Point Momentum="000." Variation="1.0"/>
-    <Point Momentum="000." Variation="1.0"/>
+  <abs>
     <Point Momentum="200." Variation="1.5"/>
     <Point Momentum="250." Variation="1.2"/>
     <Point Momentum="300." Variation="1.5"/>
   </abs>
 
-  <dcex itemCount="2" Minimum="0." Maximum="300.">
-<!--    <Point Momentum="000." Variation="1.0"/>
-     <Point Momentum="300." Variation="1.0"/>
--->
+  <dcex>
   </dcex>
 
-  <prod itemCount="2" Minimum="0." Maximum="300.">
-<!--    <Point Momentum="000." Variation="1.0"/>
-     <Point Momentum="300." Variation="1.0"/>
--->
+  <prod>
   </prod>
 
   <Minimum>200.</Minimum>

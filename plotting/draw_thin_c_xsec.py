@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 from ROOT import * 
 from math import log, sqrt
 
+from array import array
+
 def init_parser():
   parser = ArgumentParser()
   parser.add_argument('--loc', type=str, help='Location of samples')
@@ -40,10 +42,18 @@ titles = {"abs":"Pion Absorption",
           "cex":"Single Charge Exchange",
           "dcex":"Double Charge Exchange",
           "prod":"Pion Production",
-          "inel":"Inelastic"}
+          "inel":"Inelastic",
+          "reac":"Reactive"}
 
 if (cmd == "Draw" or cmd == "draw"):
   inFile = TFile(loc + "/" + args.f, "UPDATE") 
+
+  duet_abs = inFile.Get("duet_abs")
+  duet_abs.SetMarkerStyle(22)
+  duet_cex = inFile.Get("duet_cex")
+  duet_cex.SetMarkerStyle(22)
+
+  names = names + ["reac"]
 
   for name in names:
     c = TCanvas("c"+name, "c"+name, 500, 400)
@@ -83,6 +93,14 @@ if (cmd == "Draw" or cmd == "draw"):
 
     whist.Draw("pE hist")
     nhist.Draw("pE same")
+    
+    if( name == "abs" ): 
+      duet_abs.Draw("p same")  
+      leg.AddEntry(duet_abs, "DUET", "pe") 
+    elif( name == "cex" ): 
+      duet_cex.Draw("p same")  
+      leg.AddEntry(duet_cex, "DUET", "pe") 
+
     leg.Draw("same")
 
     c.Write()
@@ -159,6 +177,25 @@ else:
 
     nhists[name].Write() 
     whists[name].Write()
+
+
+  ##creating duet measurement
+  x_vals   = array("f",[201.6, 216.6, 237.2, 265.6, 295.1]) 
+  abs_vals = array("f",[153.8, 182.1, 160.8, 161.4, 159.4])
+  abs_errs = array("f",[12.0, 19.2, 16.6, 15.7, 15.3]) 
+
+  cex_vals = array("f",[44.0, 33.8, 55.8, 63.5, 52.0])
+  cex_errs = array("f",[7.9, 10.2, 10.8, 10.8, 9.3]) 
+
+  dummy_x_errs = array("f",[0.]*5)
+
+  duet_abs = TGraphErrors(5, x_vals, abs_vals, dummy_x_errs, abs_errs)
+  duet_cex = TGraphErrors(5, x_vals, cex_vals, dummy_x_errs, cex_errs)
+
+  duet_abs.SetName("duet_abs")
+  duet_abs.Write()
+  duet_cex.SetName("duet_cex")
+  duet_cex.Write()
 
   outfile.Close()
 

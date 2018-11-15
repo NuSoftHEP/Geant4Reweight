@@ -275,7 +275,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceIntsInelastic->clear();
           }
 
-          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceBetheBlochInelastic(.5);          
           for(size_t it = 0; it < slicesInelastic.size(); ++it){
             sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
             sliceIntsInelastic->push_back(slicesInelastic[it].second); 
@@ -378,7 +378,7 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
             sliceIntsInelastic->clear();
           }
 
-          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceBetheBlochInelastic(.5);          
           for(size_t it = 0; it < slicesInelastic.size(); ++it){
             sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
             sliceIntsInelastic->push_back(slicesInelastic[it].second); 
@@ -481,7 +481,7 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
             sliceIntsInelastic->clear();
           }
 
-          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceBetheBlochInelastic(.5);          
           for(size_t it = 0; it < slicesInelastic.size(); ++it){
             sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
             sliceIntsInelastic->push_back(slicesInelastic[it].second); 
@@ -1132,7 +1132,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
             sliceIntsInelastic->clear();
           }
 
-          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceMethodInelastic(.5);          
+          std::vector< std::pair<double, int> > slicesInelastic = theTraj->ThinSliceBetheBlochInelastic(.5);          
           for(size_t it = 0; it < slicesInelastic.size(); ++it){
             sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
             sliceIntsInelastic->push_back(slicesInelastic[it].second); 

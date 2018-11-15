@@ -78,6 +78,7 @@ class G4ReweightTraj{
 
     std::vector< std::pair<double,int> > ThinSliceMethod(double);
     std::vector< std::pair<double,int> > ThinSliceBetheBloch(double);
+    std::vector< std::pair<double,int> > ThinSliceBetheBlochInelastic(double);
     std::vector< std::pair<double,int> > ThinSliceMethodInelastic(double);
     double BetheBloch(double);
 

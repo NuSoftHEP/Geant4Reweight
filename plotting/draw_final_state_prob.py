@@ -8,11 +8,14 @@ from math import log, sqrt
 
 def init_parser():
   parser = ArgumentParser()
-  parser.add_argument('--loc', type=str, help='Location of samples')
-  parser.add_argument('--nom', type=str, help='nom File name')
-  parser.add_argument('--cmd', type=str, help='Which command to execute ', default=" ")
-  parser.add_argument('-f', type=str, help='Which input file')
-  parser.add_argument('--plot',type=str, help='Plot name')
+  parser.add_argument('--loc',      type=str,  help='Location of samples')
+  parser.add_argument('--nom',      type=str,  help='nom File name')
+  parser.add_argument('--cmd',      type=str,  help='Which command to execute ', default=" ")
+  parser.add_argument('-f',         type=str,  help='Which input file')
+  parser.add_argument('--plot',     type=str,  help='Plot name')
+  parser.add_argument('--nbins',    type=int,  help='How many bins', default=75)
+  parser.add_argument('--bin_high', type=float, help='Upper boundary', default=450.)
+  parser.add_argument('--bin_low',  type=float, help='Lower boundary',default=0.)
   return parser
 
 def SetStyle(h):
@@ -33,6 +36,10 @@ cmd = args.cmd
 plot = args.plot
 gStyle.SetPadTickX(1)
 gStyle.SetPadTickY(1)
+
+nbins = args.nbins
+bin_high = args.bin_high
+bin_low = args.bin_low
 
 names = ["abs", "cex", "dcex", "prod", "inel"] 
 
@@ -125,7 +132,7 @@ else:
   
   outfile.cd()
   
-  nomTree.Draw("preFinalP>>reac(75,0,450)",reac_cut,"goff")
+  nomTree.Draw("preFinalP>>reac(" + str(nbins) + "," + str(bin_low) + "," + str(bin_high) + ")",reac_cut,"goff")
   reac = gDirectory.Get("reac")
 
   reac.Sumw2() 
@@ -135,7 +142,7 @@ else:
   for name in names:
     cut = cuts[name]
     print name, cut
-    nomTree.Draw("preFinalP>>"+name+"(75,0,450)", cut,"goff")
+    nomTree.Draw("preFinalP>>"+name+"(" + str(nbins) + "," + str(bin_low) + "," + str(bin_high) + ")", cut,"goff")
   
     nhists[name] = gDirectory.Get(name) 
     nhists[name].Sumw2()

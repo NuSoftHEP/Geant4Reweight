@@ -125,35 +125,72 @@
 
 
 \author[1]{Jake Calcutt}
-%\author[1]{Kendall Mahn}
+\author[2]{Laura Fields}
+\author[1]{Kendall Mahn}
 \affil[1]{Michigan State University}
+\affil[2]{Fermi National Accelerator Laboratory}
 
 \maketitle
 \thispagestyle{fancy}
 %\linenumbers
 %\begin{abstract}
 
+\section{Motivation}
+Errors in neutrino energy estimation serve as large sources of systematic uncertainty in modern neutrino oscillation experiments such as the Deep Underground Neutrino Experiment (DUNE). This estimation relies on the reconstruction of particles, such as pions, produced at the macroscopic neutrino interaction vertex. As the pions travel through the DUNE detector, they possibly undergo secondary interactions within the detector. This allows for misreconstruction and thus errors in the neutrino energy estimation.  It is then crucial to understand the rate of these interactions - the pion interaction cross section - to account for this misreconstruction and misestimation. 
+
+Understanding these interactions on Argon will be important for DUNE, as Liquid Argon serves as its detection medium. Upcoming results from the LArIAT and ProtoDUNE experiments will increase our knowledge of these interactions on Argon, where there is currently limited data. We must also be able to estimate the uncertainty on model predictions used within neutrino detector simulations. The Geant4 software package provides this simulation, but currently has no way of providing an estimation of the uncertainty on its prediction\footnote{There is currently no way for users to easily vary the cross section model short of changing the hard-coded cross section tables by hand.}. I will provide a framework by which one can easily define a varied cross section model, and produce a varied prediction through reweighting. This will allow for varied simulation production without rerunning the simulation, thus saving computing resources and time.
+
+\section{Pion Interactions}
+As pions travel through the detector, they can undergo discrete interactions with the nuclei of the detector components. These interactions can largely be separated into elastic scattering, in which the nucleus is left in its ground state, and various reactive/inelastic scattering channels. These can be described by their final states as in Table \ref{table:fates}. Additionally, in these reactive interaction channels, any number of nucleons (or none) could be knocked out of the nucleus. 
+
+\begin{table}\label{table:fates}
+\begin{center}
+  \begin{tabular}{| c | c |}
+  \hline
+  Channel & Definition  \\  
+  \hline	
+  Inelastic Scatter & 1 same-charge pion \& no other pions \\
+  \hline  
+  Absorption & No pions in final state \\
+  \hline
+  Single Charge Exchange & 1 neutral pion \& no other pions \\
+  \hline
+  Double Charge Exchange & 1 opposite-charge pion \& no other pions \\
+  \hline
+  Pion Production & $>$1 pions of any charge \\
+  \hline
+  \end{tabular}
+\end{center}
+\caption{Reactive Pion-Nucleus Interactions}
+\end{table}
+
 \section{Geant4 Simulation Technique}
-\subsection{Tracking and Stepping}
-The foundation of Geant4's simulation technique is the concept of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs. It is up to the user to access the step information via G4StepPoints before and after the stepping. 
+Before describing the reweighting process, it is important to understand the way Geant4 handles simulating particles within matter. A user defines the material content and shape of the tracking/detector region, the initial particles to be simulated within the detector, and the set of active physics processes that will be used within the simulation. 
 
-A G4SteppingManager handles the stepping. It stores a set of active processes which are instantiated by the user at runtime, thus allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
-\begin{enumerate}
-	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen.
-	\item "Safety" ($S$) - the distance to the next boundary - is calculated. %For charged particles without a field or for neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
-	\item If $L_{min} > S$, the distance to the next volume boundary is re-calculated. 
-	\item The smaller of $L_{min}$ and $S$ is taken as the step length. 
-	\item All active continuous processes are invoked along the step. The particle's Kinetic Energy will be updated after all invoked processes are completed. The change in Kinetic Eneregy will be the sum of all the contributions.
-	\item The G4Track's properties(Kinetic Energy and 4-position) are updated before discrete processes are invoked. At this point, secondary particles created by continuous processes (i.e. ionization electrons) are stored to be given to the G4TrackingManager. 
-	\item If, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
-	\item If $L_{min}$ was given by a discrete process, it is now invoked.
-	\item Track properties are updated. Secondaries are stored.
-	\item The track is checked for termination by the invoked discrete process.
-	\item The step is finished.
-\end{enumerate}
+During the simulation, the particle takes a series of steps throughout the detector until it is either killed by some physics process (decaying, certain interactions) or if it leaves the volume. During each step, processes are invoked algorithmically. (MAYBE PUT THE TRACKING PART INTO AN APPENDIX)
 
 
-\subsection{Choosing a Process}
+%The foundation of Geant4's simulation technique is the concept of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs.
+%
+%Active processes are instantiated by the user at runtime, allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
+%\begin{enumerate}
+%	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen.
+%	\item "Safety" ($S$) - the distance to the next boundary - is calculated. %For charged particles without a field or for neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
+%	\item If $L_{min} > S$, the distance to the next volume boundary is re-calculated. 
+%	\item The smaller of $L_{min}$ and $S$ is taken as the step length. 
+%	\item All active continuous processes are invoked along the step. The particle's Kinetic Energy will be updated after all invoked processes are completed. The change in Kinetic Eneregy will be the sum of all the contributions.
+%	\item The G4Track's properties(Kinetic Energy and 4-position) are updated before discrete processes are invoked. At this point, secondary particles created by continuous processes (i.e. ionization electrons) are stored to be given to the G4TrackingManager. 
+%	\item If, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
+%	\item If $L_{min}$ was given by a discrete process, it is now invoked.
+%	\item Track properties are updated. Secondaries are stored.
+%	\item The track is checked for termination by the invoked discrete process.
+%	\item The step is finished.
+%\end{enumerate}
+
+
+\subsection{Choosing a Process}\label{subsec:processes}
+There are 3 main types of processes: AtRest, Continuous, and Discrete. AtRest processes include decaying when the particle stops in the detector, Continuous includes ionization along a step, and Discrete includes hard-scattering of particles. For now, there are no plans to make AtRest and Continuous processes reweightable. Furthemore, the 
+
 As stated in the previous section, each active Continuous and Discrete process propose an interaction length before their invocation. The smallest of these interaction lengths is used as the step length. %Additionally, if a Discrete process proposed it, that process is invoked after all of the Continuous processes. 
 It is important to understand how these interaction lengths are proposed and compared to one another.
 
@@ -172,21 +209,6 @@ In practice, this results in a \textit{number of interaction lengths} for a give
 \begin{equation}\label{eq:Nint}
 N_p = \sum\limits_{s=steps} \frac{L_s}{\lambda_{p,s}} = \sum\limits_{s=steps} L_s * \sigma_{p,s}
 \end{equation}
-
-%It is important to realize the interplay between step sizes and Mean Free Paths. Each process has the same chance of throwing a certain number according to \eqref{eq:1}. However, two processes might throw the same number (unlikely, though instructive), but the deciding factor in a process occuring is based on its Mean Free Paths and the step sizes over the particle's trajectory. This is easily realized when considering $N$ as such:
-%\begin{equation}\label{eq:3}
-%N = \sum\limits_{s={steps}} \frac{L_{s}}{\lambda_{s}}
-%\end{equation}
-%or equivalently,
-%\begin{equation}\label{eq:4}
-%N = \sum\limits_{s={steps}} L_{s} * \sigma_{s}
-%\end{equation}
-%From this, we can modify \ref{eq:1} as such:
-%\begin{equation}\label{eq:5}
-%P(\set{L_s} | \set{\sigma_s}) = e^{-\sum L_s * \sigma_s}
-%\end{equation}
-
-
 
 
 \section{Weighting Scheme}
@@ -401,27 +423,7 @@ The results of this are shown in Figures \ref{ref:slice_1.5_1} through \ref{ref:
 \end{figure}
 
 Additionally, the relative rates of pion final states were investigated. This was done by categorizing the pions by their initial kinematics and by whether they underwent an inelastic scatter, any number of elastic scatters, or if they had no interaction before stopping or exiting the volume. For pions that underwent an inelastic scatter, the final state was categorized\footnote{Inelastic scatters also include any number of elastic scatters.}. Table \ref{table:fates} lists the definitions for the various pion fates. The results are shown in Figure \ref{ref:LAr_probs}. %Subsection \ref{subsec:WatAr} shows the results for a similar test in a volume of alternating slabs of LAr and water. 
-\begin{center}\label{table:fates}
-  \begin{tabular}{| c | c |}
-  \hline
-  Pion Fate & Definition  \\
-  \hline
-  No Interaction & No inelastic or elastic scatters \\ 
-  \hline
-  Elastic Scatters & No inelastic scatter, any number of elastic scatters \\
-  \hline	
-  Inelastic Scatter & 1 same-charge pion \& no other pions \\
-  \hline  
-  Absorption & No pions in final state \\
-  \hline
-  Single Charge Exchange & 1 neutral pion \& no other pions \\
-  \hline
-  Double Charge Exchange & 1 opposite-charge pion \& no other pions \\
-  \hline
-  Pion Production & $>$1 pions of any charge \\
-  \hline
-  \end{tabular}
-\end{center}
+
 \newpage
 
 %\subsection{LAr}\label{subsec:LAr}
@@ -606,6 +608,41 @@ A thin target of Carbon was used to test the exclusive channel reweighting. The 
 	\end{subfigure}
 
 \caption{Exclusive Reweighting in Carbon }
+\end{figure}
+
+\begin{figure}
+	\centering
+		\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/reac_exclusive_LAr}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/inel_exclusive_LAr}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/abs_exclusive_LAr}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/cex_exclusive_LAr}.pdf}
+	\end{subfigure}
+	
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/dcex_exclusive_LAr}.pdf}
+	\end{subfigure}		
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/exclusive_pdfs/prod_exclusive_LAr}.pdf}
+	\end{subfigure}
+
+\caption{Exclusive Reweighting in LAr }
 \end{figure}
 
 \section{Edits to Geant4.10.03.p03}

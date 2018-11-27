@@ -141,9 +141,9 @@ Errors in neutrino energy estimation serve as large sources of systematic uncert
 Understanding these interactions on Argon will be important for DUNE, as Liquid Argon serves as its detection medium. Upcoming results from the LArIAT and ProtoDUNE experiments will increase our knowledge of these interactions on Argon, where there is currently limited data. We must also be able to estimate the uncertainty on model predictions used within neutrino detector simulations. The Geant4 software package provides this simulation, but currently has no way of providing an estimation of the uncertainty on its prediction\footnote{There is currently no way for users to easily vary the cross section model short of changing the hard-coded cross section tables by hand.}. I will provide a framework by which one can easily define a varied cross section model, and produce a varied prediction through reweighting. This will allow for varied simulation production without rerunning the simulation, thus saving computing resources and time.
 
 \section{Pion Interactions}
-As pions travel through the detector, they can undergo discrete interactions with the nuclei of the detector components. These interactions can largely be separated into elastic scattering, in which the nucleus is left in its ground state, and various reactive/inelastic scattering channels. These can be described by their final states as in Table \ref{table:fates}. Additionally, in these reactive interaction channels, any number of nucleons (or none) could be knocked out of the nucleus. 
+As pions travel through the detector, they can undergo discrete interactions with the nuclei of the detector components. These interactions can largely be separated into elastic scattering, in which the nucleus is left in its ground state, and various reactive/inelastic scattering channels. These can be described by their final states as in Table \ref{tab:fates}. Additionally, in these reactive interaction channels, any number of nucleons (or none) could be knocked out of the nucleus. 
 
-\begin{table}\label{table:fates}
+\begin{table}
 \begin{center}
   \begin{tabular}{| c | c |}
   \hline
@@ -161,106 +161,82 @@ As pions travel through the detector, they can undergo discrete interactions wit
   \hline
   \end{tabular}
 \end{center}
-\caption{Reactive Pion-Nucleus Interactions}
+\caption{Reactive Pion-Nucleus Interactions\label{tab:fates}}
 \end{table}
 
 \section{Geant4 Simulation Technique}
 Before describing the reweighting process, it is important to understand the way Geant4 handles simulating particles within matter. A user defines the material content and shape of the tracking/detector region, the initial particles to be simulated within the detector, and the set of active physics processes that will be used within the simulation. 
 
-During the simulation, the particle takes a series of steps throughout the detector until it is either killed by some physics process (decaying, certain interactions) or if it leaves the volume. During each step, processes are invoked algorithmically. (MAYBE PUT THE TRACKING PART INTO AN APPENDIX)
-
-
-%The foundation of Geant4's simulation technique is the concept of 'tracking'. In this, particles are transported through media in a series of steps, possibly interacting along the way. Each G4Event starts with a set of G4Tracks. These G4Tracks are dynamic objects whose properties are modified while a manager handles the stepping through a medium. Additionally, they are not containers of multiple G4Steps. Rather, a given G4Step can be thought of existing temporarily, and it is where the main action of tracking occurs.
-%
-%Active processes are instantiated by the user at runtime, allowing users to customize which processes are simulated. These processes are implemented in various layers of abstraction, starting at the base virtual class G4VProcess. The second layer is comprised of 3 main 'types' of processes - Rest, Continuous, and Discrete - and combinations of these (i.e. ContinuousDiscrete). The processes continue in varying amounts of abstraction until they are fully defined. The main distinction of the Rest, Continuous, and Discrete processes are whether they have the "DoIt" and "GetPhysicalInteractionLength" defined to occur AtRest, Along-step, or Post-step. Rest processes only occur while the particle is at rest and will largely be ignored for the rest of the discussion. The active Continuous and Discrete processes are handled with the following algorithm:
-%\begin{enumerate}
-%	\item Each Continuous and Discrete process propose an interaction length.The smallest interaction length ($L_{min}$) is chosen.
-%	\item "Safety" ($S$) - the distance to the next boundary - is calculated. %For charged particles without a field or for neutral particles, this is a straight line. Charged particles in fields get a $S$ equal to the arc-length of their path as affected by the field accordingly.
-%	\item If $L_{min} > S$, the distance to the next volume boundary is re-calculated. 
-%	\item The smaller of $L_{min}$ and $S$ is taken as the step length. 
-%	\item All active continuous processes are invoked along the step. The particle's Kinetic Energy will be updated after all invoked processes are completed. The change in Kinetic Eneregy will be the sum of all the contributions.
-%	\item The G4Track's properties(Kinetic Energy and 4-position) are updated before discrete processes are invoked. At this point, secondary particles created by continuous processes (i.e. ionization electrons) are stored to be given to the G4TrackingManager. 
-%	\item If, the AtRest procs will be sampled next step. (CHECK THIS. Look in fStep->UpdateTrack?)
-%	\item If $L_{min}$ was given by a discrete process, it is now invoked.
-%	\item Track properties are updated. Secondaries are stored.
-%	\item The track is checked for termination by the invoked discrete process.
-%	\item The step is finished.
-%\end{enumerate}
-
-
-\subsection{Choosing a Process}\label{subsec:processes}
-There are 3 main types of processes: AtRest, Continuous, and Discrete. AtRest processes include decaying when the particle stops in the detector, Continuous includes ionization along a step, and Discrete includes hard-scattering of particles. For now, there are no plans to make AtRest and Continuous processes reweightable. Furthemore, the 
-
-As stated in the previous section, each active Continuous and Discrete process propose an interaction length before their invocation. The smallest of these interaction lengths is used as the step length. %Additionally, if a Discrete process proposed it, that process is invoked after all of the Continuous processes. 
-It is important to understand how these interaction lengths are proposed and compared to one another.
-
-The Discrete processes do not throw a random number at each step. Rather, each Discrete process simply samples the distribution 
-\begin{equation}\label{eq:sample}
-P(N) = e^{-N}
-\end{equation}
-at the beginning of a single track and after each time that process is invoked\footnote{Discrete processes can be further categorized depending on if they kill a track (such as pion-inelastic scattering) or the track is still alive after the process is invoked (hadron-elastic scattering). This will affect the treatment of weights slightly, and will be discussed further in a later section.\label{fn_Discrete}}. This number, $N_{p,s}$ for a given Discrete process at a specific step in the track, is used indirectly in determining the proposed interaction length for that process each step. In a specific step, each active Discrete process has an interaction length $L_{p,s}$ which is determined by the mean free path $\lambda_{p,s}$ of that process as such: 
-\begin{equation}
-L_{p,s} = N_{p,s} * \lambda_{p,s}
-\end{equation}
-Each Continuous process also proposes an interaction length. The smallest option out of the Discrete and Continous processes and of the distance to the next boundary is chosen and invoked. If a Discrete process was chosen (and if the track is still alive after invocation), that process has another $N_{p,s}$ sampled from \ref{eq:sample}. Each Discrete process which was not chosen to occur has its own previously-sampled $N_{p,s}$ reduced by an amount equal to $\frac{L_s}{\lambda_{p,s}}$, where $L_s$ is the step length which was chosen in that step\footnote{At this point, $L_s$ is the same for each process, as it is the step that was physically taken.}. These new $N_{p,s}$ are then used in the next step in determining the interaction lengths.
-
-In practice, this results in a \textit{number of interaction lengths} for a given process, where those interaction lengths are constantly updated (due to changes of kinematics or target). This number can be represented as such:
-
-\begin{equation}\label{eq:Nint}
-N_p = \sum\limits_{s=steps} \frac{L_s}{\lambda_{p,s}} = \sum\limits_{s=steps} L_s * \sigma_{p,s}
-\end{equation}
-
+During the simulation, a particle takes a series of steps throughout the detector until it is either killed by some physics process (decaying, certain interactions) or if it leaves the volume. During each step, processes are invoked algorithmically. The processes that describe pion interactions - both Elastic and Inelastic - are chosen to occur based on their interaction cross sections. 
 
 \section{Weighting Scheme}
-From here, we can start moving toward a reweighting framework for pion interactions. We should keep in mind that reweighting is essentially \textit{determining the probability for the same thing to happen under a varied model}. Weights will be assigned when Discrete processes occur, and will change based on the context of what happens. Additionally, as noted in footnote \ref{fn_Discrete}, there will be some divergence in the treatment of Discrete processes that preserve or kill the track. For now, we only consider the processes that kill the track. A singular weight   will be calculated and applied to the track based on the steps it took and the particle's fate when the track is killed.
+From here, we can start moving toward a reweighting framework for pion interactions. We should keep in mind that reweighting is essentially \textit{determining the probability for the same thing to happen under a varied model}. 
+%This means we will change the following observables in the results of the simulation:
+%\begin{enumerate}
+%\item How many of each type of process occur\footnote{If we increase the Inelastic cross section, we should expect to see more of those interactions and less stopping or exiting pions.} 
+%\item The length traveled before the interactions occur\footnote{If we increase the Inelastic cross section, the pion track lengths should decrease, as inelastic interactions should occur "earlier."}
+%\end{enumerate}
 
-\subsection{Particle Fates}
+Weights will be assigned to an entire track, and according to whether Inelastic or Elastic scatters occur along a track. There will be some divergence in the treatment of Inelastic and Elastic weights due to the fact that Inelastic scatters kill the track\footnote{When an Inelastic interaction is chosen to occur, cascade routines are invoked within the simulation. The initial pion track is terminated. Then, depending on what exits the nucleus as a result of the cascade, a new set of hadrons is created and tracked throughout the macroscopic volume of the simulation.} while Elastic scatters do not. We first consider the treatment of reweighting the Inelastic scattering cross section.
 
-We can think of the simulated particle as having two possible fates: it either undergoes an interaction or "survives" after traveling some distance. However, the definition of "survival" needs clarification. In Geant4, the particle will always do \textit{something}, so we should distinguish the fate based on the process that is invoked. Survival processes should then include the pion exiting the world volume (as it is no longer simulated), as well as decaying at rest or being captured at rest. We count the last two as survival processes because they are previously-described AtRest processes which take precendence only once the particle is stopped. Essentially, they require the pion to move a certain distance without interacting, and should be counted as survival processes. 
+\subsection{Inelastic Ineraction 
+Weights}\label{subsec:inel_weights}
 
-All other processes\footnote{Such as pion-inelastic scattering, and ... This also includes decaying in flight, as it is treated similar to the rest of the discrete processes in the sampling scheme described above. } 
-are considered "interacting" processes. 
-
-\subsection{Assigning Weights}\label{subsec:inel_weights}
-
-Now that we have distinguished the interacting and survival processes, we can move on to calculating the weights that should be applied to the tracks. Whether the tracks survive or interact, they receive a weight that effectively changes the probability to have traveled a specific distance - the track's length - without interacting. Classically, this distributions is given by:
-\begin{equation}\label{eq:dist_prob}
-P(L) \propto e^{-L \sigma}
+Consider a pion travelling through some material with an Inelastic interaction cross section $\sigma$. It has a probability of travelling some small distance, $\delta x$, without undergoing an interaction\footnote{Normally, the number density of the material is stated in this equation, but is baked into the cross section here. Thus, the cross sections discussed here will depend on the surrounding material.}:
+\begin{equation}\label{eq:Psurv}
+P_{Surv} = e^{- \sigma \delta x} \simeq (1 - \sigma \delta x)
 \end{equation}
-By inspection, the exponent is similar to Equation \ref{eq:Nint}, motivating that we can use this in our weighting scheme. Since we would like to change the distribution of distances before an interaction occurs, both interacting and surviving tracks should include this in their weight. For surviving tracks, the weight is solely based on this factor:
-\begin{equation}\label{eq:surv_weight}
-  W_{surv} = \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
+Accordingly, it has a chance for interacting along that distance:
+\begin{equation}\label{eq:Pint}
+P_{Int} = \sigma \delta x
 \end{equation}
-Here, $\sigma_{tot,s}$ is the sum of all active discrete cross sections at a given step, and the sums run over the steps in the track. This will change the distribution of track lengths according to the change in the total cross section\footnote{$\sigma_{tot,s}'$ represents the variation of the total cross section, where any or all of the individual cross sections have been varied.}.
 
-Additionally, interacting tracks need to be given a factor that scales their specific fate's probability by the change to the cross section. This would normally be done by a ratio of the new cross section to the old: $\frac{\sigma'}{\sigma}$. However, to account for the cross section changing throughout the particle's travel, as well as variations relative to the kinematics of the track at each step, we use the step-length-averaged cross sections. Thus, we give this additional factor\footnote{The $'$ in the numerator of the first term is there to account for the case that the interaction that occured is weighted. If that interaction was not weighted, $ R = 1$.} to tracks that underwent interaction $a$:
-
+Within Geant4, the pion takes a series steps before the track is terminated. This termination will occur in the following cases:
+\begin{enumerate}
+\item The pion undergoes an Inelastic interaction
+\item It exits the tracking volume
+\item It decays in flight
+\item It stops within the tracking volume and either decays or is captured
+\end{enumerate}
+In the context of reweighting the Inelastic cross section, everything but the top case will be considered a surviving track.
+Each step will occur with a probability of the form of Equation \ref{eq:Psurv}, giving the following as the total probability for the pion to travel along the entire track without engaging in an Inelastic interaction:
 \begin{equation}
-\frac{R'}{R} = \frac{\sum L_s \sigma'_a}{\sum L_s \sigma_a}
+P_{Track} =  e^{- \sum \limits_{i} \sigma_i L_i}
+\end{equation} 
+where $\sigma_i$\footnote{Note that the cross section depends on the pion momentum and the surrounding material at each step. The subscript $i$ reflects this.} and $L_i$ are the Inelastic cross section and the length of the step taken for a given step $i$, and the sum in the exponential is over the set of steps throughout the track.
+
+Thus, for a varied cross section model, a track which does not undergo an Inelastic interaction receives the following weight:
+\begin{equation}\label{eq:surv_weight}
+  W_{surv} = \frac{e^{- \sum \limits_{i} \sigma'_i L_i}}{e^{- \sum \limits_{i} \sigma_i L_i}}
 \end{equation}
+Here, $\sigma'_i$ represents the varied set of Inelastic cross sections depending on the surrounding material and pion momentum at each step.
 
-Making the total weight applied to interacting tracks:
-
-\begin{equation}\label{eq:int_weight_pop}
-  W_{int} = \frac{\sum L_s \sigma'_a}{\sum L_s \sigma_a} * \frac{e^{-\sum L_s  \sigma_{tot,s}'}}{e^{-\sum L_s  \sigma_{tot,s}}}
+For tracks that end in an Inelastic interaction, the last step will receive a factor of the form of Equation \ref{eq:Pint}. Thus, the track will receive the following weight: 
+\begin{equation}\label{eq:int_weight}
+  W_{int} = \frac{\sigma'_{last}}{\sigma_{last}} \frac{e^{- \sum \limits_{i} \sigma'_i L_i}}{e^{- \sum \limits_{i} \sigma_i L_i}}
 \end{equation}
-This encapsulates both the change to the distribution of track lengths, as well as the relative rates of specific types of interactions. 
+Where the sums in the exponents now leave out the last step.
 
-\subsection{Track-Preserving Processes - Elastic Scattering}
-Certain discrete processes, such as elastic scattering, preserve the track within the simulation run. This means multiple elastic scatters could occur before the track is killed by a different discrete process or if it leaves the tracking volume. To account for this, we keep the calculation of the elastic weight separate from the track-killing processes above. We leave out the elastic cross sections from the calculation of the total cross sections used in the previous section, and we assign multiple elastic weights to the track. In essence, we have to assign a weight whenever another number is resampled after the elastic process occurs. 
+\subsection{Elastic Interaction Weights}
+We now move on to discussing reweighting the Elastic scattering cross section. As mentioned before, the track is not terminated when Elastic scatters occur. This has two effects on the weigthing scheme:
+\begin{enumerate}
+\item The weight is calculated independently of Inelastic scatters
+\item The track can have multiple Elastic scatters before termination, each with associated weighting factors. 
+\end{enumerate}
 
-The total elastic weight will always contain a term in the form of equation \ref{eq:9}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
+Because a track will never end in an Elastic scatter, the weight will always contain a term in the form of Equation \ref{eq:surv_weight}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
 
-In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight_pop}, but with only a ratio of the varied and nominal individual cross sections.
+In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight}.
 
 The resulting weight then takes the form of:
 \begin{equation}\label{ref:elastFull}
-W_{elast} = (\prod \limits_{elast} \frac{\sum L_s \sigma_s'}{\sum L_s \sigma_s} \frac{e^{-\sum L_s  \sigma_{s}'}}{e^{-\sum L_s  \sigma_{s}}})(\frac{e^{-\sum L_s \sigma_{s}'}}{e^{-\sum L_s \sigma_{s}}})
+W_{elast} = \Bigg( \prod \limits_{e} \frac{\sigma_{e}'}{\sigma_{e}} \frac{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i}')}{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i})} \Bigg)
+\Bigg( \frac{\exp(-\sum \limits_j^{end} L_j \sigma_{j}')} {\exp(-\sum \limits_j^{end} L_j \sigma_{j})} \Bigg)
 \end{equation}
-Where the $\sigma_s$ corresponds to the cross section for a given elastic-type process at a given step in the track. Note that every such process that is varied would receive this weight, and contribute to the total weight given to the track.
+Here, all $\sigma$ are the Elastic scattering cross section depending on surrounding material and pion momentum at the denoted step. The product in the first term runs over all of the Elastic scatters throughout the track. The sums in the first term run from either the first step in the track or the first step after each scatter $e$. The sums in the second term run from the step after the last elastic scatter to the end of the track. Essentially, the first term contains the contributions from all of the elastic scatters within the track, while the second term contains the contribution from the steps after the last elastic scatter.
 
 \subsection{Plan for Reweighting Final States}
-The exclusive channels\footnote{The definitions of these can be found in Table \ref{table:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. 
+The exclusive channels\footnote{The definitions of these can be found in Table \ref{tab:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. 
 
 First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$. User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
@@ -311,17 +287,17 @@ Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal 
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1.5_elast1}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1}.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1.5_elast1}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1}.pdf}
 	\end{subfigure}
 	
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1}.pdf}
 	\end{subfigure}
 \caption{Inelastic Scale: 1.5, Elastic Scale: 1}\label{fig:thin_1.5_1}
 \end{figure}
@@ -330,17 +306,17 @@ Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal 
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1_elast1.5}.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1_elast1.5}.pdf}
 	\end{subfigure}
 	
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1_elast1.5}.pdf}
 	\end{subfigure}
 \caption{Inelastic Scale: 1, Elastic Scale: 1.5}\label{fig:thin_1_1.5}
 \end{figure}
@@ -349,17 +325,17 @@ Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal 
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_new_thin_xsec_inel1.5_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1.5}.pdf}
 	\end{subfigure}
 	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_new_thin_xsec_inel1.5_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1.5}.pdf}
 	\end{subfigure}
 	
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/new_ratio_inel1.5_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1.5}.pdf}
 	\end{subfigure}
 \caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}\label{fig:thin_1.5_1.5}
 \end{figure}

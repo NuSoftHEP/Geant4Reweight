@@ -140,6 +140,7 @@ else:
   
   for samp in samps:
     nom_file = ls(args.loc + "/*" + samp + "_nom_inel" +args.i + "_elast"+args.e+"_full.root" )  
+    print args.loc + "/*" + samp + "_nom_inel" +args.i + "_elast"+args.e+"_full.root"
     print nom_file
     nom.Add(nom_file[0])
   

@@ -5,6 +5,8 @@ from draw_utils import *
 from argparse import ArgumentParser 
 from ROOT import * 
 from math import log, sqrt
+from default import *
+from array import array
 
 def getChi2(w, v):
   result = []  
@@ -34,6 +36,7 @@ def init_parser():
   parser.add_argument('--plot',type=str, help='Plot name')
   parser.add_argument('--reactive',type=str, help='reactive')
   parser.add_argument('--total',type=str, help='total')
+  parser.add_argument('--tex', type=int, help='Save as tex?')
   return parser
 
 def SetStyle(h):
@@ -45,27 +48,19 @@ def SetStyle(h):
   h.GetYaxis().SetTitleOffset(.8)
   h.GetXaxis().SetTitleOffset(.8)
 
-gStyle.SetLabelFont(62,"XYZ")
-gStyle.SetTitleFont(62,"XYZ")
- 
 args = init_parser().parse_args()
 inel = args.i
 elast = args.e
 loc = args.loc
 cmd = args.cmd
 
-gStyle.SetPadTickX(1)
-gStyle.SetPadTickY(1)
+set_default_style()
 
 if (cmd == "Draw" or cmd == "draw"):
   inFile = TFile(args.f, "READ") 
   thin_xsec_reactive_n = inFile.Get("thin_reactive_xsec_n")  
   thin_xsec_reactive_w = inFile.Get("thin_reactive_xsec_w")  
   thin_xsec_reactive_v = inFile.Get("thin_reactive_xsec_v")  
-  reactive_result = getChi2(thin_xsec_reactive_w,thin_xsec_reactive_v)
-  print "Reactive chi2: ", reactive_result[0]/reactive_result[1]
-#  for iBin in range(1,thin_xsec_reactive_w.GetNbinsX()+1):
-#    print thin_xsec_reactive_w.GetBinError(iBin),
     
   thin_xsec_reactive_n.SetMarkerStyle(24) 
   thin_xsec_reactive_w.SetMarkerStyle(25)
@@ -74,50 +69,79 @@ if (cmd == "Draw" or cmd == "draw"):
   thin_xsec_total_n = inFile.Get("thin_total_xsec_n")  
   thin_xsec_total_w = inFile.Get("thin_total_xsec_w")  
   thin_xsec_total_v = inFile.Get("thin_total_xsec_v")  
-  total_result = getChi2(thin_xsec_total_w,thin_xsec_total_v)
-  print "Total chi2: ", total_result[0]/total_result[1]
+
   thin_xsec_total_n.SetMarkerStyle(20) 
   thin_xsec_total_w.SetMarkerStyle(21)
   thin_xsec_total_v.SetMarkerStyle(22)
 
-  thin_xsec_reactive_n.SetTitle(thin_xsec_reactive_n.GetTitle() + " - Reactive")
-  thin_xsec_reactive_w.SetTitle(thin_xsec_reactive_w.GetTitle() + " - Reactive")
-  thin_xsec_reactive_v.SetTitle(thin_xsec_reactive_v.GetTitle() + " - Reactive")
   
-  thin_xsec_total_n.SetTitle(thin_xsec_total_n.GetTitle() + " - Total")
-  thin_xsec_total_w.SetTitle(thin_xsec_total_w.GetTitle() + " - Total")
-  thin_xsec_total_v.SetTitle(thin_xsec_total_v.GetTitle() + " - Total")
+  thin_xsec_reactive_n.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
+  thin_xsec_reactive_w.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
+  thin_xsec_reactive_v.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
+
+  set_pdf_style(thin_xsec_reactive_n, "Pion Momentum (MeV/c)", "#sigma (barn)" )
+  set_pdf_style(thin_xsec_reactive_w, "Pion Momentum (MeV/c)", "#sigma (barn)" )
+  set_pdf_style(thin_xsec_reactive_v, "Pion Momentum (MeV/c)", "#sigma (barn)" )
+  
+  thin_xsec_total_n.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+  thin_xsec_total_w.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+  thin_xsec_total_v.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+
+  set_pdf_style(thin_xsec_total_n, "Pion Momentum (MeV/c)", "#sigma (barn)" )
+  set_pdf_style(thin_xsec_total_w, "Pion Momentum (MeV/c)", "#sigma (barn)" )
+  set_pdf_style(thin_xsec_total_v, "Pion Momentum (MeV/c)", "#sigma (barn)" )
 
   reactive_data = inFile.Get("data")
   reactive_data.SetMarkerStyle(27)
+  
+  #check for 0
+  xCheck = array("d", [0])
+  yCheck = array("d", [0])
+  reactive_data.GetPoint(0, xCheck, yCheck) 
+  print "X:", xCheck
+  if(xCheck[0] == 0.): reactive_data.RemovePoint(0)
+
   total_data = inFile.Get("total_data")
   total_data.SetMarkerStyle(29)
 
-  total_chi2 = str(total_result[0]/total_result[1])[0:4]
-  reactive_chi2 = str(reactive_result[0]/reactive_result[1])[0:4] 
+  total_data.GetPoint(0, xCheck, yCheck) 
+  if(xCheck[0] == 0.): total_data.RemovePoint(0)
 
-  total_leg = inFile.Get("total_leg")
-  total_leg.AddEntry(None, "#chi^{2}/DOF = " + (total_chi2) )
-  reactive_leg = inFile.Get("reactive_leg")
-  reactive_leg.AddEntry(None, "#chi^{2}/DOF = " + (reactive_chi2) )
+  #total_leg = inFile.Get("total_leg")
+  #reactive_leg = inFile.Get("reactive_leg")
+  total_leg = TLegend(.55,.7,.85,.85)
+  total_leg.AddEntry(thin_xsec_total_n,"Nominal","p")
+  total_leg.AddEntry(thin_xsec_total_w,"Weighted","p")
+  total_leg.AddEntry(thin_xsec_total_v,"Varied","p")
+  total_leg.AddEntry(total_data,"Validation","p")
 
-  c1 = TCanvas()
+
+  reactive_leg = TLegend(.55,.7,.85,.85)
+  reactive_leg.AddEntry(thin_xsec_reactive_n,"Nominal","p")
+  reactive_leg.AddEntry(thin_xsec_reactive_w,"Weighted","p")
+  reactive_leg.AddEntry(thin_xsec_reactive_v,"Varied","p")
+  reactive_leg.AddEntry(reactive_data,"Validation","p")
+
+  c1 = TCanvas("c1","c1",500,400)
+  set_pad_style()
 
   thin_xsec_total_v.Draw("pE")
   thin_xsec_total_w.Draw("pE same")
   thin_xsec_total_n.Draw("pE same")
   total_data.Draw("p same")
-  total_leg.SetTextFont()
+  total_leg.SetTextFont(42)
   total_leg.Draw("same")
-  c1.SaveAs("total_"+args.plot)
+  if(args.tex == 1): c1.Print("total_"+args.plot+".tex") 
+  c1.SaveAs("total_"+args.plot+".pdf")
 
   thin_xsec_reactive_v.Draw("pE")
   thin_xsec_reactive_w.Draw("pE same")
   thin_xsec_reactive_n.Draw("pE same")
   reactive_data.Draw("p same")
-  reactive_leg.SetTextFont()
+  reactive_leg.SetTextFont(42)
   reactive_leg.Draw("same")
-  c1.SaveAs("reactive_"+args.plot) 
+  if(args.tex == 1): c1.Print("reactive_"+args.plot+".tex")
+  c1.SaveAs("reactive_"+args.plot+".pdf") 
 
 elif (cmd == "ratio" or cmd == "Ratio"):
   inFile = TFile(args.f, "READ") 
@@ -138,7 +162,10 @@ elif (cmd == "ratio" or cmd == "Ratio"):
   reactive_ratio.SetMinimum(0.)
   reactive_ratio.SetMaximum(2.0)
 
-  c1 = TCanvas()
+  set_pdf_style(total_ratio, "Pion Momentum (MeV/c)", "Ratio")
+  set_pdf_style(reactive_ratio, "Pion Momentum (MeV/c)", "Ratio")
+
+  c1 = TCanvas("c1","c1",500,400)
   total_ratio.Draw("p")
   reactive_ratio.Draw("p same")
 
@@ -146,13 +173,12 @@ elif (cmd == "ratio" or cmd == "Ratio"):
   f.SetLineColor(1)
   f.Draw("same")
 
-  leg = TLegend(.55,.7,.9,.9)
-  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+  leg = TLegend(.55,.7,.85,.85)
   leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
   leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
-  leg.SetTextFont()
+  leg.SetTextFont(42)
   leg.Draw("same")
-  c1.SaveAs(args.plot)
+  c1.SaveAs(args.plot+".pdf")
 
 elif (cmd == "can_ratio" or cmd == "can_Ratio"):
   totalFile = TFile(args.total, "READ") 
@@ -186,12 +212,12 @@ elif (cmd == "can_ratio" or cmd == "can_Ratio"):
   f.SetLineColor(1)
   f.Draw("same")
 
-  leg = TLegend(.55,.7,.9,.9)
+  leg = TLegend(.55,.7,.85,.85)
   leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
 #  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast)
   leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
   leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
-  leg.SetTextFont()
+  leg.SetTextFont(42)
   leg.Draw("same")
   c1.SaveAs(args.plot)
 
@@ -367,12 +393,12 @@ else:
   
   
   
-  SetStyle(finalNReactive)
-  SetStyle(finalVReactive)
-  SetStyle(finalWReactive)
-  SetStyle(finalNTotal)
-  SetStyle(finalVTotal)
-  SetStyle(finalWTotal)
+  #SetStyle(finalNReactive)
+  #SetStyle(finalVReactive)
+  #SetStyle(finalWReactive)
+  #SetStyle(finalNTotal)
+  #SetStyle(finalVTotal)
+  #SetStyle(finalWTotal)
 
   
   outfile.cd()
@@ -385,9 +411,9 @@ else:
   finalWTotal.Write()
   finalVTotal.Write()
   
-  leg = TLegend(.55,.7,.9,.9)
+  leg = TLegend(.55,.7,.85,.85)
   leg.SetName("reactive_leg")
-  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+  #leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
   leg.AddEntry(finalNReactive,"Nominal","p")
   leg.AddEntry(finalWReactive,"Weighted","p")
   leg.AddEntry(finalVReactive,"Varied","p")
@@ -395,9 +421,9 @@ else:
   leg.Write()
 
 
-  leg = TLegend(.55,.7,.9,.9)
+  leg = TLegend(.55,.7,.85,.85)
   leg.SetName("total_leg")
-  leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
+  #leg.SetHeader("#sigma_{inel}x"+inel+", #sigma_{el}x"+elast, "C")
   leg.AddEntry(finalNTotal,"Nominal","p")
   leg.AddEntry(finalWTotal,"Weighted","p")
   leg.AddEntry(finalVTotal,"Varied","p")

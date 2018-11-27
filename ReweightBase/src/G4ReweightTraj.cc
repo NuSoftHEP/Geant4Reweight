@@ -172,6 +172,9 @@ double G4ReweightTraj::GetWeight(double bias){
     weight = weight / (1 - exp( -1*total ));
   }*/
   double num, denom;  
+
+
+  //Checks that the last step did not end in a decay
   if(total.count(GetFinalProc()) && GetStep(GetNSteps() - 1)->stepLength > 0){
 //     std::cout << "Found final proc " << GetFinalProc() << std::endl;
 //     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
@@ -204,7 +207,6 @@ double G4ReweightTraj::GetWeight(double bias){
     //weight = exp( total - bias_total );
     weight = exp( xsecTotal - bias_xsecTotal );
   }
-//  std::cout <<"weight " << weight << std::endl; 
   return weight;
 }
 
@@ -324,20 +326,14 @@ double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
     bias_total[reweightable[i]] = 0.;
   }
 
-//  std::cout << "N steps: " << GetNSteps() << std::endl;
-  for(size_t is = 0; is < GetNSteps(); ++is){   
+  size_t nsteps = GetNSteps();
+  if( GetFinalProc() == "pi+Inelastic" )nsteps--;
+
+  for(size_t is = 0; is < nsteps; ++is){   
     auto theStep = GetStep(is);
         
-/*    std::cout << "P: " << theStep->preStepPx << " " << theStep->preStepPy << " " << theStep->preStepPz << " " << 
-
-    sqrt(theStep->preStepPx*theStep->preStepPx + theStep->preStepPy*theStep->preStepPy + theStep->preStepPz*theStep->preStepPz) <<std::endl;
-    std::cout << "L: " << theStep->stepLength << std::endl;*/
-//    std::cout << theStep->stepChosenProc << " " << is << std::endl;
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
       auto theProc = theStep->GetActivePostProc(ip);
-
-      
-      //std::cout << theProc.Name << " " << theProc.MFP << std::endl; 
 
       if (total.count(theProc.Name)){
         total[theProc.Name] += (10.*theStep->stepLength/theProc.MFP);
@@ -347,7 +343,6 @@ double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
           
           double bias;
           bias = biasInter->GetContent(theMom);
-//          std::cout << "Weight: " << bias << std::endl;
           bias_total[theProc.Name] += ( (10.*theStep->stepLength*bias) / theProc.MFP);
         }
         else{
@@ -357,56 +352,51 @@ double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
 
     }
   }
-//  std::cout << "total: " << total["pi+Inelastic"] << std::endl;
-  //std::cout << "? " << exp(-.5*total["pi+Inelastic"]) << std::endl;
+
   double xsecTotal = 0.;
   double bias_xsecTotal = 0.;
   for(int i = 0; i < nRW; ++i){
-    //std::cout << reweightable[i] << " " << total[reweightable[i]] << " " << bias_total[reweightable[i]] << std::endl;
     xsecTotal += total[reweightable[i]];
     bias_xsecTotal += bias_total[reweightable[i]];
   }
-  //std::cout << "Totals: " << xsecTotal << " " << bias_xsecTotal << std::endl;
 
+/*  std::cout << "Getting last step" << std::endl;
+
+  auto lastStep = GetStep( GetNSteps() - 1 );
+  for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+    auto theProc = lastStep->GetActivePostProc(ip);
+
+    if(theProc.Name == "pi+Inelastic"){
+
+      std::cout << "Found inelastic" << std::endl;
+
+      double theMom = lastStep->GetFullPreStepP();
+      double bias = biasInter->GetContent(theMom);
+
+      bias_last_xsec = ( bias / theProc.MFP);
+      last_xsec = 1. / theProc.MFP;
+    }
+  }
+*/
   double weight;
-/*  if(GetFinalProc() == "pi+Inelastic"){
-    weight = (1 - exp( -1*bias_total ));
-    weight = weight / (1 - exp( -1*total ));
-  }*/
   double num, denom;  
   if(total.count(GetFinalProc()) && GetStep(GetNSteps() - 1)->stepLength > 0){
-//     std::cout << "Found final proc " << GetFinalProc() << std::endl;
-//     std::cout << "Pi+inel: " << total["pi+Inelastic"]  << " " << bias_total["pi+Inelastic"] << 
-//     std::endl << "coulomb: " << total["CoulombScat"] << " " << bias_total["CoulombScat"] << std::endl;
-//
-//     std::cout << "Total: " << xsecTotal << " " << bias_xsecTotal << std::endl;
-//     std::cout << "R: " << total[GetFinalProc()]/xsecTotal << " " << bias_total[GetFinalProc()]/bias_xsecTotal << std::endl;
-//     std::cout << "p: " << (1 - exp( -1*xsecTotal ) ) << " " << (1 - exp( -1*bias_xsecTotal ) ) << std::endl;  
 
-/*     num = bias_total[GetFinalProc()];
-     num = num / bias_xsecTotal;
-     num = num * (1 - exp( -1*bias_xsecTotal ) );
+     //Trying out using the ratio only for the last step
+     
 
-     denom = total[GetFinalProc()];
-     denom = denom / xsecTotal;
-     denom = denom * (1 - exp( -1*xsecTotal ) );
-
-
-     weight = num/denom;
-*/
-     //Alternative Weight
      weight = exp( xsecTotal - bias_xsecTotal);
-     weight = weight * bias_total[GetFinalProc()] / total[GetFinalProc()];
-//     weight = ( bias_total[GetFinalProc()] / bias_xsecTotal ) * weight;
-//     weight = weight / ( total[GetFinalProc()] / xsecTotal );
-//     std::cout << GetFinalProc() << " " << weight << std::endl;
+//     weight = weight * bias_total[GetFinalProc()] / total[GetFinalProc()];
+     
+     auto lastStep = GetStep( GetNSteps() - 1 );
+     double theMom = lastStep->GetFullPreStepP();
+     double bias = biasInter->GetContent(theMom);
+     weight = weight * bias;
 
   }
   else{
-    //weight = exp( total - bias_total );
     weight = exp( xsecTotal - bias_xsecTotal );
   }
-//  std::cout <<"weight " << weight << std::endl; 
   return weight;
 }
 

@@ -37,6 +37,8 @@ class G4ReweightTraj{
     int eventNum;
     int PID;
     int parID;
+
+    std::string fInelastic;
   
     double Energy; 
 
@@ -87,8 +89,8 @@ class G4ReweightTraj{
   private:
     std::vector<G4ReweightStep *> steps;
     std::vector<G4ReweightTraj *> children;
-    static const int nRW = 1;
-    std::string reweightable[nRW] = {"pi+Inelastic"};
+//    static const int nRW = 1;
+//    std::string reweightable[nRW] = {"pi+Inelastic"};
 };
 
 

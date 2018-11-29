@@ -687,9 +687,6 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   //empty the container
   trajCollection->clear();
 
-  fout->cd();
-  tree->Write();
-  fout->Close();
 }
 
 void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
@@ -805,9 +802,6 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
   //empty the container
   trajCollection->clear();
 
-  fout->cd();
-  tree->Write();
-  fout->Close();
 }
 
 void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
@@ -923,9 +917,6 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4Rewe
   //empty the container
   trajCollection->clear();
 
-  fout->cd();
-  tree->Write();
-  fout->Close();
 }
 
 //At some point add in elastic? 
@@ -1043,9 +1034,6 @@ void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
   //empty the container
   trajCollection->clear();
 
-  fout->cd();
-  tree->Write();
-  fout->Close();
 }
 
 //Add in elastic reweighting?

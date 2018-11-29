@@ -59,6 +59,7 @@ int main(int argc, char ** argv){
     G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
 
     tp->FillAndAnalyzeFS(theFS);
+    tp->CloseAndSaveOutput();
 
     return 0;
   }
@@ -69,6 +70,7 @@ int main(int argc, char ** argv){
     std::cout << "\t" << weight << " " << elastWeight << std::endl;
 
     tp->FillAndAnalyze(weight,elastWeight);
+    tp->CloseAndSaveOutput();
   }
   else if(weightType == "binned"){
 
@@ -115,6 +117,7 @@ int main(int argc, char ** argv){
     //////////////////////////////////
 
     tp->FillAndAnalyze(inelasticHist, elasticHist);
+    tp->CloseAndSaveOutput();
     
   }
   else if(weightType == "func"){
@@ -142,6 +145,7 @@ int main(int argc, char ** argv){
 
 //    return 0;
     tp->FillAndAnalyzeFunc(inelasticBias, elasticBias);
+    tp->CloseAndSaveOutput();
     
   }
 

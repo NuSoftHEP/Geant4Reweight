@@ -40,7 +40,10 @@ class G4ReweightTreeParser{
     void GetWeightFS( G4ReweightFinalState *, double );
 
     void CloseInput();
+    void CloseAndSaveOutput(){ fout->cd(); tree->Write(); fout->Close(); };
     void GetInteractionType(int);
+
+    TTree * GetTree(){ return tree; };
 
     size_t GetNTrajs();
   //  size_t GetNEvents();

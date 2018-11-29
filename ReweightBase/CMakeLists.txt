@@ -21,16 +21,14 @@ include_directories(${ROOT_INCLUDE_DIRS} $ENV{TINYXML2_INCLUDE_DIR} ${PROJECT_SO
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
+add_library(G4ReweightLib SHARED ${sources})
 add_executable(G4Reweight G4Reweight.cc ${sources} ${headers})
 
 file(GLOB TINYXML2_LIBRARIES $ENV{TINYXML2_LIBRARY_DIR}/*.so*)
 
 target_link_libraries(G4Reweight ${ROOT_LIBRARIES} ${TINYXML2_LIBRARIES})
+target_link_libraries(G4ReweightLib ${ROOT_LIBRARIES} ${TINYXML2_LIBRARIES})
 
 install(TARGETS G4Reweight DESTINATION bin)
-
-#add_library(G4Reweight ${PROJECT_SOURCE_DIR}/src/G4ReweightTraj.cc ${PROJECT_SOURCE_DIR}/include/G4ReweightTraj.hh)
-
-
-
+install(TARGETS G4ReweightLib DESTINATION lib)
 

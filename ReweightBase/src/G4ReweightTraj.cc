@@ -487,8 +487,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
       //Update the energy
       sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
       if( sliceEnergy - 139.57 < 0.){
-        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
         sliceEnergy = 0.0001;
       }    
       //If it's more than 1 slice, add in non-interacting slices
@@ -499,8 +499,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
         //Update the energy again
         sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
         if( sliceEnergy - 139.57 < 0.){
-          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
           sliceEnergy = 0.0001;
         }
       }      
@@ -515,8 +515,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
       //Update the energy
       sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
       if( sliceEnergy - 139.57 < 0.){
-        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
         sliceEnergy = 0.0001;
       }
       //If it's more than 1 slice, add in non-interacting slices
@@ -527,8 +527,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
         //Update the energy again
         sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
         if( sliceEnergy - 139.57 < 0.){
-          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
           sliceEnergy = 0.0001;
         }
       }
@@ -652,8 +652,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
       //Update the energy
       sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
       if( sliceEnergy - 139.57 < 0.){
-        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
         sliceEnergy = 0.0001;
       }    
       //If it's more than 1 slice, add in non-interacting slices
@@ -664,8 +664,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
         //Update the energy again
         sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
         if( sliceEnergy - 139.57 < 0.){
-          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
           sliceEnergy = 0.0001;
         }
       }      
@@ -680,8 +680,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
       //Update the energy
       sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
       if( sliceEnergy - 139.57 < 0.){
-        std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-        std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
         sliceEnergy = 0.0001;
       }
       //If it's more than 1 slice, add in non-interacting slices
@@ -692,8 +692,8 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
         //Update the energy again
         sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
         if( sliceEnergy - 139.57 < 0.){
-          std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
-          std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
           sliceEnergy = 0.0001;
         }
       }

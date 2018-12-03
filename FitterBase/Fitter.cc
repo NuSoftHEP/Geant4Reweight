@@ -3,7 +3,8 @@
 int main(int argc, char ** argv){
 
   DUETFitter df(argv[1]); 
-  df.LoadData(); 
+  df.ParseXML(argv[2]);
+//  df.LoadData(); 
 
   double step = .1;
 
@@ -15,22 +16,22 @@ int main(int argc, char ** argv){
   }
 */
 
-  df.LoadRawMC();
-  for( int i = -7; i < 2; ++i ){
-    double norm_abs = 1. + i * step;
-
-    for(int j = -7; j < 2; ++j ){
-
-      double norm_cex = 1. + j * step;
-
-      std::cout << std::endl << "Reweighting. Abs: " << norm_abs << " Cex: " << norm_cex << std::endl;
-
-      df.DoReweightFS( norm_abs, norm_cex );
-      df.LoadMC();
-      std::cout << df.DoFit() << std::endl;
-
-    }
-  }
-
+//  df.LoadRawMC();
+//
+//  for( int i = -7; i < 2; ++i ){
+//    for(int j = -7; j < 2; ++j ){
+//
+//      double norm_abs = 1. + i * step;
+//      double norm_cex = 1. + j * step;
+//
+//      std::cout << std::endl << "Reweighting. Abs: " << norm_abs << " Cex: " << norm_cex << std::endl;
+//
+//      df.DoReweightFS( norm_abs, norm_cex );
+//      df.LoadMC();
+//      std::cout << df.DoFit() << std::endl;
+//
+//    }
+//  }
+//
   return 0;
 }

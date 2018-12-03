@@ -9,6 +9,13 @@
 #include <iomanip>
 #include <sstream>
 
+
+std::string set_prec(double input){
+  std::stringstream stream_in; 
+  stream_in << std::fixed << std::setprecision(2) << input;
+  return stream_in.str();
+};
+
 /*DUETFitter::DUETFitter(std::string mc_name) : fMCFileName(mc_name) { 
   fOutFile = new TFile("DUET_fit.root", "RECREATE"); 
 }
@@ -117,6 +124,10 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
   norm_cex_param = norm_cex;
 
   delete FSReweighter;
+}
+
+void DUETFitter::GetReweightFS(){
+
 }
 
 void DUETFitter::DoReweight( double norm ){
@@ -266,6 +277,7 @@ void DUETFitter::SaveInfo(){
   Reweighter->CloseAndSaveOutput();
   Reweighter->CloseInput();
 
+  //Risky putting this here
   delete Reweighter;
 
   ClearMemory();
@@ -274,4 +286,68 @@ void DUETFitter::SaveInfo(){
 void DUETFitter::ClearMemory(){
   delete MC_xsec_abs;
   delete MC_xsec_cex;
+}
+
+void DUETFitter::ParseXML(std::string FileName){
+
+  tinyxml2::XMLDocument doc;
+
+  tinyxml2::XMLError loadResult = doc.LoadFile( FileName.c_str() );
+  if( loadResult != tinyxml2::XML_SUCCESS ){
+    std::cout << "Could not load file" << std::endl;
+    return;
+  }
+
+  tinyxml2::XMLNode * theRoot = doc.FirstChild();
+  if( !theRoot ){
+    std::cout << "Could Not get first child" << std::endl;
+    return;
+  }
+
+ 
+  tinyxml2::XMLElement * theReweight = theRoot->FirstChildElement( "Reweight" );
+  if( !theReweight ){
+    std::cout << "Could Not get element " << std::endl;
+    return;
+  }
+  
+  while( theReweight ){
+   
+    double cex, abs;
+    tinyxml2::XMLError attResult = theReweight->QueryDoubleAttribute("abs", &abs);
+    if( attResult != tinyxml2::XML_SUCCESS ){
+      std::cout << "Could not get abs" << std::endl;
+    }
+
+    attResult = theReweight->QueryDoubleAttribute("cex", &cex);
+    if( attResult != tinyxml2::XML_SUCCESS ){
+      std::cout << "Could not get cex" << std::endl;
+    }
+
+    std::cout << "abs: " << set_prec(abs) << " cex: " << set_prec(cex) << std::endl;
+
+    const char * typeText = nullptr;
+    std::string theType;
+
+    typeText = theReweight->Attribute("type");
+    if (typeText != nullptr) theType = typeText;
+    if( theType == "Reweighted" ){ 
+      std::string reweightFile;
+      const char * reweightFileText = nullptr;
+
+      reweightFileText = theReweight->Attribute("File");
+      if (reweightFileText != nullptr) reweightFile = reweightFileText;
+
+      std::cout << "File: " << reweightFile << std::endl;
+    }
+    else if( theType == "New" ){
+      std::cout << "Need to run reweighting" << std::endl;
+    }
+    else{
+      std::cout << "Warning" << std::endl;
+    }
+   
+    
+    theReweight = theReweight->NextSiblingElement("Reweight");
+  }
 }

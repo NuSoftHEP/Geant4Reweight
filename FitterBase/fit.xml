@@ -1,0 +1,7 @@
+<Reweights>
+
+  <Reweight cex="1.1" abs="1.0" type="Reweighted" File="DUET_fit_reweight_abs_1.00_cex_1.10.root"/>
+
+  <Reweight cex="1.0" abs="1.0" type="New"/>
+
+</Reweights>

@@ -13,6 +13,7 @@
 #include "TGraph.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "tinyxml2.h"
 
 #include "G4ReweightTreeParser.hh"
 
@@ -30,6 +31,7 @@ class DUETFitter : public G4ReweightFitter {
     void   DoReweightFS(double,double);
     void   SaveInfo();
     void   ClearMemory();
+    void   ParseXML(std::string);
 
   private:
     

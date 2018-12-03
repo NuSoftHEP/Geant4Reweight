@@ -153,7 +153,7 @@ void DUETFitter::LoadMC(){
   std::string abs_cut =  "(int == \"pi+Inelastic\" && (nPi0 + nPiPlus + nPiMinus) == 0)";
   std::string cex_cut =  "(int == \"pi+Inelastic\" && (nPiPlus + nPiMinus) == 0 && (nPi0 == 1))";
 
-  std::string weight = "weight*";
+  std::string weight = "weight*finalStateWeight*";
 
   fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>total(50,0,500)","","goff");
   TH1D * total = (TH1D*)gDirectory->Get("total");

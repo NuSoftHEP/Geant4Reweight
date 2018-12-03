@@ -4,9 +4,33 @@ int main(int argc, char ** argv){
 
   DUETFitter df(argv[1], argv[2]); 
   df.LoadData(); 
-  df.DoReweight();
-  df.LoadMC();
-  std::cout << df.DoFit() << std::endl;
+
+  double step = .1;
+
+/*  for( int i = -5; i < 6; ++i ){
+    double norm = 1. + i * step;
+    df.DoReweight(norm);
+    df.LoadMC();
+    std::cout << norm << " " << df.DoFit() << std::endl;
+  }
+*/
+
+  df.LoadRawMC();
+  for( int i = -5; i < 2; ++i ){
+    double norm_abs = 1. + i * step;
+
+    for(int j = -5; j < 2; ++j ){
+
+      double norm_cex = 1. + j * step;
+
+      std::cout << std::endl << "Reweighting. Abs: " << norm_abs << " Cex: " << norm_cex << std::endl;
+
+      df.DoReweightFS( norm_abs, norm_cex );
+      df.LoadMC();
+      std::cout << df.DoFit() << std::endl;
+
+    }
+  }
 
   return 0;
 }

@@ -21,23 +21,28 @@ class DUETFitter : public G4ReweightFitter {
     DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
     DUETFitter( std::string );
     DUETFitter( std::string, std::string );
-   ~DUETFitter(){};
+   ~DUETFitter();
     void   LoadData();
     double DoFit();
     void   LoadMC();
     void   LoadRawMC();
-    void   DoReweight();
-    void   SaveInfo(double);
+    void   DoReweight(double);
+    void   DoReweightFS(double,double);
+    void   SaveInfo();
+    void   ClearMemory();
+
   private:
     
     TFile * fDUETFile;
     TFile * fOutFile;
+    TTree * fFitTree;
 
     std::string fMCFileName;
     std::string fRawMCFileName;
     TFile * fMCFile;
     TFile * fRawMCFile;
     TTree * fMCTree;
+    TTree * fFSTree;
 
     TGraphErrors * DUET_xsec_abs;
     TGraphErrors * DUET_xsec_cex;
@@ -51,6 +56,16 @@ class DUETFitter : public G4ReweightFitter {
 
     //Reweight stuff
     G4ReweightTreeParser * Reweighter;
+
+    double norm_param;
+    double norm_abs_param;
+    double norm_cex_param;
+    double the_Chi2;
+
+    std::vector< double > norm_vector;
+    std::vector< double > norm_abs_vector;
+    std::vector< double > norm_cex_vector;
+    std::vector< double > Chi2_vector;
 };
 
 #endif

@@ -4,6 +4,9 @@
 #include <utility>
 #include <iostream>
 
+#include "TROOT.h"
+
+
 G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string FSScaleFileName ){
   
   TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
@@ -128,6 +131,145 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
   //fout->Close();
 }
 
+G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string, G4ReweightInter* > &FSScales, double max, double min) 
+: Maximum(max), Minimum(min){
+  
+//  TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
+
+  std::map< std::string, TH1D* > oldHists;
+  std::map< std::string, TH1D* > newHists;
+  std::map< std::string, G4ReweightInter* > theVariations;
+
+
+  std::map< std::string, std::string >::iterator it = theCuts.begin();
+  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(20, 200, 300)", "", "goff" ); 
+
+  TH1D * total = (TH1D*)gDirectory->Get("total");
+
+  for( ; it != theCuts.end(); ++it ){
+    std::string name = it->first;
+    std::string cut  = it->second;
+
+    input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(20, 200, 300)").c_str(), cut.c_str(), "goff" ); 
+
+    TH1D * theHist = (TH1D*)gDirectory->Get(name.c_str());
+
+    //Load the Hists
+//    TH1D * theHist = (TH1D*)FinalStateFile->Get( theInts.at(i).c_str() );
+    newHists[ name ] = (TH1D*)theHist->Clone( ("new_" + name).c_str() );
+    oldHists[ name ] = (TH1D*)theHist->Clone();
+  }
+
+  
+  //Just for loading. Could do everything in one shot, but it's
+  //more understandable if it's compartmentalized like this
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    G4ReweightInter * theInter = FSScales[ theInts.at(i) ]; 
+    theVariations[ theInts.at(i) ] = theInter;
+
+  }
+
+  //fout->cd();
+
+  //Now go through and vary the exclusive channels  
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    G4ReweightInter * theVar = theVariations.at( theInts.at(i) );
+    TH1D * theHist = newHists.at( theInts.at(i) );
+
+    for( int bin = 1; bin <= theHist->GetNbinsX(); ++bin ){
+      
+      double histContent = theHist->GetBinContent( bin );
+      double binCenter   = theHist->GetBinCenter( bin );
+      double theScale    = theVar->GetContent( binCenter ); 
+
+      if( ( theHist->GetBinCenter( bin ) < Minimum ) 
+      ||  ( theHist->GetBinCenter( bin ) > Maximum ) ){
+        theHist->SetBinContent( bin, histContent );
+      }
+      else{
+        theHist->SetBinContent( bin, theScale * histContent ); 
+      }
+    }
+
+    //Save the varied and nominal
+    //theHist->Write();
+    //oldHists.at( theInts.at(i) )->Write();
+  }
+
+  //Form the total cross sections from 
+  //the nominal and varied exlcusive channels
+  TH1D * oldTotal = (TH1D*)oldHists[ theInts.at(0) ]->Clone("oldTotal");
+  TH1D * newTotal = (TH1D*)newHists[ theInts.at(0) ]->Clone("newTotal");
+  
+  for(size_t i = 1; i < theInts.size(); ++i){
+    oldTotal->Add( oldHists[ theInts.at(i) ] );
+    newTotal->Add( newHists[ theInts.at(i) ] );
+  }
+
+  //Save the Totals
+  //oldTotal->Write();
+  //newTotal->Write();
+
+  //Need to make this smarter when going through the bins.
+  //What if there's an empty bin?
+/*
+  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
+
+    if( oldTotal->GetBinContent( bin ) == 0. ){
+      oldTotal->SetBinContent( bin, 1. );
+    }
+
+    if( ( newTotal->GetBinCenter( bin ) < Minimum ) 
+    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
+      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
+    }
+  }
+*/
+
+  //Form the variation from the new and old totals 
+  totalVariation = (TH1D*)newTotal->Clone("totalVariation");
+  totalVariation->Divide( oldTotal );
+  for( int bin = 1; bin <= totalVariation->GetNbinsX(); ++bin ){
+
+    if( ( totalVariation->GetBinCenter( bin ) < Minimum ) 
+    ||  ( totalVariation->GetBinCenter( bin ) > Maximum ) ){
+
+      if( totalVariation->GetBinContent( bin ) < .000000001 ){
+        totalVariation->SetBinContent( bin, 1. );
+      }
+
+    }
+  }
+  //totalVariation->Write();
+
+  //Now go back through the varied exclusive channels
+  //and compute the final scale
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    TH1D * exclusiveVariation = (TH1D*)newHists.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
+
+    exclusiveVariation->Divide( oldHists.at( theInts.at(i) ) );
+
+    for( int bin = 1; bin <= exclusiveVariation->GetNbinsX(); ++bin ){
+
+      if( ( exclusiveVariation->GetBinCenter( bin ) < Minimum ) 
+      ||  ( exclusiveVariation->GetBinCenter( bin ) > Maximum ) ){
+
+        if( exclusiveVariation->GetBinContent( bin ) < .000000001 ){
+          exclusiveVariation->SetBinContent( bin, 1. );
+        }
+
+      }
+    }
+
+    exclusiveVariation->Divide( totalVariation );
+    //exclusiveVariation->Write();
+
+    exclusiveVariations[ theInts.at(i) ] = exclusiveVariation; 
+  }
+
+  //fout->Close();
+}
+
 void G4ReweightFinalState::GetMaxAndMin( std::string FileName ){
   tinyxml2::XMLDocument doc;
 
@@ -233,4 +375,8 @@ TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){
   return exclusiveVariations.at( theInt ); 
 }
 
-G4ReweightFinalState::~G4ReweightFinalState(){}
+G4ReweightFinalState::~G4ReweightFinalState(){ 
+  for( size_t i = 0; i < theInts.size(); ++i){ 
+    delete gROOT->FindObject( theInts.at(i).c_str() ); 
+  } 
+}

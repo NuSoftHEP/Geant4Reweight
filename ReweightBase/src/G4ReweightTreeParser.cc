@@ -113,7 +113,7 @@ void G4ReweightTreeParser::FillCollection(){
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%10000)){std::cout << ie << std::endl;}
+//    if(!(ie%10000)){std::cout << ie << std::endl;}
 
     G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
     SetSteps(G4RTraj);
@@ -630,7 +630,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%1000)){std::cout << ie << std::endl;}
+    //if(!(ie%1000)){std::cout << ie << std::endl;}
     //New event. Do the analysis and Delete the current collection
     if( (prevEvent > -1) && (prevEvent != tEventNum) ){
 
@@ -745,7 +745,7 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%1000)){std::cout << ie << std::endl;}
+    //if(!(ie%1000)){std::cout << ie << std::endl;}
     //New event. Do the analysis and Delete the current collection
     if( (prevEvent > -1) && (prevEvent != tEventNum) ){
 
@@ -860,7 +860,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4Rewe
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%1000)){std::cout << ie << std::endl;}
+    //if(!(ie%1000)){std::cout << ie << std::endl;}
     //New event. Do the analysis and Delete the current collection
     if( (prevEvent > -1) && (prevEvent != tEventNum) ){
 
@@ -978,7 +978,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
   for(int ie = 0; ie < track->GetEntries(); ++ie){    
     track->GetEntry(ie);
 
-    if(!(ie%1000)){std::cout << ie << std::endl;}
+    //if(!(ie%1000)){std::cout << ie << std::endl;}
     //New event. Do the analysis and Delete the current collection
     if( (prevEvent > -1) && (prevEvent != tEventNum) ){
 

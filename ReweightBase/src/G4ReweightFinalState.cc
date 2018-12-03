@@ -265,7 +265,16 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
     //exclusiveVariation->Write();
 
     exclusiveVariations[ theInts.at(i) ] = exclusiveVariation; 
+
+
+    //Delete the pointers here
+    delete newHists.at( theInts.at(i) );
+    delete oldHists.at( theInts.at(i) );
   }
+
+  //Now go through and clear from memory all of the pointers
+  delete newTotal;
+  delete oldTotal;
 
   //fout->Close();
 }
@@ -377,6 +386,11 @@ TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){
 
 G4ReweightFinalState::~G4ReweightFinalState(){ 
   for( size_t i = 0; i < theInts.size(); ++i){ 
-    delete gROOT->FindObject( theInts.at(i).c_str() ); 
+//    delete gROOT->FindObject( theInts.at(i).c_str() ); 
+    delete exclusiveVariations.at( theInts.at(i) );
   } 
 }
+
+/*G4ReweightFinalState::ClearVariations(){
+  std::map< std::string, G4ReweightInter * >::iterator it = exclusiveVariations.at(
+}*/

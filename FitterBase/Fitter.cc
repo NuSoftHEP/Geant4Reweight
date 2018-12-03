@@ -2,7 +2,7 @@
 
 int main(int argc, char ** argv){
 
-  DUETFitter df(argv[1], argv[2]); 
+  DUETFitter df(argv[1]); 
   df.LoadData(); 
 
   double step = .1;
@@ -16,10 +16,10 @@ int main(int argc, char ** argv){
 */
 
   df.LoadRawMC();
-  for( int i = -5; i < 2; ++i ){
+  for( int i = -7; i < 2; ++i ){
     double norm_abs = 1. + i * step;
 
-    for(int j = -5; j < 2; ++j ){
+    for(int j = -7; j < 2; ++j ){
 
       double norm_cex = 1. + j * step;
 

@@ -20,7 +20,7 @@ class DUETFitter : public G4ReweightFitter {
   public:
     DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
     DUETFitter( std::string );
-    DUETFitter( std::string, std::string );
+    //DUETFitter( std::string, std::string );
    ~DUETFitter();
     void   LoadData();
     double DoFit();

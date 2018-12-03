@@ -9,16 +9,19 @@
 #include <iomanip>
 #include <sstream>
 
-DUETFitter::DUETFitter(std::string mc_name) : fMCFileName(mc_name) { 
+/*DUETFitter::DUETFitter(std::string mc_name) : fMCFileName(mc_name) { 
   fOutFile = new TFile("DUET_fit.root", "RECREATE"); 
 }
+*/
 
-DUETFitter::DUETFitter(std::string mc_name, std::string raw_mc_name) : fMCFileName(mc_name), fRawMCFileName(raw_mc_name) { 
+//DUETFitter::DUETFitter(std::string mc_name, std::string raw_mc_name) : fMCFileName(mc_name), fRawMCFileName(raw_mc_name) { 
+DUETFitter::DUETFitter(std::string raw_mc_name) : fRawMCFileName(raw_mc_name) { 
   fOutFile = new TFile("DUET_fit.root", "RECREATE"); 
 
-  fFitTree = new TTree("Fit","");
+/*  fFitTree = new TTree("Fit","");
   fFitTree->Branch("norm", &norm_param);
   fFitTree->Branch("Chi2", &the_Chi2);
+*/
 }
 
 DUETFitter::~DUETFitter(){
@@ -35,7 +38,7 @@ DUETFitter::~DUETFitter(){
   gr->Write( "Chi2_vs_norm" );
 
 
-  fFitTree->Write();
+  //fFitTree->Write();
   fOutFile->Close();
 }
 
@@ -113,6 +116,7 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
   norm_abs_param = norm_abs;
   norm_cex_param = norm_cex;
 
+  delete FSReweighter;
 }
 
 void DUETFitter::DoReweight( double norm ){
@@ -255,12 +259,14 @@ void DUETFitter::SaveInfo(){
   norm_abs_vector.push_back(norm_abs_param);
   norm_cex_vector.push_back(norm_cex_param);
 
-  fFitTree->Fill();
+  //fFitTree->Fill();
 
 //  fOutFile->Close();
    
   Reweighter->CloseAndSaveOutput();
   Reweighter->CloseInput();
+
+  delete Reweighter;
 
   ClearMemory();
 }

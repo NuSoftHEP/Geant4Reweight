@@ -542,6 +542,7 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
 
   //std::cout << "Getting FS weight" << std::endl;
 
+  //NOTE: MAKE THIS WORK FOR PI- AS WELL
   if( theInt != "pi+Inelastic" ){
 //    std::cout << "Not inelastic" << std::endl;
     theFSWeight = 1.;

@@ -17,8 +17,9 @@ std::string set_prec(double input){
   return stream_in.str();
 };
 
-DUETFitter::DUETFitter(std::string raw_mc_name, std::string output_dir) : fRawMCFileName(raw_mc_name), fOutputDir(output_dir){ 
-  fOutFile = new TFile( (fOutputDir + "/DUET_fit.root").c_str(), "RECREATE"); 
+DUETFitter::DUETFitter(std::string raw_mc_name/*, std::string output_dir*/) : fRawMCFileName(raw_mc_name)/*, fOutputDir(output_dir)*/{ 
+//  fOutFile = new TFile( (fOutputDir + "/DUET_fit.root").c_str(), "RECREATE"); 
+  fOutFile = new TFile( "DUET_fit.root", "RECREATE"); 
 
 /*  fFitTree = new TTree("Fit","");
   fFitTree->Branch("norm", &norm_param);
@@ -44,7 +45,7 @@ DUETFitter::~DUETFitter(){
 
 void DUETFitter::LoadData(){
 
-  fDUETFile = new TFile("../data/DUET.root", "READ");
+  fDUETFile = new TFile(fDataFileName.c_str(), "READ");
 
   DUET_xsec_abs   = (TGraphErrors*)fDUETFile->Get("xsec_abs");    
   DUET_xsec_cex   = (TGraphErrors*)fDUETFile->Get("xsec_cex");    
@@ -68,24 +69,14 @@ void DUETFitter::LoadRawMC(){
   fFSFracs->SetBranches();
   fFSFracs->FillAndAnalyze(1., 1.);
 
-//  fOutFile->cd();
   fFSTree = (TTree*)fFSFracs->GetTree()->Clone();
 }
 
 
 void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
 
-  //Create output file
-/*  std::stringstream stream_abs; 
-  stream_abs << std::fixed << std::setprecision(2) << norm_abs;
-  std::string norm_abs_str = stream_abs.str();
-  */
   std::string norm_abs_str = set_prec(norm_abs);
 
-/*  std::stringstream stream_cex; 
-  stream_cex << std::fixed << std::setprecision(2) << norm_cex;
-  std::string norm_cex_str = stream_cex.str();
-*/
   std::string norm_cex_str = set_prec(norm_cex);
 
   std::string RWFileName = "DUET_fit_reweight_abs_" + norm_abs_str + "_cex_" + norm_cex_str + ".root";
@@ -113,7 +104,7 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
   //////////////////////////////
 
   //Make the reweighter pointer and do the reweighting
-  Reweighter = new G4ReweightTreeParser( fRawMCFileName, fOutputDir + "/" + RWFileName );
+  Reweighter = new G4ReweightTreeParser( fRawMCFileName,  RWFileName );
   Reweighter->SetBranches();
   Reweighter->FillAndAnalyzeFS(FSReweighter);
   ////////////////////////////////
@@ -141,10 +132,6 @@ TTree* DUETFitter::GetReweightFS( FitSample theSample ){
 
 void DUETFitter::DoReweight( double norm ){
 
-/*  std::stringstream stream; 
-  stream << std::fixed << std::setprecision(2) << norm;
-  std::string normstr = stream.str();
-*/
   std::string normstr = set_prec(norm);
 
   std::string RWFileName = "DUET_fit_reweight_norm_" + normstr + ".root";
@@ -171,7 +158,7 @@ void DUETFitter::DoReweight( double norm ){
 void DUETFitter::LoadMC(){
   //fMCFile = new TFile(fMCFileName.c_str(), "READ");
   //fMCTree = (TTree*)fMCFile->Get("tree"); 
-  fOutFile->cd();
+  //fOutFile->cd();
 
   
   if( ActiveSample->Raw ){ 
@@ -264,16 +251,8 @@ double DUETFitter::DoFit(){
 void DUETFitter::SaveInfo(){
   fOutFile->cd();
 
-/*  std::stringstream stream_abs; 
-  stream_abs << std::fixed << std::setprecision(2) << norm_abs_param;
-  std::string norm_abs_str = stream_abs.str();
-  */
   std::string norm_abs_str = set_prec(norm_abs_param);
 
-  /*std::stringstream stream_cex; 
-  stream_cex << std::fixed << std::setprecision(2) << norm_cex_param;
-  std::string norm_cex_str = stream_cex.str();
-  */
   std::string norm_cex_str = set_prec(norm_cex_param);
 
   MC_xsec_cex->Write(("MC_xsec_cex_" + norm_cex_str).c_str());
@@ -377,4 +356,19 @@ void DUETFitter::ParseXML(std::string FileName){
     
     theSample = theSample->NextSiblingElement("Sample");
   }
+
+  tinyxml2::XMLElement * theData = theRoot->FirstChildElement("Data");
+  if( !theData ){
+    std::cout << "Could Not get Data " << std::endl;
+    return;
+  }
+
+  std::string dataFile;
+  const char * dataFileText = nullptr;
+  dataFileText = theData->Attribute("File");
+  if (dataFileText != nullptr) dataFile = dataFileText;
+
+  std::cout << "Data: " << dataFile << std::endl;
+
+  fDataFileName = dataFile;
 }

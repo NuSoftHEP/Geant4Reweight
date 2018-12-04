@@ -21,7 +21,7 @@
 class DUETFitter : public G4ReweightFitter { 
   public:
     DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
-    DUETFitter( std::string, std::string );
+    DUETFitter( std::string/*, std::string*/ );
     //DUETFitter( std::string, std::string );
    ~DUETFitter();
    
@@ -48,8 +48,9 @@ class DUETFitter : public G4ReweightFitter {
 
     std::string fMCFileName;
     std::string fRawMCFileName;
+    std::string fDataFileName;
 
-    std::string fOutputDir;
+//    std::string fOutputDir;
 
     TFile * fMCFile;
     TFile * fRawMCFile;

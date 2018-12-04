@@ -2,7 +2,7 @@
 
 int main(int argc, char ** argv){
 
-  DUETFitter df(argv[1], argv[3]); 
+  DUETFitter df(argv[1]); 
   df.ParseXML(argv[2]);
   df.LoadData(); 
 

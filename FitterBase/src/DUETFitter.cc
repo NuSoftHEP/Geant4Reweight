@@ -5,6 +5,7 @@
 #include "TGraph2D.h"
 
 #include "G4ReweightInter.hh"
+
 #include <vector>
 #include <iomanip>
 #include <sstream>
@@ -16,14 +17,8 @@ std::string set_prec(double input){
   return stream_in.str();
 };
 
-/*DUETFitter::DUETFitter(std::string mc_name) : fMCFileName(mc_name) { 
-  fOutFile = new TFile("DUET_fit.root", "RECREATE"); 
-}
-*/
-
-//DUETFitter::DUETFitter(std::string mc_name, std::string raw_mc_name) : fMCFileName(mc_name), fRawMCFileName(raw_mc_name) { 
-DUETFitter::DUETFitter(std::string raw_mc_name) : fRawMCFileName(raw_mc_name) { 
-  fOutFile = new TFile("DUET_fit.root", "RECREATE"); 
+DUETFitter::DUETFitter(std::string raw_mc_name, std::string output_dir) : fRawMCFileName(raw_mc_name), fOutputDir(output_dir){ 
+  fOutFile = new TFile( (fOutputDir + "/DUET_fit.root").c_str(), "RECREATE"); 
 
 /*  fFitTree = new TTree("Fit","");
   fFitTree->Branch("norm", &norm_param);
@@ -34,10 +29,6 @@ DUETFitter::DUETFitter(std::string raw_mc_name) : fRawMCFileName(raw_mc_name) {
 DUETFitter::~DUETFitter(){
   fOutFile->cd(); 
   
-  //TGraph * gr = new TGraph( norm_vector.size(), &norm_vector[0], &Chi2_vector[0] );
-  //gr->SetTitle(";Normalization; #chi^{2}");
-  //gr->Write( "Chi2_vs_norm" );
-
   TGraph2D * gr = new TGraph2D( norm_abs_vector.size(), &norm_abs_vector[0], &norm_cex_vector[0], &Chi2_vector[0] );
   gr->SetTitle("");
   gr->GetXaxis()->SetTitle("Abs Norm.");
@@ -47,6 +38,8 @@ DUETFitter::~DUETFitter(){
 
   //fFitTree->Write();
   fOutFile->Close();
+  fFSFracs->CloseAndSaveOutput();
+  fFSFracs->CloseInput();
 }
 
 void DUETFitter::LoadData(){
@@ -69,26 +62,31 @@ void DUETFitter::LoadData(){
 
 void DUETFitter::LoadRawMC(){
   //Use input file to get a tree to use for nominal fractions
-  G4ReweightTreeParser * FSFracs = new G4ReweightTreeParser( fRawMCFileName, "DUET_MC_final_states.root" );
-  
-  FSFracs->SetBranches();
-  FSFracs->FillAndAnalyze(1., 1.);
+  std::cout << "\nGetting Raw Data" << std::endl;
+  fFSFracs = new G4ReweightTreeParser( fRawMCFileName, "DUET_MC_final_states.root" );
 
-  fFSTree = FSFracs->GetTree();
+  fFSFracs->SetBranches();
+  fFSFracs->FillAndAnalyze(1., 1.);
 
+//  fOutFile->cd();
+  fFSTree = (TTree*)fFSFracs->GetTree()->Clone();
 }
 
 
 void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
 
   //Create output file
-  std::stringstream stream_abs; 
+/*  std::stringstream stream_abs; 
   stream_abs << std::fixed << std::setprecision(2) << norm_abs;
   std::string norm_abs_str = stream_abs.str();
+  */
+  std::string norm_abs_str = set_prec(norm_abs);
 
-  std::stringstream stream_cex; 
+/*  std::stringstream stream_cex; 
   stream_cex << std::fixed << std::setprecision(2) << norm_cex;
   std::string norm_cex_str = stream_cex.str();
+*/
+  std::string norm_cex_str = set_prec(norm_cex);
 
   std::string RWFileName = "DUET_fit_reweight_abs_" + norm_abs_str + "_cex_" + norm_cex_str + ".root";
   /////////////////////////////
@@ -115,7 +113,7 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
   //////////////////////////////
 
   //Make the reweighter pointer and do the reweighting
-  Reweighter = new G4ReweightTreeParser( fRawMCFileName, RWFileName );
+  Reweighter = new G4ReweightTreeParser( fRawMCFileName, fOutputDir + "/" + RWFileName );
   Reweighter->SetBranches();
   Reweighter->FillAndAnalyzeFS(FSReweighter);
   ////////////////////////////////
@@ -126,15 +124,28 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
   delete FSReweighter;
 }
 
-void DUETFitter::GetReweightFS(){
+TTree* DUETFitter::GetReweightFS( FitSample theSample ){
+  std::cout << "Sample: " << std::endl
+            << "\tabs: "  << theSample.abs  << std::endl
+            << "\tcex: "  << theSample.cex  << std::endl
+            << "\tdcex: " << theSample.dcex << std::endl
+            << "\tinel: " << theSample.inel << std::endl
+            << "\tprod: " << theSample.prod << std::endl
+            << "\tFile: " << theSample.theFile << std::endl;
 
+  TFile * RWFile = new TFile(theSample.theFile.c_str(), "READ");
+  TTree * RWTree = (TTree*)RWFile->Get("tree");
+  return RWTree;
 }
+
 
 void DUETFitter::DoReweight( double norm ){
 
-  std::stringstream stream; 
+/*  std::stringstream stream; 
   stream << std::fixed << std::setprecision(2) << norm;
   std::string normstr = stream.str();
+*/
+  std::string normstr = set_prec(norm);
 
   std::string RWFileName = "DUET_fit_reweight_norm_" + normstr + ".root";
   
@@ -161,22 +172,25 @@ void DUETFitter::LoadMC(){
   //fMCFile = new TFile(fMCFileName.c_str(), "READ");
   //fMCTree = (TTree*)fMCFile->Get("tree"); 
   fOutFile->cd();
-  fMCTree = Reweighter->GetTree();
+
+  
+  if( ActiveSample->Raw ){ 
+    DoReweightFS( ActiveSample->abs, ActiveSample->cex );
+    fMCTree = Reweighter->GetTree();
+  }
+  else{
+    fMCTree = GetReweightFS( *ActiveSample );
+  }
   std::cout << "Got Tree " << fMCTree << std::endl;
 
 
-  std::string abs_cut =  "(int == \"pi+Inelastic\" && (nPi0 + nPiPlus + nPiMinus) == 0)";
-  std::string cex_cut =  "(int == \"pi+Inelastic\" && (nPiPlus + nPiMinus) == 0 && (nPi0 == 1))";
-
-  std::string weight = "weight*finalStateWeight*";
-
-  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>total(50,0,500)","","goff");
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>total(10,200,300)","","goff");
   TH1D * total = (TH1D*)gDirectory->Get("total");
 
-  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>abs(50,0,500)",(weight + abs_cut).c_str(),"goff"); 
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>abs(10,200,300)",(weight + abs_cut).c_str(),"goff"); 
   TH1D * abs_hist = (TH1D*)gDirectory->Get("abs");
 
-  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>cex(50,0,500)",(weight + cex_cut).c_str(),"goff"); 
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>cex(10,200,300)",(weight + cex_cut).c_str(),"goff"); 
   TH1D * cex_hist = (TH1D*)gDirectory->Get("cex");
 
   double scale = 1.E27 / (.5 * 2.266 * 6.022E23 / 12.01 );
@@ -250,13 +264,17 @@ double DUETFitter::DoFit(){
 void DUETFitter::SaveInfo(){
   fOutFile->cd();
 
-  std::stringstream stream_abs; 
+/*  std::stringstream stream_abs; 
   stream_abs << std::fixed << std::setprecision(2) << norm_abs_param;
   std::string norm_abs_str = stream_abs.str();
+  */
+  std::string norm_abs_str = set_prec(norm_abs_param);
 
-  std::stringstream stream_cex; 
+  /*std::stringstream stream_cex; 
   stream_cex << std::fixed << std::setprecision(2) << norm_cex_param;
   std::string norm_cex_str = stream_cex.str();
+  */
+  std::string norm_cex_str = set_prec(norm_cex_param);
 
   MC_xsec_cex->Write(("MC_xsec_cex_" + norm_cex_str).c_str());
   MC_xsec_abs->Write(("MC_xsec_abs_" + norm_abs_str).c_str());
@@ -273,12 +291,14 @@ void DUETFitter::SaveInfo(){
   //fFitTree->Fill();
 
 //  fOutFile->Close();
-   
-  Reweighter->CloseAndSaveOutput();
-  Reweighter->CloseInput();
+  
+  if( ActiveSample->Raw ){
+    Reweighter->CloseAndSaveOutput();
+    Reweighter->CloseInput();
 
-  //Risky putting this here
-  delete Reweighter;
+    //Risky putting this here
+    delete Reweighter;
+  }
 
   ClearMemory();
 }
@@ -305,49 +325,56 @@ void DUETFitter::ParseXML(std::string FileName){
   }
 
  
-  tinyxml2::XMLElement * theReweight = theRoot->FirstChildElement( "Reweight" );
-  if( !theReweight ){
+  tinyxml2::XMLElement * theSample = theRoot->FirstChildElement( "Sample" );
+  if( !theSample ){
     std::cout << "Could Not get element " << std::endl;
     return;
   }
   
-  while( theReweight ){
+  while( theSample ){
    
     double cex, abs;
-    tinyxml2::XMLError attResult = theReweight->QueryDoubleAttribute("abs", &abs);
+    tinyxml2::XMLError attResult = theSample->QueryDoubleAttribute("abs", &abs);
     if( attResult != tinyxml2::XML_SUCCESS ){
       std::cout << "Could not get abs" << std::endl;
     }
 
-    attResult = theReweight->QueryDoubleAttribute("cex", &cex);
+    attResult = theSample->QueryDoubleAttribute("cex", &cex);
     if( attResult != tinyxml2::XML_SUCCESS ){
       std::cout << "Could not get cex" << std::endl;
     }
 
     std::cout << "abs: " << set_prec(abs) << " cex: " << set_prec(cex) << std::endl;
+    
+    bool Raw;
+    attResult = theSample->QueryBoolAttribute("Raw", &Raw);
+    if( attResult != tinyxml2::XML_SUCCESS ){
+      std::cout << "Could not get Raw" << std::endl;
+    }
 
-    const char * typeText = nullptr;
-    std::string theType;
+    std::string reweightFile;
 
-    typeText = theReweight->Attribute("type");
-    if (typeText != nullptr) theType = typeText;
-    if( theType == "Reweighted" ){ 
-      std::string reweightFile;
+    if( !Raw ){ 
       const char * reweightFileText = nullptr;
 
-      reweightFileText = theReweight->Attribute("File");
+      reweightFileText = theSample->Attribute("File");
       if (reweightFileText != nullptr) reweightFile = reweightFileText;
 
       std::cout << "File: " << reweightFile << std::endl;
     }
-    else if( theType == "New" ){
-      std::cout << "Need to run reweighting" << std::endl;
-    }
-    else{
-      std::cout << "Warning" << std::endl;
-    }
-   
+    else std::cout << "Need to run reweighting" << std::endl;
     
-    theReweight = theReweight->NextSiblingElement("Reweight");
+    FitSample theFitSample;
+    theFitSample.Raw  = Raw;
+    theFitSample.abs  = abs;
+    theFitSample.cex  = cex;
+    theFitSample.inel = 1.0;
+    theFitSample.prod = 1.0;
+    theFitSample.dcex = 1.0;
+    theFitSample.theFile = reweightFile;
+   
+    samples.push_back( theFitSample );
+    
+    theSample = theSample->NextSiblingElement("Sample");
   }
 }

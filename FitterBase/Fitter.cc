@@ -2,9 +2,9 @@
 
 int main(int argc, char ** argv){
 
-  DUETFitter df(argv[1]); 
+  DUETFitter df(argv[1], argv[3]); 
   df.ParseXML(argv[2]);
-//  df.LoadData(); 
+  df.LoadData(); 
 
   double step = .1;
 
@@ -16,8 +16,8 @@ int main(int argc, char ** argv){
   }
 */
 
-//  df.LoadRawMC();
-//
+  df.LoadRawMC();
+
 //  for( int i = -7; i < 2; ++i ){
 //    for(int j = -7; j < 2; ++j ){
 //
@@ -32,6 +32,13 @@ int main(int argc, char ** argv){
 //
 //    }
 //  }
-//
+
+  for( size_t i = 0; i < df.GetNSamples(); ++i ){
+    std::cout << std::endl << "Reweighting. Abs: " << df.GetSample(i).abs << " Cex: " << df.GetSample(i).cex << std::endl;
+    df.SetActiveSample(i);
+    df.LoadMC();
+    std::cout << df.DoFit() << std::endl;
+  }
+
   return 0;
 }

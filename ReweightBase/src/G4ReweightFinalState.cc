@@ -142,7 +142,7 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
 
 
   std::map< std::string, std::string >::iterator it = theCuts.begin();
-  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(20, 200, 300)", "", "goff" ); 
+  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(10, 200, 300)", "", "goff" ); 
 
   TH1D * total = (TH1D*)gDirectory->Get("total");
 
@@ -150,7 +150,7 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
     std::string name = it->first;
     std::string cut  = it->second;
 
-    input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(20, 200, 300)").c_str(), cut.c_str(), "goff" ); 
+    input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(10, 200, 300)").c_str(), cut.c_str(), "goff" ); 
 
     TH1D * theHist = (TH1D*)gDirectory->Get(name.c_str());
 

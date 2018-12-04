@@ -2,6 +2,7 @@
 #define DUETFitter_h
 
 #include "G4ReweightFitter.hh"
+#include "FitSample.hh"
 
 #include <iostream>
 #include <string>
@@ -20,18 +21,24 @@
 class DUETFitter : public G4ReweightFitter { 
   public:
     DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
-    DUETFitter( std::string );
+    DUETFitter( std::string, std::string );
     //DUETFitter( std::string, std::string );
    ~DUETFitter();
+   
     void   LoadData();
     double DoFit();
     void   LoadMC();
     void   LoadRawMC();
     void   DoReweight(double);
     void   DoReweightFS(double,double);
+    TTree* GetReweightFS(FitSample);
     void   SaveInfo();
     void   ClearMemory();
     void   ParseXML(std::string);
+
+    size_t    GetNSamples(){return samples.size();};
+    FitSample GetSample( size_t i ){return samples[i];};
+    void      SetActiveSample( size_t i ){ ActiveSample = &samples[i]; }
 
   private:
     
@@ -41,9 +48,13 @@ class DUETFitter : public G4ReweightFitter {
 
     std::string fMCFileName;
     std::string fRawMCFileName;
+
+    std::string fOutputDir;
+
     TFile * fMCFile;
     TFile * fRawMCFile;
     TTree * fMCTree;
+    G4ReweightTreeParser * fFSFracs; 
     TTree * fFSTree;
 
     TGraphErrors * DUET_xsec_abs;
@@ -68,6 +79,16 @@ class DUETFitter : public G4ReweightFitter {
     std::vector< double > norm_abs_vector;
     std::vector< double > norm_cex_vector;
     std::vector< double > Chi2_vector;
+
+    std::vector< FitSample > samples;
+    FitSample * ActiveSample;
+
+    std::string abs_cut =  "(int == \"pi+Inelastic\" && (nPi0 + nPiPlus + nPiMinus) == 0)";
+    std::string cex_cut =  "(int == \"pi+Inelastic\" && (nPiPlus + nPiMinus) == 0 && (nPi0 == 1))";
+
+    std::string weight = "weight*finalStateWeight*";
+
+
 };
 
 #endif

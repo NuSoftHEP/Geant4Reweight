@@ -74,19 +74,26 @@ if (cmd == "Draw" or cmd == "draw"):
   thin_xsec_total_w.SetMarkerStyle(21)
   thin_xsec_total_v.SetMarkerStyle(22)
 
-  
   thin_xsec_reactive_n.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
   thin_xsec_reactive_w.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
   thin_xsec_reactive_v.SetTitle("Pi+ Ar - Thin Target Scattering - Reactive")
+
+  thin_xsec_total_n.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+  thin_xsec_total_w.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+  thin_xsec_total_v.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
+  
+  thin_xsec_reactive_n.SetTitle("")
+  thin_xsec_reactive_w.SetTitle("")
+  thin_xsec_reactive_v.SetTitle("")
+
+  thin_xsec_total_n.SetTitle("")
+  thin_xsec_total_w.SetTitle("")
+  thin_xsec_total_v.SetTitle("")
 
   set_pdf_style(thin_xsec_reactive_n, "Pion Momentum (MeV/c)", "#sigma (barn)" )
   set_pdf_style(thin_xsec_reactive_w, "Pion Momentum (MeV/c)", "#sigma (barn)" )
   set_pdf_style(thin_xsec_reactive_v, "Pion Momentum (MeV/c)", "#sigma (barn)" )
   
-  thin_xsec_total_n.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
-  thin_xsec_total_w.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
-  thin_xsec_total_v.SetTitle("Pi+ Ar - Thin Target Scattering - Total")
-
   set_pdf_style(thin_xsec_total_n, "Pion Momentum (MeV/c)", "#sigma (barn)" )
   set_pdf_style(thin_xsec_total_w, "Pion Momentum (MeV/c)", "#sigma (barn)" )
   set_pdf_style(thin_xsec_total_v, "Pion Momentum (MeV/c)", "#sigma (barn)" )
@@ -164,6 +171,8 @@ elif (cmd == "ratio" or cmd == "Ratio"):
 
   set_pdf_style(total_ratio, "Pion Momentum (MeV/c)", "Ratio")
   set_pdf_style(reactive_ratio, "Pion Momentum (MeV/c)", "Ratio")
+  total_ratio.SetTitle("")
+  reactive_ratio.SetTitle("")
 
   c1 = TCanvas("c1","c1",500,400)
   total_ratio.Draw("p")
@@ -174,8 +183,9 @@ elif (cmd == "ratio" or cmd == "Ratio"):
   f.Draw("same")
 
   leg = TLegend(.55,.7,.85,.85)
-  leg.AddEntry(total_ratio, "Total: Weighted/Varied","p")
-  leg.AddEntry(reactive_ratio, "Reactive: Weighted/Varied","p")
+  leg.SetHeader("Weighted/Varied")
+  leg.AddEntry(total_ratio, "Total","p")
+  leg.AddEntry(reactive_ratio, "Reactive","p")
   leg.SetTextFont(42)
   leg.Draw("same")
   c1.SaveAs(args.plot+".pdf")

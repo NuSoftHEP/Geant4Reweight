@@ -3,6 +3,7 @@
 #include "TMatrixDUtilsfwd.h"
 #include "TArrayD.h"
 #include "TGraph2D.h"
+#include "TCanvas.h"
 
 #include "G4ReweightInter.hh"
 
@@ -27,6 +28,10 @@ DUETFitter::DUETFitter(std::string raw_mc_name/*, std::string output_dir*/) : fR
 */
 }
 
+DUETFitter::DUETFitter( std::vector<std::string> raw_mc_names ) : fRawMCFileNameVector( raw_mc_names ){
+  fOutFile = new TFile( "DUET_fit.root", "RECREATE"); 
+}
+
 DUETFitter::~DUETFitter(){
   fOutFile->cd(); 
   
@@ -40,7 +45,7 @@ DUETFitter::~DUETFitter(){
   //fFitTree->Write();
   fOutFile->Close();
   fFSFracs->CloseAndSaveOutput();
-  fFSFracs->CloseInput();
+  //fFSFracs->CloseInput();
 }
 
 void DUETFitter::LoadData(){
@@ -66,12 +71,36 @@ void DUETFitter::LoadRawMC(){
   std::cout << "\nGetting Raw Data" << std::endl;
   fFSFracs = new G4ReweightTreeParser( fRawMCFileName, "DUET_MC_final_states.root" );
 
-  fFSFracs->SetBranches();
   fFSFracs->FillAndAnalyze(1., 1.);
 
-  fFSTree = (TTree*)fFSFracs->GetTree()->Clone();
+  fFSTree = (TTree*)fFSFracs->GetTree();
 }
 
+void DUETFitter::LoadRawMCVector(){
+  //Use input file to get a tree to use for nominal fractions
+  std::cout << "\nGetting Raw Data" << std::endl;
+  fFSFracs = new G4ReweightTreeParser( fRawMCFileNameVector[0], "DUET_MC_final_states.root" );
+
+
+  std::cout << "Raw File: " << 0 << std::endl;
+  fFSFracs->FillAndAnalyze(1., 1.);
+  std::cout << "Tree Entries: " << fFSFracs->GetTree()->GetEntries() << std::endl;
+  fFSFracs->CloseInput();
+  
+  for( size_t i = 1; i < fRawMCFileNameVector.size(); ++i ){
+    std::cout << "Raw File: " << i << std::endl;
+    fFSFracs->OpenNewInput( fRawMCFileNameVector[i] );
+    fFSFracs->FillAndAnalyze(1., 1.);
+    std::cout << "Tree Entries: " << fFSFracs->GetTree()->GetEntries() << std::endl;
+
+    fFSFracs->CloseInput();
+  } 
+
+  fFSTree = (TTree*)fFSFracs->GetTree();
+
+  std::cout << "FSTree Entries: " << fFSTree->GetEntries() << std::endl; 
+
+}
 
 void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
 
@@ -105,8 +134,62 @@ void DUETFitter::DoReweightFS( double norm_abs, double norm_cex ){
 
   //Make the reweighter pointer and do the reweighting
   Reweighter = new G4ReweightTreeParser( fRawMCFileName,  RWFileName );
-  Reweighter->SetBranches();
   Reweighter->FillAndAnalyzeFS(FSReweighter);
+  ////////////////////////////////
+
+  norm_abs_param = norm_abs;
+  norm_cex_param = norm_cex;
+
+  delete FSReweighter;
+}
+
+void DUETFitter::DoReweightFSVector( double norm_abs, double norm_cex ){
+
+  std::string norm_abs_str = set_prec(norm_abs);
+  std::string norm_cex_str = set_prec(norm_cex);
+  std::string RWFileName = "DUET_fit_reweight_abs_" + norm_abs_str + "_cex_" + norm_cex_str + ".root";
+  /////////////////////////////
+  
+  //Make Final State Reweighter
+  G4ReweightInter * dummy = new G4ReweightInter(std::vector< std::pair<double, double> >() ); 
+
+  std::map< std::string, G4ReweightInter* > FSInters;
+  FSInters["inel"] = dummy;
+  FSInters["dcex"] = dummy;
+  FSInters["prod"] = dummy;
+
+  std::vector< std::pair< double, double > > abs_vector;
+  abs_vector.push_back( std::make_pair(200., norm_abs) );  
+  abs_vector.push_back( std::make_pair(300., norm_abs) );  
+  FSInters["abs"]  = new G4ReweightInter(abs_vector);
+
+  std::vector< std::pair< double, double > > cex_vector;
+  cex_vector.push_back( std::make_pair(200., norm_cex) );  
+  cex_vector.push_back( std::make_pair(300., norm_cex) );       
+  FSInters["cex"]  = new G4ReweightInter(cex_vector);
+  
+
+  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, 300., 200. );
+
+  //////////////////////////////
+
+  //Make the reweighter pointer and do the reweighting
+  Reweighter = new G4ReweightTreeParser( fRawMCFileNameVector[0],  RWFileName );
+  std::cout << "MC File: " << 0 << std::endl;
+  Reweighter->FillAndAnalyzeFS(FSReweighter);
+
+  std::cout << "Tree Entries: " << Reweighter->GetTree()->GetEntries() << std::endl;
+  
+  for( size_t i = 1; i < fRawMCFileNameVector.size(); ++i ){
+
+    Reweighter->CloseInput();
+
+    std::cout << "MC File: " << i << std::endl;
+    Reweighter->OpenNewInput( fRawMCFileNameVector[i] );
+    Reweighter->FillAndAnalyzeFS(FSReweighter);
+    std::cout << "Tree Entries: " << Reweighter->GetTree()->GetEntries() << std::endl;
+
+  } 
   ////////////////////////////////
 
   norm_abs_param = norm_abs;
@@ -156,11 +239,7 @@ void DUETFitter::DoReweight( double norm ){
 }
 
 void DUETFitter::LoadMC(){
-  //fMCFile = new TFile(fMCFileName.c_str(), "READ");
-  //fMCTree = (TTree*)fMCFile->Get("tree"); 
-  //fOutFile->cd();
 
-  
   if( ActiveSample->Raw ){ 
     DoReweightFS( ActiveSample->abs, ActiveSample->cex );
     fMCTree = Reweighter->GetTree();
@@ -197,6 +276,55 @@ void DUETFitter::LoadMC(){
   for( int i = 0; i < 5; ++i ){
     abs_y[i] = abs_hist->GetBinContent( abs_hist->FindBin( x[i] ) );
     cex_y[i] = cex_hist->GetBinContent( cex_hist->FindBin( x[i] ) );
+  }
+
+  MC_xsec_abs = new TGraph(5, x, abs_y);
+  MC_xsec_cex = new TGraph(5, x, cex_y);
+
+}
+
+void DUETFitter::LoadMCVector(){
+  
+  if( ActiveSample->Raw ){ 
+    DoReweightFSVector( ActiveSample->abs, ActiveSample->cex );
+    fMCTree = Reweighter->GetTree();
+  }
+  else{
+    fMCTree = GetReweightFS( *ActiveSample );
+  }
+  std::cout << "Got Tree " << fMCTree << std::endl;
+  std::cout << "Entries: " << fMCTree->GetEntries() << std::endl; 
+
+
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>total(10,200,300)","","goff");
+  TH1D * total = (TH1D*)gDirectory->Get("total");
+
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>abs(10,200,300)",(weight + abs_cut).c_str(),"goff"); 
+  TH1D * abs_hist = (TH1D*)gDirectory->Get("abs");
+
+  fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>cex(10,200,300)",(weight + cex_cut).c_str(),"goff"); 
+  TH1D * cex_hist = (TH1D*)gDirectory->Get("cex");
+
+  double scale = 1.E27 / (.5 * 2.266 * 6.022E23 / 12.01 );
+
+  abs_hist->Divide( total );
+  abs_hist->Scale( scale );
+
+  cex_hist->Divide( total );
+  cex_hist->Scale( scale );
+  
+  abs_hist->SetMinimum(0.);
+  cex_hist->SetMinimum(0.);
+
+  double x[5] = {201.6, 216.6, 237.2, 265.6, 295.1};
+
+  double abs_y[5];
+  double cex_y[5];
+
+  for( int i = 0; i < 5; ++i ){
+    abs_y[i] = abs_hist->GetBinContent( abs_hist->FindBin( x[i] ) );
+    cex_y[i] = cex_hist->GetBinContent( cex_hist->FindBin( x[i] ) );
+    std::cout << "abs: " << abs_y[i] << " cex: " << cex_y[i] << std::endl;
   }
 
   MC_xsec_abs = new TGraph(5, x, abs_y);
@@ -257,12 +385,6 @@ void DUETFitter::SaveInfo(){
 
   MC_xsec_cex->Write(("MC_xsec_cex_" + norm_cex_str).c_str());
   MC_xsec_abs->Write(("MC_xsec_abs_" + norm_abs_str).c_str());
-//  DUET_xsec_cex->Write();
-//  DUET_xsec_abs->Write();
-
-//  DUET_cov_matrix->Write("cov");
-//  DUET_cov_inv->Write("cov_inv");
-
   Chi2_vector.push_back(the_Chi2);
   norm_abs_vector.push_back(norm_abs_param);
   norm_cex_vector.push_back(norm_cex_param);

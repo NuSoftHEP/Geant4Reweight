@@ -11,7 +11,7 @@
 #include "TH1F.h"
 
 enum interactionType {
-      kNone,
+      kNoInt,
       kInel,
       kCEX,
       kABS,
@@ -23,8 +23,14 @@ class G4ReweightTreeParser{
   public:
     //Functions
     G4ReweightTreeParser(std::string, std::string);
+//    G4ReweightTreeParser(std::string, TFile *, TTree *);
+
    ~G4ReweightTreeParser();
+
     void SetBranches();
+    void MakeOutputBranches();
+//    void SetOutputBranches();
+
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
 
@@ -39,6 +45,7 @@ class G4ReweightTreeParser{
     void AnalyzeFS( G4ReweightFinalState * );
     void GetWeightFS( G4ReweightFinalState *, double );
 
+    void OpenNewInput( std::string );
     void CloseInput();
     void CloseAndSaveOutput(){ fout->cd(); tree->Write(); fout->Close(); };
     void GetInteractionType(int);

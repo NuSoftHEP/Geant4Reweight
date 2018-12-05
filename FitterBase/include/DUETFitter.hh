@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "TH1D.h"
 #include "TH2D.h"
@@ -22,15 +23,19 @@ class DUETFitter : public G4ReweightFitter {
   public:
     DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
     DUETFitter( std::string/*, std::string*/ );
+    DUETFitter( std::vector< std::string > );
     //DUETFitter( std::string, std::string );
    ~DUETFitter();
    
     void   LoadData();
     double DoFit();
     void   LoadMC();
+    void   LoadMCVector();
     void   LoadRawMC();
+    void   LoadRawMCVector();
     void   DoReweight(double);
     void   DoReweightFS(double,double);
+    void   DoReweightFSVector(double,double);
     TTree* GetReweightFS(FitSample);
     void   SaveInfo();
     void   ClearMemory();
@@ -48,6 +53,7 @@ class DUETFitter : public G4ReweightFitter {
 
     std::string fMCFileName;
     std::string fRawMCFileName;
+    std::vector< std::string > fRawMCFileNameVector;
     std::string fDataFileName;
 
 //    std::string fOutputDir;
@@ -84,8 +90,8 @@ class DUETFitter : public G4ReweightFitter {
     std::vector< FitSample > samples;
     FitSample * ActiveSample;
 
-    std::string abs_cut =  "(int == \"pi+Inelastic\" && (nPi0 + nPiPlus + nPiMinus) == 0)";
-    std::string cex_cut =  "(int == \"pi+Inelastic\" && (nPiPlus + nPiMinus) == 0 && (nPi0 == 1))";
+    std::string abs_cut =  "(int == \"pi+Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )";
+    std::string cex_cut =  "(int == \"pi+Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))";
 
     std::string weight = "weight*finalStateWeight*";
 

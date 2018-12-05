@@ -1,22 +1,26 @@
 #include "DUETFitter.hh"
+#include <vector>
+#include <string>
 
 int main(int argc, char ** argv){
 
-  DUETFitter df(argv[1]); 
+  std::vector< std::string > files = {
+    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_0.root",
+    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_1.root",
+    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_2.root",
+    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_3.root",
+    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_4.root"
+  };
+
+  //DUETFitter df(argv[1]); 
+  DUETFitter df(files);
   df.ParseXML(argv[2]);
   df.LoadData(); 
 
   double step = .1;
 
-/*  for( int i = -5; i < 6; ++i ){
-    double norm = 1. + i * step;
-    df.DoReweight(norm);
-    df.LoadMC();
-    std::cout << norm << " " << df.DoFit() << std::endl;
-  }
-*/
-
-  df.LoadRawMC();
+  //df.LoadRawMC();
+  df.LoadRawMCVector();
 
 //  for( int i = -7; i < 2; ++i ){
 //    for(int j = -7; j < 2; ++j ){
@@ -36,9 +40,11 @@ int main(int argc, char ** argv){
   for( size_t i = 0; i < df.GetNSamples(); ++i ){
     std::cout << std::endl << "Reweighting. Abs: " << df.GetSample(i).abs << " Cex: " << df.GetSample(i).cex << std::endl;
     df.SetActiveSample(i);
-    df.LoadMC();
+//    df.LoadMC();
+    df.LoadMCVector();
     std::cout << df.DoFit() << std::endl;
   }
+
 
   return 0;
 }

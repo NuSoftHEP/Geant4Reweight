@@ -1,7 +1,6 @@
 <Samples>
 
   <Data File="/dune/app/users/calcuttj/geant/GeantReweight/data/DUET.root"/>
-
   <Sample cex="1.1" abs="1.1" Raw="true" />
   <Sample cex="1.1" abs="1.0" Raw="true" />
   <Sample cex="1.1" abs="0.9" Raw="true" />
@@ -13,6 +12,7 @@
   <Sample cex="1.1" abs="0.3" Raw="true" />
 
   <Sample cex="1.0" abs="1.1" Raw="true" />
+
   <Sample cex="1.0" abs="1.0" Raw="true" />
   <Sample cex="1.0" abs="0.9" Raw="true" />
   <Sample cex="1.0" abs="0.8" Raw="true" />

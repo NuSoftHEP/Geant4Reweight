@@ -50,7 +50,7 @@ int main(int argc, char ** argv){
   
 
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str(), outFileName.c_str());
-  tp->SetBranches();
+//  tp->SetBranches();
   if(enableFS){
     std::cout << "Enabling Final State Reweighting" << std::endl;
     std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;

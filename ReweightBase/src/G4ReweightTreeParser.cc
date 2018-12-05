@@ -4,9 +4,14 @@
 #include "TH1D.h"
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::string fOutputFileName){
-  fin = new TFile(fInputFileName.c_str(), "READ"); 
+/*  fin = new TFile(fInputFileName.c_str(), "READ"); 
   track = (TTree*)fin->Get("track");
   step = (TTree*)fin->Get("step");
+
+  SetBranches();
+*/
+
+  OpenNewInput( fInputFileName );
 
   fout = new TFile(fOutputFileName.c_str(), "RECREATE"); 
   tree = new TTree("tree","");
@@ -16,10 +21,45 @@ G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::stri
                 {111, &nPi0},
                 {2212, &nProton},
                 {2112, &nNeutron} };
+
+  MakeOutputBranches();
+
 }
+
+void G4ReweightTreeParser::OpenNewInput(std::string fInputFileName){
+  
+  fin = new TFile(fInputFileName.c_str(), "READ"); 
+  track = (TTree*)fin->Get("track");
+  step = (TTree*)fin->Get("step");
+
+  SetBranches();
+
+}
+
+/*G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, TFile * fOutputFile, TTree * fOutputTree){
+  fin = new TFile(fInputFileName.c_str(), "READ"); 
+  track = (TTree*)fin->Get("track");
+  step = (TTree*)fin->Get("step");
+
+  SetBranches();
+
+  fout = fOutputFile; 
+  tree = new TTree("tree","");
+
+  mapPIDtoN = { {211, &nPiPlus},
+                {-211, &nPiMinus},
+                {111, &nPi0},
+                {2212, &nProton},
+                {2112, &nNeutron} };
+
+  MakeOutputBranches();
+
+}
+*/
 
 void G4ReweightTreeParser::CloseInput(){
   fin->Close();  
+  delete fin;
 }
 
 G4ReweightTreeParser::~G4ReweightTreeParser(){
@@ -507,13 +547,13 @@ void G4ReweightTreeParser::GetInteractionType(int thePID){
  
 //  std::cout << thePID << std::endl;
 
-  if( abs(thePID) != 211 ) intType = kNone; 
+  if( abs(thePID) != 211 ) intType = kNoInt; 
   else{
 //    std::cout << thePID << " " << (*mapPIDtoN[thePID]) << std::endl;
 //    std::cout << -1*thePID << " " << (*mapPIDtoN[-1*thePID]) << std::endl;
 //    std::cout << 111 << " " << (*mapPIDtoN[111]) << std::endl;
 
-    if( !(theInt.find("Inelastic")) ) intType = kNone;
+    if( !(theInt.find("Inelastic")) ) intType = kNoInt;
     else{      
 
       if ( ( (*mapPIDtoN[thePID])    == 1 ) &&
@@ -577,7 +617,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   //TFile * fout = new TFile("outtry.root","RECREATE");
 //  tree = new TTree("tree","");
   
-  theLen=0.;
+/*  theLen=0.;
   theWeight=0.;
   theElastWeight = 0.;
   N=0.;
@@ -623,6 +663,8 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
   tree->Branch("nNeutron", &nNeutron);
 
   tree->Branch("intType", &intType);
+  */
+  //MakeOutputBranches();
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -692,7 +734,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
 void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
   
-  theLen=0.;
+  /*theLen=0.;
   theWeight=0.;
   theElastWeight = 0.;
   N=0.;
@@ -738,6 +780,8 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
   tree->Branch("nNeutron", &nNeutron);
 
   tree->Branch("intType", &intType);
+*/
+  //MakeOutputBranches();
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -807,7 +851,7 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
 
 void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
   
-  theLen=0.;
+  /*theLen=0.;
   theWeight=0.;
   theElastWeight = 0.;
   N=0.;
@@ -853,6 +897,8 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4Rewe
   tree->Branch("nNeutron", &nNeutron);
 
   tree->Branch("intType", &intType);
+*/
+  //MakeOutputBranches();
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -923,7 +969,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4Rewe
 //At some point add in elastic? 
 void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
   
-  theLen=0.;
+/*  theLen=0.;
   theWeight=0.;
   theElastWeight = 0.;
   theFSWeight=0.;
@@ -971,6 +1017,9 @@ void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
   tree->Branch("nNeutron", &nNeutron);
 
   tree->Branch("intType", &intType);
+  */
+
+  //MakeOutputBranches();
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -1143,3 +1192,105 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
       }
 }
 
+void G4ReweightTreeParser::MakeOutputBranches(){
+  theLen=0.;
+  theWeight=1.;
+  theElastWeight = 1.;
+  theFSWeight=1.;
+  N=0.;
+  theInt = ""; 
+  postFinalP=0.;
+  preFinalP=0.;
+  nElast = 0;
+  elastDists = 0;
+  sliceEnergy = 0;
+  sliceInts = 0;
+  sliceEnergyInelastic = 0;
+  sliceIntsInelastic = 0;
+  cosTheta = 0.;
+
+  nPiPlus = 0;
+  nPiMinus = 0;
+  nPi0 = 0;
+  nProton = 0;
+  nNeutron = 0;
+
+  Energy = 0.;
+
+  tree->Branch("len", &theLen);  
+  tree->Branch("weight", &theWeight);  
+  tree->Branch("elastWeight", &theElastWeight);  
+  tree->Branch("finalStateWeight", &theFSWeight);
+  tree->Branch("N", &N);
+  tree->Branch("nElast", &nElast);
+  tree->Branch("elastDists", &elastDists);
+  tree->Branch("sliceEnergy", &sliceEnergy);
+  tree->Branch("sliceEnergyInelastic", &sliceEnergyInelastic);
+  tree->Branch("Energy", &Energy);
+  tree->Branch("sliceInts", &sliceInts);
+  tree->Branch("sliceIntsInelastic", &sliceIntsInelastic);
+  tree->Branch("int", &theInt);
+  tree->Branch("postFinalP", &postFinalP);
+  tree->Branch("preFinalP", &preFinalP);
+  tree->Branch("cosTheta", &cosTheta);
+
+  tree->Branch("nPiPlus", &nPiPlus);
+  tree->Branch("nPiMinus", &nPiMinus);
+  tree->Branch("nPi0", &nPi0);
+  tree->Branch("nProton", &nProton);
+  tree->Branch("nNeutron", &nNeutron);
+
+  tree->Branch("intType", &intType);
+}
+
+/*void G4ReweightTreeParser::SetOutputBranches(){
+  theLen=0.;
+  theWeight=0.;
+  theElastWeight = 0.;
+  theFSWeight=0.;
+  N=0.;
+  theInt = ""; 
+  postFinalP=0.;
+  preFinalP=0.;
+  nElast = 0;
+  elastDists = 0;
+  sliceEnergy = 0;
+  sliceInts = 0;
+  sliceEnergyInelastic = 0;
+  sliceIntsInelastic = 0;
+  cosTheta = 0.;
+
+  nPiPlus = 0;
+  nPiMinus = 0;
+  nPi0 = 0;
+  nProton = 0;
+  nNeutron = 0;
+
+  Energy = 0.;
+
+  tree->SetBranchAddress("len", &theLen);  
+  tree->SetBranchAddress("weight", &theWeight);  
+  tree->SetBranchAddress("elastWeight", &theElastWeight);  
+  tree->SetBranchAddress("finalStateWeight", &theFSWeight);
+  tree->SetBranchAddress("N", &N);
+  tree->SetBranchAddress("nElast", &nElast);
+  tree->SetBranchAddress("elastDists", &elastDists);
+  tree->SetBranchAddress("sliceEnergy", &sliceEnergy);
+  tree->SetBranchAddress("sliceEnergyInelastic", &sliceEnergyInelastic);
+  tree->SetBranchAddress("Energy", &Energy);
+  tree->SetBranchAddress("sliceInts", &sliceInts);
+  tree->SetBranchAddress("sliceIntsInelastic", &sliceIntsInelastic);
+  tree->SetBranchAddress("int", &theInt);
+  tree->SetBranchAddress("postFinalP", &postFinalP);
+  tree->SetBranchAddress("preFinalP", &preFinalP);
+  tree->SetBranchAddress("cosTheta", &cosTheta);
+
+  tree->SetBranchAddress("nPiPlus", &nPiPlus);
+  tree->SetBranchAddress("nPiMinus", &nPiMinus);
+  tree->SetBranchAddress("nPi0", &nPi0);
+  tree->SetBranchAddress("nProton", &nProton);
+  tree->SetBranchAddress("nNeutron", &nNeutron);
+
+  tree->SetBranchAddress("intType", &intType);
+}
+*/

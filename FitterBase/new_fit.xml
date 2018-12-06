@@ -122,8 +122,27 @@
   <Sample cex="0.2" abs="0.2" Raw="true"/>
   <Sample cex="0.2" abs="0.1" Raw="true"/>
 
-  <Sample cex="0.1" abs="0.2" Raw="true"/> 
-  
+  <Sample cex="0.1" abs="0.2" Raw="true"/>
   <Sample cex="0.1" abs="0.1" Raw="true"/>
+
+  <Sample cex="0.2" abs="1.1" Raw="true" />
+  <Sample cex="0.2" abs="1.0" Raw="true" />
+  <Sample cex="0.2" abs="0.9" Raw="true" />
+  <Sample cex="0.2" abs="0.8" Raw="true" />
+  <Sample cex="0.2" abs="0.7" Raw="true" />
+  <Sample cex="0.2" abs="0.6" Raw="true" />
+  <Sample cex="0.2" abs="0.5" Raw="true" />
+  <Sample cex="0.2" abs="0.4" Raw="true" />
+  <Sample cex="0.2" abs="0.3" Raw="true" />
+
+  <Sample cex="0.1" abs="1.1" Raw="true" />
+  <Sample cex="0.1" abs="1.0" Raw="true" />
+  <Sample cex="0.1" abs="0.9" Raw="true" />
+  <Sample cex="0.1" abs="0.8" Raw="true" />
+  <Sample cex="0.1" abs="0.7" Raw="true" />
+  <Sample cex="0.1" abs="0.6" Raw="true" />
+  <Sample cex="0.1" abs="0.5" Raw="true" />
+  <Sample cex="0.1" abs="0.4" Raw="true" />
+  <Sample cex="0.1" abs="0.3" Raw="true" />
 
 </Samples>

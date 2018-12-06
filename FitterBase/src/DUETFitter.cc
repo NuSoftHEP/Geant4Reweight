@@ -35,6 +35,9 @@ DUETFitter::DUETFitter( std::vector<std::string> raw_mc_names ) : fRawMCFileName
 DUETFitter::~DUETFitter(){
   fOutFile->cd(); 
   
+  std::cout << "norm_abs: " << norm_abs_vector.size() << std::endl;
+  std::cout << "norm_cex: " << norm_cex_vector.size() << std::endl;
+  std::cout << "Chi2: " << Chi2_vector.size() << std::endl;
   TGraph2D * gr = new TGraph2D( norm_abs_vector.size(), &norm_abs_vector[0], &norm_cex_vector[0], &Chi2_vector[0] );
   gr->SetTitle("");
   gr->GetXaxis()->SetTitle("Abs Norm.");
@@ -206,6 +209,9 @@ TTree* DUETFitter::GetReweightFS( FitSample theSample ){
             << "\tinel: " << theSample.inel << std::endl
             << "\tprod: " << theSample.prod << std::endl
             << "\tFile: " << theSample.theFile << std::endl;
+
+  norm_abs_param = theSample.abs;
+  norm_cex_param = theSample.cex;
 
   TFile * RWFile = new TFile(theSample.theFile.c_str(), "READ");
   TTree * RWTree = (TTree*)RWFile->Get("tree");

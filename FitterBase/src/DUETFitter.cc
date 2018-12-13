@@ -44,7 +44,6 @@ DUETFitter::~DUETFitter(){
   gr->GetYaxis()->SetTitle("Cex Norm.");
   gr->Write( "Chi2_vs_norm" );
 
-
   //fFitTree->Write();
   fOutFile->Close();
   fFSFracs->CloseAndSaveOutput();
@@ -340,6 +339,7 @@ void DUETFitter::LoadMCVector(){
 
 
 double DUETFitter::DoFit(){
+  BinnedChi2 = new TH2D( ("BinnedChi2_abs_" + set_prec(norm_abs_param) + "_cex_" + set_prec(norm_cex_param)).c_str(), "", 10, 0, 10, 10, 0, 10 );
 
   double Chi2 = 0.;
 
@@ -373,12 +373,14 @@ double DUETFitter::DoFit(){
 
       cov_val = DUET_cov_inv[0][i][j];
 
+      BinnedChi2->SetBinContent(i+1, j+1, ( MC_val_i - DUET_val_i ) * cov_val * ( MC_val_j - DUET_val_j ) );
       Chi2 += ( MC_val_i - DUET_val_i ) * cov_val * ( MC_val_j - DUET_val_j );
     }
   }
 
   the_Chi2 = Chi2;
   SaveInfo();
+  //BinnedChi2->Write();
   return Chi2;
 }
 
@@ -394,6 +396,8 @@ void DUETFitter::SaveInfo(){
   Chi2_vector.push_back(the_Chi2);
   norm_abs_vector.push_back(norm_abs_param);
   norm_cex_vector.push_back(norm_cex_param);
+
+  BinnedChi2->Write();
 
   //fFitTree->Fill();
 

@@ -81,6 +81,7 @@ class DUETFitter : public G4ReweightFitter {
     double norm_abs_param;
     double norm_cex_param;
     double the_Chi2;
+    TH2D * BinnedChi2;
 
     std::vector< double > norm_vector;
     std::vector< double > norm_abs_vector;

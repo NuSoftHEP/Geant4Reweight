@@ -1,5 +1,6 @@
 from ROOT import * 
 from array import array 
+from numpy import sign
 
 f = TFile("DUET.root", "RECREATE")
 
@@ -51,9 +52,9 @@ cov_vals = [
 ]
 
 ##need to square it
-cov_vals = [c*c for c in cov_vals]
+cov_vals = [sign(c)*c*c for c in cov_vals]
 
-##also, need to convert from fractional to full covariance:
+#also, need to convert from fractional to full covariance:
 for i in range(0,10):
   if( i < 5 ): i_val = y_cex[i]
   else: i_val = y_abs[i - 5]

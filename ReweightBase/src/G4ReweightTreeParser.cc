@@ -193,21 +193,8 @@ void G4ReweightTreeParser::FillCollection(){
 }
 
 size_t G4ReweightTreeParser::GetNTrajs(){ 
-//  size_t nTraj = 0;
-  
-//  std::cout << trajCollection->size() << " Events" << std::endl;
-/*  for(size_t i = 0; i < trajCollection->size(); ++i){
-    //Get map at i. Add its size to the count
-    nTraj += (trajCollection->at(i))->size();
-  }
-*/
   return trajCollection->size();
-//  return nTraj;
 }
-
-/*size_t G4ReweightTreeParser::GetNEvents(){
-  return trajCollection->size();
-}*/
 
 G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackIndex){
   if(!GetNTrajs()){
@@ -237,13 +224,13 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
 
-        /* std::string Inel;
-           if(theTraj->parID != 0)continue;
-           if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
-           else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
-           else continue;
-        */
-        if (theTraj->parID == 0 && theTraj->PID == 211){ //Delete this line
+        std::string Inel;
+        if(theTraj->parID != 0)continue;
+        if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+        else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+        else continue;
+        
+        //if (theTraj->parID == 0 && theTraj->PID == 211){ //Delete this line
           //Skip any that exit out the back
           double totalDeltaZ = 0.;
           for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
@@ -251,13 +238,6 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             totalDeltaZ += theStep->deltaZ;
           }
           if(totalDeltaZ < 0.) continue;
-
-//          std::cout << "Found primary " << theTraj->PID << std::endl;
-//          std::cout << "Has NChildren: " << theTraj->GetNChilds() << std::endl;
-//          std::cout << "Has Final Proc: " << theTraj->GetFinalProc() << std::endl;
-//         for(int ic = 0; ic < theTraj->GetNChilds(); ++ic){
-//            std::cout <<"\t"<<theTraj->GetChild(ic)->PID << std::endl;
-//         }
 
           double w = theTraj->GetWeight(bias);
 
@@ -274,7 +254,8 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           preFinalP = sqrt( px*px + py*py + pz*pz); 
 
-          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+//          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+          if(theInt == Inel ){
              //Now check the scattering angle 
              auto products = theTraj->HasChild(theTraj->PID);
              if( products.size() == 1){
@@ -327,19 +308,19 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
             sliceEnergyInelastic->push_back(slicesInelastic[it].first); 
             sliceIntsInelastic->push_back(slicesInelastic[it].second); 
           }
-//          std::cout << "New Track" << std::endl;
+
           std::map<int, int*>::iterator itN = mapPIDtoN.begin();
           for(; itN != mapPIDtoN.end(); ++itN){
             *(itN->second) = (theTraj->HasChild(itN->first)).size();
-//            std::cout << "This track has " << *(itN->second) << " " << itN->first << std::endl;
           }
+
           GetInteractionType(theTraj->PID);
          
           Energy = theTraj->Energy;
 
           tree->Fill();
            
-        } //Delete this line
+//        } //Delete this line
       }
 }
 
@@ -348,7 +329,13 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0 && theTraj->PID == 211){
+         std::string Inel;
+        if(theTraj->parID != 0)continue;
+        if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+        else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+        else continue;
+        
+        //       if (theTraj->parID == 0 && theTraj->PID == 211){
           //Skip any that exit out the back
           double totalDeltaZ = 0.;
           for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
@@ -377,7 +364,8 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           preFinalP = sqrt( px*px + py*py + pz*pz); 
 
-          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+//          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+          if(theInt == Inel ){
              //Now check the scattering angle 
              auto products = theTraj->HasChild(theTraj->PID);
              if( products.size() == 1){
@@ -442,7 +430,7 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
 
           tree->Fill();
            
-        }
+        //}
       }
 }
 
@@ -451,7 +439,13 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0 && theTraj->PID == 211){
+         std::string Inel;
+        if(theTraj->parID != 0)continue;
+        if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+        else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+        else continue;
+        
+        //       if (theTraj->parID == 0 && theTraj->PID == 211){
           //Skip any that exit out the back
           double totalDeltaZ = 0.;
           for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
@@ -480,7 +474,8 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           preFinalP = sqrt( px*px + py*py + pz*pz); 
 
-          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+//          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+          if(theInt == Inel ){
              //Now check the scattering angle 
              auto products = theTraj->HasChild(theTraj->PID);
              if( products.size() == 1){
@@ -545,7 +540,7 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
 
           tree->Fill();
            
-        }
+        //}
       }
 }
 
@@ -1099,7 +1094,13 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0 && theTraj->PID == 211){
+         std::string Inel;
+        if(theTraj->parID != 0)continue;
+        if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+        else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+        else continue;
+        
+        //       if (theTraj->parID == 0 && theTraj->PID == 211){
           //Skip any that exit out the back
           double totalDeltaZ = 0.;
           for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
@@ -1129,7 +1130,8 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
           //std::cout << theInt << " " << px << " " << py << " " << pz << std::endl;
           preFinalP = sqrt( px*px + py*py + pz*pz); 
 
-          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+//          if(theInt == "pi+Inelastic" || theInt == "pi-Inelastic"){
+          if(theInt == Inel ){
              //Now check the scattering angle 
              auto products = theTraj->HasChild(theTraj->PID);
              if( products.size() == 1){
@@ -1195,7 +1197,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 
           tree->Fill();
            
-        }
+        //}
       }
 }
 

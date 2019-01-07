@@ -236,7 +236,14 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-        if (theTraj->parID == 0 && theTraj->PID == 211){
+
+        /* std::string Inel;
+           if(theTraj->parID != 0)continue;
+           if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+           else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+           else continue;
+        */
+        if (theTraj->parID == 0 && theTraj->PID == 211){ //Delete this line
           //Skip any that exit out the back
           double totalDeltaZ = 0.;
           for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
@@ -332,7 +339,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
 
           tree->Fill();
            
-        }
+        } //Delete this line
       }
 }
 

@@ -20,7 +20,8 @@ int main(int argc, char ** argv){
   double step = .1;
 
   //df.LoadRawMC();
-  df.LoadRawMCVector();
+  //df.LoadRawMCVector();
+  df.LoadFracs("DUET_MC_final_states.root");
 
 //  for( int i = -7; i < 2; ++i ){
 //    for(int j = -7; j < 2; ++j ){

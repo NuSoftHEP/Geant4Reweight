@@ -33,6 +33,7 @@ class DUETFitter : public G4ReweightFitter {
     void   LoadMCVector();
     void   LoadRawMC();
     void   LoadRawMCVector();
+    void   LoadFracs(std::string);
     void   DoReweight(double);
     void   DoReweightFS(double,double);
     void   DoReweightFSVector(double,double);
@@ -63,6 +64,7 @@ class DUETFitter : public G4ReweightFitter {
     TTree * fMCTree;
     G4ReweightTreeParser * fFSFracs; 
     TTree * fFSTree;
+    TFile * fFrac;
 
     TGraphErrors * DUET_xsec_abs;
     TGraphErrors * DUET_xsec_cex;

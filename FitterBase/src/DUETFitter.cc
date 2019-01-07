@@ -18,6 +18,10 @@ std::string set_prec(double input){
   return stream_in.str();
 };
 
+/*DUETFitter::DUETFitter(){
+  fOutFile = new TFile( "DUET_fit.root", "RECREATE"); 
+}*/
+
 DUETFitter::DUETFitter(std::string raw_mc_name/*, std::string output_dir*/) : fRawMCFileName(raw_mc_name)/*, fOutputDir(output_dir)*/{ 
 //  fOutFile = new TFile( (fOutputDir + "/DUET_fit.root").c_str(), "RECREATE"); 
   fOutFile = new TFile( "DUET_fit.root", "RECREATE"); 
@@ -46,7 +50,8 @@ DUETFitter::~DUETFitter(){
 
   //fFitTree->Write();
   fOutFile->Close();
-  fFSFracs->CloseAndSaveOutput();
+  std::cout << "outfile closed" << std::endl;
+  if(fFrac->IsOpen()){fFrac->Close();}
   //fFSFracs->CloseInput();
 }
 
@@ -66,6 +71,11 @@ void DUETFitter::LoadData(){
   DUET_cov_inv ->Write("cov_inv");
 
 
+}
+
+void DUETFitter::LoadFracs(std::string fFracName){
+  fFrac = new TFile( fFracName.c_str(), "OPEN" );
+  fFSTree = (TTree*)fFrac->Get("tree");
 }
 
 void DUETFitter::LoadRawMC(){

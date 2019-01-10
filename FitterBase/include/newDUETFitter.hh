@@ -1,7 +1,7 @@
-#ifndef DUETFitter_h
-#define DUETFitter_h
+#ifndef newDUETFitter_h
+#define newDUETFitter_h
 
-//#include "G4ReweightFitter.hh"
+#include "G4ReweightFitter.hh"
 #include "FitSample.hh"
 
 #include <iostream>
@@ -19,15 +19,20 @@
 
 #include "G4ReweightTreeParser.hh"
 
-class DUETFitter /*: public G4ReweightFitter */{ 
+class newDUETFitter : public G4ReweightFitter { 
   public:
-    DUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
-    DUETFitter( std::string/*, std::string*/ );
-    DUETFitter( std::vector< std::string > );
-    //DUETFitter( std::string, std::string );
-   ~DUETFitter();
+  
+    newDUETFitter();
+    virtual void   LoadData();
+    double DoFit() override;
+
+//    newDUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
+//    newDUETFitter( std::string/*, std::string*/ );
+//    newDUETFitter( std::vector< std::string > );
+//    //newDUETFitter( std::string, std::string );
+//   ~newDUETFitter();
    
-    void   LoadData();
+/*   
     double DoFit();
     void   LoadMC();
     void   LoadMCVector();
@@ -45,10 +50,12 @@ class DUETFitter /*: public G4ReweightFitter */{
     size_t    GetNSamples(){return samples.size();};
     FitSample GetSample( size_t i ){return samples[i];};
     void      SetActiveSample( size_t i ){ ActiveSample = &samples[i]; }
-
+*/
   private:
+    TMatrixD * DUET_cov_matrix;
+    TMatrixD * DUET_cov_inv;
     
-    TFile * fDUETFile;
+/*    TFile * fDUETFile;
     TFile * fOutFile;
     TTree * fFitTree;
 
@@ -69,8 +76,6 @@ class DUETFitter /*: public G4ReweightFitter */{
     TGraphErrors * DUET_xsec_abs;
     TGraphErrors * DUET_xsec_cex;
     //TH2D * DUET_cov;
-    TMatrixD * DUET_cov_matrix;
-    TMatrixD * DUET_cov_inv;
 
     TGraph * MC_xsec_abs;
     TGraph * MC_xsec_cex;
@@ -92,11 +97,11 @@ class DUETFitter /*: public G4ReweightFitter */{
 
     std::vector< FitSample > samples;
     FitSample * ActiveSample;
+*/
+ //   std::string abs_cut =  "(int == \"pi+Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )";
+ //   std::string cex_cut =  "(int == \"pi+Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))";
 
-    std::string abs_cut =  "(int == \"pi+Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )";
-    std::string cex_cut =  "(int == \"pi+Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))";
-
-    std::string weight = "weight*finalStateWeight*";
+//    std::string weight = "weight*finalStateWeight*";
 
 
 };

@@ -5,11 +5,19 @@
 int main(int argc, char ** argv){
 
   std::vector< std::string > files = {
-    "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_0.root",
+    /*"/pnfs/dune/scratch/users/calcuttj/C_thin_gps_0.root",
     "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_1.root",
     "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_2.root",
     "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_3.root",
     "/pnfs/dune/scratch/users/calcuttj/C_thin_gps_4.root"
+    */
+
+    "/dune/data2/users/calcuttj/GeantReweight/Thin_C/C_thin_gps_0.root",
+    "/dune/data2/users/calcuttj/GeantReweight/Thin_C/C_thin_gps_1.root",
+    "/dune/data2/users/calcuttj/GeantReweight/Thin_C/C_thin_gps_2.root",
+    "/dune/data2/users/calcuttj/GeantReweight/Thin_C/C_thin_gps_3.root",
+    "/dune/data2/users/calcuttj/GeantReweight/Thin_C/C_thin_gps_4.root"
+
   };
 
   //DUETFitter df(argv[1]); 
@@ -17,12 +25,12 @@ int main(int argc, char ** argv){
   df.ParseXML(argv[2]);
   df.LoadData(); 
 
-  double step = .1;
 
   //df.LoadRawMC();
   //df.LoadRawMCVector();
   df.LoadFracs("DUET_MC_final_states.root");
 
+//  double step = .1;
 //  for( int i = -7; i < 2; ++i ){
 //    for(int j = -7; j < 2; ++j ){
 //

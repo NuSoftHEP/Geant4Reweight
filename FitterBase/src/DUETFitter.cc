@@ -68,7 +68,7 @@ void DUETFitter::LoadData(){
   DUET_xsec_abs->Write();
   DUET_xsec_cex->Write();
   DUET_cov_matrix->Write("cov");
-  DUET_cov_inv ->Write("cov_inv");
+  DUET_cov_inv->Write("cov_inv");
 
 
 }
@@ -309,6 +309,17 @@ void DUETFitter::LoadMCVector(){
   }
   std::cout << "Got Tree " << fMCTree << std::endl;
   std::cout << "Entries: " << fMCTree->GetEntries() << std::endl; 
+
+  /*
+    Ideas for making this more user-friendly:
+
+    ActiveSample->Experiment
+    ActiveSample->GetRange()
+    ActiveSample->GetBins()
+
+    ActiveSample->Cut
+    ActiveSample->Scale
+  */
 
 
   fMCTree->Draw("sqrt(Energy*Energy - 139.57*139.57)>>total(10,200,300)","","goff");

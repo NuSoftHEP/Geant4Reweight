@@ -1,6 +1,9 @@
 #include "newDUETFitter.hh"
 
-newDUETFitter::newDUETFitter(){ 
+newDUETFitter::newDUETFitter(TFile * output_file/*, TDirectory * output_dir*/){ 
+  fOutputFile = output_file;
+/*  output_dir->cd(); */ 
+
   points = {201.6, 216.6, 237.2, 265.6, 295.1}; 
 
   binning = "(10,200,300)";
@@ -10,8 +13,31 @@ newDUETFitter::newDUETFitter(){
     {"cex", "(int == \"pi+Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))"}
   };
 
-//  LoadData(); 
+  scale = 1.E27 / (.5 * 2.266 * 6.022E23 / 12.01 );
+
+  fExperimentName = "DUET";
+  fDataFileName = "/dune/app/users/calcuttj/geant/GeantReweight/data/DUET.root"; 
 }; 
+
+void newDUETFitter::SaveData(TDirectory * data_dir){
+  data_dir->cd();
+  
+  TDirectory * experiment_dir;
+  //Check if the directory already exists. If so, delete it and remake
+  if( data_dir->Get( fExperimentName.c_str() ) ){
+     data_dir->cd();
+     data_dir->rmdir( fExperimentName.c_str() );
+  }
+  experiment_dir = data_dir->mkdir( fExperimentName.c_str() );
+  experiment_dir->cd();
+
+  Data_xsec_graphs["abs"]->Write();
+  Data_xsec_graphs["cex"]->Write();
+  DUET_cov_matrix->Write();
+  DUET_cov_inv->Write();
+
+
+}
 
 void newDUETFitter::LoadData(){
   fDataFile = new TFile( fDataFileName.c_str(), "READ"); 
@@ -24,6 +50,9 @@ void newDUETFitter::LoadData(){
   DUET_cov_inv    = &DUET_cov_matrix->Invert();
 
   std::cout << "Loaded data" << std::endl;
+
+  fOutputFile->cd();
+
 }
 
 double newDUETFitter::DoFit(){

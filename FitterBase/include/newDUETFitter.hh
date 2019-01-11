@@ -22,8 +22,9 @@
 class newDUETFitter : public G4ReweightFitter { 
   public:
   
-    newDUETFitter();
+    newDUETFitter( TFile * output );
     virtual void   LoadData();
+    void SaveData( TDirectory * ) override;
     double DoFit() override;
 
 //    newDUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };

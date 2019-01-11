@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "TH1D.h"
-
+#include "TCanvas.h"
 
 void G4ReweightFitter::GetMCGraphs(){
   
@@ -21,6 +21,8 @@ void G4ReweightFitter::GetMCGraphs(){
 
   TH1D * total = (TH1D*)gDirectory->Get("total");
 
+  TCanvas * c1 = new TCanvas("c1", "c1");
+
   //Go through the map of cuts
   std::map< std::string, std::string >::iterator itCuts = cuts.begin();
   for( itCuts; itCuts != cuts.end(); ++itCuts ){
@@ -29,35 +31,57 @@ void G4ReweightFitter::GetMCGraphs(){
     std::string name = itCuts->first;      
     std::string theCut = itCuts->second;
     
-    std::cout << name << std::endl;
     std::string cutCommand = drawCommand + ">>" + name + binning;
 
     std::string cutOption = weight + theCut;
-    std::cout << cutOption.c_str() << std::endl;
 
     fMCTree->Draw( cutCommand.c_str(), cutOption.c_str(), "goff" );
    
     TH1D * hist = (TH1D*)gDirectory->Get( name.c_str() );
+
+    hist->Draw();
+    
     
     hist->Divide( total );
     hist->Scale( scale );
+    hist->Draw();
     
-    std::cout << "MC cut " << name << std::endl;
-
+    
     std::vector< double > the_xsec; 
     for( int i = 0; i < points.size(); ++i ){
 
-      std::cout << "point: " << points[i] << std::endl;
-      std::cout << "bin: " << hist->FindBin( points[i] ) << std::endl;
-      std::cout << "content: " << hist->GetBinContent( hist->FindBin( points[i] ) ) << std::endl;
 
       double content = hist->GetBinContent( hist->FindBin( points[i] ) );
 
-      std::cout << "\txsec: " << content << std::endl;
       the_xsec.push_back( content );
     }
 
     MC_xsec_graphs[ name ] = new TGraph( points.size(), &points[0], &the_xsec[0] );
+
+    fFitDir->cd();
+
+    MC_xsec_graphs[ name ]->Write(name.c_str()); 
+  }
+
+}
+
+void G4ReweightFitter::SaveData(TDirectory * data_dir){
+  data_dir->cd();
+  
+  TDirectory * experiment_dir;
+
+  //Check if the directory already exists. If so, delete it and remake
+  if( data_dir->Get( fExperimentName.c_str() ) ){
+     data_dir->cd();
+     data_dir->rmdir( fExperimentName.c_str() );
+  }
+  experiment_dir = data_dir->mkdir( fExperimentName.c_str() );
+  experiment_dir->cd();
+
+  std::map< std::string, TGraphErrors * >::iterator itData;
+  for( itData = Data_xsec_graphs.begin(); itData != Data_xsec_graphs.end(); ++itData ){
+    std::string name = itData->first;
+    itData->second->Write( name.c_str() );
   }
 
 }
@@ -95,11 +119,13 @@ double G4ReweightFitter::DoFit(){
     int nPoints = MC_xsec->GetN(); 
 
     for( int i = 0; i < nPoints; ++i ){
+
       Data_xsec->GetPoint(i, x, Data_val);
       Data_err = Data_xsec->GetErrorY(i);
       MC_xsec->GetPoint(i, x, MC_val);
 
-      Chi2 += (1 / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
+
+      Chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }
     
   }
@@ -192,10 +218,10 @@ void G4ReweightFitter::ParseXML(std::string FileName){
     theFitSample.dcex = factors["dcex"];
     theFitSample.theFile = reweightFile;
 
-    std::cout << "CHECKING " << std::endl;
-    std::cout << "abs: "  << theFitSample.abs << std::endl;
-    std::cout << "cex: "  << theFitSample.cex << std::endl;
-    std::cout << "File: " << theFitSample.theFile << std::endl;
+    //std::cout << "CHECKING " << std::endl;
+    //std::cout << "abs: "  << theFitSample.abs << std::endl;
+    //std::cout << "cex: "  << theFitSample.cex << std::endl;
+    //std::cout << "File: " << theFitSample.theFile << std::endl;
    
     samples.push_back( theFitSample );
     
@@ -213,7 +239,28 @@ void G4ReweightFitter::ParseXML(std::string FileName){
   dataFileText = theData->Attribute("File");
   if (dataFileText != nullptr) dataFile = dataFileText;
 
-  std::cout << "Data: " << dataFile << std::endl;
+  //std::cout << "Data: " << dataFile << std::endl;
 
-  fDataFileName = dataFile;
+  //fDataFileName = dataFile;
+}
+
+void G4ReweightFitter::SetActiveSample( size_t i, TDirectory * output_dir){ 
+  ActiveSample = &samples[i]; 
+  fTopDir = output_dir;
+  fTopDir->cd();
+
+  fFitDir = output_dir->mkdir( fExperimentName.c_str() );
+  fFitDir->cd();
+}
+
+void G4ReweightFitter::LoadData(){
+  fDataFile = new TFile( fDataFileName.c_str(), "READ"); 
+
+  std::map< std::string, std::string >::iterator itGraphs;
+  for( itGraphs = graph_names.begin(); itGraphs != graph_names.end(); ++itGraphs ){
+    Data_xsec_graphs[ itGraphs->first ] = (TGraphErrors*)fDataFile->Get(itGraphs->second.c_str());
+    std::cout << "Data: " << Data_xsec_graphs[ itGraphs->first ] << std::endl;
+  }
+
+  std::cout << "Loaded data" << std::endl;
 }

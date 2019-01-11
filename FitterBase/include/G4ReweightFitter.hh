@@ -6,6 +6,7 @@
 #include "TGraphErrors.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TDirectory.h"
 #include "FitSample.hh"
 #include <iostream>
 #include <iomanip>
@@ -19,23 +20,35 @@ class G4ReweightFitter{
     G4ReweightFitter() {};
     ~G4ReweightFitter(){};
 
-    virtual void   LoadData() = 0;
+    virtual void   LoadData()/* = 0*/;
+    virtual void   SaveData( TDirectory * );
     virtual double DoFit();
     virtual void   LoadMC(){};
+
 
     void GetMCGraphs();
     TTree * GetReweightFS( );
 
     size_t    GetNSamples(){return samples.size();};
     FitSample GetSample( size_t i ){return samples[i];};
-    void      SetActiveSample( size_t i ){ ActiveSample = &samples[i]; }
+/*    void      SetActiveSample( size_t i, TDirectory * output_dir){ 
+      ActiveSample = &samples[i]; 
+      output_dir->cd();
+    }
+    */
+    void SetActiveSample( size_t, TDirectory * );
     void ParseXML(std::string);
 
   protected:
 
+    std::string fExperimentName = "Generic_Experiment_Name";
+
     TTree * fMCTree;
     std::string fDataFileName;
     TFile * fDataFile;
+    TFile * fOutputFile;
+    TDirectory * fFitDir;
+    TDirectory * fTopDir;
 
     std::vector< double > points;
 
@@ -45,6 +58,8 @@ class G4ReweightFitter{
 
    
     std::map< std::string, std::string > cuts;
+    std::map< std::string, std::string > graph_names;
+
     std::map< std::string, TGraph* > MC_xsec_graphs;
     std::map< std::string, TGraphErrors* > Data_xsec_graphs;
     const std::string weight = "weight*finalStateWeight*";

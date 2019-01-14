@@ -1,0 +1,234 @@
+#
+# Macro file for MyExample
+#
+# set verbose level for this run
+#
+
+/run/verbose    1
+/run/setCut     0.04 mm
+/event/verbose  1
+/process/verbose 10
+/random/setSeeds 770353837 70597151
+#/random/setSeeds 575841909 838392975
+# Set the particle source properties
+# 
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Arb
+/gps/hist/type   arb
+/gps/ene/emspec  1 #choose to produce momentum rather than KE
+
+/gps/hist/point  116.13698 0.
+/gps/hist/point  116.13699 1.
+/gps/hist/point  116.13700 1.
+/gps/hist/point  116.13701 1. 
+/gps/hist/point  116.13702 0. 
+
+/gps/hist/point  120.77298 0.
+/gps/hist/point  120.77299 1.
+/gps/hist/point  120.77300 1.
+/gps/hist/point  120.77301 1. 
+/gps/hist/point  120.77302 0. 
+
+/gps/hist/point  123.05398 0.
+/gps/hist/point  123.05399 1.
+/gps/hist/point  123.05400 1.
+/gps/hist/point  123.05401 1. 
+/gps/hist/point  123.05402 0. 
+
+/gps/hist/point  125.30998 0.
+/gps/hist/point  125.30999 1.
+/gps/hist/point  125.31000 1.
+/gps/hist/point  125.31001 1. 
+/gps/hist/point  125.31002 0. 
+
+/gps/hist/point  128.28498 0.
+/gps/hist/point  128.28499 1.
+/gps/hist/point  128.28500 1.
+/gps/hist/point  128.28501 1. 
+/gps/hist/point  128.28502 0. 
+
+/gps/hist/point  134.12498 0.
+/gps/hist/point  134.12499 1.
+/gps/hist/point  134.12500 1.
+/gps/hist/point  134.12501 1. 
+/gps/hist/point  134.12502 0. 
+
+/gps/hist/point  149.56298 0.
+/gps/hist/point  149.56299 1.
+/gps/hist/point  149.56300 1.
+/gps/hist/point  149.56301 1. 
+/gps/hist/point  149.56302 0. 
+
+/gps/hist/point  156.33198 0.
+/gps/hist/point  156.33199 1.
+/gps/hist/point  156.33200 1.
+/gps/hist/point  156.33201 1. 
+/gps/hist/point  156.33202 0. 
+
+/gps/hist/point  169.50298 0.
+/gps/hist/point  169.50299 1.
+/gps/hist/point  169.50300 1.
+/gps/hist/point  169.50301 1. 
+/gps/hist/point  169.50302 0. 
+
+/gps/hist/point  175.93198 0.
+/gps/hist/point  175.93199 1.
+/gps/hist/point  175.93200 1.
+/gps/hist/point  175.93201 1. 
+/gps/hist/point  175.93202 0. 
+
+/gps/hist/point  194.71498 0.
+/gps/hist/point  194.71499 1.
+/gps/hist/point  194.71500 1.
+/gps/hist/point  194.71501 1. 
+/gps/hist/point  194.71502 0. 
+
+/gps/hist/point  201.59998 0.
+/gps/hist/point  201.59999 1.
+/gps/hist/point  201.60000 1.
+/gps/hist/point  201.60001 1. 
+/gps/hist/point  201.60002 0. 
+
+/gps/hist/point  216.59998 0.
+/gps/hist/point  216.59999 1.
+/gps/hist/point  216.60000 1.
+/gps/hist/point  216.60001 1. 
+/gps/hist/point  216.60002 0. 
+
+/gps/hist/point  224.76098 0.
+/gps/hist/point  224.76099 1.
+/gps/hist/point  224.76100 1.
+/gps/hist/point  224.76101 1. 
+/gps/hist/point  224.76102 0. 
+
+/gps/hist/point  230.62598 0.
+/gps/hist/point  230.62599 1.
+/gps/hist/point  230.62600 1.
+/gps/hist/point  230.62601 1. 
+/gps/hist/point  230.62602 0. 
+
+/gps/hist/point  237.19998 0.
+/gps/hist/point  237.19999 1.
+/gps/hist/point  237.20000 1.
+/gps/hist/point  237.20001 1. 
+/gps/hist/point  237.20002 0. 
+
+/gps/hist/point  265.07098 0.
+/gps/hist/point  265.07099 1.
+/gps/hist/point  265.07100 1.
+/gps/hist/point  265.07101 1. 
+/gps/hist/point  265.07102 0. 
+
+/gps/hist/point  265.59998 0.
+/gps/hist/point  265.59999 1.
+/gps/hist/point  265.60000 1.
+/gps/hist/point  265.60001 1. 
+/gps/hist/point  265.60002 0. 
+
+/gps/hist/point  270.70898 0.
+/gps/hist/point  270.70899 1.
+/gps/hist/point  270.70900 1.
+/gps/hist/point  270.70901 1. 
+/gps/hist/point  270.70902 0. 
+
+/gps/hist/point  295.09998 0.
+/gps/hist/point  295.09999 1.
+/gps/hist/point  295.10000 1.
+/gps/hist/point  295.10001 1. 
+/gps/hist/point  295.10002 0. 
+
+/gps/hist/point  315.03798 0.
+/gps/hist/point  315.03799 1.
+/gps/hist/point  315.03800 1.
+/gps/hist/point  315.03801 1. 
+/gps/hist/point  315.03802 0. 
+
+/gps/hist/point  331.37698 0.
+/gps/hist/point  331.37699 1.
+/gps/hist/point  331.37700 1.
+/gps/hist/point  331.37701 1. 
+/gps/hist/point  331.37702 0. 
+
+/gps/hist/point  358.34898 0.
+/gps/hist/point  358.34899 1.
+/gps/hist/point  358.34900 1.
+/gps/hist/point  358.34901 1. 
+/gps/hist/point  358.34902 0. 
+
+/gps/hist/point  363.37098 0.
+/gps/hist/point  363.37099 1.
+/gps/hist/point  363.37100 1.
+/gps/hist/point  363.37101 1. 
+/gps/hist/point  363.37102 0. 
+
+/gps/hist/point  416.82398 0.
+/gps/hist/point  416.82399 1.
+/gps/hist/point  416.82400 1.
+/gps/hist/point  416.82401 1. 
+/gps/hist/point  416.82402 0. 
+
+/gps/hist/point  432.61298 0.
+/gps/hist/point  432.61299 1.
+/gps/hist/point  432.61300 1.
+/gps/hist/point  432.61301 1. 
+/gps/hist/point  432.61302 0. 
+
+/gps/hist/point  521.20598 0.
+/gps/hist/point  521.20599 1.
+/gps/hist/point  521.20600 1.
+/gps/hist/point  521.20601 1. 
+/gps/hist/point  521.20602 0. 
+
+/gps/hist/point  624.15498 0.
+/gps/hist/point  624.15499 1.
+/gps/hist/point  624.15500 1.
+/gps/hist/point  624.15501 1. 
+/gps/hist/point  624.15502 0. 
+
+/gps/hist/point  709.99998 0.
+/gps/hist/point  709.99999 1.
+/gps/hist/point  710.00000 1.
+/gps/hist/point  710.00001 1. 
+/gps/hist/point  710.00002 0. 
+
+/gps/hist/point  839.99998 0.
+/gps/hist/point  839.99999 1.
+/gps/hist/point  840.00000 1.
+/gps/hist/point  840.00001 1. 
+/gps/hist/point  840.00002 0. 
+
+/gps/hist/point  999.99998 0.
+/gps/hist/point  999.99999 1.
+/gps/hist/point  1000.00000 1.
+/gps/hist/point  1000.00001 1. 
+/gps/hist/point  1000.00002 0. 
+
+/gps/hist/point  1359.99998 0.
+/gps/hist/point  1359.99999 1.
+/gps/hist/point  1360.00000 1.
+/gps/hist/point  1360.00001 1. 
+/gps/hist/point  1360.00002 0. 
+
+/gps/hist/point  1579.99998 0.
+/gps/hist/point  1579.99999 1.
+/gps/hist/point  1580.00000 1.
+/gps/hist/point  1580.00001 1. 
+/gps/hist/point  1580.00002 0. 
+
+/gps/hist/point  1999.99998 0.
+/gps/hist/point  1999.99999 1.
+/gps/hist/point  2000.00000 1.
+/gps/hist/point  2000.00001 1. 
+/gps/hist/point  2000.00002 0. 
+
+/gps/hist/inter  Lin
+
+
+/run/beamOn 1000
+#/run/beamOn 1

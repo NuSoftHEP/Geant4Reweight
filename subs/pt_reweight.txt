@@ -55,26 +55,35 @@ tar -xf G4Reweight.tar
 cd ${_CONDOR_SCRATCH_DIR}/code/macros/
 tar -xf macros.tar
 
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-install/
+tar -xf ReweightBase-install.tar
 
+cd ${_CONDOR_SCRATCH_DIR}/code/tinyxml2-install/
+tar -xf tinyxml2.tar
 ######################
 
 cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/bin/
 #source geant4_lite.sh
 source geant4.sh
 
-cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-install/lib/
+export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
+
+cd ${_CONDOR_SCRATCH_DIR}/code/tinyxml2-install/lib64/
+export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
+echo "ADDED TO LD LIBRARY PATH"
+echo ${LD_LIBRARY_PATH}
+
+
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
 
 echo $(pwd) 
 ls 
 
-./${EXE} -c ${_CONDOR_SCRATCH_DIR}/code/macros/macros/points/${SET}_${PROCESS}.mac -o ${NAME}_nom_${PROCESS}.root -i 1. -e 1.
+ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/Reweight/${JOBSUBJOBID:0:10}/
 
-ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/${JOBSUBJOBID:0:10}/
+ifdh cp ${FILEDIR}/${FILE}_${PROCESS}.root ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/${FILE}_${PROCESS}.root
 
-ifdh cp ${NAME}_nom_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/${JOBSUBJOBID:0:10}/${NAME}_nom_${PROCESS}.root 
+./G4Reweight -f ${FILE}_${PROCESS}.root -o finalstate_${FILE}_${PROCESS}.root 
 
-#cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
-#
-#./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_${PROCESS}.root 
-#
-#ifdh cp rw_${NAME}_nom_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_${PROCESS}.root
+ifdh cp finalstate_${FILE}_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/Reweight/${JOBSUBJOBID:0:10}/finalstate_${FILE}_${PROCESS}.root

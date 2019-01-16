@@ -8,7 +8,7 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353837 70597151
+/random/setSeeds 770353838 70597152
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
@@ -230,5 +230,5 @@
 /gps/hist/inter  Lin
 
 
-/run/beamOn 1000
+/run/beamOn 200000
 #/run/beamOn 1

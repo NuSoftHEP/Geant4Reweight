@@ -8,7 +8,7 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353892 70597206
+/random/setSeeds 770353845 70597159
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
@@ -23,11 +23,53 @@
 /gps/hist/type   arb
 /gps/ene/emspec  1 #choose to produce momentum rather than KE
 
+/gps/hist/point  128.28498 0.
+/gps/hist/point  128.28499 1.
+/gps/hist/point  128.28500 1.
+/gps/hist/point  128.28501 1. 
+/gps/hist/point  128.28502 0. 
+
+/gps/hist/point  149.56298 0.
+/gps/hist/point  149.56299 1.
+/gps/hist/point  149.56300 1.
+/gps/hist/point  149.56301 1. 
+/gps/hist/point  149.56302 0. 
+
+/gps/hist/point  155.66098 0.
+/gps/hist/point  155.66099 1.
+/gps/hist/point  155.66000 1.
+/gps/hist/point  155.66001 1. 
+/gps/hist/point  155.66002 0. 
+
 /gps/hist/point  156.33198 0.
 /gps/hist/point  156.33199 1.
 /gps/hist/point  156.33200 1.
 /gps/hist/point  156.33201 1. 
 /gps/hist/point  156.33202 0. 
+
+/gps/hist/point  169.50298 0.
+/gps/hist/point  169.50299 1.
+/gps/hist/point  169.50300 1.
+/gps/hist/point  169.50301 1. 
+/gps/hist/point  169.50302 0. 
+
+/gps/hist/point  179.11198 0.
+/gps/hist/point  179.11199 1.
+/gps/hist/point  179.11200 1.
+/gps/hist/point  179.11201 1. 
+/gps/hist/point  179.11202 0. 
+
+/gps/hist/point  218.85298 0.
+/gps/hist/point  218.85299 1.
+/gps/hist/point  218.85300 1.
+/gps/hist/point  218.85301 1. 
+/gps/hist/point  218.85302 0. 
+
+/gps/hist/point  224.76098 0.
+/gps/hist/point  224.76099 1.
+/gps/hist/point  224.76100 1.
+/gps/hist/point  224.76101 1. 
+/gps/hist/point  224.76102 0. 
 
 /gps/hist/point  253.71398 0.
 /gps/hist/point  253.71399 1.
@@ -40,6 +82,42 @@
 /gps/hist/point  265.07100 1.
 /gps/hist/point  265.07101 1. 
 /gps/hist/point  265.07102 0. 
+
+/gps/hist/point  270.70898 0.
+/gps/hist/point  270.70899 1.
+/gps/hist/point  270.70900 1.
+/gps/hist/point  270.70901 1. 
+/gps/hist/point  270.70902 0. 
+
+/gps/hist/point  287.48098 0.
+/gps/hist/point  287.48099 1.
+/gps/hist/point  287.48100 1.
+/gps/hist/point  287.48101 1. 
+/gps/hist/point  287.48102 0. 
+
+/gps/hist/point  309.56098 0.
+/gps/hist/point  309.56099 1.
+/gps/hist/point  309.56100 1.
+/gps/hist/point  309.56101 1. 
+/gps/hist/point  309.56102 0. 
+
+/gps/hist/point  342.20198 0.
+/gps/hist/point  342.20199 1.
+/gps/hist/point  342.20200 1.
+/gps/hist/point  342.20201 1. 
+/gps/hist/point  342.20202 0. 
+
+/gps/hist/point  374.40098 0.
+/gps/hist/point  374.40099 1.
+/gps/hist/point  374.40100 1.
+/gps/hist/point  374.40101 1. 
+/gps/hist/point  374.40102 0. 
+
+/gps/hist/point  395.67598 0.
+/gps/hist/point  395.67599 1.
+/gps/hist/point  395.67600 1.
+/gps/hist/point  395.67601 1. 
+/gps/hist/point  395.67602 0. 
 
 /gps/hist/point  531.55198 0.
 /gps/hist/point  531.55199 1.

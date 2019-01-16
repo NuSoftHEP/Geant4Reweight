@@ -8,11 +8,11 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353877 70597191
+/random/setSeeds 770353885 70597199
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
-/gps/particle    pi+
+/gps/particle    pi-
 /gps/direction   0 0 1
 /gps/pos/type    Plane 
 /gps/pos/shape   Circle
@@ -22,12 +22,6 @@
 /gps/ene/type    Arb
 /gps/hist/type   arb
 /gps/ene/emspec  1 #choose to produce momentum rather than KE
-
-/gps/hist/point  83.36198 0.
-/gps/hist/point  83.36199 1.
-/gps/hist/point  83.36200 1.
-/gps/hist/point  83.36201 1. 
-/gps/hist/point  83.36202 0. 
 
 /gps/hist/point  108.15398 0.
 /gps/hist/point  108.15399 1.
@@ -46,6 +40,12 @@
 /gps/hist/point  153.64100 1.
 /gps/hist/point  153.64101 1. 
 /gps/hist/point  153.64102 0. 
+
+/gps/hist/point  156.33198 0.
+/gps/hist/point  156.33199 1.
+/gps/hist/point  156.33200 1.
+/gps/hist/point  156.33201 1. 
+/gps/hist/point  156.33202 0. 
 
 /gps/hist/point  173.37098 0.
 /gps/hist/point  173.37099 1.
@@ -88,6 +88,25 @@
 /gps/hist/point  395.67600 1.
 /gps/hist/point  395.67601 1. 
 /gps/hist/point  395.67602 0. 
+
+/gps/hist/point  531.55198 0.
+/gps/hist/point  531.55199 1.
+/gps/hist/point  531.55200 1.
+/gps/hist/point  531.55201 1. 
+/gps/hist/point  531.55202 0. 
+
+/gps/hist/point  587.21098 0.
+/gps/hist/point  587.21099 1.
+/gps/hist/point  587.21100 1.
+/gps/hist/point  587.21101 1. 
+/gps/hist/point  587.21102 0. 
+
+/gps/hist/point  615.95498 0.
+/gps/hist/point  615.95499 1.
+/gps/hist/point  615.95500 1.
+/gps/hist/point  615.95501 1. 
+/gps/hist/point  615.95502 0. 
+
 
 /gps/hist/inter  Lin
 

@@ -230,5 +230,5 @@
 /gps/hist/inter  Lin
 
 
-/run/beamOn 1000
+/run/beamOn 200000
 #/run/beamOn 1

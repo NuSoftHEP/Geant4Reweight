@@ -8,7 +8,7 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353852 70597166
+/random/setSeeds 770353875 70597189
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
@@ -29,11 +29,17 @@
 /gps/hist/point  128.28501 1. 
 /gps/hist/point  128.28502 0. 
 
-/gps/hist/point  265.07098 0.
-/gps/hist/point  265.07099 1.
-/gps/hist/point  265.07100 1.
-/gps/hist/point  265.07101 1. 
-/gps/hist/point  265.07102 0. 
+/gps/hist/point  224.76098 0.
+/gps/hist/point  224.76099 1.
+/gps/hist/point  224.76100 1.
+/gps/hist/point  224.76101 1. 
+/gps/hist/point  224.76102 0. 
+
+/gps/hist/point  270.70898 0.
+/gps/hist/point  270.70899 1.
+/gps/hist/point  270.70900 1.
+/gps/hist/point  270.70901 1. 
+/gps/hist/point  270.70902 0. 
 
 /gps/hist/inter  Lin
 

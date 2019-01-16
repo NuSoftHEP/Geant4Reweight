@@ -8,11 +8,11 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353852 70597166
+/random/setSeeds 770353849 70597163
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
-/gps/particle    pi-
+/gps/particle    pi+
 /gps/direction   0 0 1
 /gps/pos/type    Plane 
 /gps/pos/shape   Circle
@@ -29,11 +29,35 @@
 /gps/hist/point  128.28501 1. 
 /gps/hist/point  128.28502 0. 
 
+/gps/hist/point  194.71498 0.
+/gps/hist/point  194.71499 1.
+/gps/hist/point  194.71500 1.
+/gps/hist/point  194.71501 1. 
+/gps/hist/point  194.71502 0. 
+
+/gps/hist/point  211.70298 0.
+/gps/hist/point  211.70299 1.
+/gps/hist/point  211.70300 1.
+/gps/hist/point  211.70301 1. 
+/gps/hist/point  211.70302 0. 
+
 /gps/hist/point  265.07098 0.
 /gps/hist/point  265.07099 1.
 /gps/hist/point  265.07100 1.
 /gps/hist/point  265.07101 1. 
 /gps/hist/point  265.07102 0. 
+
+/gps/hist/point  268.45598 0.
+/gps/hist/point  268.45599 1.
+/gps/hist/point  268.45600 1.
+/gps/hist/point  268.45601 1. 
+/gps/hist/point  268.45602 0. 
+
+/gps/hist/point  352.97798 0.
+/gps/hist/point  352.97799 1.
+/gps/hist/point  352.97800 1.
+/gps/hist/point  352.97801 1. 
+/gps/hist/point  352.97802 0. 
 
 /gps/hist/inter  Lin
 

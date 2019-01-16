@@ -8,7 +8,7 @@
 /run/setCut     0.04 mm
 /event/verbose  1
 /process/verbose 10
-/random/setSeeds 770353852 70597166
+/random/setSeeds 770353854 70597168
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 

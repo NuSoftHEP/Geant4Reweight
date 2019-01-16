@@ -21,7 +21,7 @@
 
 /gps/ene/type    Arb
 /gps/hist/type   arb
-/gps/ene/emspec  1 #choose to produce momentum rather than KE
+/gps/ene/emspec  0 #choose to produce momentum rather than KE
 
 /gps/hist/point  128.28498 0.
 /gps/hist/point  128.28499 1.

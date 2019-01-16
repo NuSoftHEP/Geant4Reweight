@@ -4,6 +4,7 @@
 #include <string>
 
 struct FitSample{
+  std::string theName;
   double abs, cex, inel, prod, dcex;
   bool Raw;
   std::string theFile;

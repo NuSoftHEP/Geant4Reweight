@@ -12,6 +12,9 @@
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
+
+
+########################
 /gps/particle    pi-
 /gps/direction   0 0 1
 /gps/pos/type    Plane 
@@ -19,23 +22,23 @@
 /gps/pos/centre  0 0 0 mm
 /gps/pos/radius  5 cm
 
-/gps/ene/type    Arb
-/gps/hist/type   arb
-/gps/ene/emspec  0 #choose to produce momentum rather than KE
+/gps/ene/type    Mono
+/gps/ene/mono    50.00 MeV
+########################
 
-/gps/hist/point  128.28498 0.
-/gps/hist/point  128.28499 1.
-/gps/hist/point  128.28500 1.
-/gps/hist/point  128.28501 1. 
-/gps/hist/point  128.28502 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi-
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  265.07098 0.
-/gps/hist/point  265.07099 1.
-/gps/hist/point  265.07100 1.
-/gps/hist/point  265.07101 1. 
-/gps/hist/point  265.07102 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    160.00 MeV
+########################
 
-/gps/hist/inter  Lin
 
 
 /run/beamOn 200000

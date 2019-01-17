@@ -12,6 +12,9 @@
 #/random/setSeeds 575841909 838392975
 # Set the particle source properties
 # 
+
+
+########################
 /gps/particle    pi+
 /gps/direction   0 0 1
 /gps/pos/type    Plane 
@@ -19,77 +22,140 @@
 /gps/pos/centre  0 0 0 mm
 /gps/pos/radius  5 cm
 
-/gps/ene/type    Arb
-/gps/hist/type   arb
-/gps/ene/emspec  0 #choose to produce momentum rather than KE
+/gps/ene/type    Mono
+/gps/ene/mono    160.000 MeV
+########################
 
-/gps/hist/point  265.07098 0.
-/gps/hist/point  265.07099 1.
-/gps/hist/point  265.07100 1.
-/gps/hist/point  265.07101 1. 
-/gps/hist/point  265.07102 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  363.37098 0.
-/gps/hist/point  363.37099 1.
-/gps/hist/point  363.37100 1.
-/gps/hist/point  363.37101 1. 
-/gps/hist/point  363.37102 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    250.000 MeV
+########################
 
-/gps/hist/point  416.82398 0.
-/gps/hist/point  416.82399 1.
-/gps/hist/point  416.82400 1.
-/gps/hist/point  416.82401 1. 
-/gps/hist/point  416.82402 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  521.20598 0.
-/gps/hist/point  521.20599 1.
-/gps/hist/point  521.20600 1.
-/gps/hist/point  521.20601 1. 
-/gps/hist/point  521.20602 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    300.000 MeV
+########################
 
-/gps/hist/point  624.15498 0.
-/gps/hist/point  624.15499 1.
-/gps/hist/point  624.15500 1.
-/gps/hist/point  624.15501 1. 
-/gps/hist/point  624.15502 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  709.99998 0.
-/gps/hist/point  709.99999 1.
-/gps/hist/point  710.00000 1.
-/gps/hist/point  710.00001 1. 
-/gps/hist/point  710.00002 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    400.000 MeV
+########################
 
-/gps/hist/point  839.99998 0.
-/gps/hist/point  839.99999 1.
-/gps/hist/point  840.00000 1.
-/gps/hist/point  840.00001 1. 
-/gps/hist/point  840.00002 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  999.99998 0.
-/gps/hist/point  999.99999 1.
-/gps/hist/point  1000.00000 1.
-/gps/hist/point  1000.00001 1. 
-/gps/hist/point  1000.00002 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    500.000 MeV
+########################
 
-/gps/hist/point  1359.99998 0.
-/gps/hist/point  1359.99999 1.
-/gps/hist/point  1360.00000 1.
-/gps/hist/point  1360.00001 1. 
-/gps/hist/point  1360.00002 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/point  1579.99998 0.
-/gps/hist/point  1579.99999 1.
-/gps/hist/point  1580.00000 1.
-/gps/hist/point  1580.00001 1. 
-/gps/hist/point  1580.00002 0. 
+/gps/ene/type    Mono
+/gps/ene/mono    584.018 MeV
+########################
 
-/gps/hist/point  1999.99998 0.
-/gps/hist/point  1999.99999 1.
-/gps/hist/point  2000.00000 1.
-/gps/hist/point  2000.00001 1. 
-/gps/hist/point  2000.00002 0. 
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
 
-/gps/hist/inter  Lin
+/gps/ene/type    Mono
+/gps/ene/mono    711.946 MeV
+########################
+
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Mono
+/gps/ene/mono    870.123 MeV
+########################
+
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Mono
+/gps/ene/mono    1227.573 MeV
+########################
+
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Mono
+/gps/ene/mono    1446.583 MeV
+########################
+
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Mono
+/gps/ene/mono    1865.294 MeV
+########################
+
 
 
 /run/beamOn 200000

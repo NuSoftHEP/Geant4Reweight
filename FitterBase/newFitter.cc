@@ -4,6 +4,7 @@
 #include "BinonFitter.hh"
 #include <vector>
 #include <string>
+#include "TVectorD.h"
 
 #include "TFile.h"
 
@@ -21,16 +22,32 @@ int main(int argc, char ** argv){
   handler.ParseXML("../FitterBase/reweight_handler.xml");
 
 
-  handler.SetFiles_C_piplus();
+  handler.SetFiles("C_piplus");
   std::vector< FitSample > C_piplus_samples;
-  for( int i = 0; i < 1; ++i ){
-    for( int j = 0; j < 1; ++j ){
+
+  double abs_start = 0.9;
+  double abs_end = 1.0;
+  double delta_abs = .1;
+
+  double cex_start = 0.9;
+  double cex_end = 0.9;
+  double delta_cex = .1; 
+
+
+  for( double abs = abs_start; abs <= abs_end; abs += delta_abs ){
+    for( double cex = cex_start; cex <= cex_end; cex += delta_cex ){
        
-       FitSample theSample = handler.DoReweight( "abs1.00_cex1.00", 1., 1.);
+       std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
+       FitSample theSample = handler.DoReweight( name.c_str(), abs, cex);
        C_piplus_samples.push_back( theSample );
+
+       theSample.abs = abs;
+       theSample.cex = cex;
+       theSample.dcex = 0.;
+       theSample.inel = 0.;
+       theSample.prod = 0.;
+
        df.AddSample( theSample );
-       //add samples here
-       //need to move fitters above this loop
     }
   }
 
@@ -47,16 +64,33 @@ int main(int argc, char ** argv){
     fitters[i]->LoadData();
     fitters[i]->SaveData(data_dir);
   }
-//
-  for( size_t i = 0; i < 1/* df.GetNSamples()*/; ++i ){
-//    std::string dir_name = "abs" + set_prec(df.GetSample(i).abs) + "_cex" + set_prec(df.GetSample(i).cex);
-    std::string dir_name = C_piplus_samples[i].theName;
+  
+  std::cout << "Have: " << df.GetNSamples() << " samples" << std::endl;
+
+  for( size_t i = 0; i < df.GetNSamples(); ++i ){
+    
+    FitSample theSample = C_piplus_samples[i];
+    std::string dir_name = theSample.theName;
     std::cout << dir_name << std::endl;
 
-    out->cd();
-    TDirectory * outdir = out->mkdir( dir_name.c_str() );
+    ///NEED TO FIX THIS
+    TVectorD absvec(1, &(theSample.abs));
+    TVectorD cexvec(1, &(theSample.cex));
+    TVectorD inelvec(1, &(theSample.inel));
+    TVectorD prodvec(1, &(theSample.prod));
+    TVectorD dcexvec(1, &(theSample.dcex));
 
-//    std::cout << std::endl << "Reweighting. Abs: " << df.GetSample(i).abs << " Cex: " << df.GetSample(i).cex << std::endl;
+    out->cd();
+    //check this when have multiple fitters
+    TDirectory * outdir = out->mkdir( dir_name.c_str() );
+    outdir->cd();
+
+    absvec.Write("absval");
+    cexvec.Write("cexval");
+    inelvec.Write("inelval");
+    prodvec.Write("prodval");
+    dcexvec.Write("dcexval");
+
 
     for( size_t iFitter = 0; iFitter < fitters.size(); ++iFitter ){
       auto theFitter = fitters[iFitter];

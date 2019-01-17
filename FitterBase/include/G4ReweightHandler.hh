@@ -27,21 +27,15 @@ class G4ReweightHandler{
     void ParseXML(std::string);
     FitSample DoReweight(std::string, double, double);
 
-    void SetFiles( std::vector<std::string> * theFiles ){ fRawMCFileNames = theFiles; };
-    void SetFiles_C_piplus(){ fRawMCFileNames = &C_piplus_FilesVector; fFSFileName = C_piplus_FSFile; };
-    void SetFiles_C_piminus(){ fRawMCFileNames = &C_piminus_FilesVector; fFSFileName = C_piminus_FSFile; };
-//    void SetFiles_O_piplus(){ fRawMCFileNames = &O_piplus_FilesVector; };
-//    void SetFiles_O_piminus(){ fRawMCFileNames = &O_piminus_FilesVector; };
+    void SetFiles( std::string name ){ fRawMCFileNames = &(fMapToFiles[name]); fFSFileName = fMapToFSFiles[name]; };
 
 
   protected:
     std::vector< std::string > * fRawMCFileNames;
     std::string fFSFileName;
-    std::vector< std::string > C_piplus_FilesVector;
-    std::vector< std::string > C_piminus_FilesVector;
 
-    std::string C_piplus_FSFile;
-    std::string C_piminus_FSFile;
+    std::map< std::string, std::vector<std::string> > fMapToFiles;
+    std::map< std::string, std::string >              fMapToFSFiles;
 
     std::string RWFileName;
     G4ReweightTreeParser * Reweighter;

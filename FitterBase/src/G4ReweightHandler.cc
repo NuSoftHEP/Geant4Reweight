@@ -40,7 +40,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
   //////////////////////////////
 
   //NEED TO FIX
-  RWFileName = "try.root";
+  RWFileName = theName + ".root";
 
 
   //Make the reweighter pointer and do the reweighting
@@ -85,41 +85,55 @@ void G4ReweightHandler::ParseXML(std::string FileName){
     return;
   }
 
-  tinyxml2::XMLElement * C_piplus_Files = theRoot->FirstChildElement( "C_piplus_Files" );
-  if( !C_piplus_Files ){
-    std::cout << "Could Not get C_piplus_Files" << std::endl;
-    return;
+
+  std::vector< std::string > vector_names = {"C_piplus"};
+
+  for( std::vector< std::string >::iterator vector_name = vector_names.begin(); vector_name != vector_names.end(); ++vector_name){
+
+    //Create the entry in the map 
+    fMapToFiles[ *vector_name ]; 
+
+    std::string element_name = *vector_name + "_Files";
+
+    tinyxml2::XMLElement * Files = theRoot->FirstChildElement( element_name.c_str() );
+    if( !Files ){
+      std::cout << "Could Not get " << *vector_name + "_Files" << std::endl;
+      return;
+    }
+  
+    tinyxml2::XMLElement * theFile = Files->FirstChildElement( "File" );
+  
+    while(theFile){
+      std::string reweightFile;
+  
+      const char * reweightFileText = nullptr;
+  
+      reweightFileText = theFile->Attribute("Name");
+      if (reweightFileText != nullptr) reweightFile = reweightFileText;
+  
+      std::cout << "File: " << reweightFile << std::endl;
+  
+      fMapToFiles[ *vector_name ].push_back( reweightFile );
+      
+      theFile = theFile->NextSiblingElement("File");
+    }
+  
+    tinyxml2::XMLElement * theFSFile = Files->FirstChildElement( "FSFile");
+    std::string FSFile;
+  
+    const char * FSFileText = nullptr;
+  
+    FSFileText = theFSFile->Attribute("Name");
+    if (FSFileText != nullptr) FSFile = FSFileText;
+  
+    std::cout << "File: " << FSFile << std::endl;
+  
+    fMapToFSFiles[ *vector_name ] = FSFile;
+
   }
 
-  tinyxml2::XMLElement * theFile = C_piplus_Files->FirstChildElement( "File" );
-
-  while(theFile){
-    std::string reweightFile;
-
-    const char * reweightFileText = nullptr;
-
-    reweightFileText = theFile->Attribute("Name");
-    if (reweightFileText != nullptr) reweightFile = reweightFileText;
-
-    std::cout << "File: " << reweightFile << std::endl;
-
-    C_piplus_FilesVector.push_back( reweightFile );
-    
-    theFile = theFile->NextSiblingElement("File");
-  }
-
-  tinyxml2::XMLElement * theFSFile = C_piplus_Files->FirstChildElement( "FSFile");
-  std::string FSFile;
-
-  const char * FSFileText = nullptr;
-
-  FSFileText = theFSFile->Attribute("Name");
-  if (FSFileText != nullptr) FSFile = FSFileText;
-
-  std::cout << "File: " << FSFile << std::endl;
-
-  C_piplus_FSFile = FSFile;
-
+/*
+  ////////////////////////////////////////////
   tinyxml2::XMLElement * C_piminus_Files = theRoot->FirstChildElement( "C_piminus_Files" );
   if( !C_piminus_Files ){
     std::cout << "Could Not get C_piminus_Files" << std::endl;
@@ -152,6 +166,8 @@ void G4ReweightHandler::ParseXML(std::string FileName){
   std::cout << "File: " << FSFile << std::endl;
 
   C_piminus_FSFile = FSFile;
+  ////////////////////////
+  */
 
 
   //O Files

@@ -29,8 +29,30 @@ class G4ReweightFinalState{
     TH1D * GetTotalVariation(){ return totalVariation; };
     TH1D * GetExclusiveVariation( std::string );
 
+    bool IsPiMinus(){return PiMinusFlag;};
+
+    void SetPiMinus(){
+
+      abs_cut =  "(int == \"pi-Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )";
+      inel_cut = "(int == \"pi-Inelastic\" && ( (nPi0 + nPiPlus) == 0 ) && (nPiMinus == 1))";
+      cex_cut =  "(int == \"pi-Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))";
+      dcex_cut = "(int == \"pi-Inelastic\" && ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1))";
+      prod_cut = "(int == \"pi-Inelastic\" && ( (nPiPlus + nPi0 + nPiMinus) > 1) )";             
+
+      PiMinusFlag = true;
+
+      theCuts["inel"] = inel_cut;
+      theCuts["abs"]  = abs_cut;
+      theCuts["cex"]  = cex_cut;
+      theCuts["dcex"] = dcex_cut;
+      theCuts["prod"] = prod_cut;
+
+    };
+
   private:
     
+    bool PiMinusFlag = false;
+
     std::map< std::string, TH1D* > exclusiveVariations; 
 
     TH1D * totalVariation;

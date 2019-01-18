@@ -1,7 +1,11 @@
 #include "G4ReweightInter.hh"
 
  
-G4ReweightInter::G4ReweightInter(std::vector< std::pair< double, double > > input) : content(input) { }
+G4ReweightInter::G4ReweightInter(std::vector< std::pair< double, double > > input) /*: content(input)*/ {
+  for( size_t i = 0; i < input.size(); ++i ) content.push_back( input.at(i) );
+
+  NPoints = content.size();
+}
 
 double G4ReweightInter::GetContent( double inputPoint ){
 
@@ -31,13 +35,13 @@ double G4ReweightInter::GetContent( double inputPoint ){
   return 1.;
 }
 
-double G4ReweightInter::GetPoint( size_t i ){
+const double G4ReweightInter::GetPoint( size_t i ) const {
   if( i >= GetNPoints() ) return -1.;
 
   return content[i].first;
 }
 
-double G4ReweightInter::GetValue( size_t i ){
+const double G4ReweightInter::GetValue( size_t i ) const {
   if( i >= GetNPoints() ) return -1.;
 
   return content[i].second;

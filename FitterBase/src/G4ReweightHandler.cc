@@ -3,27 +3,31 @@
 std::string set_prec( double );
 
 G4ReweightHandler::G4ReweightHandler(){
-
+  
+  dummy = new G4ReweightInter(std::vector< std::pair<double, double> >() );
 }
 
 G4ReweightHandler::~G4ReweightHandler(){
-
+  delete dummy;
+ 
+//  std::map<std::string, G4ReweightInter*>::iterator itInter;
+//  for( itInter = FSInters.begin(); itInter != FSInters.end(); ++itInter ){
+//    delete itInter->second;
+//  }
 }
 
-FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex ){
+FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName ) 
+{
 
   std::string norm_abs_str = set_prec(norm_abs);
   std::string norm_cex_str = set_prec(norm_cex);
 
-  G4ReweightInter * dummy = new G4ReweightInter(std::vector< std::pair<double, double> >() );
-  std::map< std::string, G4ReweightInter* > FSInters;
 
-  std::vector< std::pair< double, double > > abs_vector;
+
   abs_vector.push_back( std::make_pair(200., norm_abs) );  
   abs_vector.push_back( std::make_pair(300., norm_abs) );  
   FSInters["abs"]  = new G4ReweightInter(abs_vector);
 
-  std::vector< std::pair< double, double > > cex_vector;
   cex_vector.push_back( std::make_pair(200., norm_cex) );  
   cex_vector.push_back( std::make_pair(300., norm_cex) );       
   FSInters["cex"]  = new G4ReweightInter(cex_vector);
@@ -33,19 +37,22 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
   FSInters["dcex"] = dummy;
 
 
-  TFile * fFSFile = new TFile( fFSFileName.c_str(), "READ");
-  TTree * fFSTree = (TTree*)fFSFile->Get( "tree" ); 
-
   G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, 300., 200. );
   //////////////////////////////
 
   //NEED TO FIX
-  RWFileName = theName + ".root";
+  //RWFileName = theName + ".root";
+  RWFileName = outName;
 
 
   //Make the reweighter pointer and do the reweighting
+
+  std::cout << "Reweighting MC File: 0" << std::endl;
+
   Reweighter = new G4ReweightTreeParser( fRawMCFileNames->at(0),  RWFileName );
   Reweighter->FillAndAnalyzeFS(FSReweighter);
+
+  std::cout << std::endl;
   for( size_t i = 1; i < fRawMCFileNames->size(); ++i ){
 
     Reweighter->CloseInput();
@@ -54,9 +61,11 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
     Reweighter->OpenNewInput( fRawMCFileNames->at(i) );
     Reweighter->FillAndAnalyzeFS(FSReweighter);
     std::cout << "Tree Entries: " << Reweighter->GetTree()->GetEntries() << std::endl;
+    std::cout << std::endl;
 
   }   
 
+  Reweighter->CloseInput();
   Reweighter->CloseAndSaveOutput();
   ////////////////////////////////
 
@@ -66,10 +75,16 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
   theSample.theFile = RWFileName;
   theSample.Raw = false;
 
+
+  //memory management
+  delete FSReweighter;
+  delete Reweighter;
+  ClearFSInters();
+
   return theSample;
 }
 
-void G4ReweightHandler::ParseXML(std::string FileName){
+void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
 
   tinyxml2::XMLDocument doc;
 
@@ -86,7 +101,7 @@ void G4ReweightHandler::ParseXML(std::string FileName){
   }
 
 
-  std::vector< std::string > vector_names = {"C_piplus"};
+  //std::vector< std::string > vector_names = {"C_piplus"};
 
   for( std::vector< std::string >::iterator vector_name = vector_names.begin(); vector_name != vector_names.end(); ++vector_name){
 
@@ -287,4 +302,23 @@ void G4ReweightHandler::ParseXML(std::string FileName){
   if (dataFileText != nullptr) dataFile = dataFileText;
   */
 
+}
+
+void G4ReweightHandler::SetFiles( std::string name ){ 
+  fRawMCFileNames = &(fMapToFiles[name]); 
+  fFSFileName = fMapToFSFiles[name]; 
+
+  fFSFile = new TFile( fFSFileName.c_str(), "READ");
+  fFSTree = (TTree*)fFSFile->Get( "tree" ); 
+
+}
+
+void G4ReweightHandler::ClearFSInters(){
+      abs_vector.clear();
+      cex_vector.clear();
+
+//      std::map<std::string, G4ReweightInter*>::iterator itInter;
+//      for( itInter = FSInters.begin(); itInter != FSInters.end(); ++itInter ){
+//        delete itInter->second;
+//      }
 }

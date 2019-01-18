@@ -19,93 +19,119 @@ int main(int argc, char ** argv){
   TDirectory * data_dir = out->mkdir( "Data" );
 
   newDUETFitter df(out);
+  BinonFitter bf(out);
+
+
+  std::vector< std::string > sets = {/*"C_piplus",*/ "C_piminus"};
+  std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
+  //mapSetsToFitters["C_piplus"] = {&df};
+  mapSetsToFitters["C_piminus"] = {&bf};
+
 
   G4ReweightHandler handler;  
-  handler.ParseXML("../FitterBase/reweight_handler.xml");
-
-
-  handler.SetFiles("C_piplus");
-  std::vector< FitSample > C_piplus_samples;
+  handler.ParseXML(argv[1], sets);
 
   double abs_start = 0.5;
   double delta_abs = .1;
-  int n_abs = 10;
-  double abs_end = abs_start + n_abs*delta_abs;
+  int n_abs = 1;
 
   double cex_start = 0.5;
   double delta_cex = .1; 
-  int n_cex = 10;
-  double cex_end = cex_start + n_cex*delta_cex;
+  int n_cex = 1;
 
- std::vector< double > abs_vector; 
- std::vector< double > cex_vector; 
- std::vector< double > chi2_vector; 
+  int nSamples = n_abs * n_cex;
 
+  for( std::vector<std::string>::iterator itSet = sets.begin(); itSet != sets.end(); ++itSet ){
 
-  for( int i = 0; i < n_abs; ++i ){
-    for( int j = 0; j < n_cex; ++j ){
+    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+    std::cout << "Set: " << *itSet << std::endl;
 
-       double abs = abs_start + delta_abs*i;
-       double cex = cex_start + delta_cex*j;
-       
-       std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
-       FitSample theSample = handler.DoReweight( name.c_str(), abs, cex);
-       C_piplus_samples.push_back( theSample );
+    handler.SetFiles( *itSet );
 
-       theSample.abs = abs;
-       theSample.cex = cex;
-       theSample.dcex = 0.;
-       theSample.inel = 0.;
-       theSample.prod = 0.;
+    for( int i = 0; i < n_abs; ++i ){
+      for( int j = 0; j < n_cex; ++j ){
 
-       df.AddSample( theSample );
+         double abs = abs_start + delta_abs*i;
+         double cex = cex_start + delta_cex*j;
+         
+         std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
+         std::cout << name << std::endl;
+         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + name) );
+
+         theSample.abs = abs;
+         theSample.cex = cex;
+         theSample.dcex = 0.;
+         theSample.inel = 0.;
+         theSample.prod = 0.;
+
+         std::vector< G4ReweightFitter* > theFitters = mapSetsToFitters[ *itSet ]; 
+         for( size_t iFit = 0; iFit < theFitters.size(); ++iFit){
+           std::cout << "Adding sample to " << *itSet << std::endl;
+           theFitters[iFit]->AddSample( theSample );
+         }
+      }
+    }
+
+    handler.CloseFSFile();
+
+    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  }
+
+ 
+  //Flatten the map to fitters while loading data for ease 
+  std::vector< G4ReweightFitter* > allFitters;
+ 
+  std::map< std::string, std::vector< G4ReweightFitter* > >::iterator itSet;
+  itSet = mapSetsToFitters.begin();
+  for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+ 
+    std::cout << "Loading Data for Set: " << itSet->first;
+    std::vector< G4ReweightFitter* > fitters = itSet->second;
+    for( size_t i = 0; i < fitters.size(); ++i ){
+      fitters[i]->LoadData();
+      fitters[i]->SaveData(data_dir);
+      allFitters.push_back( fitters[i] );
     }
   }
-
-  std::vector< FitSample > C_piminus_samples;
   
-  
-//  BinonFitter bf(out);
-//  
-//  std::vector< G4ReweightFitter* > fitters = {&df, &bf};
-  std::vector< G4ReweightFitter* > fitters = {&df};
-//
-  for( size_t i = 0; i < fitters.size(); ++i ){
-//    fitters[i]->ParseXML(argv[1]);
-    fitters[i]->LoadData();
-    fitters[i]->SaveData(data_dir);
-  }
-  
-  std::cout << "Have: " << df.GetNSamples() << " samples" << std::endl;
+  std::cout << "Have: " << nSamples << " samples" << std::endl;
 
-  for( size_t i = 0; i < df.GetNSamples(); ++i ){
-    
-    FitSample theSample = df.GetSample(i);
-    std::string dir_name = theSample.theName;
-    std::cout << dir_name << std::endl;
+  std::vector< double > abs_vector; 
+  std::vector< double > cex_vector; 
+  std::vector< double > chi2_vector; 
 
-    double abs =  theSample.abs;
-    double cex =  theSample.cex;
-    std::cout << "Vals: " << abs << " " << cex << std::endl;
-    double inel = theSample.inel;
-    double prod = theSample.prod;
-    double dcex = theSample.dcex;
-
-    out->cd();
-    //check this when have multiple fitters
-    TDirectory * outdir = out->mkdir( dir_name.c_str() );
-    outdir->cd();
+  for( size_t i = 0; i < nSamples; ++i ){
 
     double chi2 = 0.;
+    
+    //Just for getting the parameter values
+    auto tempFitter = allFitters[0];
+    FitSample tempSample = tempFitter->GetSample(i);
+    std::string dir_name = tempSample.theName;
+    std::cout << dir_name << std::endl;
 
-    for( size_t iFitter = 0; iFitter < fitters.size(); ++iFitter ){
-      auto theFitter = fitters[iFitter];
-      theFitter->SetActiveSample(i, outdir);
-      theFitter->GetMCGraphs();
-      double fit_chi2 = theFitter->DoFit();
-      std::cout << fit_chi2 << std::endl;
+    double abs =  tempSample.abs;
+    double cex =  tempSample.cex;
+    std::cout << "Vals: " << abs << " " << cex << std::endl;
+    double inel = tempSample.inel;
+    double prod = tempSample.prod;
+    double dcex = tempSample.dcex;
 
-      chi2 += fit_chi2;
+    TDirectory * outdir = out->mkdir( dir_name.c_str() );
+
+    for( size_t j = 0; j < allFitters.size(); ++j ){
+    
+        auto theFitter = allFitters[j];
+
+        out->cd();
+        outdir->cd();
+
+        theFitter->SetActiveSample(i, outdir);
+        theFitter->GetMCGraphs();
+        double fit_chi2 = theFitter->DoFit();
+        std::cout << fit_chi2 << std::endl;
+
+        chi2 += fit_chi2;
     }
 
     abs_vector.push_back( abs );
@@ -120,6 +146,7 @@ int main(int argc, char ** argv){
   fitSurf->Write("chi2_surf");
   out->Close();
 
+  std::cout << "Done" << std::endl;
 
   return 0;
 }

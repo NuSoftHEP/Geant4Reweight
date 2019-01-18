@@ -19,7 +19,10 @@ trackID(tid), PID(pid), parID(parid), eventNum(eventnum), stepRange(range){
 G4ReweightTraj::~G4ReweightTraj(){
   children.clear();
 
-  std::for_each(steps.begin(), steps.end(), DeleteVector<G4ReweightStep*>());  
+//  std::for_each(steps.begin(), steps.end(), DeleteVector<G4ReweightStep*>());  
+  for( size_t i = 0; i < steps.size(); ++i ){
+    delete steps.at(i);
+  }
   steps.clear();
 }
 

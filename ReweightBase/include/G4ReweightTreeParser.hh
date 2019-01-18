@@ -47,7 +47,7 @@ class G4ReweightTreeParser{
 
     void OpenNewInput( std::string );
     void CloseInput();
-    void CloseAndSaveOutput(){ fout->cd(); tree->Write(); fout->Close(); };
+    void CloseAndSaveOutput(){ fout->cd(); tree->Write(); delete tree; fout->Delete("tree"); fout->Close(); };
     void GetInteractionType(int);
 
     TTree * GetTree(){ return tree; };
@@ -60,6 +60,7 @@ class G4ReweightTreeParser{
     bool skipEM = true;
 
   private:
+    std::string Inel;
 
     //Data Members
     TFile * fin;

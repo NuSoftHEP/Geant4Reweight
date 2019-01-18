@@ -58,6 +58,13 @@ void G4ReweightTreeParser::OpenNewInput(std::string fInputFileName){
 */
 
 void G4ReweightTreeParser::CloseInput(){
+
+  delete track;  
+  delete step;
+
+  fin->Delete("track");
+  fin->Delete("step");
+
   fin->Close();  
   delete fin;
 }
@@ -68,6 +75,11 @@ G4ReweightTreeParser::~G4ReweightTreeParser(){
   stepActivePostProcMFPs->clear();
   stepActiveAlongProcMFPs->clear();
 
+//  trajCollection->clear();
+  std::map< std::pair< size_t, size_t >, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+  for( ; itTraj != trajCollection->end(); ++itTraj ){
+    delete itTraj->second;
+  }
   trajCollection->clear();
 }
 
@@ -224,7 +236,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
 
-        std::string Inel;
+        
         if(theTraj->parID != 0)continue;
         if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
         else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
@@ -329,7 +341,7 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-         std::string Inel;
+         
         if(theTraj->parID != 0)continue;
         if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
         else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
@@ -439,7 +451,7 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-         std::string Inel;
+         
         if(theTraj->parID != 0)continue;
         if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
         else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
@@ -585,7 +597,7 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
   //std::cout << "Getting FS weight" << std::endl;
 
   //NOTE: MAKE THIS WORK FOR PI- AS WELL
-  if( theInt != "pi+Inelastic" ){
+  if( theInt != Inel ){
 //    std::cout << "Not inelastic" << std::endl;
     theFSWeight = 1.;
     return;
@@ -599,8 +611,14 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
   std::string interaction;
   if( (nPiPlus + nPiMinus + nPi0) == 0 ) interaction = "abs";
   else if( (nPiPlus + nPiMinus) == 0 && ( nPi0 == 1 ) ) interaction = "cex";
-  else if( (nPiPlus + nPi0) == 0 && ( nPiMinus == 1 ) ) interaction = "dcex";
-  else if( (nPiMinus + nPi0) == 0 && ( nPiPlus == 1 ) ) interaction = "inel";
+  else if( (nPiPlus + nPi0) == 0 && ( nPiMinus == 1 ) ){
+    if( theFS->IsPiMinus() ) interaction = "inel";  
+    else interaction = "dcex";
+  }
+  else if( (nPiMinus + nPi0) == 0 && ( nPiPlus == 1 ) ){
+    if( theFS->IsPiMinus() ) interaction = "dcex";  
+    else interaction = "inel"; 
+  }
   else interaction = "prod";
 
   //std::cout << "Interaction: " << interaction << std::endl;
@@ -1094,7 +1112,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
         auto theTraj = itTraj->second; 
-         std::string Inel;
+         
         if(theTraj->parID != 0)continue;
         if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
         else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
@@ -1252,54 +1270,4 @@ void G4ReweightTreeParser::MakeOutputBranches(){
   tree->Branch("intType", &intType);
 }
 
-/*void G4ReweightTreeParser::SetOutputBranches(){
-  theLen=0.;
-  theWeight=0.;
-  theElastWeight = 0.;
-  theFSWeight=0.;
-  N=0.;
-  theInt = ""; 
-  postFinalP=0.;
-  preFinalP=0.;
-  nElast = 0;
-  elastDists = 0;
-  sliceEnergy = 0;
-  sliceInts = 0;
-  sliceEnergyInelastic = 0;
-  sliceIntsInelastic = 0;
-  cosTheta = 0.;
 
-  nPiPlus = 0;
-  nPiMinus = 0;
-  nPi0 = 0;
-  nProton = 0;
-  nNeutron = 0;
-
-  Energy = 0.;
-
-  tree->SetBranchAddress("len", &theLen);  
-  tree->SetBranchAddress("weight", &theWeight);  
-  tree->SetBranchAddress("elastWeight", &theElastWeight);  
-  tree->SetBranchAddress("finalStateWeight", &theFSWeight);
-  tree->SetBranchAddress("N", &N);
-  tree->SetBranchAddress("nElast", &nElast);
-  tree->SetBranchAddress("elastDists", &elastDists);
-  tree->SetBranchAddress("sliceEnergy", &sliceEnergy);
-  tree->SetBranchAddress("sliceEnergyInelastic", &sliceEnergyInelastic);
-  tree->SetBranchAddress("Energy", &Energy);
-  tree->SetBranchAddress("sliceInts", &sliceInts);
-  tree->SetBranchAddress("sliceIntsInelastic", &sliceIntsInelastic);
-  tree->SetBranchAddress("int", &theInt);
-  tree->SetBranchAddress("postFinalP", &postFinalP);
-  tree->SetBranchAddress("preFinalP", &preFinalP);
-  tree->SetBranchAddress("cosTheta", &cosTheta);
-
-  tree->SetBranchAddress("nPiPlus", &nPiPlus);
-  tree->SetBranchAddress("nPiMinus", &nPiMinus);
-  tree->SetBranchAddress("nPi0", &nPi0);
-  tree->SetBranchAddress("nProton", &nProton);
-  tree->SetBranchAddress("nNeutron", &nNeutron);
-
-  tree->SetBranchAddress("intType", &intType);
-}
-*/

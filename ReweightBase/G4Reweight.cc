@@ -29,6 +29,7 @@ std::string elasticBiasName   = "elastic";
 std::string weightType        = "flat";
 
 bool enableFS = false;
+bool enablePiMinus = false;
 
 std::string FinalStateFracsFile = "FinalStateFile.root";
 std::string FinalStateVarsFile  = "try.xml";
@@ -57,6 +58,7 @@ int main(int argc, char ** argv){
     std::cout << "Using FinalStateVarsFile: " << FinalStateVarsFile << std::endl;
 
     G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
+    if( enablePiMinus ) theFS->SetPiMinus();
 
     tp->FillAndAnalyzeFS(theFS);
     tp->CloseAndSaveOutput();
@@ -197,6 +199,10 @@ bool parseArgs(int argc, char ** argv){
 
     else if( strcmp(argv[i], "--FS") == 0){
       enableFS = atoi( argv[i + 1] );
+    }
+
+    else if( strcmp(argv[i], "--PiMinus") == 0){
+      enablePiMinus = atoi( argv[i + 1] );
     }
 
     else if( strcmp(argv[i], "--FSFracs") == 0){

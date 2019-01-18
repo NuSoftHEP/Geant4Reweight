@@ -24,10 +24,10 @@ class G4ReweightHandler{
     G4ReweightHandler();
     ~G4ReweightHandler();
 
-    void ParseXML(std::string);
-    FitSample DoReweight(std::string, double, double);
+    void ParseXML(std::string, std::vector< std::string >);
+    FitSample DoReweight(std::string, double, double, std::string);
 
-    void SetFiles( std::string name ){ fRawMCFileNames = &(fMapToFiles[name]); fFSFileName = fMapToFSFiles[name]; };
+    void SetFiles( std::string );
 
 
   protected:
@@ -39,7 +39,20 @@ class G4ReweightHandler{
 
     std::string RWFileName;
     G4ReweightTreeParser * Reweighter;
+
+    TFile * fFSFile;
+    TTree * fFSTree;
+
+    std::map< std::string, G4ReweightInter* > FSInters;
+    G4ReweightInter * dummy;
+    std::vector< std::pair< double, double > > abs_vector;
+    std::vector< std::pair< double, double > > cex_vector;
+
+    void ClearFSInters();
+
+
   public:
+    void CloseFSFile(){ delete fFSTree; fFSFile->Close(); delete fFSFile; };
 };
 
 #endif

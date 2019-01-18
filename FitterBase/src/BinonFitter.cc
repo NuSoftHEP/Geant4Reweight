@@ -8,7 +8,7 @@ BinonFitter::BinonFitter(TFile * output_file){
   binning = "(25,150,400)";
 
   cuts = {
-    {"reac", "(int == \"pi+Inelastic\")"}
+    {"reac", "(int == \"pi-Inelastic\")"}
   };
 
   graph_names = {

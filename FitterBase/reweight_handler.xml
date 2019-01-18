@@ -73,12 +73,12 @@
   </Pb_piplus_Files>
 
   <C_piminus_Files>
-    <File Name="0.root" />
-    <File Name="1.root" />
-    <File Name="2.root" />
-    <File Name="3.root" />
-    <File Name="4.root" />
-    <FSFile Name=".root" />
+    <File Name="/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_0.root" />
+    <File Name="/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_1.root" />
+    <File Name="/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_2.root" />
+    <File Name="/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_3.root" />
+    <File Name="/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_4.root" />
+    <FSFile Name="/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piminus.root" />
   </C_piminus_Files>
   
   <O_piminus_Files>

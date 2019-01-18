@@ -11,16 +11,19 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
   
   TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
+  std::cout << "Making hist maps" << std::endl;
   std::map< std::string, TH1D* > oldHists;
   std::map< std::string, TH1D* > newHists;
   std::map< std::string, G4ReweightInter* > theVariations;
 
+  std::cout << "Getting Max and Min" << std::endl;
   GetMaxAndMin( FSScaleFileName );
   
   //Just for loading. Could do everything in one shot, but it's
   //more understandable if it's compartmentalized like this
   for( size_t i = 0; i < theInts.size(); ++i ){
     //Open up the FSScaleFile and load the variations
+    std::cout << theInts.at(i) << std::endl;
     G4ReweightInter * theInter = GetInter( FSScaleFileName, theInts.at(i) );
     theVariations[ theInts.at(i) ] = theInter;
 
@@ -141,15 +144,16 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
   std::map< std::string, G4ReweightInter* > theVariations;
 
 
+
+//  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(10, 200, 300)", "", "goff" ); 
+//  TH1D * total = (TH1D*)gDirectory->Get("total");
+
   std::map< std::string, std::string >::iterator it = theCuts.begin();
-  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(10, 200, 300)", "", "goff" ); 
-
-  TH1D * total = (TH1D*)gDirectory->Get("total");
-
   for( ; it != theCuts.end(); ++it ){
     std::string name = it->first;
     std::string cut  = it->second;
 
+    //Set Binning
     input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(10, 200, 300)").c_str(), cut.c_str(), "goff" ); 
 
     TH1D * theHist = (TH1D*)gDirectory->Get(name.c_str());
@@ -266,15 +270,22 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
 
     exclusiveVariations[ theInts.at(i) ] = exclusiveVariation; 
 
+    std::string name = theInts.at(i);
+    std::string new_name = "new_" + name;
 
     //Delete the pointers here
     delete newHists.at( theInts.at(i) );
     delete oldHists.at( theInts.at(i) );
+    gDirectory->Delete(name.c_str());
+    gDirectory->Delete(new_name.c_str());
   }
 
   //Now go through and clear from memory all of the pointers
   delete newTotal;
   delete oldTotal;
+
+  gDirectory->Delete("oldTotal");
+  gDirectory->Delete("newTotal");
 
   //fout->Close();
 }

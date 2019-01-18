@@ -7,6 +7,8 @@
 #include "TVectorD.h"
 
 #include "TFile.h"
+#include "TH2D.h"
+#include "TGraph2D.h"
 
 std::string set_prec(double);
 
@@ -25,17 +27,26 @@ int main(int argc, char ** argv){
   handler.SetFiles("C_piplus");
   std::vector< FitSample > C_piplus_samples;
 
-  double abs_start = 0.9;
-  double abs_end = 1.0;
+  double abs_start = 0.5;
   double delta_abs = .1;
+  int n_abs = 10;
+  double abs_end = abs_start + n_abs*delta_abs;
 
-  double cex_start = 0.9;
-  double cex_end = 0.9;
+  double cex_start = 0.5;
   double delta_cex = .1; 
+  int n_cex = 10;
+  double cex_end = cex_start + n_cex*delta_cex;
+
+ std::vector< double > abs_vector; 
+ std::vector< double > cex_vector; 
+ std::vector< double > chi2_vector; 
 
 
-  for( double abs = abs_start; abs <= abs_end; abs += delta_abs ){
-    for( double cex = cex_start; cex <= cex_end; cex += delta_cex ){
+  for( int i = 0; i < n_abs; ++i ){
+    for( int j = 0; j < n_cex; ++j ){
+
+       double abs = abs_start + delta_abs*i;
+       double cex = cex_start + delta_cex*j;
        
        std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
        FitSample theSample = handler.DoReweight( name.c_str(), abs, cex);
@@ -69,37 +80,44 @@ int main(int argc, char ** argv){
 
   for( size_t i = 0; i < df.GetNSamples(); ++i ){
     
-    FitSample theSample = C_piplus_samples[i];
+    FitSample theSample = df.GetSample(i);
     std::string dir_name = theSample.theName;
     std::cout << dir_name << std::endl;
 
-    ///NEED TO FIX THIS
-    TVectorD absvec(1, &(theSample.abs));
-    TVectorD cexvec(1, &(theSample.cex));
-    TVectorD inelvec(1, &(theSample.inel));
-    TVectorD prodvec(1, &(theSample.prod));
-    TVectorD dcexvec(1, &(theSample.dcex));
+    double abs =  theSample.abs;
+    double cex =  theSample.cex;
+    std::cout << "Vals: " << abs << " " << cex << std::endl;
+    double inel = theSample.inel;
+    double prod = theSample.prod;
+    double dcex = theSample.dcex;
 
     out->cd();
     //check this when have multiple fitters
     TDirectory * outdir = out->mkdir( dir_name.c_str() );
     outdir->cd();
 
-    absvec.Write("absval");
-    cexvec.Write("cexval");
-    inelvec.Write("inelval");
-    prodvec.Write("prodval");
-    dcexvec.Write("dcexval");
-
+    double chi2 = 0.;
 
     for( size_t iFitter = 0; iFitter < fitters.size(); ++iFitter ){
       auto theFitter = fitters[iFitter];
       theFitter->SetActiveSample(i, outdir);
       theFitter->GetMCGraphs();
-      std::cout << theFitter->DoFit() << std::endl;
+      double fit_chi2 = theFitter->DoFit();
+      std::cout << fit_chi2 << std::endl;
+
+      chi2 += fit_chi2;
     }
+
+    abs_vector.push_back( abs );
+    cex_vector.push_back( cex );
+    chi2_vector.push_back( chi2 );
   }
 
+  out->cd();
+
+  TGraph2D * fitSurf = new TGraph2D( abs_vector.size(), &abs_vector[0], &cex_vector[0], &chi2_vector[0]); 
+  
+  fitSurf->Write("chi2_surf");
   out->Close();
 
 

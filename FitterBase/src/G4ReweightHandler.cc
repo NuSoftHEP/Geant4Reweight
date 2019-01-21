@@ -16,8 +16,8 @@ G4ReweightHandler::~G4ReweightHandler(){
 //  }
 }
 
-FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName ) 
-{
+FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus ){
+
 
   std::string norm_abs_str = set_prec(norm_abs);
   std::string norm_cex_str = set_prec(norm_cex);
@@ -37,7 +37,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
   FSInters["dcex"] = dummy;
 
 
-  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, 300., 200. );
+  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, 300., 200., PiMinus );
   //////////////////////////////
 
   //NEED TO FIX
@@ -146,161 +146,6 @@ void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string 
     fMapToFSFiles[ *vector_name ] = FSFile;
 
   }
-
-/*
-  ////////////////////////////////////////////
-  tinyxml2::XMLElement * C_piminus_Files = theRoot->FirstChildElement( "C_piminus_Files" );
-  if( !C_piminus_Files ){
-    std::cout << "Could Not get C_piminus_Files" << std::endl;
-    return;
-  }
-
-  theFile = C_piminus_Files->FirstChildElement( "File" );
-
-  while(theFile){
-    std::string reweightFile;
-
-    const char * reweightFileText = nullptr;
-
-    reweightFileText = theFile->Attribute("Name");
-    if (reweightFileText != nullptr) reweightFile = reweightFileText;
-
-    std::cout << "File: " << reweightFile << std::endl;
-
-    C_piminus_FilesVector.push_back( reweightFile );
-    
-    theFile = theFile->NextSiblingElement("File");
-  } 
-
-  theFSFile = C_piminus_Files->FirstChildElement( "FSFile");
-  FSFileText = nullptr;
-
-  FSFileText = theFSFile->Attribute("Name");
-  if (FSFileText != nullptr) FSFile = FSFileText;
-
-  std::cout << "File: " << FSFile << std::endl;
-
-  C_piminus_FSFile = FSFile;
-  ////////////////////////
-  */
-
-
-  //O Files
-//  tinyxml2::XMLElement * O_Files = theRoot->FirstChildElement( "O_Files" );
-//  if( !O_Files ){
-//    std::cout << "Could Not get O_Files" << std::endl;
-//    return;
-//  }
-//
-//  tinyxml2::XMLElement * theFile = O_Files->FirstChildElement( "File" );
-//
-//  while(theFile){
-//    std::string reweightFile;
-//
-//    const char * reweightFileText = nullptr;
-//
-//    reweightFileText = theFile->Attribute("File");
-//    if (reweightFileText != nullptr) reweightFile = reweightFileText;
-//
-//    std::cout << "File: " << reweightFile << std::endl;
-//
-//    OFilesVector.push_back( reweightFile );
-//    
-//    theFile = theFile->NextSiblingElement("File")
-//  }
-  //
-
-
-
-
-  /*{ 
-  //Sample loops
-  tinyxml2::XMLElement * theSample = theRoot->FirstChildElement( "Sample" );
-  if( !theSample ){
-    std::cout << "Could Not get element " << std::endl;
-    return;
-  }
-  while( theSample ){
-
-    double abs, cex, dcex, prod, inel;
-
-    std::map< std::string, double > factors = {
-      { "abs",  0. },
-      { "cex",  0. },
-      { "dcex", 0. },
-      { "prod", 0. },
-      { "inel", 0. }
-    };
-
-   
-    std::map< std::string , double >::iterator itFactor = factors.begin();
-    
-    tinyxml2::XMLError attResult;
-
-    for( itFactor; itFactor != factors.end(); ++itFactor ){
-      std::string name = itFactor->first;
-      attResult = theSample->QueryDoubleAttribute(name.c_str(), &(itFactor->second) );
-
-      if( attResult != tinyxml2::XML_SUCCESS ){
-        std::cout << "Could not get " << name << std::endl;
-        std::cout << "Setting to 1."  << std::endl;
-
-        itFactor->second = 1.;
-      }
-
-      else std::cout << "Got " << name << ": " << itFactor->second << std::endl;
-
-
-    }
-    
-    bool Raw;
-    attResult = theSample->QueryBoolAttribute("Raw", &Raw);
-    if( attResult != tinyxml2::XML_SUCCESS ){
-      std::cout << "Could not get Raw" << std::endl;
-    }
-
-    std::string reweightFile;
-
-    if( !Raw ){ 
-      const char * reweightFileText = nullptr;
-
-      reweightFileText = theSample->Attribute("File");
-      if (reweightFileText != nullptr) reweightFile = reweightFileText;
-
-      std::cout << "File: " << reweightFile << std::endl;
-    }
-    else std::cout << "Need to run reweighting" << std::endl;
-    
-    FitSample theFitSample;
-    theFitSample.Raw  = Raw;
-    theFitSample.abs  = factors["abs"];
-    theFitSample.cex  = factors["cex"];
-    theFitSample.inel = factors["inel"];
-    theFitSample.prod = factors["prod"];
-    theFitSample.dcex = factors["dcex"];
-    theFitSample.theFile = reweightFile;
-
-    //std::cout << "CHECKING " << std::endl;
-    //std::cout << "abs: "  << theFitSample.abs << std::endl;
-    //std::cout << "cex: "  << theFitSample.cex << std::endl;
-    //std::cout << "File: " << theFitSample.theFile << std::endl;
-   
-    samples.push_back( theFitSample );
-    
-    theSample = theSample->NextSiblingElement("Sample");
-  }
-
-  tinyxml2::XMLElement * theData = theRoot->FirstChildElement("Data");
-  if( !theData ){
-    std::cout << "Could Not get Data " << std::endl;
-    return;
-  }
-
-  std::string dataFile;
-  const char * dataFileText = nullptr;
-  dataFileText = theData->Attribute("File");
-  if (dataFileText != nullptr) dataFile = dataFileText;
-  */
 
 }
 

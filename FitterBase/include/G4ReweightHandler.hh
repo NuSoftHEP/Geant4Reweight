@@ -25,7 +25,7 @@ class G4ReweightHandler{
     ~G4ReweightHandler();
 
     void ParseXML(std::string, std::vector< std::string >);
-    FitSample DoReweight(std::string, double, double, std::string);
+    FitSample DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus=false);
 
     void SetFiles( std::string );
 

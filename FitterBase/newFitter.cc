@@ -27,15 +27,18 @@ int main(int argc, char ** argv){
   //mapSetsToFitters["C_piplus"] = {&df};
   mapSetsToFitters["C_piminus"] = {&bf};
 
+  std::map< std::string, bool > mapSetsToPiMinus;
+  mapSetsToPiMinus["C_piminus"] = true;
+
 
   G4ReweightHandler handler;  
   handler.ParseXML(argv[1], sets);
 
-  double abs_start = 0.5;
+  double abs_start = 1.0;
   double delta_abs = .1;
   int n_abs = 1;
 
-  double cex_start = 0.5;
+  double cex_start = 1.0;
   double delta_cex = .1; 
   int n_cex = 1;
 
@@ -55,8 +58,8 @@ int main(int argc, char ** argv){
          double cex = cex_start + delta_cex*j;
          
          std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
-         std::cout << name << std::endl;
-         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + name) );
+         bool pim = mapSetsToPiMinus[ *itSet ];
+         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + name), pim );
 
          theSample.abs = abs;
          theSample.cex = cex;

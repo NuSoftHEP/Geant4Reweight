@@ -134,8 +134,10 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
   //fout->Close();
 }
 
-G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string, G4ReweightInter* > &FSScales, double max, double min) 
+G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string, G4ReweightInter* > &FSScales, double max, double min, bool PiMinus) 
 : Maximum(max), Minimum(min){
+
+  SetPiMinus();
   
 //  TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
@@ -147,6 +149,7 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
 
 //  input->Draw( "sqrt(Energy*Energy - 139.57*139.57)>>total(10, 200, 300)", "", "goff" ); 
 //  TH1D * total = (TH1D*)gDirectory->Get("total");
+//  total->Write();
 
   std::map< std::string, std::string >::iterator it = theCuts.begin();
   for( ; it != theCuts.end(); ++it ){
@@ -157,12 +160,15 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
     input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(10, 200, 300)").c_str(), cut.c_str(), "goff" ); 
 
     TH1D * theHist = (TH1D*)gDirectory->Get(name.c_str());
+    //theHist->Write();
 
     //Load the Hists
 //    TH1D * theHist = (TH1D*)FinalStateFile->Get( theInts.at(i).c_str() );
     newHists[ name ] = (TH1D*)theHist->Clone( ("new_" + name).c_str() );
     oldHists[ name ] = (TH1D*)theHist->Clone();
   }
+  //fout->Close();
+  //delete fout;
 
   
   //Just for loading. Could do everything in one shot, but it's

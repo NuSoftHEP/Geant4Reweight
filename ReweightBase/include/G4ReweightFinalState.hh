@@ -13,13 +13,15 @@
 #include <map>
 #include "TTree.h"
 
+#include <iostream> 
+
 class G4ReweightFinalState{
   public:
     
     G4ReweightFinalState(){};
     G4ReweightFinalState(TFile * , std::string );    
     //G4ReweightFinalState(TFile * FinalStateFinal, std::string FSScaleFileName);    
-    G4ReweightFinalState(TTree *, std::map< std::string, G4ReweightInter*> &, double, double);    
+    G4ReweightFinalState(TTree *, std::map< std::string, G4ReweightInter*> &, double, double, bool PiMinus = false);    
     ~G4ReweightFinalState();
 
     G4ReweightInter * GetInter(std::string, std::string);
@@ -41,11 +43,12 @@ class G4ReweightFinalState{
 
       PiMinusFlag = true;
 
-      theCuts["inel"] = inel_cut;
       theCuts["abs"]  = abs_cut;
+      theCuts["inel"] = inel_cut;
       theCuts["cex"]  = cex_cut;
       theCuts["dcex"] = dcex_cut;
       theCuts["prod"] = prod_cut;
+
 
     };
 

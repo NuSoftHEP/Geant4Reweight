@@ -137,7 +137,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
 G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string, G4ReweightInter* > &FSScales, double max, double min, bool PiMinus) 
 : Maximum(max), Minimum(min){
 
-  SetPiMinus();
+  if( PiMinus ) SetPiMinus();
   
 //  TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 

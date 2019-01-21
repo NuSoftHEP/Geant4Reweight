@@ -5,6 +5,8 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(Fitter)
 
+include(ExternalProject)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -22,13 +24,25 @@ file(GLOB G4REWEIGHT_LIBRARIES $ENV{G4REWEIGHT_LIBRARY_DIR}/*.so)
 
 message( ${G4REWEIGHT_INCLUDE_DIR} ${G4REWEIGHT_LIBRARIES})
 
-include_directories(${ROOT_INCLUDE_DIRS} $ENV{TINYXML2_INCLUDE_DIR} ${G4REWEIGHT_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/include)
+
+#Importing fhiclcpp
+
+message( "Use fhicl?" ${USE_FHICL} )
+include(${CMAKE_SOURCE_DIR}/cmake/fhiclcppSetup.cmake)
+
+include_directories(${ROOT_INCLUDE_DIRS} $ENV{TINYXML2_INCLUDE_DIR} ${G4REWEIGHT_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/include ${CMAKE_INSTALL_PREFIX}/include)
 
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
+
 add_executable(Fitter Fitter.cc ${sources} ${headers})
 add_executable(newFitter newFitter.cc ${sources} ${headers})
+
+if(DEFINED USE_FHICL AND USE_FHICL)
+  add_dependencies(newFitter fhiclcpp-simple)
+endif()
+
 file(GLOB TINYXML2_LIBRARIES $ENV{TINYXML2_LIBRARY_DIR}/*.so*)
 target_link_libraries(Fitter ${G4REWEIGHT_LIBRARIES} ${ROOT_LIBRARIES} ${TINYXML2_LIBRARIES})
 target_link_libraries(newFitter ${G4REWEIGHT_LIBRARIES} ${ROOT_LIBRARIES} ${TINYXML2_LIBRARIES})

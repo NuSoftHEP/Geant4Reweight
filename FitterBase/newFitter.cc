@@ -2,6 +2,8 @@
 #include "G4ReweightHandler.hh"
 #include "newDUETFitter.hh"
 #include "BinonFitter.hh"
+#include "Meirav_C_PiPlusFitter.hh"
+#include "Meirav_C_PiMinusFitter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"
@@ -9,6 +11,9 @@
 #include "TFile.h"
 #include "TH2D.h"
 #include "TGraph2D.h"
+
+#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/ParameterSet.h"
 
 std::string set_prec(double);
 
@@ -18,17 +23,38 @@ int main(int argc, char ** argv){
   out->cd();
   TDirectory * data_dir = out->mkdir( "Data" );
 
-  newDUETFitter df(out);
-  BinonFitter bf(out);
-
-
-  std::vector< std::string > sets = {/*"C_piplus",*/ "C_piminus"};
   std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
-  //mapSetsToFitters["C_piplus"] = {&df};
-  mapSetsToFitters["C_piminus"] = {&bf};
+
+  fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[2]);
+  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
+
+  std::cout << "Getting Experiments: "  << exps.size() << std::endl;
+  for(size_t i = 0; i < exps.size(); ++i){
+
+    G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
+
+    std::cout << std::endl;
+
+    mapSetsToFitters[ exp->GetType() ].push_back( exp ); 
+
+  }
+
+  std::cout << "Sizes: " << mapSetsToFitters[ "C_piplus" ].size() << " " << mapSetsToFitters[ "C_piminus" ].size() << std::endl;
+
+  newDUETFitter df(out);
+  mapSetsToFitters["C_piplus"].push_back( &df );
+
+  //BinonFitter bf(out);
+  //Meirav_C_PiPlusFitter mcpf(out);
+  //Meirav_C_PiMinusFitter mcmf(out);
+
+  std::vector< std::string > sets = ps.get< std::vector< std::string > >("Sets");
+  //mapSetsToFitters["C_piplus"] = {&df, &mcpf};
+  //mapSetsToFitters["C_piminus"] = {&bf, &mcmf};
 
   std::map< std::string, bool > mapSetsToPiMinus;
   mapSetsToPiMinus["C_piminus"] = true;
+  mapSetsToPiMinus["C_piplus"]  = false;
 
 
   G4ReweightHandler handler;  

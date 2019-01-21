@@ -9,6 +9,50 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 
+G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp ){
+  fOutputFile = output_file;
+
+  fExperimentName = exp.get< std::string >("Name");
+  points = exp.get< std::vector< double > >("Points");
+  
+  std::cout << "Points: ";
+  for( size_t i = 0; i < points.size(); ++i){
+    std::cout << points.at(i) << " ";
+  }
+  std::cout << std::endl;
+
+  std::vector< std::pair< std::string, std::string > > temp_cuts = exp.get< std::vector< std::pair<std::string, std::string> > >("Cuts");
+  cuts = std::map< std::string, std::string >( temp_cuts.begin(), temp_cuts.end() );
+
+  std::cout << "Cuts: " << std::endl;
+  for( std::map< std::string, std::string >::iterator it = cuts.begin(); it != cuts.end(); ++it ){ 
+    std::cout << it->first << " " << it->second << std::endl;
+  }
+
+  std::vector< std::pair< std::string, std::string > > temp_graph_names = exp.get< std::vector< std::pair<std::string, std::string> > >("Graphs");
+  graph_names = std::map< std::string, std::string >( temp_graph_names.begin(), temp_graph_names.end() );
+
+  fDataFileName = exp.get< std::string >("Data");
+
+  double thickness = exp.get< double >("Thickness");
+  double mass      = exp.get< double >("Mass");
+  double density   = exp.get< double >("Density");
+
+  scale = 1.e27 / (thickness * density * 6.022e23 / mass);
+
+  std::vector< std::string > bin_param = exp.get< std::vector< std::string > >("Binning");
+  binning = "(" + bin_param[0] + "," + bin_param[1] + "," + bin_param[2] + ")"; 
+
+  type = exp.get< std::string >("Type");
+  BuildCuts();
+  
+  std::cout << "Cuts: " << std::endl;
+  for( std::map< std::string, std::string >::iterator it = cuts.begin(); it != cuts.end(); ++it ){ 
+    std::cout << it->first << " " << it->second << std::endl;
+  }
+
+}
+
 void G4ReweightFitter::GetMCGraphs(){
   
   //here: have option for if Raw

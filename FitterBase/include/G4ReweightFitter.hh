@@ -15,9 +15,12 @@
 #include <string>
 #include "tinyxml2.h"
 
+#include "fhiclcpp/ParameterSet.h"
+
 class G4ReweightFitter{
   public:
     G4ReweightFitter() {};
+    G4ReweightFitter(TFile*, fhicl::ParameterSet);
     ~G4ReweightFitter(){};
 
     virtual void   LoadData()/* = 0*/;
@@ -40,6 +43,24 @@ class G4ReweightFitter{
     void AddSample( FitSample theSample ){ samples.push_back( theSample); };
     void ParseXML(std::string);
 
+    std::string GetType(){ return type; };
+
+    void BuildCuts(){
+      for( std::map< std::string, std::string >::iterator itCuts = cuts.begin(); itCuts != cuts.end(); ++itCuts ){
+        if( type.find("piplus") != std::string::npos ){
+          std::string old_cut = itCuts->second;
+          itCuts->second = "(int == \"pi+Inelastic\" && " + old_cut + ")";
+        }         
+        if( type.find("piminus") != std::string::npos ){
+          std::string old_cut = itCuts->second;
+          itCuts->second = "(int == \"pi-Inelastic\" && " + old_cut + ")";
+        }         
+      }
+    }
+
+/*    void BuildScale(){
+      scale
+    }*/
   protected:
 
     std::string fExperimentName = "Generic_Experiment_Name";
@@ -56,6 +77,8 @@ class G4ReweightFitter{
     int nBins;
     double binLow, binHigh;
     std::string binning;
+
+    std::string type;
 
    
     std::map< std::string, std::string > cuts;

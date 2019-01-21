@@ -1,0 +1,69 @@
+Sets: ["C_piplus", "C_piminus"]
+
+Experiments: [  
+  {
+    Name:    "Binon"
+    Points:  [155.661, 179.112, 218.853, 253.714, 287.481, 309.561, 342.202, 374.401, 395.676]
+    Binning:  ["25", "150", "400"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "C_xsec_reac_piminus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Binon.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  }, 
+
+  {
+    Name:    "Meirav_C_PiMinus"
+    Points:   [128.285, 149.563, 169.503]
+    Binning:  ["10", "100", "200"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "C_xsec_reac_piminus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  }, 
+
+  {
+    Name:    "Meirav_C_PiPlus"
+    Points:   [128.285, 149.563, 169.503]
+    Binning:  ["10", "100", "200"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "C_xsec_reac_piplus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  }
+]

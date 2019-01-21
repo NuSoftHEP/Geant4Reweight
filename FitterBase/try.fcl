@@ -65,5 +65,39 @@ Experiments: [
     Density:   2.266
 
     Type:   "C_piplus"
+  }, 
+
+  {
+    Name:   "Allarydyce_C_PiPlus"
+    Points: [710., 840., 1000., 1360., 1580., 2000.]
+    Binning: ["10", "700", "2001"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Allarydyce_C_PiMinus"
+    Points: [710., 840., 1000., 1360., 1580., 2000.]
+    Binning: ["10", "700", "2001"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "C_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
   }
 ]

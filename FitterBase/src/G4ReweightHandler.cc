@@ -149,6 +149,26 @@ void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string 
 
 }
 
+void G4ReweightHandler::ParseFHiCL( std::vector<fhicl::ParameterSet> ps_vec){
+
+  for( size_t i = 0; i < ps_vec.size(); ++i){
+    
+    fhicl::ParameterSet ps = ps_vec.at(i);
+
+    std::string name = ps.get<std::string>("Name");
+
+    std::vector< std::string > files = ps.get< std::vector< std::string > >("Files"); 
+
+    fMapToFiles[name] = files;
+
+    std::string FSFile = ps.get< std::string >("FSFile");
+  
+    fMapToFSFiles[ name ] = FSFile;
+
+  }
+
+}
+
 void G4ReweightHandler::SetFiles( std::string name ){ 
   fRawMCFileNames = &(fMapToFiles[name]); 
   fFSFileName = fMapToFSFiles[name]; 

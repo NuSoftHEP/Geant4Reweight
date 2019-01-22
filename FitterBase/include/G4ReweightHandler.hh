@@ -19,12 +19,16 @@
 #include <string>
 #include "tinyxml2.h"
 
+#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/ParameterSet.h"
+
 class G4ReweightHandler{
   public:
     G4ReweightHandler();
     ~G4ReweightHandler();
 
     void ParseXML(std::string, std::vector< std::string >);
+    void ParseFHiCL( std::vector<fhicl::ParameterSet> );
     FitSample DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus=false);
 
     void SetFiles( std::string );

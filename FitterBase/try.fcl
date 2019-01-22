@@ -1,4 +1,13 @@
+#include "../FitterBase/sets.fcl"
+
 Sets: ["C_piplus", "C_piminus"]
+
+
+
+New_Sets: [
+  @local::C_piplus,
+  @local::C_piminus
+]
 
 Experiments: [  
   {
@@ -99,5 +108,57 @@ Experiments: [
     Density:   2.266
 
     Type:   "C_piminus"
+  },
+
+  {
+    Name:   "Saunders_C_PiPlus"
+    Points: [116.137, 120.774, 123.054, 125.31, 127.545, 128.285, 134.125, 149.563]
+    Binning: ["35", "115", "150"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Saunders_C_PiMinus"
+    Points: [128.285]
+    Binning: ["35", "115", "150"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "C_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  },
+
+  {
+    Name:   "Gelderloos_C_PiMinus"
+    Points: [531.552, 587.211, 615.955]
+    Binning: ["150", "500", "550"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "C_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Gelderloos.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
   }
 ]
+

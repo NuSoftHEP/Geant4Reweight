@@ -1,0 +1,31 @@
+C_piplus: {
+
+  Name: "C_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piplus.root" 
+}
+
+C_piminus: {
+
+  Name: "C_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piminus.root" 
+}
+
+

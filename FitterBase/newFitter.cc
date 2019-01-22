@@ -58,7 +58,9 @@ int main(int argc, char ** argv){
 
 
   G4ReweightHandler handler;  
-  handler.ParseXML(argv[1], sets);
+
+  std::vector< fhicl::ParameterSet > new_sets = ps.get< std::vector< fhicl::ParameterSet > >("New_Sets"); 
+  handler.ParseFHiCL( new_sets );
 
   double abs_start = 1.0;
   double delta_abs = .1;
@@ -70,6 +72,14 @@ int main(int argc, char ** argv){
 
   int nSamples = n_abs * n_cex;
 
+  //replace vector of samples from fcl
+  //each vector will contain the name of the sample, 
+  //the abs and cex values
+  //the file name
+  //and whether it's already reweighted 
+  //
+  //if reweighted, add to the sample vector of the experiments
+  //if raw, do reweight like normal
   for( std::vector<std::string>::iterator itSet = sets.begin(); itSet != sets.end(); ++itSet ){
 
     std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
@@ -85,7 +95,7 @@ int main(int argc, char ** argv){
          
          std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
          bool pim = mapSetsToPiMinus[ *itSet ];
-         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + name), pim );
+         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + "_" + name + ".root"), pim );
 
          theSample.abs = abs;
          theSample.cex = cex;

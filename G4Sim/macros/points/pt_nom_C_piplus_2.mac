@@ -75,6 +75,19 @@
 /gps/pos/radius  5 cm
 
 /gps/ene/type    Mono
+/gps/ene/mono    49.50 MeV
+########################
+
+########################
+/gps/source/add  1
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Mono
 /gps/ene/mono    50.00 MeV
 ########################
 

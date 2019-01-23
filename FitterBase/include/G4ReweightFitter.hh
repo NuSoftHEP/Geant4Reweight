@@ -72,7 +72,8 @@ class G4ReweightFitter{
     TDirectory * fFitDir;
     TDirectory * fTopDir;
 
-    std::vector< double > points;
+//    std::vector< double > points;
+    std::map< std::string, std::vector< double > > points;
 
     int nBins;
     double binLow, binHigh;

@@ -13,13 +13,19 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
   fOutputFile = output_file;
 
   fExperimentName = exp.get< std::string >("Name");
-  points = exp.get< std::vector< double > >("Points");
+  std::vector< std::pair< std::string, std::vector< double > > > temp_points;
+  temp_points = exp.get< std::vector< std::pair< std::string, std::vector< double > > > >("Points");
+  points = std::map< std::string, std::vector< double > >( temp_points.begin(), temp_points.end() );
   
-  std::cout << "Points: ";
-  for( size_t i = 0; i < points.size(); ++i){
-    std::cout << points.at(i) << " ";
+  std::cout << "Points:" << std::endl;
+
+  for( std::map< std::string, std::vector< double > >::iterator ip = points.begin(); ip != points.end(); ++ip ){
+    std::cout << ip->first << " ";
+    for( size_t i = 0; i < (ip->second).size(); ++i){
+      std::cout << (ip->second).at(i) << " ";
+    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
 
   std::vector< std::pair< std::string, std::string > > temp_cuts = exp.get< std::vector< std::pair<std::string, std::string> > >("Cuts");
   cuts = std::map< std::string, std::string >( temp_cuts.begin(), temp_cuts.end() );
@@ -90,16 +96,17 @@ void G4ReweightFitter::GetMCGraphs(){
 //    hist->Draw();
     
     
+    std::vector< double > thePoints = points.at( name );
     std::vector< double > the_xsec; 
-    for( int i = 0; i < points.size(); ++i ){
+    for( int i = 0; i < thePoints.size(); ++i ){
 
 
-      double content = hist->GetBinContent( hist->FindBin( points[i] ) );
+      double content = hist->GetBinContent( hist->FindBin( thePoints[i] ) );
 
       the_xsec.push_back( content );
     }
 
-    MC_xsec_graphs[ name ] = new TGraph( points.size(), &points[0], &the_xsec[0] );
+    MC_xsec_graphs[ name ] = new TGraph( thePoints.size(), &thePoints[0], &the_xsec[0] );
 
     fFitDir->cd();
 

@@ -13,7 +13,7 @@ Sets: [
 Experiments: [  
   {
     Name:    "Binon"
-    Points:  [155.661, 179.112, 218.853, 253.714, 287.481, 309.561, 342.202, 374.401, 395.676]
+    Points:  [ ["reac", [155.661, 179.112, 218.853, 253.714, 287.481, 309.561, 342.202, 374.401, 395.676] ] ]
     Binning:  ["25", "150", "400"]
 
     Cuts:    [
@@ -35,7 +35,7 @@ Experiments: [
 
   {
     Name:    "Meirav_C_PiMinus"
-    Points:   [128.285, 149.563, 169.503]
+    Points:   [ ["reac", [128.285, 149.563, 169.503] ] ]
     Binning:  ["10", "100", "200"]
 
     Cuts:    [
@@ -57,7 +57,7 @@ Experiments: [
 
   {
     Name:    "Meirav_C_PiPlus"
-    Points:   [128.285, 149.563, 169.503]
+    Points:   [ ["reac", [128.285, 149.563, 169.503] ] ]
     Binning:  ["10", "100", "200"]
 
     Cuts:    [
@@ -79,7 +79,7 @@ Experiments: [
 
   {
     Name:   "Allarydyce_C_PiPlus"
-    Points: [710., 840., 1000., 1360., 1580., 2000.]
+    Points: [ ["reac", [710., 840., 1000., 1360., 1580., 2000.] ] ]
     Binning: ["10", "700", "2001"]
 
     Cuts:   [ ["reac", "1"] ]  
@@ -96,7 +96,7 @@ Experiments: [
 
   {
     Name:   "Allarydyce_C_PiMinus"
-    Points: [710., 840., 1000., 1360., 1580., 2000.]
+    Points: [ ["reac", [710., 840., 1000., 1360., 1580., 2000.] ] ]
     Binning: ["10", "700", "2001"]
 
     Cuts:   [ ["reac", "1"] ]  
@@ -113,7 +113,7 @@ Experiments: [
 
   {
     Name:   "Saunders_C_PiPlus"
-    Points: [116.137, 120.774, 123.054, 125.31, 127.545, 128.285, 134.125, 149.563]
+    Points: [ ["reac", [116.137, 120.774, 123.054, 125.31, 127.545, 128.285, 134.125, 149.563] ] ]
     Binning: ["35", "115", "150"]
 
     Cuts:   [ ["reac", "1"] ]  
@@ -130,7 +130,7 @@ Experiments: [
 
   {
     Name:   "Saunders_C_PiMinus"
-    Points: [128.285]
+    Points: [ ["reac", [128.285] ] ]
     Binning: ["35", "115", "150"]
 
     Cuts:   [ ["reac", "1"] ]  
@@ -147,7 +147,7 @@ Experiments: [
 
   {
     Name:   "Gelderloos_C_PiMinus"
-    Points: [531.552, 587.211, 615.955]
+    Points: [ ["reac", [531.552, 587.211, 615.955] ] ] 
     Binning: ["150", "500", "550"]
 
     Cuts:   [ ["reac", "1"] ]  

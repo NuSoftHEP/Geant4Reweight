@@ -1,9 +1,6 @@
 #include "G4ReweightFitter.hh"
 #include "G4ReweightHandler.hh"
 #include "newDUETFitter.hh"
-#include "BinonFitter.hh"
-#include "Meirav_C_PiPlusFitter.hh"
-#include "Meirav_C_PiMinusFitter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"

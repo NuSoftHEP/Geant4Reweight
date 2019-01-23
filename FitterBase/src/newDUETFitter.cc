@@ -4,7 +4,8 @@ newDUETFitter::newDUETFitter(TFile * output_file/*, TDirectory * output_dir*/){
   fOutputFile = output_file;
 /*  output_dir->cd(); */ 
 
-  points = {201.6, 216.6, 237.2, 265.6, 295.1}; 
+  points["abs"] = {201.6, 216.6, 237.2, 265.6, 295.1}; 
+  points["cex"] = {201.6, 216.6, 237.2, 265.6, 295.1}; 
 
   binning = "(10,200,300)";
 

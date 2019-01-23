@@ -55,7 +55,6 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 
 void G4ReweightFitter::GetMCGraphs(){
   
-  //here: have option for if Raw
   fMCTree = GetReweightFS();
 
   //Get the total 
@@ -65,7 +64,7 @@ void G4ReweightFitter::GetMCGraphs(){
 
   TH1D * total = (TH1D*)gDirectory->Get("total");
 
-  TCanvas * c1 = new TCanvas("c1", "c1");
+  //TCanvas * c1 = new TCanvas("c1", "c1");
 
   //Go through the map of cuts
   std::map< std::string, std::string >::iterator itCuts = cuts.begin();
@@ -83,12 +82,12 @@ void G4ReweightFitter::GetMCGraphs(){
    
     TH1D * hist = (TH1D*)gDirectory->Get( name.c_str() );
 
-    hist->Draw();
+//    hist->Draw();
     
     
     hist->Divide( total );
     hist->Scale( scale );
-    hist->Draw();
+//    hist->Draw();
     
     
     std::vector< double > the_xsec; 

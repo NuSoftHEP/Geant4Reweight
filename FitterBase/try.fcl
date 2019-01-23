@@ -1,10 +1,11 @@
 #include "../FitterBase/sets.fcl"
+#include "../FitterBase/samples.fcl
 
-Sets: ["C_piplus", "C_piminus"]
+#Sets: ["C_piplus", "C_piminus"]
 
 
 
-New_Sets: [
+Sets: [
   @local::C_piplus,
   @local::C_piminus
 ]

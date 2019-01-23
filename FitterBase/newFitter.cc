@@ -25,7 +25,7 @@ int main(int argc, char ** argv){
 
   std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[2]);
+  fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
   std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
 
   std::cout << "Getting Experiments: "  << exps.size() << std::endl;
@@ -44,76 +44,80 @@ int main(int argc, char ** argv){
   newDUETFitter df(out);
   mapSetsToFitters["C_piplus"].push_back( &df );
 
-  //BinonFitter bf(out);
-  //Meirav_C_PiPlusFitter mcpf(out);
-  //Meirav_C_PiMinusFitter mcmf(out);
-
-  std::vector< std::string > sets = ps.get< std::vector< std::string > >("Sets");
-  //mapSetsToFitters["C_piplus"] = {&df, &mcpf};
-  //mapSetsToFitters["C_piminus"] = {&bf, &mcmf};
-
-  std::map< std::string, bool > mapSetsToPiMinus;
-  mapSetsToPiMinus["C_piminus"] = true;
-  mapSetsToPiMinus["C_piplus"]  = false;
-
+  std::vector< std::string > sets;
+  std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
+  
+  for( size_t i = 0; i < FCLSets.size(); ++i ){
+    sets.push_back( FCLSets[i].get< std::string >("Name") );
+  }
 
   G4ReweightHandler handler;  
+  handler.ParseFHiCL( FCLSets );
 
-  std::vector< fhicl::ParameterSet > new_sets = ps.get< std::vector< fhicl::ParameterSet > >("New_Sets"); 
-  handler.ParseFHiCL( new_sets );
+  std::vector< fhicl::ParameterSet > samples = ps.get< std::vector< fhicl::ParameterSet > >("Samples"); 
+  std::cout << "Got " << samples.size() << " samples" << std::endl;
+  size_t nSamples = samples.size();
 
-  double abs_start = 1.0;
-  double delta_abs = .1;
-  int n_abs = 1;
+  for( size_t i = 0; i < nSamples; ++i ){
 
-  double cex_start = 1.0;
-  double delta_cex = .1; 
-  int n_cex = 1;
+    fhicl::ParameterSet sampleSet = samples[i];
 
-  int nSamples = n_abs * n_cex;
+    std::vector<std::pair<std::string, bool>>   tempRaw = sampleSet.get<std::vector<std::pair<std::string, bool>>>("Raw");
+    std::map< std::string, bool > Raw = std::map< std::string, bool >(tempRaw.begin(), tempRaw.end());
+    
 
-  //replace vector of samples from fcl
-  //each vector will contain the name of the sample, 
-  //the abs and cex values
-  //the file name
-  //and whether it's already reweighted 
-  //
-  //if reweighted, add to the sample vector of the experiments
-  //if raw, do reweight like normal
-  for( std::vector<std::string>::iterator itSet = sets.begin(); itSet != sets.end(); ++itSet ){
+    double abs = sampleSet.get<double>("abs");
+    double cex = sampleSet.get<double>("cex");
+    std::string Name = sampleSet.get<std::string>("Name");
 
-    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
-    std::cout << "Set: " << *itSet << std::endl;
+    std::cout << Name << std::endl;
+    std::cout << "abs: " << abs << std::endl;
+    std::cout << "cex: " << cex << std::endl;
 
-    handler.SetFiles( *itSet );
+    
+    std::vector< std::string >::iterator itSet = sets.begin();
+    //std::map< std::string, bool >::iterator itRaw = Raw.begin();
+//    for( itRaw; itRaw != Raw.end(); ++itRaw){
+    for( itSet; itSet != sets.end(); ++itSet ){
+      
+      std::string theSet = *itSet; 
+      
+      std::cout << "Checking " << theSet << std::endl;
 
-    for( int i = 0; i < n_abs; ++i ){
-      for( int j = 0; j < n_cex; ++j ){
+      FitSample theSample;
+      theSample.abs = abs;
+      theSample.cex = cex;
+      theSample.dcex = 0.;
+      theSample.inel = 0.;
+      theSample.prod = 0.;
 
-         double abs = abs_start + delta_abs*i;
-         double cex = cex_start + delta_cex*j;
-         
-         std::string name = "abs" + set_prec(abs) + "_cex" + set_prec(cex);
-         bool pim = mapSetsToPiMinus[ *itSet ];
-         FitSample theSample = handler.DoReweight( name.c_str(), abs, cex, (*itSet + "_" + name + ".root"), pim );
+      if( Raw[ theSet ] ){
 
-         theSample.abs = abs;
-         theSample.cex = cex;
-         theSample.dcex = 0.;
-         theSample.inel = 0.;
-         theSample.prod = 0.;
+        handler.SetFiles( theSet );
 
-         std::vector< G4ReweightFitter* > theFitters = mapSetsToFitters[ *itSet ]; 
-         for( size_t iFit = 0; iFit < theFitters.size(); ++iFit){
-           std::cout << "Adding sample to " << *itSet << std::endl;
-           theFitters[iFit]->AddSample( theSample );
-         }
+        bool pim = ( (theSet).find("minus") != std::string::npos );
+        std::cout << "PiMinus? " << pim << std::endl;
+        theSample = handler.DoReweight( Name.c_str(), abs, cex, (theSet + "_" + Name + ".root"), pim );
+
       }
+      else{
+        
+        std::vector< std::pair< std::string, std::string > > tempFiles;
+        tempFiles = sampleSet.get< std::vector< std::pair< std::string, std::string > > >("Files");
+        std::map< std::string, std::string > theFiles = std::map< std::string, std::string >(tempFiles.begin(), tempFiles.end());
+
+        theSample.theFile = theFiles[ theSet ];
+        theSample.theName = Name;
+
+      }
+
+      std::vector< G4ReweightFitter* > theFitters = mapSetsToFitters[ theSet ]; 
+      for( size_t iFit = 0; iFit < theFitters.size(); ++iFit){
+        std::cout << "Adding sample to " << theSet << std::endl;
+        theFitters[iFit]->AddSample( theSample );
+      }
+
     }
-
-    handler.CloseFSFile();
-
-    std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   }
 
  

@@ -28,4 +28,152 @@ C_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piminus.root" 
 }
 
+O_piplus: {
 
+  Name: "O_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_O_piplus.root" 
+}
+
+O_piminus: {
+
+  Name: "O_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_O_piminus.root" 
+}
+
+Al_piplus: {
+
+  Name: "Al_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Al_piplus.root" 
+}
+
+Al_piminus: {
+
+  Name: "Al_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Al_piminus.root" 
+}
+
+Fe_piplus: {
+
+  Name: "Fe_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Fe_piplus.root" 
+}
+
+Fe_piminus: {
+
+  Name: "Fe_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Fe_piminus.root" 
+}
+
+Cu_piplus: {
+
+  Name: "Cu_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Cu_piplus.root" 
+}
+
+Cu_piminus: {
+
+  Name: "Cu_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Cu_piminus.root" 
+}
+
+Pb_piplus: {
+
+  Name: "Pb_piplus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Pb_piplus.root" 
+}
+
+Pb_piminus: {
+
+  Name: "Pb_piminus"
+  
+  Files: [
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_0.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_1.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_2.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_3.root",
+     "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_4.root"
+  ]
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_Pb_piminus.root" 
+}

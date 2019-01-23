@@ -160,6 +160,220 @@ Experiments: [
     Density:   2.266
 
     Type:   "C_piminus"
+  },
+
+  {
+    Name:   "Levenson_C_PiPlus"
+    Points: [ ["inel", [194.715, 265.071, 331.377, 416.824] ] ] 
+    Binning: ["230", "190", "420"]
+
+    Cuts:   [ ["inel", "( ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1) )"] ]  
+    Graphs: [ ["inel", "C_xsec_inel_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Levenson.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Jones_C_PiPlus"
+    Points: [ 
+      ["inel", [363.71, 416.824] ],
+      ["cex",  [363.71, 416.824, 521.206, 624.155] ]
+    ] 
+    Binning: ["265", "360", "625"]
+
+    Cuts:   [ 
+      ["inel", "( ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1) )"],
+      ["cex",  "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 1) )"]
+    ]  
+    Graphs: [ ["inel", "C_xsec_inel_piplus"], ["cex", "C_xsec_cex_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Jones.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  }, 
+
+  {
+    Name:   "Ashery_2173_C_PiPlus"
+    Points: [ 
+      ["inel",  [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ],
+      ["abscx", [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ]
+    ] 
+    Binning: ["260", "175", "435"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "C_xsec_inel_piplus"], ["abscx", "C_xsec_abscx_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Ashery_2173_C_PiMinus"
+    Points: [ 
+      ["inel",  [224.761, 270.709] ],
+      ["abscx", [224.761, 270.709] ]
+    ] 
+    Binning: ["55", "220", "275"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiPlus + nPi0) == 0 ) && (nPiMinus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "C_xsec_inel_piminus"], ["abscx", "C_xsec_abscx_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  }, 
+
+  {
+    Name:   "Hilscher_C_PiMinus"
+    Points: [ 
+      ["cex", [156.332] ]
+    ] 
+    Binning: ["10", "150", "160"]
+
+    Cuts:   [ 
+      ["cex", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 1) )"]
+    ]  
+    Graphs: [ ["cex", "C_xsec_cex_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Hilscher.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  },
+
+  {
+    Name:   "Ashery_946_C_PiPlus"
+    Points: [ 
+      ["cex",  [265.071] ]
+    ] 
+    Binning: ["5", "265", "270"]
+
+    Cuts:   [ 
+      ["cex", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 1) )"]
+    ]  
+    Graphs: [ ["cex", "C_xsec_cex_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_946.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Ashery_946_C_PiMinus"
+    Points: [ 
+      ["cex",  [265.071] ]
+    ] 
+    Binning: ["5", "265", "270"]
+
+    Cuts:   [ 
+      ["cex", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 1) )"]
+    ]  
+    Graphs: [ ["cex", "C_xsec_cex_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_946.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
+  }, 
+
+  {
+    Name:   "Bellotti_C_PiPlus"
+    Points: [ 
+      ["cex",  [230.626] ],
+      ["abs",  [230.626] ]
+    ] 
+    Binning: ["5", "230", "235"]
+
+    Cuts:   [ 
+      ["cex", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 1) )"],
+      ["abs", "( (nPiMinus + nPiPlus + nPi0) == 0 )"]
+    ]  
+    Graphs: [ ["cex", "C_xsec_cex_piplus"], ["abs", "C_xsec_abs_piplus"]]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Bellotti.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Navon_C_PiPlus"
+    Points: [ 
+      ["abscx",  [128.285] ]
+    ] 
+    Binning: ["5", "125", "130"]
+
+    Cuts:   [ 
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["abscx", "C_xsec_abscx_piplus"]]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Navon.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piplus"
+  },
+
+  {
+    Name:   "Miller_C_PiMinus"
+    Points: [ 
+      ["abscx",  [253.714] ]
+    ] 
+    Binning: ["5", "250", "255"]
+
+    Cuts:   [ 
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["abscx", "C_xsec_abscx_piminus"]]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Miller.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_piminus"
   }
 ]
 

@@ -11,25 +11,25 @@ mom = array( "d", [ get_p(T) for T in Ts ])
 print mom
 
 moms = {
-  "C_xsec_abscex_piminus":  mom,
-  "Pb_xsec_abscex_piminus": mom
+  "C_xsec_abscx_piminus":  mom,
+  "Pb_xsec_abscx_piminus": mom
 }
 
 
 xsecs = {
-  "C_xsec_abscex_piminus":  array("d", [192.]), 
-  "Pb_xsec_abscex_piminus": array("d", [380.]) 
+  "C_xsec_abscx_piminus":  array("d", [192.]), 
+  "Pb_xsec_abscx_piminus": array("d", [380.]) 
 }
 
 
 errs = {
-  "C_xsec_abscex_piminus":  array("d", [34.]), 
-  "Pb_xsec_abscex_piminus": array("d", [310.]) 
+  "C_xsec_abscx_piminus":  array("d", [34.]), 
+  "Pb_xsec_abscx_piminus": array("d", [310.]) 
 }
 
 exs = {
-  "C_xsec_abscex_piminus":  array("d", [0.]), 
-  "Pb_xsec_abscex_piminus": array("d", [0.]) 
+  "C_xsec_abscx_piminus":  array("d", [0.]), 
+  "Pb_xsec_abscx_piminus": array("d", [0.]) 
 }
 
 

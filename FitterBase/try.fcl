@@ -12,7 +12,7 @@ Sets: [
 
 Experiments: [  
   {
-    Name:    "Binon"
+    Name:    "Binon_C_PiMinus"
     Points:  [ ["reac", [155.661, 179.112, 218.853, 253.714, 287.481, 309.561, 342.202, 374.401, 395.676] ] ]
     Binning:  ["25", "150", "400"]
 

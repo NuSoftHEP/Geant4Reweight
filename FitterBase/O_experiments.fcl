@@ -1,0 +1,49 @@
+O_experiments: [
+
+  {
+    Name:    "Meirav_O_PiMinus"
+    Points:   [ ["reac", [128.285, 149.563] ] ]
+    Binning:  ["50", "100", "150"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "O_xsec_reac_piminus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "O_piminus"
+  }, 
+
+  {
+    Name:    "Meirav_O_PiPlus"
+    Points:   [ ["reac", [128.285, 149.563] ] ]
+    Binning:  ["50", "100", "150"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "O_xsec_reac_piplus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "O_piplus"
+  }
+   
+  
+
+]

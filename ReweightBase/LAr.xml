@@ -3,14 +3,11 @@
   </inel>
 
   <cex>
-    <Point Momentum="200." Variation="2.0"/>
-    <Point Momentum="400." Variation="2.0"/>
   </cex>
 
   <abs>
-    <Point Momentum="200." Variation=".5"/>
-    <Point Momentum="500." Variation=".75"/>
-    <Point Momentum="600." Variation="1."/>
+    <Point Momentum="200." Variation="2."/>
+    <Point Momentum="300." Variation="2."/>
   </abs>
 
   <dcex>
@@ -20,6 +17,6 @@
   </prod>
 
   <Minimum>200.</Minimum>
-  <Maximum>600.</Maximum>
+  <Maximum>300.</Maximum>
 
 </FinalStates>

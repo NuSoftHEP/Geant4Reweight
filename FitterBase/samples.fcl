@@ -1,61 +1,76 @@
 
-#Samples: [
-#  {
-#    Name: "abs1.00_cex1.00"
-#    Files:  [
-#      ["C_piplus",  "C_piplus_abs1.00_cex1.00.root"],
-#      ["C_piminus", "C_piminus_abs1.00_cex1.00.root"]
-#    ]
-#    abs: 1.00
-#    cex: 1.00
-#    Raw: [ 
-#      ["C_piplus",  false],
-#      ["C_piminus", false]    
-#    ]
-#  }, 
-#
-#  {
-#    Name: "abs1.10_cex1.00"
-#    Files:  [
-#      ["C_piplus",  "C_piplus_abs1.10_cex1.00.root"],
-#      ["C_piminus", "C_piminus_abs1.10_cex1.00.root"]
-#    ]
-#    abs: 1.10
-#    cex: 1.00
-#    Raw: [ 
-#      ["C_piplus",  false],
-#      ["C_piminus", false]    
-#    ]
-#  }
-#]
-
 a: {
   Name: "abs1.00_cex1.00"
   Files:  [
-    ["C_piplus",  "C_piplus_abs1.00_cex1.00.root"],
-    ["C_piminus", "C_piminus_abs1.00_cex1.00.root"]
+    #["C_piplus",  "C_piplus_abs1.00_cex1.00.root"],
+    #["C_piminus", "C_piminus_abs1.00_cex1.00.root"]
+    ["O_piplus",  "O_piplus_abs1.00_cex1.00.root"],
+    ["O_piminus", "O_piminus_abs1.00_cex1.00.root"]
   ]
   abs: 1.00
   cex: 1.00
   Raw: [ 
-    ["C_piplus",  false],
-    ["C_piminus", false]    
+    #["C_piplus",  false],
+    #["C_piminus", false]    
+    ["O_piplus",  true],
+    ["O_piminus", true]
   ]
 }
 
 b: {
-  Name: "abs1.10_cex1.00"
+  Name: "abs1.10_cex1.10"
   Files:  [
-    ["C_piplus",  "C_piplus_abs1.10_cex1.00.root"],
-    ["C_piminus", "C_piminus_abs1.10_cex1.00.root"]
+    ["C_piplus",  "C_piplus_abs1.10_cex1.10.root"],
+    ["C_piminus", "C_piminus_abs1.10_cex1.10.root"]
   ]
   abs: 1.10
-  cex: 1.00
+  cex: 1.10
   Raw: [ 
-    ["C_piplus",  false],
-    ["C_piminus", false]    
+    ["C_piplus",  true],
+    ["C_piminus", true]    
   ]
 }
 
+c: {
+  Name: "abs1.20_cex1.20"
+  Files:  [
+    ["C_piplus",  "C_piplus_abs1.20_cex1.20.root"],
+    ["C_piminus", "C_piminus_abs1.20_cex1.20.root"]
+  ]
+  abs: 1.20
+  cex: 1.20
+  Raw: [ 
+    ["C_piplus",  true],
+    ["C_piminus", true]    
+  ]
+}
+
+d: {
+  Name: "abs0.90_cex0.90"
+  Files:  [
+    ["C_piplus",  "C_piplus_abs0.90_cex0.90.root"],
+    ["C_piminus", "C_piminus_abs0.90_cex0.90.root"]
+  ]
+  abs: 0.90
+  cex: 0.90
+  Raw: [ 
+    ["C_piplus",  true],
+    ["C_piminus", true]    
+  ]
+}
+
+e: {
+  Name: "abs0.80_cex0.80"
+  Files:  [
+    ["C_piplus",  "C_piplus_abs0.80_cex0.80.root"],
+    ["C_piminus", "C_piminus_abs0.80_cex0.80.root"]
+  ]
+  abs: 0.80
+  cex: 0.80
+  Raw: [ 
+    ["C_piplus",  true],
+    ["C_piminus", true]    
+  ]
+}
 Samples: [ @local::a ]
 

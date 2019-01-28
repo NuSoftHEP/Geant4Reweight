@@ -83,9 +83,9 @@ if (cmd == "Draw" or cmd == "draw"):
     vhist.SetTitle(titles[name])
     whist.SetTitle(titles[name])
 
-    nhist.SetXTitle("Pion Kinetic Energy (MeV)")
-    vhist.SetXTitle("Pion Kinetic Energy (MeV)")
-    whist.SetXTitle("Pion Kinetic Energy (MeV)")
+    nhist.SetXTitle("Pion Momentum (MeV/c)")
+    vhist.SetXTitle("Pion Momentum (MeV/c)")
+    whist.SetXTitle("Pion Momentum (MeV/c)")
 
     nhist.SetYTitle("Fraction")
     vhist.SetYTitle("Fraction")
@@ -107,7 +107,7 @@ if (cmd == "Draw" or cmd == "draw"):
     whist.SetLineColor(2)
     vhist.SetLineColor(1)
 
-    vhist.SetMaximum(.6)
+    vhist.SetMaximum(1.5*vhist.GetMaximum())
     vhist.SetMinimum(0.)
     vhist.Draw("pE hist")
     whist.Draw("pE same hist")
@@ -202,9 +202,9 @@ else:
   #nomTree.Draw("Energy - 139.57>>nTotal(20,100,1100)","","goff")
   #nomTree.Draw("Energy - 139.57>>wTotal(20,100,1100)","weight*elastWeight","goff")
   #varTree.Draw("Energy - 139.57>>vTotal(20,100,1100)","","goff")
-  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>nTotal(21,100,1200)","","goff")
-  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>wTotal(21,100,1200)","weight*elastWeight","goff")
-  varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>vTotal(21,100,1200)","","goff")
+  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>nTotal(50,100,600)","","goff")
+  nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>wTotal(50,100,600)","finalStateWeight*weight*elastWeight","goff")
+  varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>vTotal(50,100,600)","","goff")
 
   nTotal = gDirectory.Get("nTotal")
   wTotal = gDirectory.Get("wTotal")
@@ -219,9 +219,9 @@ else:
     #nomTree.Draw("Energy - 139.57>>n"+name+"(20,100,1100)", cut,"goff")
     #nomTree.Draw("Energy - 139.57>>w"+name+"(20,100,1100)","weight*elastWeight*" + cut,"goff")
     #varTree.Draw("Energy - 139.57>>v"+name+"(20,100,1100)", cut,"goff")
-    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>n"+name+"(21,100,1200)", cut,"goff")
-    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>w"+name+"(21,100,1200)","weight*elastWeight*" + cut,"goff")
-    varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>v"+name+"(21,100,1200)", cut,"goff")
+    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>n"+name+"(50,100,600)", cut,"goff")
+    nomTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>w"+name+"(50,100,600)","finalStateWeight*weight*elastWeight*" + cut,"goff")
+    varTree.Draw("sqrt(Energy*Energy - 139.57*139.57)>>v"+name+"(50,100,600)", cut,"goff")
   
     nhists[name] = gDirectory.Get("n"+name) 
     nhists[name].Sumw2()

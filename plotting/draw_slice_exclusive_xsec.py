@@ -5,6 +5,8 @@ from math import log, sqrt
 from argparse import ArgumentParser 
 from glob import glob as ls
 
+gROOT.SetBatch(1)
+
 def LogIt(h):
   for i in range(1,h.GetNbinsX() + 1):
     content = h.GetBinContent(i)

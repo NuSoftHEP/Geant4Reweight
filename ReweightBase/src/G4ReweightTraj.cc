@@ -149,7 +149,23 @@ double G4ReweightTraj::GetWeight(double bias){
 
   double weight = exp( total - bias_total );
   if( GetFinalProc() == fInelastic ){
-    weight = weight * bias;
+    double mfp;
+
+    //Get the last step
+    auto lastStep = GetStep( nsteps );
+
+    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = lastStep->GetActivePostProc(ip);
+      if( theProc.Name == fInelastic ){
+        mfp = theProc.MFP;
+      }
+
+    }
+
+    //weight = weight * bias;
+    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
+    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
   }
  
   return weight;
@@ -195,6 +211,18 @@ double G4ReweightTraj::GetWeight(TH1F * biasHist){
   double weight = exp( total - bias_total );
   if( GetFinalProc() == fInelastic ){
     auto lastStep = GetStep( GetNSteps() - 1 );
+    double mfp;
+
+    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = lastStep->GetActivePostProc(ip);
+      if( theProc.Name == fInelastic ){
+        mfp = theProc.MFP;
+      }
+
+    }
+
+
     double theMom = lastStep->GetFullPreStepP();
     int theBin    = biasHist->FindBin(theMom);
 
@@ -202,7 +230,9 @@ double G4ReweightTraj::GetWeight(TH1F * biasHist){
     if( theBin < 1 || theBin > biasHist->GetNbinsX() ) bias = 1.;
     else bias = biasHist->GetBinContent(theBin); 
 
-    weight = weight * bias;
+    //weight = weight * bias;
+    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
+    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
   }
  
   return weight;
@@ -241,9 +271,22 @@ double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
   double weight = exp( total - bias_total );
   if( GetFinalProc() == fInelastic ){
     auto lastStep = GetStep( GetNSteps() - 1 );
+    double mfp;
+
+    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = lastStep->GetActivePostProc(ip);
+      if( theProc.Name == fInelastic ){
+        mfp = theProc.MFP;
+      }
+
+    }
+
     double theMom = lastStep->GetFullPreStepP();
     double bias = biasInter->GetContent(theMom);
-    weight = weight * bias;
+//    weight = weight * bias;
+    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
+    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
   }
  
   return weight;

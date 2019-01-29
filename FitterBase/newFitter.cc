@@ -36,10 +36,8 @@ int main(int argc, char ** argv){
 
   }
 
-  std::cout << "Sizes: " << mapSetsToFitters[ "C_piplus" ].size() << " " << mapSetsToFitters[ "C_piminus" ].size() << std::endl;
-
-  newDUETFitter df(out);
-  mapSetsToFitters["C_piplus"].push_back( &df );
+//  newDUETFitter df(out);
+//  mapSetsToFitters["C_piplus"].push_back( &df );
 
   std::vector< std::string > sets;
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");

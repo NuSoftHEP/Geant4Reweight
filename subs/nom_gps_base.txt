@@ -60,13 +60,13 @@ ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:1
 
 ifdh cp ${NAME}_nom_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/${NAME}_nom_${PROCESS}.root 
 
-cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
+#cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
 
-./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root -i 1.5 -e 1. 
-ifdh cp rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root
-
-./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root -i 1 -e 1.5 
-ifdh cp rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root
-
-./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root -i 1.5 -e 1.5 
-ifdh cp rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root
+#./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root -i 1.5 -e 1. 
+#ifdh cp rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1.5_elast1_${PROCESS}.root
+#
+#./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root -i 1 -e 1.5 
+#ifdh cp rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1_elast1.5_${PROCESS}.root
+#
+#./G4Reweight -f ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/${NAME}_nom_${PROCESS}.root -o rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root -i 1.5 -e 1.5 
+#ifdh cp rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Sim/${JOBSUBJOBID:0:10}/rw_${NAME}_nom_inel1.5_elast1.5_${PROCESS}.root

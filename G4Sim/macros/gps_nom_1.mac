@@ -29,5 +29,5 @@
 # Set the initial kinematic and run 3 events
 #
 
-/run/beamOn 10000
+/run/beamOn 250000
 #/run/beamOn 1

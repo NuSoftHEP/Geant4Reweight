@@ -621,14 +621,8 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
   }
   else interaction = "prod";
 
-  //std::cout << "Interaction: " << interaction << std::endl;
-  //std::cout << "momentum: " << theMomentum << std::endl;
   theFSWeight = theFS->GetWeight( interaction, theMomentum );
-//  std::cout << "Weight: " << theFSWeight << std::endl;
-//  std::cout << "Interaction: " << interaction << std::endl << std::endl;
 
-  
-  //std::cout << "Weight: " << theFSWeight << std::endl;
 
 }
 
@@ -1213,6 +1207,8 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 
           GetWeightFS( theFS, preFinalP );
 
+          altFSWeight = theTraj->GetWeightFS( theFS );
+
           tree->Fill();
            
         //}
@@ -1224,6 +1220,7 @@ void G4ReweightTreeParser::MakeOutputBranches(){
   theWeight=1.;
   theElastWeight = 1.;
   theFSWeight=1.;
+  altFSWeight=1.;
   N=0.;
   theInt = ""; 
   postFinalP=0.;
@@ -1248,6 +1245,7 @@ void G4ReweightTreeParser::MakeOutputBranches(){
   tree->Branch("weight", &theWeight);  
   tree->Branch("elastWeight", &theElastWeight);  
   tree->Branch("finalStateWeight", &theFSWeight);
+  tree->Branch("altFSWeight", &altFSWeight);
   tree->Branch("N", &N);
   tree->Branch("nElast", &nElast);
   tree->Branch("elastDists", &elastDists);

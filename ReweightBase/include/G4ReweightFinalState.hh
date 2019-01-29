@@ -30,6 +30,8 @@ class G4ReweightFinalState{
 
     TH1D * GetTotalVariation(){ return totalVariation; };
     TH1D * GetExclusiveVariation( std::string );
+    TH1D * GetOldHist( std::string cut ){ return oldHists[cut]; };
+    TH1D * GetNewHist( std::string cut ){ return newHists[cut]; };
 
     bool IsPiMinus(){return PiMinusFlag;};
 
@@ -79,6 +81,8 @@ class G4ReweightFinalState{
       {"prod", prod_cut},
     };
 
+    std::map< std::string, TH1D* > oldHists;
+    std::map< std::string, TH1D* > newHists;
 };
 
 #endif

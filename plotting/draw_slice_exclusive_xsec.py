@@ -29,6 +29,7 @@ def init_parser():
   parser.add_argument('--plot',type=str, help='Plot name')
   parser.add_argument('-x', type=str, help='XML File')
   parser.add_argument('--title',type=str, help='Append to title')
+  parser.add_argument('--alt', type=int, help='Which weight to apply', default=1)
   return parser
 
 def ratio_scale_errors(n, d, scale, name="r"):
@@ -132,9 +133,13 @@ else:
   outfile = TFile(args.loc+"/"+args.f,"RECREATE")
   outfile.cd()
 
+  if( args.alt ): weight_str = "altFSWeight"
+  else: weight_str = "finalStateWeight*weight*elastWeight"
+  print weight_str
+
   ##Total
   nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>nTotal(52,0,1300)","","goff")
-  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>wTotal(52,0,1300)", "finalStateWeight*weight*elastWeight","goff")
+  nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>wTotal(52,0,1300)", weight_str,"goff")
 
   nTotal = gDirectory.Get("nTotal")
   wTotal = gDirectory.Get("wTotal")
@@ -146,7 +151,7 @@ else:
     cut = cuts[name]
 
     nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>n" + name + "(52,0,1300)", cut,"goff")
-    nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>w" + name + "(52,0,1300)", "finalStateWeight*weight*elastWeight*" + cut,"goff")
+    nom.Draw("(sqrt( sliceEnergy*sliceEnergy - 139.57*139.57))>>w" + name + "(52,0,1300)", weight_str + "*" + cut,"goff")
     nhists[name] = gDirectory.Get("n" + name)
     whists[name] = gDirectory.Get("w" + name)
 

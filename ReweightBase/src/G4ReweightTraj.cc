@@ -779,5 +779,133 @@ std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPID){
 
 
 double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
-  return 0.;
+
+  TH1D * biasHist = theFS->GetTotalVariation(); 
+
+  double total, bias_total;
+
+  //Decrement in the case an inelastic interaction occurred.
+  size_t nsteps = GetNSteps();
+  if( GetFinalProc() == fInelastic )nsteps--;
+
+  for(size_t is = 0; is < nsteps; ++is){   
+
+    auto theStep = GetStep(is);
+        
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      if( theProc.Name == fInelastic ){
+
+        total += (10.*theStep->stepLength/theProc.MFP);
+
+        double theMom = theStep->GetFullPreStepP();
+        int theBin    = biasHist->FindBin(theMom);
+        
+        double bias;
+        if(theBin < 1 || theBin > biasHist->GetNbinsX() ){
+          bias = 1.;
+        }
+        else{
+          bias = biasHist->GetBinContent(theBin); 
+        }
+
+        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
+
+      }
+    }
+  }
+
+
+  double weight = exp( total - bias_total );
+
+
+
+  if( GetFinalProc() == fInelastic ){
+    auto lastStep = GetStep( GetNSteps() - 1 );
+    double xsec;
+
+    int nPi0 = HasChild(111).size();  
+    int nPiPlus = HasChild(211).size();
+    int nPiMinus = HasChild(-211).size();
+
+    std::string cut;
+    if( (nPi0 + nPiPlus + nPiMinus) == 0){
+      cut = "abs";
+    }
+    else if( (nPiPlus + nPiMinus) == 0 && nPi0 == 1 ){
+      cut = "cex";
+    }
+    else if( (nPiPlus + nPiMinus + nPi0) > 1 ){
+      cut = "prod";
+    }
+    else{
+      if( PID == 211 ){
+        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
+          cut = "inel";
+        }
+        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
+          cut = "dcex"; 
+        }
+      }
+      else if( PID == -211 ){
+        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
+          cut = "dcex";
+        }
+        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
+          cut = "inel"; 
+        }
+      }
+    }
+
+    TH1D* theOldHist = theFS->GetOldHist( cut );
+    TH1D* theNewHist = theFS->GetNewHist( cut );
+
+    double theMom = lastStep->GetFullPreStepP();
+    int theBin    = theOldHist->FindBin(theMom);
+
+    double oldVal = theOldHist->GetBinContent( theBin );
+    double newVal = theNewHist->GetBinContent( theBin );
+
+//    double bias = newVal / oldVal;
+
+
+    double oldTotal = 0.;
+    double newTotal = 0.;
+
+    std::vector< std::string > cuts = {"abs", "inel", "cex", "prod", "dcex"};
+    for( size_t i = 0; i < cuts.size(); ++i ){
+      std::string theCut = cuts[i];
+      oldTotal += theFS->GetOldHist( theCut )->GetBinContent( theBin );      
+      newTotal += theFS->GetNewHist( theCut )->GetBinContent( theBin );      
+    }
+
+    double oldFrac = oldVal / oldTotal;
+    double newFrac = newVal / newTotal;
+
+    double mfp;
+
+    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = lastStep->GetActivePostProc(ip);
+      if( theProc.Name == fInelastic ){
+        mfp = theProc.MFP;
+      }
+
+    }
+
+    // mfp^-1 = xsec
+    // newFrac * xsec = new_xsec_exclusive
+
+    double totalVar = biasHist->GetBinContent( theBin );
+
+    
+
+    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*newFrac*totalVar / mfp ) );
+
+    weight = weight / ( 1 - exp( -10.*lastStep->stepLength*oldFrac / mfp ) );
+  }
+ 
+  return weight;
 }

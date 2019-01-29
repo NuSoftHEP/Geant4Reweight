@@ -12,8 +12,8 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * FinalStateFile, std::string F
   TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
   std::cout << "Making hist maps" << std::endl;
-  std::map< std::string, TH1D* > oldHists;
-  std::map< std::string, TH1D* > newHists;
+//  std::map< std::string, TH1D* > oldHists;
+//  std::map< std::string, TH1D* > newHists;
   std::map< std::string, G4ReweightInter* > theVariations;
 
   std::cout << "Getting Max and Min" << std::endl;
@@ -405,6 +405,8 @@ G4ReweightFinalState::~G4ReweightFinalState(){
   for( size_t i = 0; i < theInts.size(); ++i){ 
 //    delete gROOT->FindObject( theInts.at(i).c_str() ); 
     delete exclusiveVariations.at( theInts.at(i) );
+    delete oldHists.at( theInts.at(i) );
+    delete newHists.at( theInts.at(i) );
   } 
 }
 

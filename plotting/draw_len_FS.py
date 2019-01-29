@@ -4,6 +4,9 @@ import sys
 
 f = TFile(sys.argv[1], "OPEN")
 
+print sys.argv[3]
+print type(sys.argv[3])
+
 tree = f.Get("tree")
 
 cuts = {
@@ -21,9 +24,13 @@ gROOT.SetBatch(1)
 
 gStyle.SetOptStat(0)
 
+if ( "0" in sys.argv[3]): weight_str = "*weight*finalStateWeight"
+else: weight_str = "*altFSWeight"
+print weight_str
+
 for name,cut in cuts.iteritems():
   tree.Draw("len>>n" + name + "(50,0,100)", cut, "goff")
-  tree.Draw("len>>w" + name + "(50,0,100)", cut + "*weight*finalStateWeight", "goff")
+  tree.Draw("len>>w" + name + "(50,0,100)", cut + weight_str, "goff")
 
   n = gDirectory.Get("n" + name) 
   w = gDirectory.Get("w" + name) 
@@ -48,7 +55,7 @@ for name,cut in cuts.iteritems():
 
 
   tree.Draw("len:sqrt(Energy*Energy - 139.57*139.57)>>n" + name + "2D", cut, "goff colz")
-  tree.Draw("len:sqrt(Energy*Energy - 139.57*139.57)>>w" + name + "2D", cut + "*weight*finalStateWeight", "goff colz")
+  tree.Draw("len:sqrt(Energy*Energy - 139.57*139.57)>>w" + name + "2D", cut + weight_str, "goff colz")
   n2D = gDirectory.Get("n" + name + "2D") 
   w2D = gDirectory.Get("w" + name + "2D") 
 

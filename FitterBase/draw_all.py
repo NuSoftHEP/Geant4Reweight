@@ -129,6 +129,8 @@ cut_to_names = {
 sample_to_type = {
   "C_PiPlus" : "#pi^{+},C - ",
   "C_PiMinus" : "#pi^{-},C - ",
+  "O_PiPlus" : "#pi^{+},O - ",
+  "O_PiMinus" : "#pi^{-},O - "
 }
 
 

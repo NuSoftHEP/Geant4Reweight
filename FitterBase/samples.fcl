@@ -12,22 +12,26 @@ a: {
   Raw: [ 
     #["C_piplus",  false],
     #["C_piminus", false]    
-    ["O_piplus",  true],
-    ["O_piminus", true]
+    ["O_piplus",  false],
+    ["O_piminus", false]
   ]
 }
 
 b: {
   Name: "abs1.10_cex1.10"
   Files:  [
-    ["C_piplus",  "C_piplus_abs1.10_cex1.10.root"],
-    ["C_piminus", "C_piminus_abs1.10_cex1.10.root"]
+    #["C_piplus",  "C_piplus_abs1.10_cex1.10.root"],
+    #["C_piminus", "C_piminus_abs1.10_cex1.10.root"]
+    ["O_piplus",  "O_piplus_abs1.10_cex1.10.root"],
+    ["O_piminus", "O_piminus_abs1.10_cex1.10.root"]
   ]
   abs: 1.10
   cex: 1.10
   Raw: [ 
-    ["C_piplus",  true],
-    ["C_piminus", true]    
+    #["C_piplus",  false],
+    #["C_piminus", false]    
+    ["O_piplus",  false],
+    ["O_piminus", false]
   ]
 }
 
@@ -72,5 +76,5 @@ e: {
     ["C_piminus", true]    
   ]
 }
-Samples: [ @local::a ]
+Samples: [ @local::a, @local::b ]
 

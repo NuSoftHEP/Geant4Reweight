@@ -141,8 +141,8 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
   
 //  TFile * fout = new TFile( "final_state_try.root", "RECREATE" );
 
-  std::map< std::string, TH1D* > oldHists;
-  std::map< std::string, TH1D* > newHists;
+//  std::map< std::string, TH1D* > oldHists;
+//  std::map< std::string, TH1D* > newHists;
   std::map< std::string, G4ReweightInter* > theVariations;
 
 
@@ -280,18 +280,18 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
     std::string new_name = "new_" + name;
 
     //Delete the pointers here
-    delete newHists.at( theInts.at(i) );
-    delete oldHists.at( theInts.at(i) );
-    gDirectory->Delete(name.c_str());
-    gDirectory->Delete(new_name.c_str());
+//    delete newHists.at( theInts.at(i) );
+//    delete oldHists.at( theInts.at(i) );
+//    gDirectory->Delete(name.c_str());
+//    gDirectory->Delete(new_name.c_str());
   }
 
   //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-
-  gDirectory->Delete("oldTotal");
-  gDirectory->Delete("newTotal");
+//  delete newTotal;
+//  delete oldTotal;
+//
+//  gDirectory->Delete("oldTotal");
+//  gDirectory->Delete("newTotal");
 
   //fout->Close();
 }

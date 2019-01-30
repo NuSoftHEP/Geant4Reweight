@@ -786,6 +786,8 @@ double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
 
   //Decrement in the case an inelastic interaction occurred.
   size_t nsteps = GetNSteps();
+
+
   if( GetFinalProc() == fInelastic )nsteps--;
 
   for(size_t is = 0; is < nsteps; ++is){   
@@ -858,15 +860,34 @@ double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
         }
       }
     }
+    
 
     TH1D* theOldHist = theFS->GetOldHist( cut );
     TH1D* theNewHist = theFS->GetNewHist( cut );
 
     double theMom = lastStep->GetFullPreStepP();
-    int theBin    = theOldHist->FindBin(theMom);
+    int theBin; 
+    if( ( theMom < theOldHist->GetBinLowEdge(0) )
+     || ( theMom > theOldHist->GetBinLowEdge( theOldHist->GetNbinsX() ) + theOldHist->GetBinWidth( theOldHist->GetNbinsX() ) ) ){
+      theBin = 0;
+    }
+    else{
+      theBin = theOldHist->FindBin(theMom);
+    }
 
-    double oldVal = theOldHist->GetBinContent( theBin );
-    double newVal = theNewHist->GetBinContent( theBin );
+
+
+    double oldVal;
+    double newVal;
+
+    if(theBin < 1 || theBin > theOldHist->GetNbinsX() ){
+      oldVal = 1.;
+      newVal = 1.;
+    }
+    else{
+      oldVal = theOldHist->GetBinContent( theBin ); 
+      newVal = theNewHist->GetBinContent( theBin ); 
+    }
 
 //    double bias = newVal / oldVal;
 
@@ -875,6 +896,7 @@ double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
     double newTotal = 0.;
 
     std::vector< std::string > cuts = {"abs", "inel", "cex", "prod", "dcex"};
+
     for( size_t i = 0; i < cuts.size(); ++i ){
       std::string theCut = cuts[i];
       oldTotal += theFS->GetOldHist( theCut )->GetBinContent( theBin );      

@@ -2,6 +2,10 @@
 #include "../FitterBase/samples.fcl
 #include "../FitterBase/C_experiments.fcl"
 #include "../FitterBase/O_experiments.fcl"
+#include "../FitterBase/Al_experiments.fcl"
+#include "../FitterBase/Fe_experiments.fcl"
+#include "../FitterBase/Cu_experiments.fcl"
+#include "../FitterBase/Pb_experiments.fcl"
 
 #Sets: ["C_piplus", "C_piminus"]
 
@@ -10,12 +14,23 @@
 Sets: [
 #  @local::C_piplus,
 #  @local::C_piminus
-  @local::O_piplus,
-  @local::O_piminus
+#  @local::O_piplus,
+#  @local::O_piminus
+#  @local::Al_piplus,
+#  @local::Al_piminus
+#  @local::Fe_piplus,
+#  @local::Fe_piminus
+#  @local::Cu_piplus,
+#  @local::Cu_piminus
+  @local::Pb_piplus,
+  @local::Pb_piminus
 ]
 
 #Experiments: @local::C_experiments
-
-Experiments: @local::O_experiments
+#Experiments: @local::O_experiments
+#Experiments: @local::Al_experiments
+#Experiments: @local::Fe_experiments
+#Experiments: @local::Cu_experiments
+Experiments: @local::Pb_experiments
 
 

@@ -1,0 +1,175 @@
+Al_experiments: [
+
+  {
+    Name:   "Allarydyce_Al_PiPlus"
+    Points: [ ["reac", [840., 1000., 1360., 1580.] ] ]
+    Binning: ["9", "800", "1600"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "Al_xsec_reac_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+    Type:   "Al_piplus"
+  },
+
+  {
+    Name:   "Allarydyce_Al_PiMinus"
+    Points: [ ["reac", [840., 1000., 1360., 1580.] ] ]
+    Binning: ["9", "800", "1600"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+    Type:   "Al_piminus"
+  }, 
+
+  {
+    Name:   "Saunders_Al_PiPlus"
+    Points: [ ["reac", [128.285] ] ]
+    Binning: ["35", "115", "150"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "Al_xsec_reac_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+    Type:   "Al_piplus"
+  },
+
+  {
+    Name:   "Saunders_Al_PiMinus"
+    Points: [ ["reac", [128.285] ] ]
+    Binning: ["35", "115", "150"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+
+    Type:   "Al_piminus"
+  }, 
+
+  {
+    Name:   "Gelderloos_Al_PiMinus"
+    Points: [ ["reac", [531.552, 587.211, 615.955] ] ] 
+    Binning: ["150", "500", "650"]
+
+    Cuts:   [ ["reac", "1"] ]  
+    Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Gelderloos.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+    Type:   "Al_piminus"
+  },
+
+  {
+    Name:   "Ashery_2173_Al_PiPlus"
+    Points: [ 
+      ["inel",  [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ],
+      ["abscx", [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ]
+    ] 
+    Binning: ["260", "175", "435"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "Al_xsec_inel_piplus"], ["abscx", "Al_xsec_abscx_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+
+    Type:   "Al_piplus"
+  },
+
+  {
+    Name:   "Ashery_2173_Al_PiMinus"
+    Points: [ 
+      ["inel",  [224.761, 270.709] ],
+      ["abscx", [224.761, 270.709] ]
+    ] 
+    Binning: ["55", "220", "275"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiPlus + nPi0) == 0 ) && (nPiMinus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "Al_xsec_inel_piminus"], ["abscx", "Al_xsec_abscx_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+
+
+    Type:   "Al_piminus"
+  }, 
+
+  {
+    Name:   "Nakai_Al_PiPlus"
+    Points: [ ["abs", [83.362, 108.154, 131.222, 153.641, 173.371, 194.715, 224.761, 254.855, 295.243, 345.440, 395.676] ] ]
+    Binning: ["320", "80", "400"]
+
+    Cuts:   [ ["abs", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 0) )"] ]
+    Graphs: [ ["abs", "Al_xsec_abs_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+
+
+    Type:   "Al_piplus"
+  },
+
+  {
+    Name:   "Nakai_Al_PiMinus"
+    Points: [ ["abs", [108.154, 131.222, 153.641, 173.371, 194.715, 224.761, 254.855, 295.243, 345.440, 395.676] ] ]
+    Binning: ["300", "100", "400"]
+
+    Cuts:   [ ["abs", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 0) )"] ]
+    Graphs: [ ["abs", "Al_xsec_abs_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+
+    Thickness: .5
+    Mass:      26.98
+    Density:   2.699
+
+
+
+    Type:   "Al_piminus"
+  }
+]

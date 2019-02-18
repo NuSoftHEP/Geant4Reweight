@@ -1,0 +1,71 @@
+Fe_experiments: [  
+  {
+    Name:   "Ashery_2173_Fe_PiPlus"
+    Points: [ 
+      ["inel",  [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ],
+      ["abscx", [175.932, 224.761, 270.709, 315.038, 358.349, 432.613] ]
+    ] 
+    Binning: ["260", "175", "435"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiMinus + nPi0) == 0 ) && (nPiPlus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "Fe_xsec_inel_piplus"], ["abscx", "Fe_xsec_abscx_piplus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      55.85
+    Density:   7.874
+
+    Type:   "Fe_piplus"
+  },
+
+  {
+    Name:   "Ashery_2173_Fe_PiMinus"
+    Points: [ 
+      ["inel",  [224.761, 270.709] ],
+      ["abscx", [224.761, 270.709] ]
+    ] 
+    Binning: ["55", "220", "275"]
+
+    Cuts:   [ 
+      ["inel",  "( ( (nPiPlus + nPi0) == 0 ) && (nPiMinus == 1) )"],
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["inel", "Fe_xsec_inel_piminus"], ["abscx", "Fe_xsec_abscx_piminus"] ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+
+    Thickness: .5
+    Mass:      55.85
+    Density:   7.874
+
+    Type:   "Fe_piminus"
+  }, 
+
+  {
+    Name:   "Navon_Fe_PiPlus"
+    Points: [ 
+      ["abscx",  [128.285] ]
+    ] 
+    Binning: ["5", "125", "130"]
+
+    Cuts:   [ 
+      ["abscx", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 < 2) )"]
+    ]  
+    Graphs: [ ["abscx", "Fe_xsec_abscx_piplus"]]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Navon.root"
+
+    Thickness: .5
+    Mass:      55.85
+    Density:   7.874
+
+    Type:   "Fe_piplus"
+  }
+
+]
+
+

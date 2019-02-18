@@ -130,7 +130,15 @@ sample_to_type = {
   "C_PiPlus" : "#pi^{+},C - ",
   "C_PiMinus" : "#pi^{-},C - ",
   "O_PiPlus" : "#pi^{+},O - ",
-  "O_PiMinus" : "#pi^{-},O - "
+  "O_PiMinus" : "#pi^{-},O - ",
+  "Al_PiPlus" : "#pi^{+},Al - ",
+  "Al_PiMinus" : "#pi^{-},Al - ",
+  "Fe_PiPlus" : "#pi^{+},Fe - ",
+  "Fe_PiMinus" : "#pi^{-},Fe - ",
+  "Cu_PiPlus" : "#pi^{+},Cu - ",
+  "Cu_PiMinus" : "#pi^{-},Cu - ",
+  "Pb_PiPlus" : "#pi^{+},Pb - ",
+  "Pb_PiMinus" : "#pi^{-},Pb - "
 }
 
 

@@ -136,7 +136,7 @@ C_experiments: [
   {
     Name:   "Gelderloos_C_PiMinus"
     Points: [ ["reac", [531.552, 587.211, 615.955] ] ] 
-    Binning: ["150", "500", "550"]
+    Binning: ["150", "500", "650"]
 
     Cuts:   [ ["reac", "1"] ]  
     Graphs: [ ["reac", "C_xsec_reac_piminus"] ]

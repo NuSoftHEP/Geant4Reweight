@@ -14,20 +14,20 @@ reacs = {
   "Pb":    array("d", [1922., 1888., 2005.]) 
 }
 
-errs = {
+'''errs = {
   "C":     array("d", [11., 10., 9.]), 
   "Al":    array("d", [23., 27., 24.]),
   "Cu":    array("d", [35., 36., 34.]), 
   "Pb":    array("d", [90., 86., 140.]) 
-}
+}'''
 
 #Alternate errors. See Gelderloos 
-'''errs = {
+errs = {
   "C":     array("d", [15., 14., 12.]), 
   "Al":    array("d", [26., 44., 29.]),
   "Cu":    array("d", [37., 42., 35.]), 
   "Pb":    array("d", [95., 90., 236.]) 
-}'''
+}
 
 
 f.cd()

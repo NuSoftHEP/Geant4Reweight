@@ -32,10 +32,10 @@ void newDUETFitter::SaveData(TDirectory * data_dir){
   experiment_dir = data_dir->mkdir( fExperimentName.c_str() );
   experiment_dir->cd();
 
-  Data_xsec_graphs["abs"]->Write();
-  Data_xsec_graphs["cex"]->Write();
-  DUET_cov_matrix->Write();
-  DUET_cov_inv->Write();
+  Data_xsec_graphs["abs"]->Write("abs");
+  Data_xsec_graphs["cex"]->Write("cex");
+  DUET_cov_matrix->Write("cov");
+  DUET_cov_inv->Write("cov_inv");
 
 
 }
@@ -94,12 +94,17 @@ double newDUETFitter::DoFit(){
       cov_val = DUET_cov_inv[0][i][j];
 
       //BinnedChi2->SetBinContent(i+1, j+1, ( MC_val_i - Data_val_i ) * cov_val * ( MC_val_j - Data_val_j ) );
-      Chi2 += ( MC_val_i - Data_val_i ) * cov_val * ( MC_val_j - Data_val_j );
+      double partial_chi2 = ( MC_val_i - Data_val_i ) * cov_val * ( MC_val_j - Data_val_j );
+      Chi2 += partial_chi2; 
     }
   }
 
   //the_Chi2 = Chi2;
   //SaveInfo();
   //BinnedChi2->Write();
+  std::string name = "abs";
+  SaveExpChi2( Chi2, name );
+  name = "cex";
+  SaveExpChi2( Chi2, name );
   return Chi2;
 }

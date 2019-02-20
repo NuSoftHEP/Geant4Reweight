@@ -39,6 +39,9 @@ class G4ReweightFitter{
       output_dir->cd();
     }
     */
+
+    void SaveExpChi2( double &, std::string & );
+
     void SetActiveSample( size_t, TDirectory * );
     void AddSample( FitSample theSample ){ samples.push_back( theSample); };
     void ParseXML(std::string);
@@ -66,6 +69,7 @@ class G4ReweightFitter{
     std::string fExperimentName = "Generic_Experiment_Name";
 
     TTree * fMCTree;
+//    TFile * fMCFile;
     std::string fDataFileName;
     TFile * fDataFile;
     TFile * fOutputFile;

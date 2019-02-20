@@ -8,6 +8,7 @@
 
 #include "TH1D.h"
 #include "TCanvas.h"
+#include "TVectorD.h"
 
 G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp ){
   fOutputFile = output_file;
@@ -60,8 +61,17 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 }
 
 void G4ReweightFitter::GetMCGraphs(){
-  
-  fMCTree = GetReweightFS();
+  std::cout << "Sample: " << std::endl
+          << "\tabs: "  << ActiveSample->abs  << std::endl
+          << "\tcex: "  << ActiveSample->cex  << std::endl
+          << "\tdcex: " << ActiveSample->dcex << std::endl
+          << "\tinel: " << ActiveSample->inel << std::endl
+          << "\tprod: " << ActiveSample->prod << std::endl
+          << "\tFile: " << ActiveSample->theFile << std::endl;
+
+  TFile fMCFile(ActiveSample->theFile.c_str(), "READ");
+  fMCTree = (TTree*)fMCFile.Get("tree");
+  std::cout << "Got tree: " << fMCTree << std::endl;
 
   //Get the total 
   std::string drawCommand = "sqrt(Energy*Energy - 139.57*139.57)";
@@ -113,6 +123,9 @@ void G4ReweightFitter::GetMCGraphs(){
     MC_xsec_graphs[ name ]->Write(name.c_str()); 
   }
 
+  delete fMCTree;
+  fMCFile.Close();
+
 }
 
 void G4ReweightFitter::SaveData(TDirectory * data_dir){
@@ -145,11 +158,17 @@ TTree* G4ReweightFitter::GetReweightFS( /*FitSample theSample*/ ){
             << "\tprod: " << ActiveSample->prod << std::endl
             << "\tFile: " << ActiveSample->theFile << std::endl;
 
+//To do: make these members of the class to handle memory better
   TFile * RWFile = new TFile(ActiveSample->theFile.c_str(), "READ");
   TTree * RWTree = (TTree*)RWFile->Get("tree");
   std::cout << "Got tree: " << RWTree << std::endl;
   return RWTree;
 }
+
+//To do: close file & delete pointers from GetReweightFS
+//void G4ReweightFitter::CloseReweightFS(){
+//
+//}
 
 double G4ReweightFitter::DoFit(){
   double Chi2 = 0.;
@@ -167,7 +186,8 @@ double G4ReweightFitter::DoFit(){
     TGraphErrors * Data_xsec = Data_xsec_graphs.at(name);
 
     int nPoints = MC_xsec->GetN(); 
-
+   
+    double partial_chi2 = 0.;
     for( int i = 0; i < nPoints; ++i ){
 
       Data_xsec->GetPoint(i, x, Data_val);
@@ -175,12 +195,29 @@ double G4ReweightFitter::DoFit(){
       MC_xsec->GetPoint(i, x, MC_val);
 
 
-      Chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
+      partial_chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }
     
-  }
+    /*
+    fFitDir->cd();
+    TVectorD chi2_val(1);
+    chi2_val[0] = partial_chi2;
+    chi2_val.Write( (name + "_chi2").c_str() );
+    */
 
+    SaveExpChi2( partial_chi2, name ); 
+
+    Chi2 += partial_chi2;
+  }
+ 
   return Chi2;
+}
+
+void G4ReweightFitter::SaveExpChi2( double &theChi2, std::string &name ){
+  fFitDir->cd();
+  TVectorD chi2_val(1);
+  chi2_val[0] = theChi2;
+  chi2_val.Write( (name + "_chi2").c_str() );
 }
 
 void G4ReweightFitter::ParseXML(std::string FileName){

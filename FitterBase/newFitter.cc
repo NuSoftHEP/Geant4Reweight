@@ -36,8 +36,13 @@ int main(int argc, char ** argv){
 
   }
 
-//  newDUETFitter df(out);
-//  mapSetsToFitters["C_piplus"].push_back( &df );
+  bool includeDUET = ps.get< bool >("IncludeDUET");
+  newDUETFitter df(out);
+  if( includeDUET ){ 
+    std::cout << "Including DUET" << std::endl;
+    
+    mapSetsToFitters["C_piplus"].push_back( &df );
+  }
 
   std::vector< std::string > sets;
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
@@ -167,6 +172,11 @@ int main(int argc, char ** argv){
         theFitter->SetActiveSample(i, outdir);
         theFitter->GetMCGraphs();
         double fit_chi2 = theFitter->DoFit();
+
+        //TVectorD chi2_val(1);
+        //chi2_val[0] = fit_chi2;
+        //chi2_val.Write("chi2_val");
+
         std::cout << fit_chi2 << std::endl;
 
         chi2 += fit_chi2;

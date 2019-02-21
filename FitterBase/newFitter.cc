@@ -76,8 +76,6 @@ int main(int argc, char ** argv){
 
     
     std::vector< std::string >::iterator itSet = sets.begin();
-    //std::map< std::string, bool >::iterator itRaw = Raw.begin();
-//    for( itRaw; itRaw != Raw.end(); ++itRaw){
     for( itSet; itSet != sets.end(); ++itSet ){
       
       std::string theSet = *itSet; 
@@ -97,7 +95,14 @@ int main(int argc, char ** argv){
 
         bool pim = ( (theSet).find("minus") != std::string::npos );
         std::cout << "PiMinus? " << pim << std::endl;
-        theSample = handler.DoReweight( Name.c_str(), abs, cex, (theSet + "_" + Name + ".root"), pim );
+    //    theSample = handler.DoReweight( Name.c_str(), abs, cex, (theSet + "_" + Name + ".root"), pim );
+
+
+        std::vector< fhicl::ParameterSet > variations = sampleSet.get< std::vector< fhicl::ParameterSet > >( "Variations" );
+        handler.DefineInters( variations );
+        double max = sampleSet.get< double >("Max");
+        double min = sampleSet.get< double >("Min");
+        theSample = handler.DoReweight( Name.c_str(), max, min, (theSet + "_" + Name + ".root"), pim );
 
       }
       else{
@@ -181,6 +186,11 @@ int main(int argc, char ** argv){
 
         chi2 += fit_chi2;
     }
+
+    TVectorD chi2_result(1);
+    chi2_result[0] = chi2;
+    outdir->cd();
+    chi2_result.Write("Chi2");
 
     abs_vector.push_back( abs );
     cex_vector.push_back( cex );

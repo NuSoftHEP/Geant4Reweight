@@ -7,10 +7,6 @@
 #include "../FitterBase/Cu_experiments.fcl"
 #include "../FitterBase/Pb_experiments.fcl"
 
-#Sets: ["C_piplus", "C_piminus"]
-
-
-
 Sets: [
   @local::C_piplus,
   @local::C_piminus,
@@ -25,13 +21,6 @@ Sets: [
   @local::Pb_piplus,
   @local::Pb_piminus
 ]
-
-#Experiments: @local::C_experiments
-#Experiments: @local::O_experiments
-#Experiments: @local::Al_experiments
-#Experiments: @local::Fe_experiments
-#Experiments: @local::Cu_experiments
-#Experiments: @local::Pb_experiments
 
 Experiments: [ 
   @sequence::C_experiments,

@@ -16,7 +16,90 @@ G4ReweightHandler::~G4ReweightHandler(){
 //  }
 }
 
-FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus ){
+void G4ReweightHandler::DefineInters( std::vector< fhicl::ParameterSet > ps ){
+  std::cout << "Defining Inters" << std::endl;
+  for( size_t i = 0; i < ps.size(); ++i ){
+    fhicl::ParameterSet set = ps.at(i);
+
+    std::string name = set.get< std::string >( "Cut" );
+
+    std::cout << "Cut: " << name;
+
+    std::vector< std::pair< double, double > > vars;
+    bool isDummy = set.get< bool >( "Dummy" );
+    if( isDummy ){
+      std::cout << "Dummy" << std::endl;
+      FSInters[name] = dummy;
+    }
+    else{
+      vars = set.get< std::vector< std::pair< double, double > > >( "Vars" );
+      for( size_t j = 0; j < vars.size(); ++j ){
+        std::cout << vars.at(j).first << " " << vars.at(j).second << std::endl;
+      }
+      FSInters[name]  = new G4ReweightInter(vars);
+    }
+
+  }
+}
+
+
+void G4ReweightHandler::SetInters( std::map< std::string, G4ReweightInter* > & theInts ){
+  std::map< std::string, G4ReweightInter* >::iterator it = theInts.begin(); 
+  for( ; it != theInts.end(); ++it ){
+    FSInters[ it->first ] = it->second;
+  }
+}
+
+FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus ){
+
+  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, max, min, PiMinus );
+  //////////////////////////////
+
+  //NEED TO FIX
+  //RWFileName = theName + ".root";
+  RWFileName = outName;
+
+
+  //Make the reweighter pointer and do the reweighting
+
+  std::cout << "Reweighting MC File: 0" << std::endl;
+
+  Reweighter = new G4ReweightTreeParser( fRawMCFileNames->at(0),  RWFileName );
+  Reweighter->FillAndAnalyzeFS(FSReweighter);
+
+  std::cout << std::endl;
+  for( size_t i = 1; i < fRawMCFileNames->size(); ++i ){
+
+    Reweighter->CloseInput();
+
+    std::cout << "MC File: " << i << std::endl;
+    Reweighter->OpenNewInput( fRawMCFileNames->at(i) );
+    Reweighter->FillAndAnalyzeFS(FSReweighter);
+    std::cout << "Tree Entries: " << Reweighter->GetTree()->GetEntries() << std::endl;
+    std::cout << std::endl;
+
+  }   
+
+  Reweighter->CloseInput();
+  Reweighter->CloseAndSaveOutput();
+  ////////////////////////////////
+
+  
+  FitSample theSample; 
+  theSample.theName = theName;
+  theSample.theFile = RWFileName;
+  theSample.Raw = false;
+
+
+  //memory management
+  delete FSReweighter;
+  delete Reweighter;
+//  ClearFSInters();
+
+  return theSample;
+}
+
+/*FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus ){
 
 
   std::string norm_abs_str = set_prec(norm_abs);
@@ -83,6 +166,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, do
 
   return theSample;
 }
+*/
 
 void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
 

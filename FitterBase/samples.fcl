@@ -1,11 +1,67 @@
+Nominal: [
+  {
+    Cut: "abs"
+    Vars: [ 
+      [ 200., 1.00 ],
+      [ 300., 1.00 ]
+    ]
+    Dummy: false
+  },
+
+  {
+    Cut: "cex"
+    Vars: [ 
+      [ 200., 1.00 ],
+      [ 300., 1.00 ]
+    ]
+    Dummy: false
+  }, 
+
+  { Cut: "inel"
+    Dummy: true },
+  { Cut: "prod"
+    Dummy: true },
+  { Cut: "dcex"
+    Dummy: true }
+]
+
+abs1p10_cex1p10: [
+  {
+    Cut: "abs"
+    Vars: [ 
+      [ 200., 1.10 ],
+      [ 300., 1.10 ]
+    ]
+    Dummy: false
+  },
+
+  {
+    Cut: "cex"
+    Vars: [ 
+      [ 200., 1.10 ],
+      [ 300., 1.10 ]
+    ]
+    Dummy: false
+  }, 
+
+  { Cut: "inel"
+    Dummy: true },
+  { Cut: "prod"
+    Dummy: true },
+  { Cut: "dcex"
+    Dummy: true }
+
+]
+
+
 
 a: {
   Name: "abs1.00_cex1.00"
   Files:  [
-    ["C_piplus",  "C_piplus_abs1.00_cex1.00.root"],
-    ["C_piminus", "C_piminus_abs1.00_cex1.00.root"],
-    ["O_piplus",  "O_piplus_abs1.00_cex1.00.root"],
-    ["O_piminus", "O_piminus_abs1.00_cex1.00.root"],
+    ["C_piplus",    "C_piplus_abs1.00_cex1.00.root"],
+    ["C_piminus",   "C_piminus_abs1.00_cex1.00.root"],
+    ["O_piplus",    "O_piplus_abs1.00_cex1.00.root"],
+    ["O_piminus",   "O_piminus_abs1.00_cex1.00.root"],
     ["Al_piplus",  "Al_piplus_abs1.00_cex1.00.root"],
     ["Al_piminus", "Al_piminus_abs1.00_cex1.00.root"],
     ["Fe_piplus",  "Fe_piplus_abs1.00_cex1.00.root"],
@@ -18,7 +74,7 @@ a: {
   abs: 1.00
   cex: 1.00
   Raw: [ 
-    ["C_piplus",  false],
+    ["C_piplus",  true],
     ["C_piminus", false],   
     ["O_piplus",  false],
     ["O_piminus", false],
@@ -31,24 +87,48 @@ a: {
     ["Pb_piplus",  false],
     ["Pb_piminus", false]
   ]
+
+  Variations: @local::Nominal
+  Max: 300. 
+  Min: 200.
 }
 
 b: {
   Name: "abs1.10_cex1.10"
   Files:  [
-    #["C_piplus",  "C_piplus_abs1.10_cex1.10.root"],
-    #["C_piminus", "C_piminus_abs1.10_cex1.10.root"]
-    ["O_piplus",  "O_piplus_abs1.10_cex1.10.root"],
-    ["O_piminus", "O_piminus_abs1.10_cex1.10.root"]
+    ["C_piplus",    "C_piplus_abs1.10_cex1.10.root"],
+    ["C_piminus",   "C_piminus_abs1.10_cex1.10.root"],
+    ["O_piplus",    "O_piplus_abs1.10_cex1.10.root"],
+    ["O_piminus",   "O_piminus_abs1.10_cex1.10.root"],
+    ["Al_piplus",  "Al_piplus_abs1.10_cex1.10.root"],
+    ["Al_piminus", "Al_piminus_abs1.10_cex1.10.root"],
+    ["Fe_piplus",  "Fe_piplus_abs1.10_cex1.10.root"],
+    ["Fe_piminus", "Fe_piminus_abs1.10_cex1.10.root"],
+    ["Cu_piplus",  "Cu_piplus_abs1.10_cex1.10.root"],
+    ["Cu_piminus", "Cu_piminus_abs1.10_cex1.10.root"],
+    ["Pb_piplus",  "Pb_piplus_abs1.10_cex1.10.root"],
+    ["Pb_piminus", "Pb_piminus_abs1.10_cex1.10.root"]
   ]
   abs: 1.10
   cex: 1.10
   Raw: [ 
-    #["C_piplus",  false],
-    #["C_piminus", false]    
+    ["C_piplus",  true],
+    ["C_piminus", false],   
     ["O_piplus",  false],
-    ["O_piminus", false]
+    ["O_piminus", false],
+    ["Al_piplus",  false],
+    ["Al_piminus", false],
+    ["Fe_piplus",  false],
+    ["Fe_piminus", false],
+    ["Cu_piplus",  false],
+    ["Cu_piminus", false],
+    ["Pb_piplus",  false],
+    ["Pb_piminus", false]
   ]
+
+  Variations: @local::abs1p10_cex1p10
+  Max: 300. 
+  Min: 200.
 }
 
 c: {

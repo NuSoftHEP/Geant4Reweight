@@ -1,11 +1,11 @@
-#include "../FitterBase/sets.fcl"
-#include "../FitterBase/samples.fcl
-#include "../FitterBase/C_experiments.fcl"
-#include "../FitterBase/O_experiments.fcl"
-#include "../FitterBase/Al_experiments.fcl"
-#include "../FitterBase/Fe_experiments.fcl"
-#include "../FitterBase/Cu_experiments.fcl"
-#include "../FitterBase/Pb_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/sets.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/samples.fcl
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/C_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/O_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Al_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Fe_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Cu_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Pb_experiments.fcl"
 
 Sets: [
   @local::C_piplus,

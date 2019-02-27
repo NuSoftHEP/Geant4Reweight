@@ -1,89 +1,5 @@
-Nominal: [
-  {
-    Cut: "abs"
-    Vars: [ 
-      [ 200., 1.00 ],
-      [ 300., 1.00 ]
-    ]
-    Dummy: false
-  },
-
-  {
-    Cut: "cex"
-    Vars: [ 
-      [ 200., 1.00 ],
-      [ 300., 1.00 ]
-    ]
-    Dummy: false
-  }, 
-
-  { Cut: "inel"
-    Dummy: true },
-  { Cut: "prod"
-    Dummy: true },
-  { Cut: "dcex"
-    Dummy: true }
-]
-
-abs1p10_cex1p10: [
-  {
-    Cut: "abs"
-    Vars: [ 
-      [ 200., 1.10 ],
-      [ 300., 1.10 ]
-    ]
-    Dummy: false
-  },
-
-  {
-    Cut: "cex"
-    Vars: [ 
-      [ 200., 1.10 ],
-      [ 300., 1.10 ]
-    ]
-    Dummy: false
-  }, 
-
-  { Cut: "inel"
-    Dummy: true },
-  { Cut: "prod"
-    Dummy: true },
-  { Cut: "dcex"
-    Dummy: true }
-
-]
-
-abs0p09_cex0p09: [
-  {
-    Cut: "abs"
-    Vars: [ 
-      [ 200., 0.90 ],
-      [ 300., 0.90 ]
-    ]
-    Dummy: false
-  },
-
-  {
-    Cut: "cex"
-    Vars: [ 
-      [ 200., 0.90 ],
-      [ 300., 0.90 ]
-    ]
-    Dummy: false
-  }, 
-
-  { Cut: "inel"
-    Dummy: true },
-  { Cut: "prod"
-    Dummy: true },
-  { Cut: "dcex"
-    Dummy: true }
-
-]
-
-
 a: {
-  Name: "abs1.00_cex1.00"
+  Name: "AbsLow1.00_AbsHigh1.00_CexLow1.00"
   Files:  [
     ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"],
     ["C_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piminus_abs1.00_cex1.00.root"],
@@ -98,10 +14,8 @@ a: {
     ["Pb_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piplus_abs1.00_cex1.00.root"],
     ["Pb_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piminus_abs1.00_cex1.00.root"]
   ]
-  abs: 1.00
-  cex: 1.00
   Raw: [ 
-    ["C_piplus",  false],
+    ["C_piplus",  true],
     ["C_piminus", false],   
     ["O_piplus",  false],
     ["O_piminus", false],
@@ -115,86 +29,60 @@ a: {
     ["Pb_piminus", false]
   ]
 
-  Variations: @local::Nominal
+  Variations: {  
+    fAbsLow:  1.0
+    fAbsHigh: 1.0
+    fCexLow:  1.0
+  }
+
+  abs: 1.00
+  cex: 1.00
   Max: 300. 
   Min: 200.
 }
 
 b: {
-  Name: "abs1.10_cex1.10"
+  Name: "AbsLow1.10_AbsHigh0.90_CexLow1.00"
   Files:  [
-    ["C_piplus",    "C_piplus_abs1.10_cex1.10.root"],
-    ["C_piminus",   "C_piminus_abs1.10_cex1.10.root"],
-    ["O_piplus",    "O_piplus_abs1.10_cex1.10.root"],
-    ["O_piminus",   "O_piminus_abs1.10_cex1.10.root"],
-    ["Al_piplus",  "Al_piplus_abs1.10_cex1.10.root"],
-    ["Al_piminus", "Al_piminus_abs1.10_cex1.10.root"],
-    ["Fe_piplus",  "Fe_piplus_abs1.10_cex1.10.root"],
-    ["Fe_piminus", "Fe_piminus_abs1.10_cex1.10.root"],
-    ["Cu_piplus",  "Cu_piplus_abs1.10_cex1.10.root"],
-    ["Cu_piminus", "Cu_piminus_abs1.10_cex1.10.root"],
-    ["Pb_piplus",  "Pb_piplus_abs1.10_cex1.10.root"],
-    ["Pb_piminus", "Pb_piminus_abs1.10_cex1.10.root"]
+    ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"],
+    ["C_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piminus_abs1.00_cex1.00.root"],
+    ["O_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piplus_abs1.00_cex1.00.root"],
+    ["O_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piminus_abs1.00_cex1.00.root"],
+    ["Al_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piplus_abs1.00_cex1.00.root"],
+    ["Al_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piminus_abs1.00_cex1.00.root"],
+    ["Fe_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piplus_abs1.00_cex1.00.root"],
+    ["Fe_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piminus_abs1.00_cex1.00.root"],
+    ["Cu_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piplus_abs1.00_cex1.00.root"],
+    ["Cu_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piminus_abs1.00_cex1.00.root"],
+    ["Pb_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piplus_abs1.00_cex1.00.root"],
+    ["Pb_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piminus_abs1.00_cex1.00.root"]
   ]
-  abs: 1.10
-  cex: 1.10
   Raw: [ 
     ["C_piplus",  true],
-    ["C_piminus", true],   
-    ["O_piplus",  true],
-    ["O_piminus", true],
-    ["Al_piplus",  true],
-    ["Al_piminus", true],
-    ["Fe_piplus",  true],
-    ["Fe_piminus", true],
-    ["Cu_piplus",  true],
-    ["Cu_piminus", true],
-    ["Pb_piplus",  true],
-    ["Pb_piminus", true]
+    ["C_piminus", false],   
+    ["O_piplus",  false],
+    ["O_piminus", false],
+    ["Al_piplus",  false],
+    ["Al_piminus", false],
+    ["Fe_piplus",  false],
+    ["Fe_piminus", false],
+    ["Cu_piplus",  false],
+    ["Cu_piminus", false],
+    ["Pb_piplus",  false],
+    ["Pb_piminus", false]
   ]
 
-  Variations: @local::abs1p10_cex1p10
-  Max: 300. 
+  Variations: {  
+    fAbsLow:  1.1
+    fAbsHigh: 0.9
+    fCexLow:  1.0
+  }
+
+  abs: 1.00
+  cex: 1.00
+  Max: 400. 
   Min: 200.
 }
 
-c: {
-  Name: "abs0.90_cex0.90"
-  Files:  [
-    ["C_piplus",    "C_piplus_abs0.90_cex0.90.root"],
-    ["C_piminus",   "C_piminus_abs0.90_cex0.90.root"],
-    ["O_piplus",    "O_piplus_abs0.90_cex0.90.root"],
-    ["O_piminus",   "O_piminus_abs0.90_cex0.90.root"],
-    ["Al_piplus",  "Al_piplus_abs0.90_cex0.90.root"],
-    ["Al_piminus", "Al_piminus_abs0.90_cex0.90.root"],
-    ["Fe_piplus",  "Fe_piplus_abs0.90_cex0.90.root"],
-    ["Fe_piminus", "Fe_piminus_abs0.90_cex0.90.root"],
-    ["Cu_piplus",  "Cu_piplus_abs0.90_cex0.90.root"],
-    ["Cu_piminus", "Cu_piminus_abs0.90_cex0.90.root"],
-    ["Pb_piplus",  "Pb_piplus_abs0.90_cex0.90.root"],
-    ["Pb_piminus", "Pb_piminus_abs0.90_cex0.90.root"]
-  ]
-  abs: 0.90
-  cex: 0.90
-  Raw: [ 
-    ["C_piplus",  true],
-    ["C_piminus", true],   
-    ["O_piplus",  true],
-    ["O_piminus", true],
-    ["Al_piplus",  true],
-    ["Al_piminus", true],
-    ["Fe_piplus",  true],
-    ["Fe_piminus", true],
-    ["Cu_piplus",  true],
-    ["Cu_piminus", true],
-    ["Pb_piplus",  true],
-    ["Pb_piminus", true]
-  ]
-
-  Variations: @local::abs0p09_cex0p09
-  Max: 300. 
-  Min: 200.
-}
-
-Samples: [ @local::a, @local::b, @local::c ]
+Samples: [ @local::a, @local::b ]
 

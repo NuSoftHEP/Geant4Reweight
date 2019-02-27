@@ -1,5 +1,6 @@
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/sets.fcl"
-#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/samples.fcl
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/samples.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/parameters.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/C_experiments.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/O_experiments.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Al_experiments.fcl"

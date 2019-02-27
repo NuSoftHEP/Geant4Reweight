@@ -9,6 +9,7 @@
 #include "TTree.h"
 #include "TDirectory.h"
 #include "FitSample.hh"
+#include "FitParameter.hh"
 #include "G4ReweightInter.hh"
 #include "G4ReweightFinalState.hh"
 #include "G4ReweightTreeParser.hh"
@@ -33,6 +34,7 @@ class G4ReweightHandler{
     FitSample DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus );
     void SetInters( std::map< std::string, G4ReweightInter* > & );
     void DefineInters( std::vector< fhicl::ParameterSet > );
+    void DefineInters( std::map< std::string, std::vector< FitParameter > > );
 
     void SetFiles( std::string );
 

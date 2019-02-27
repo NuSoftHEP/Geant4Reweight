@@ -1,0 +1,42 @@
+ParameterSet: [
+
+  {
+    Cut:    "abs"
+    Dummy: false
+    Parameters:  [
+      {
+        Name: "fAbsLow"
+        Range: [200., 299.9]        
+      }, 
+
+      {
+        Name: "fAbsHigh"
+        Range: [300.1, 400.]
+      }
+    ]
+  }, 
+
+  {
+    Cut:   "cex"
+    Dummy: false
+    Parameters:  [
+      { 
+        Name: "fCexLow"
+        Range: [200., 300.]
+      }
+    ]
+  },
+
+  {
+    Cut:    "inel"
+    Dummy:  true
+  },
+
+  { Cut:    "prod"
+    Dummy:  true
+  },
+
+  { Cut:    "dcex"
+    Dummy:  true 
+  }
+]

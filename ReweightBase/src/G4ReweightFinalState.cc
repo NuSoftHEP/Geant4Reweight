@@ -157,7 +157,7 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
     std::string cut  = it->second;
 
     //Set Binning
-    input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(10, 200, 300)").c_str(), cut.c_str(), "goff" ); 
+    input->Draw( ("sqrt(Energy*Energy - 139.57*139.57)>>" + name + "(600, 50, 650)").c_str(), cut.c_str(), "goff" ); 
 
     TH1D * theHist = (TH1D*)gDirectory->Get(name.c_str());
     //theHist->Write();

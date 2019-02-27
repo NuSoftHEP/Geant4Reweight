@@ -1,6 +1,7 @@
 #include "G4ReweightFitter.hh"
 #include "G4ReweightHandler.hh"
 #include "newDUETFitter.hh"
+#include "FitParameter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"
@@ -23,27 +24,74 @@ int main(int argc, char ** argv){
   std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
-  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
+  ///Making Fit Parameters
 
+  std::map< std::string, std::vector< FitParameter > > FullParameterSet;
+
+  std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
+  std::cout << "Making parameter sets" << std::endl;
+  for( size_t i = 0; i < FitParSets.size(); ++i ){
+    fhicl::ParameterSet theSet = FitParSets.at(i);
+    std::string theCut = theSet.get< std::string >("Cut");
+
+    if( FullParameterSet.find( theCut ) == FullParameterSet.end() ){ 
+      FullParameterSet[ theCut ] = std::vector< FitParameter  >();
+    }
+    bool isDummy = theSet.get< bool >("Dummy");
+    if( isDummy ){
+      FitParameter dummyPar;
+      dummyPar.Name = "dummy";
+      dummyPar.Cut = theCut;
+      dummyPar.Value = 1.;
+      dummyPar.Range = std::make_pair( 0., 0.);
+      dummyPar.Dummy = true;
+      
+      FullParameterSet[ theCut ].push_back( dummyPar );
+    } 
+    else{ 
+      std::cout << "Making parameters for " << theCut << std::endl;
+    
+      std::vector< fhicl::ParameterSet > theParameters = theSet.get< std::vector< fhicl::ParameterSet > >("Parameters");
+      for( size_t j = 0; j < theParameters.size(); ++j ){
+        fhicl::ParameterSet thePar = theParameters.at(j);
+
+
+        std::string theName = thePar.get< std::string >("Name");
+        std::cout << theName << std::endl;
+        
+        std::pair< double, double > theRange = thePar.get< std::pair< double, double > >("Range");
+        std::cout << "Range Low: " << theRange.first << " High: " << theRange.second << std::endl;
+
+        FitParameter par;
+        par.Name = theName;
+        par.Cut = theCut;
+        par.Dummy = false;
+        par.Value = 1.;
+        par.Range = theRange;
+        FullParameterSet[ theCut ].push_back( par );
+      }
+    }
+  }
+  /////////////////////////////////////////////////
+
+  ///Defining experiments
+  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
   std::cout << "Getting Experiments: "  << exps.size() << std::endl;
   for(size_t i = 0; i < exps.size(); ++i){
-
     G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
-
     std::cout << std::endl;
-
     mapSetsToFitters[ exp->GetType() ].push_back( exp ); 
-
   }
 
   bool includeDUET = ps.get< bool >("IncludeDUET");
   newDUETFitter df(out);
   if( includeDUET ){ 
     std::cout << "Including DUET" << std::endl;
-    
     mapSetsToFitters["C_piplus"].push_back( &df );
   }
+  ///////////////////////////////////////////
 
+  ///Defining MC Sets
   std::vector< std::string > sets;
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
   
@@ -53,7 +101,9 @@ int main(int argc, char ** argv){
 
   G4ReweightHandler handler;  
   handler.ParseFHiCL( FCLSets );
+  ///////////////////////////////////////////
 
+  //Defining varied samples
   std::vector< fhicl::ParameterSet > samples = ps.get< std::vector< fhicl::ParameterSet > >("Samples"); 
   std::cout << "Got " << samples.size() << " samples" << std::endl;
   size_t nSamples = samples.size();
@@ -92,14 +142,35 @@ int main(int argc, char ** argv){
       if( Raw[ theSet ] ){
 
         handler.SetFiles( theSet );
-
         bool pim = ( (theSet).find("minus") != std::string::npos );
-        std::cout << "PiMinus? " << pim << std::endl;
-    //    theSample = handler.DoReweight( Name.c_str(), abs, cex, (theSet + "_" + Name + ".root"), pim );
 
+        fhicl::ParameterSet variations = sampleSet.get< fhicl::ParameterSet >( "Variations" );
+        //Go through each of the pre-defined parameters and see if there is a value in Variations
+        std::map< std::string, std::vector< FitParameter > >::iterator itPar = FullParameterSet.begin();
+        for( itPar; itPar != FullParameterSet.end(); ++itPar ){
+          for( size_t iP = 0; iP < itPar->second.size(); ++ iP ){
 
-        std::vector< fhicl::ParameterSet > variations = sampleSet.get< std::vector< fhicl::ParameterSet > >( "Variations" );
-        handler.DefineInters( variations );
+            if( itPar->second.at(iP).Dummy ){
+              std::cout << "This is a dummy. Continuing" << std::endl;
+              break;
+            }
+
+            std::string parName = itPar->second.at( iP ).Name;
+            std::cout << "Trying to get value for parameter " << parName << std::endl;
+            double value = 1.;
+            try{ 
+              value = variations.get< double >( parName );
+              std:: cout << "Its value: " << value << std::endl;
+            }
+            catch ( const std::exception &e ){
+              std::cout << "Could not find it. Setting to 1." << std::endl;
+            }
+            
+            itPar->second.at( iP ).Value = value;
+          }
+        }
+
+        handler.DefineInters( FullParameterSet );
         double max = sampleSet.get< double >("Max");
         double min = sampleSet.get< double >("Min");
         theSample = handler.DoReweight( Name.c_str(), max, min, (theSet + "_" + Name + ".root"), pim );
@@ -177,10 +248,6 @@ int main(int argc, char ** argv){
         theFitter->SetActiveSample(i, outdir);
         theFitter->GetMCGraphs();
         double fit_chi2 = theFitter->DoFit();
-
-        //TVectorD chi2_val(1);
-        //chi2_val[0] = fit_chi2;
-        //chi2_val.Write("chi2_val");
 
         std::cout << fit_chi2 << std::endl;
 

@@ -42,6 +42,48 @@ void G4ReweightHandler::DefineInters( std::vector< fhicl::ParameterSet > ps ){
   }
 }
 
+void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitParameter > > pars ){
+  std::cout << "Defining Inters" << std::endl;
+
+
+  std::map< std::string, std::vector< FitParameter > >::iterator itPar;
+  for( itPar = pars.begin(); itPar != pars.end(); ++itPar ){
+    std::string name = itPar->first;  
+    std::cout << "Cut: " << name << std::endl;
+    
+    bool isDummy = false;
+
+    std::vector< std::pair< double, double > > vars;
+
+    for( size_t i = 0; i < itPar->second.size(); ++i ){
+      
+      if( itPar->second.at( i ).Dummy ){
+        std::cout << "Dummy" << std::endl;
+        FSInters[name] = dummy;
+        isDummy = true;
+        break;
+      }
+  
+      else{        
+        double value = itPar->second.at( i ).Value;
+        std::pair< double, double > range = itPar->second.at( i ).Range;
+
+        vars.push_back( std::make_pair( range.first,  value ) );
+        vars.push_back( std::make_pair( range.second, value ) );
+      }
+  
+    }
+    
+    if( !isDummy ){
+      for( size_t i = 0; i < vars.size(); ++i ){
+        std::cout << vars.at(i).first << " " << vars.at(i).second << std::endl;
+      }
+
+      FSInters[name]  = new G4ReweightInter(vars);
+    }
+  }
+}
+
 
 void G4ReweightHandler::SetInters( std::map< std::string, G4ReweightInter* > & theInts ){
   std::map< std::string, G4ReweightInter* >::iterator it = theInts.begin(); 

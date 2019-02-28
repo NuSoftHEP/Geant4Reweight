@@ -25,6 +25,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TGraph.h"
 
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -56,7 +57,8 @@ int main(int argc, char * argv[]){
     std::cout << momenta.back() << std::endl;
   }
 
-  TFile * fout = new TFile( "cascade_out.root", "RECREATE");
+  std::string outFileName = ps.get< std::string >("Outfile");
+  TFile * fout = new TFile( outFileName.c_str(), "RECREATE");
   TTree * tree = new TTree("tree","");  
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0;
   double momentum;
@@ -139,6 +141,58 @@ int main(int argc, char * argv[]){
   }
   fout->cd();
   tree->Write();
+ 
+  std::map< std::string, std::string > cuts;
+  //Define cuts and make graphs out of the results
+  cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
+  cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
+  cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+  if( type == 211 ){
+    cuts["inel"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
+    cuts["dcex"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
+  }
+  if( type == -211 ){
+    cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
+    cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
+  }
+
+  int nbins = int(range.second) + 1;
+  std::string binning = "(" + std::to_string(nbins) + ",0," + std::to_string(range.second + 1.) + ")";
+
+  std::string draw = "momentum>>total" + binning;
+  tree->Draw( draw.c_str(), "", "goff" );
+  TH1F * total = (TH1F*)gDirectory->Get("total");
+  std::vector< int > bins;
+  for( int i = 1; i <= total->GetNbinsX(); ++i ){
+    if( total->GetBinContent( i ) > 0. ){
+      bins.push_back( i );
+      std::cout << i << std::endl;
+    }
+  }
+
+  std::map< std::string, std::string >::iterator itCut = cuts.begin();
+  for( itCut; itCut != cuts.end(); ++itCut ){
+    std::cout << itCut->first << std::endl;
+    std::string name = "h" + itCut->first;
+    std::string draw = "momentum>>" + name + binning;
+    std::cout << "Draw: " << draw << std::endl;
+
+    tree->Draw( draw.c_str(), itCut->second.c_str(), "goff" ); 
+    TH1F * hist = (TH1F*)gDirectory->Get( name.c_str() );
+    hist->Divide( total );
+
+    std::vector< double > xs,ys;
+    
+    for( int i = 0; i < bins.size(); ++i ){
+      xs.push_back( bins.at(i) );
+      ys.push_back( hist->GetBinContent(bins.at(i)) );
+    }
+    TGraph gr(xs.size(), &xs[0], &ys[0]);
+    gr.Write( itCut->first.c_str() );
+
+  }
+
+
   fout->Close();
   delete rm;
 

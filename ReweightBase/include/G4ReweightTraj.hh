@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "TH1F.h"
+#include "TGraph.h" 
 
 // Functor for deleting pointers in vector.
 template<class T> class DeleteVector
@@ -66,10 +67,12 @@ class G4ReweightTraj{
     double GetWeight(TH1F *);
     double GetWeight_Elast(TH1F *);
     
+    double GetWeight(TGraph *);
     double GetWeightFunc(G4ReweightInter *);
     double GetWeightFunc_Elast(G4ReweightInter *);
     
     double GetWeightFS(G4ReweightFinalState *);
+    double GetWeightFS(TGraph *);
 
     int GetNElastic();
     //Returns a vector of the distances between elastic scatters.

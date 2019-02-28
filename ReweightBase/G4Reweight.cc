@@ -150,6 +150,33 @@ int main(int argc, char ** argv){
     tp->CloseAndSaveOutput();
     
   }
+  else if( weightType == "graph"){
+    std::cout << "Enabling Final State Reweighting With Graphs" << std::endl;
+    std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;
+
+    std::map< std::string, TGraph * > vars;
+    double dummyX = 0.;
+    double dummyY = 1.;
+    vars["abs"] = new TGraph(1, &dummyX, &dummyY); 
+    vars["cex"] = new TGraph(1, &dummyX, &dummyY); 
+    vars["dcex"] = new TGraph(1, &dummyX, &dummyY); 
+    vars["prod"] = new TGraph(1, &dummyX, &dummyY); 
+    double x[2] = {200., 300.};
+    double y[2] = {1.5, 1.5};
+    vars["inel"] = new TGraph(2., x, y);
+
+    std::cout << "Added the graphs" << std::endl;
+
+     
+    G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), vars, 300., 200., false  ); 
+    if( enablePiMinus ) theFS->SetPiMinus();
+
+    tp->FillAndAnalyzeFS(theFS);
+    tp->CloseAndSaveOutput();
+
+    return 0;
+
+  }
 
   tp->CloseInput();
 

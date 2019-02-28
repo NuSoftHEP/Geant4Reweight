@@ -621,7 +621,12 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
   }
   else interaction = "prod";
 
-  theFSWeight = theFS->GetWeight( interaction, theMomentum );
+  if( theFS->AsGraph() ){
+    theFSWeight = theFS->GetWeightFromGraph( interaction, theMomentum );
+  }
+  else{
+    theFSWeight = theFS->GetWeight( interaction, theMomentum );
+  }
 
 
 }
@@ -1129,7 +1134,12 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 //         }
 
           theLen         = theTraj->GetTotalLength();
-          theWeight      = theTraj->GetWeight( (TH1F*)theFS->GetTotalVariation() );
+          if( theFS->AsGraph() ){
+            theWeight      = theTraj->GetWeight( theFS->GetTotalVariationGraph() );          
+          }
+          else{
+            theWeight      = theTraj->GetWeight( (TH1F*)theFS->GetTotalVariation() );
+          }
 //          theFSWeight    = theTraj->GetWeightFS(theFS);
           theElastWeight = 1.;
           theInt         = theTraj->GetFinalProc();
@@ -1207,7 +1217,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 
           GetWeightFS( theFS, preFinalP );
 
-          altFSWeight = theTraj->GetWeightFS( theFS );
+          //altFSWeight = theTraj->GetWeightFS( theFS );
 
           tree->Fill();
            

@@ -238,7 +238,6 @@ double G4ReweightTraj::GetWeight(TH1F * biasHist){
   return weight;
 }
 
-
 double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
   double total, bias_total;
 
@@ -284,6 +283,59 @@ double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
 
     double theMom = lastStep->GetFullPreStepP();
     double bias = biasInter->GetContent(theMom);
+//    weight = weight * bias;
+    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
+    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
+  }
+ 
+  return weight;
+}
+
+double G4ReweightTraj::GetWeight(TGraph * theGraph ){
+  double total, bias_total;
+
+  //Decrement in the case an inelastic interaction occurred.
+  size_t nsteps = GetNSteps();
+  if( GetFinalProc() == fInelastic )nsteps--;
+
+  for(size_t is = 0; is < nsteps; ++is){   
+
+    auto theStep = GetStep(is);
+        
+    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = theStep->GetActivePostProc(ip);
+
+      if( theProc.Name == fInelastic ){
+
+        total += (10.*theStep->stepLength/theProc.MFP);
+        
+        double theMom = theStep->GetFullPreStepP();
+        double bias;
+        bias = theGraph->Eval(theMom);
+        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
+
+      }
+    }
+  }
+
+
+  double weight = exp( total - bias_total );
+  if( GetFinalProc() == fInelastic ){
+    auto lastStep = GetStep( GetNSteps() - 1 );
+    double mfp;
+
+    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
+
+      auto theProc = lastStep->GetActivePostProc(ip);
+      if( theProc.Name == fInelastic ){
+        mfp = theProc.MFP;
+      }
+
+    }
+
+    double theMom = lastStep->GetFullPreStepP();
+    double bias = theGraph->Eval(theMom);
 //    weight = weight * bias;
     weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
     weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );

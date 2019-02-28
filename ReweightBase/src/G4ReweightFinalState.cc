@@ -296,6 +296,149 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
   //fout->Close();
 }
 
+G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string, TGraph* > &FSScales, double max, double min, bool PiMinus) 
+: Maximum(max), Minimum(min){
+
+  as_graphs = true;
+  if( PiMinus ) SetPiMinus();
+  
+  std::map< std::string, TGraph* > theVariations;
+  std::map< std::string, std::string >::iterator it = theCuts.begin();
+  TFile *fout = new TFile ("graph_weights.root", "RECREATE");
+  for( ; it != theCuts.end(); ++it ){
+    std::string name = it->first;
+    std::string cut  = it->second;
+
+    std::cout << "Loading " << name << std::endl;
+
+    TGraph * theGraph = (TGraph*)input->Get(name.c_str());
+    //theHist->Write();
+
+    //Load the Hists
+    newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
+    oldGraphs[ name ] = (TGraph*)theGraph->Clone();
+    fout->cd();
+    oldGraphs[ name ]->Write( ("old_" + name).c_str());
+  }
+  std::cout << "Loaded Graphs" << std::endl;
+  //delete fout;
+
+   
+  std::cout << "Storing" << std::endl;
+  //Just for loading. Could do everything in one shot, but it's
+  //more understandable if it's compartmentalized like this
+  fout->cd();
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    //TGraph * theInter = FSScales[ theInts.at(i) ]; 
+    //theVariations[ theInts.at(i) ] = theInter;
+    std::cout << theInts.at(i) << std::endl;
+    theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
+    theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
+  }
+  std::cout << "Stored" << std::endl;
+
+  //fout->cd();
+
+  //Now go through and vary the exclusive channels  
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    TGraph * theVar = theVariations.at( theInts.at(i) );
+    TGraph * theGraph = newGraphs.at( theInts.at(i) );
+    std::cout << "Varying " << theInts.at(i) << std::endl;
+    for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
+      
+      double Content = theGraph->GetY()[bin];
+      double binCenter   = theGraph->GetX()[bin];
+      double theScale    = theVar->Eval(binCenter); 
+      std::cout << Content << " " << binCenter << " " << theScale << std::endl;
+      
+      //Check if >/< max/min of var graph
+      if( ( binCenter < Minimum ) 
+      ||  ( binCenter > Maximum ) ){
+        std::cout << "OOB" << std::endl;
+        theGraph->SetPoint( bin, binCenter, Content );
+      }
+      else{
+        std::cout << "Varying" << std::endl;
+        theGraph->SetPoint( bin, binCenter, theScale * Content ); 
+      }
+    }
+    theGraph->Write();
+
+    //Save the varied and nominal
+    //theHist->Write();
+    //oldHists.at( theInts.at(i) )->Write();
+  }
+
+  //Form the total cross sections from 
+  //the nominal and varied exlcusive channels
+  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
+  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
+  
+  for(size_t i = 1; i < theInts.size(); ++i){
+    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
+    AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
+  }
+  oldTotal->Write("oldTotal");
+  newTotal->Write("newTotal");
+
+  //Save the Totals
+  //oldTotal->Write();
+  //newTotal->Write();
+
+  //Need to make this smarter when going through the bins.
+  //What if there's an empty bin?
+/*
+  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
+
+    if( oldTotal->GetBinContent( bin ) == 0. ){
+      oldTotal->SetBinContent( bin, 1. );
+    }
+
+    if( ( newTotal->GetBinCenter( bin ) < Minimum ) 
+    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
+      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
+    }
+  }
+*/
+
+  //Form the variation from the new and old totals 
+  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
+  DivideGraphs(totalVariationGraph, oldTotal);
+  totalVariationGraph->Write("totalVar");
+
+  //Now go back through the varied exclusive channels
+  //and compute the final scale
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
+
+    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
+
+    DivideGraphs( exclusiveVariation, totalVariationGraph );
+    //exclusiveVariation->Write();
+
+    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation; 
+
+    std::string name = theInts.at(i);
+    std::string new_name = "new_" + name;
+    exclusiveVariation->Write((name + "Var").c_str());
+
+    //Delete the pointers here
+//    delete newHists.at( theInts.at(i) );
+//    delete oldHists.at( theInts.at(i) );
+//    gDirectory->Delete(name.c_str());
+//    gDirectory->Delete(new_name.c_str());
+  }
+
+  //Now go through and clear from memory all of the pointers
+//  delete newTotal;
+//  delete oldTotal;
+//
+//  gDirectory->Delete("oldTotal");
+//  gDirectory->Delete("newTotal");
+
+  //fout->Close();
+}
+
 void G4ReweightFinalState::GetMaxAndMin( std::string FileName ){
   tinyxml2::XMLDocument doc;
 
@@ -395,10 +538,34 @@ double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum )
   return theWeight;
 }
 
+double G4ReweightFinalState::GetWeightFromGraph( std::string theInt, double theMomentum ){
+  
+  if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
+    //std::cout << "Out of bounds. Returning 1" << std::endl;
+    return 1.;
+  }
+
+  //std::cout << "Getting hist for interaction: " << theInt << std::endl;
+  TGraph * theGraph = GetExclusiveVariationGraph( theInt ); 
+  //std::cout << "Hist exists: " << theHist << std::endl;
+//  int theBin = theHist->FindBin( theMomentum );
+  //std::cout << "Bin: " << theBin << std::endl;
+  double theWeight = theGraph->Eval( theMomentum );
+  //std::cout << "Weight: " << theWeight << std::endl;
+
+  return theWeight;
+}
+
 TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){
   //Add in check
   
   return exclusiveVariations.at( theInt ); 
+}
+
+TGraph * G4ReweightFinalState::GetExclusiveVariationGraph( std::string theInt ){
+  //Add in check
+  
+  return exclusiveVariationGraphs.at( theInt ); 
 }
 
 G4ReweightFinalState::~G4ReweightFinalState(){ 
@@ -408,6 +575,25 @@ G4ReweightFinalState::~G4ReweightFinalState(){
     delete oldHists.at( theInts.at(i) );
     delete newHists.at( theInts.at(i) );
   } 
+}
+
+void G4ReweightFinalState::AddGraphs( TGraph *target, TGraph* adder  ){
+  int nbins = target->GetN();
+  for( int i = 0; i < nbins; ++i ){
+    target->SetPoint(i , target->GetX()[i], (target->GetY()[i] + adder->GetY()[i]) );
+  }
+}
+
+void G4ReweightFinalState::DivideGraphs( TGraph *target, TGraph* divider  ){
+  int nbins = target->GetN();
+  for( int i = 0; i < nbins; ++i ){
+    if( divider->GetY()[i] < 0.000001 ){
+      target->SetPoint(i , target->GetX()[i], 1. );
+    }
+    else{
+      target->SetPoint(i , target->GetX()[i], (target->GetY()[i] / divider->GetY()[i]) );
+    }
+  }
 }
 
 /*G4ReweightFinalState::ClearVariations(){

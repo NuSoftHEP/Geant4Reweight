@@ -304,7 +304,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   
   std::map< std::string, TGraph* > theVariations;
   std::map< std::string, std::string >::iterator it = theCuts.begin();
-  TFile *fout = new TFile ("graph_weights.root", "RECREATE");
+  //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
   for( ; it != theCuts.end(); ++it ){
     std::string name = it->first;
     std::string cut  = it->second;
@@ -317,8 +317,8 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
     //Load the Hists
     newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
     oldGraphs[ name ] = (TGraph*)theGraph->Clone();
-    fout->cd();
-    oldGraphs[ name ]->Write( ("old_" + name).c_str());
+    //fout->cd();
+    //oldGraphs[ name ]->Write( ("old_" + name).c_str());
   }
   std::cout << "Loaded Graphs" << std::endl;
   //delete fout;
@@ -327,13 +327,13 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   std::cout << "Storing" << std::endl;
   //Just for loading. Could do everything in one shot, but it's
   //more understandable if it's compartmentalized like this
-  fout->cd();
+  //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
     //TGraph * theInter = FSScales[ theInts.at(i) ]; 
     //theVariations[ theInts.at(i) ] = theInter;
     std::cout << theInts.at(i) << std::endl;
     theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
-    theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
+    //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
   }
   std::cout << "Stored" << std::endl;
 
@@ -362,7 +362,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
         theGraph->SetPoint( bin, binCenter, theScale * Content ); 
       }
     }
-    theGraph->Write();
+    //theGraph->Write();
 
     //Save the varied and nominal
     //theHist->Write();
@@ -378,8 +378,8 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
     AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
     AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
   }
-  oldTotal->Write("oldTotal");
-  newTotal->Write("newTotal");
+  //oldTotal->Write("oldTotal");
+  //newTotal->Write("newTotal");
 
   //Save the Totals
   //oldTotal->Write();
@@ -404,7 +404,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   //Form the variation from the new and old totals 
   totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
   DivideGraphs(totalVariationGraph, oldTotal);
-  totalVariationGraph->Write("totalVar");
+  //totalVariationGraph->Write("totalVar");
 
   //Now go back through the varied exclusive channels
   //and compute the final scale
@@ -420,7 +420,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
 
     std::string name = theInts.at(i);
     std::string new_name = "new_" + name;
-    exclusiveVariation->Write((name + "Var").c_str());
+    //exclusiveVariation->Write((name + "Var").c_str());
 
     //Delete the pointers here
 //    delete newHists.at( theInts.at(i) );
@@ -571,9 +571,23 @@ TGraph * G4ReweightFinalState::GetExclusiveVariationGraph( std::string theInt ){
 G4ReweightFinalState::~G4ReweightFinalState(){ 
   for( size_t i = 0; i < theInts.size(); ++i){ 
 //    delete gROOT->FindObject( theInts.at(i).c_str() ); 
-    delete exclusiveVariations.at( theInts.at(i) );
-    delete oldHists.at( theInts.at(i) );
-    delete newHists.at( theInts.at(i) );
+    if( exclusiveVariations.find( theInts.at(i) ) != exclusiveVariations.end() )
+      delete exclusiveVariations.at( theInts.at(i) );
+
+    if( oldHists.find( theInts.at(i) ) != oldHists.end() )
+      delete oldHists.at( theInts.at(i) );
+
+    if( newHists.find( theInts.at(i) ) != newHists.end() )
+      delete newHists.at( theInts.at(i) );
+
+    if( exclusiveVariationGraphs.find( theInts.at(i) ) != exclusiveVariationGraphs.end() )
+      delete exclusiveVariationGraphs.at( theInts.at(i) );
+
+    if( oldGraphs.find( theInts.at(i) ) != oldGraphs.end() )
+      delete oldGraphs.at( theInts.at(i) );
+
+    if( newGraphs.find( theInts.at(i) ) != newGraphs.end() )
+      delete newGraphs.at( theInts.at(i) );
   } 
 }
 

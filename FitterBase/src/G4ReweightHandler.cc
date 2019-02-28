@@ -2,13 +2,17 @@
 
 std::string set_prec( double );
 
-G4ReweightHandler::G4ReweightHandler(){
+G4ReweightHandler::G4ReweightHandler(bool as_graphs): enable_graphs(as_graphs){
   
   dummy = new G4ReweightInter(std::vector< std::pair<double, double> >() );
+  double dummyX = 0.;
+  double dummyY = 1.;
+  dummyGraph = new TGraph( 1, &dummyX, &dummyY );
 }
 
 G4ReweightHandler::~G4ReweightHandler(){
   delete dummy;
+  delete dummyGraph;
  
 //  std::map<std::string, G4ReweightInter*>::iterator itInter;
 //  for( itInter = FSInters.begin(); itInter != FSInters.end(); ++itInter ){
@@ -54,12 +58,14 @@ void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitPar
     bool isDummy = false;
 
     std::vector< std::pair< double, double > > vars;
+    std::vector< double > varX, varY; 
 
     for( size_t i = 0; i < itPar->second.size(); ++i ){
       
       if( itPar->second.at( i ).Dummy ){
         std::cout << "Dummy" << std::endl;
         FSInters[name] = dummy;
+        FSGraphs[name] = dummyGraph;
         isDummy = true;
         break;
       }
@@ -70,6 +76,11 @@ void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitPar
 
         vars.push_back( std::make_pair( range.first,  value ) );
         vars.push_back( std::make_pair( range.second, value ) );
+
+        varX.push_back( range.first );
+        varX.push_back( range.second );
+        varY.push_back( value );
+        varY.push_back( value );
       }
   
     }
@@ -79,7 +90,8 @@ void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitPar
         std::cout << vars.at(i).first << " " << vars.at(i).second << std::endl;
       }
 
-      FSInters[name]  = new G4ReweightInter(vars);
+      FSInters[name] = new G4ReweightInter(vars);
+      FSGraphs[name] = new TGraph(varX.size(), &varX[0], &varY[0]);
     }
   }
 }
@@ -94,7 +106,13 @@ void G4ReweightHandler::SetInters( std::map< std::string, G4ReweightInter* > & t
 
 FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus ){
 
-  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, max, min, PiMinus );
+  G4ReweightFinalState * FSReweighter;
+  if( enable_graphs ){
+    FSReweighter = new G4ReweightFinalState( fFSFile, FSGraphs, max, min, PiMinus );
+  }
+  else{
+    FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, max, min, PiMinus );
+  }
   //////////////////////////////
 
   //NEED TO FIX
@@ -140,75 +158,6 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double 
 
   return theSample;
 }
-
-/*FitSample G4ReweightHandler::DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus ){
-
-
-  std::string norm_abs_str = set_prec(norm_abs);
-  std::string norm_cex_str = set_prec(norm_cex);
-
-
-
-  abs_vector.push_back( std::make_pair(200., norm_abs) );  
-  abs_vector.push_back( std::make_pair(300., norm_abs) );  
-  FSInters["abs"]  = new G4ReweightInter(abs_vector);
-
-  cex_vector.push_back( std::make_pair(200., norm_cex) );  
-  cex_vector.push_back( std::make_pair(300., norm_cex) );       
-  FSInters["cex"]  = new G4ReweightInter(cex_vector);
-
-  FSInters["inel"] = dummy;
-  FSInters["prod"] = dummy;
-  FSInters["dcex"] = dummy;
-
-
-  G4ReweightFinalState * FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, 300., 200., PiMinus );
-  //////////////////////////////
-
-  //NEED TO FIX
-  //RWFileName = theName + ".root";
-  RWFileName = outName;
-
-
-  //Make the reweighter pointer and do the reweighting
-
-  std::cout << "Reweighting MC File: 0" << std::endl;
-
-  Reweighter = new G4ReweightTreeParser( fRawMCFileNames->at(0),  RWFileName );
-  Reweighter->FillAndAnalyzeFS(FSReweighter);
-
-  std::cout << std::endl;
-  for( size_t i = 1; i < fRawMCFileNames->size(); ++i ){
-
-    Reweighter->CloseInput();
-
-    std::cout << "MC File: " << i << std::endl;
-    Reweighter->OpenNewInput( fRawMCFileNames->at(i) );
-    Reweighter->FillAndAnalyzeFS(FSReweighter);
-    std::cout << "Tree Entries: " << Reweighter->GetTree()->GetEntries() << std::endl;
-    std::cout << std::endl;
-
-  }   
-
-  Reweighter->CloseInput();
-  Reweighter->CloseAndSaveOutput();
-  ////////////////////////////////
-
-  
-  FitSample theSample; 
-  theSample.theName = theName;
-  theSample.theFile = RWFileName;
-  theSample.Raw = false;
-
-
-  //memory management
-  delete FSReweighter;
-  delete Reweighter;
-  ClearFSInters();
-
-  return theSample;
-}
-*/
 
 void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
 

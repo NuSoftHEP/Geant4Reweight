@@ -99,7 +99,7 @@ int main(int argc, char ** argv){
     sets.push_back( FCLSets[i].get< std::string >("Name") );
   }
 
-  G4ReweightHandler handler;  
+  G4ReweightHandler handler(true);  
   handler.ParseFHiCL( FCLSets );
   ///////////////////////////////////////////
 

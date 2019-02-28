@@ -20,12 +20,13 @@
 #include <string>
 #include "tinyxml2.h"
 
+#include "TGraph.h"
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 class G4ReweightHandler{
   public:
-    G4ReweightHandler();
+    G4ReweightHandler(bool as_graphs = false);
     ~G4ReweightHandler();
 
     void ParseXML(std::string, std::vector< std::string >);
@@ -40,6 +41,9 @@ class G4ReweightHandler{
 
 
   protected:
+
+    bool enable_graphs = false;
+
     std::vector< std::string > * fRawMCFileNames;
     std::string fFSFileName;
 
@@ -53,7 +57,9 @@ class G4ReweightHandler{
     TTree * fFSTree;
 
     std::map< std::string, G4ReweightInter* > FSInters;
+    std::map< std::string, TGraph* > FSGraphs;
     G4ReweightInter * dummy;
+    TGraph * dummyGraph;
     std::vector< std::pair< double, double > > abs_vector;
     std::vector< std::pair< double, double > > cex_vector;
 

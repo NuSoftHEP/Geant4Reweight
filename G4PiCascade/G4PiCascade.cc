@@ -54,7 +54,6 @@ int main(int argc, char * argv[]){
   double step = delta / nDivisions; 
   for( size_t i = 0; i <= nDivisions; ++i ){
     momenta.push_back( range.first + i * step );
-    std::cout << momenta.back() << std::endl;
   }
 
   std::string outFileName = ps.get< std::string >("Outfile");
@@ -81,9 +80,11 @@ int main(int argc, char * argv[]){
   G4PionMinus * piminus;
   G4ParticleDefinition * part_def;
   if( type == 211 ){
+    std::cout << "Chose PiPlus" << std::endl;
     part_def = piplus->Definition();
   }
   else if( type == -211 ){
+    std::cout << "Chose PiMinus" << std::endl;
     part_def = piminus->Definition();
   }
   else{
@@ -101,9 +102,9 @@ int main(int argc, char * argv[]){
   G4CascadeInterface * theCascade = new G4CascadeInterface( "BertiniCascade" );
   
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
+  std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
 
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
-    
     double theMomentum = momenta[iM]; 
     double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );

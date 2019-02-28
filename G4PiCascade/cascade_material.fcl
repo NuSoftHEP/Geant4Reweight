@@ -5,4 +5,44 @@ LAr: {
   Density: 1.390
 }
 
+C: {
+  Name: "graphite"
+  A:   6
+  Mass: 21.01
+  Density: 2.266 
+}
 
+O: {
+  Name: "oxygen"
+  A: 8
+  Mass: 16.
+  Density: 1.141
+}
+
+Al: {
+  Name: "aluminum"
+  A: 13
+  Mass: 26.98
+  Density: 2.699
+}
+
+Fe: {
+  Name: "iron"
+  A: 26
+  Mass: 55.85
+  Density: 7.874
+}
+
+Cu: {
+  Name: "copper"
+  A: 29
+  Mass: 63.55
+  Density: 8.960
+}
+
+Pb: {
+  Name: "lead" 
+  A: 82
+  Mass: 207.2
+  Density: 11.35
+}

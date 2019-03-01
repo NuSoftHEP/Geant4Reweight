@@ -22,7 +22,7 @@ int main(int argc, char ** argv){
 
   //DUETFitter df(argv[1]); 
   DUETFitter df(files);
-  df.ParseXML(argv[2]);
+  //df.ParseXML(argv[2]);
   df.LoadData(); 
 
 
@@ -47,7 +47,7 @@ int main(int argc, char ** argv){
 //  }
 
   for( size_t i = 0; i < df.GetNSamples(); ++i ){
-    std::cout << std::endl << "Reweighting. Abs: " << df.GetSample(i).abs << " Cex: " << df.GetSample(i).cex << std::endl;
+    //std::cout << std::endl << "Reweighting. Abs: " << df.GetSample(i).abs << " Cex: " << df.GetSample(i).cex << std::endl;
     df.SetActiveSample(i);
 //    df.LoadMC();
     df.LoadMCVector();

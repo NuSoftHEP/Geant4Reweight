@@ -65,6 +65,8 @@ class G4ReweightHandler{
 
     void ClearFSInters();
 
+    std::vector< FitParameter > ActiveParameters;
+
 
   public:
     void CloseFSFile(){ delete fFSTree; fFSFile->Close(); delete fFSFile; };

@@ -44,7 +44,7 @@ class G4ReweightFitter{
 
     void SetActiveSample( size_t, TDirectory * );
     void AddSample( FitSample theSample ){ samples.push_back( theSample); };
-    void ParseXML(std::string);
+    //void ParseXML(std::string);
 
     std::string GetType(){ return type; };
 

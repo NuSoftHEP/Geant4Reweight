@@ -61,13 +61,12 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 }
 
 void G4ReweightFitter::GetMCGraphs(){
-  std::cout << "Sample: " << std::endl
-          << "\tabs: "  << ActiveSample->abs  << std::endl
-          << "\tcex: "  << ActiveSample->cex  << std::endl
-          << "\tdcex: " << ActiveSample->dcex << std::endl
-          << "\tinel: " << ActiveSample->inel << std::endl
-          << "\tprod: " << ActiveSample->prod << std::endl
-          << "\tFile: " << ActiveSample->theFile << std::endl;
+  std::cout << "Sample: " << std::endl;
+  std::cout << "Sample: " << std::endl;
+  for( size_t i = 0; i < ActiveSample->Parameters.size(); ++i ){
+    std::cout << "\t" << ActiveSample->Parameters.at(i).Name << " " << ActiveSample->Parameters.at(i).Value << std::endl;
+  }
+  std::cout << "\tFile: " << ActiveSample->theFile << std::endl;
 
   TFile fMCFile(ActiveSample->theFile.c_str(), "READ");
   fMCTree = (TTree*)fMCFile.Get("tree");
@@ -150,13 +149,11 @@ void G4ReweightFitter::SaveData(TDirectory * data_dir){
 }
 
 TTree* G4ReweightFitter::GetReweightFS( /*FitSample theSample*/ ){
-  std::cout << "Sample: " << std::endl
-            << "\tabs: "  << ActiveSample->abs  << std::endl
-            << "\tcex: "  << ActiveSample->cex  << std::endl
-            << "\tdcex: " << ActiveSample->dcex << std::endl
-            << "\tinel: " << ActiveSample->inel << std::endl
-            << "\tprod: " << ActiveSample->prod << std::endl
-            << "\tFile: " << ActiveSample->theFile << std::endl;
+  std::cout << "Sample: " << std::endl;
+  for( size_t i = 0; i < ActiveSample->Parameters.size(); ++i ){
+    std::cout << "\t" << ActiveSample->Parameters.at(i).Name << " " << ActiveSample->Parameters.at(i).Value << std::endl;
+  }
+  std::cout << "\tFile: " << ActiveSample->theFile << std::endl;
 
 //To do: make these members of the class to handle memory better
   TFile * RWFile = new TFile(ActiveSample->theFile.c_str(), "READ");
@@ -220,7 +217,7 @@ void G4ReweightFitter::SaveExpChi2( double &theChi2, std::string &name ){
   chi2_val.Write( (name + "_chi2").c_str() );
 }
 
-void G4ReweightFitter::ParseXML(std::string FileName){
+/*void G4ReweightFitter::ParseXML(std::string FileName){
 
   tinyxml2::XMLDocument doc;
 
@@ -329,7 +326,7 @@ void G4ReweightFitter::ParseXML(std::string FileName){
   //std::cout << "Data: " << dataFile << std::endl;
 
   //fDataFileName = dataFile;
-}
+}*/
 
 void G4ReweightFitter::SetActiveSample( size_t i, TDirectory * output_dir){ 
   ActiveSample = &samples[i]; 

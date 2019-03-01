@@ -2,10 +2,12 @@
 #define FitSample_h 1
 
 #include <string>
+#include <vector>
+#include "FitParameter.hh"
 
 struct FitSample{
   std::string theName;
-  double abs, cex, inel, prod, dcex;
+  std::vector< FitParameter > Parameters;
   bool Raw;
   std::string theFile;
 };

@@ -84,5 +84,6 @@ b: {
   Min: 200.
 }
 
-Samples: [ @local::a, @local::b ]
+#Samples: [ @local::a, @local::b ]
+Samples: [ @local::a ]
 

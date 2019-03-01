@@ -10,7 +10,8 @@ C_piplus: {
      "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_4.root"
   ]
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piplus.root" 
+#  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/finalstate_pt_nom_C_piplus.root" 
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
 }
 
 C_piminus: {

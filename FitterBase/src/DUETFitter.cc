@@ -212,15 +212,15 @@ void DUETFitter::DoReweightFSVector( double norm_abs, double norm_cex ){
 
 TTree* DUETFitter::GetReweightFS( FitSample theSample ){
   std::cout << "Sample: " << std::endl
-            << "\tabs: "  << theSample.abs  << std::endl
-            << "\tcex: "  << theSample.cex  << std::endl
-            << "\tdcex: " << theSample.dcex << std::endl
-            << "\tinel: " << theSample.inel << std::endl
-            << "\tprod: " << theSample.prod << std::endl
+//            << "\tabs: "  << theSample.abs  << std::endl
+//            << "\tcex: "  << theSample.cex  << std::endl
+//            << "\tdcex: " << theSample.dcex << std::endl
+//            << "\tinel: " << theSample.inel << std::endl
+//            << "\tprod: " << theSample.prod << std::endl
             << "\tFile: " << theSample.theFile << std::endl;
 
-  norm_abs_param = theSample.abs;
-  norm_cex_param = theSample.cex;
+//  norm_abs_param = theSample.abs;
+//  norm_cex_param = theSample.cex;
 
   TFile * RWFile = new TFile(theSample.theFile.c_str(), "READ");
   TTree * RWTree = (TTree*)RWFile->Get("tree");
@@ -256,7 +256,7 @@ void DUETFitter::DoReweight( double norm ){
 void DUETFitter::LoadMC(){
 
   if( ActiveSample->Raw ){ 
-    DoReweightFS( ActiveSample->abs, ActiveSample->cex );
+    DoReweightFS( 1., 1./*ActiveSample->abs, ActiveSample->cex*/ );
     fMCTree = Reweighter->GetTree();
   }
   else{
@@ -301,7 +301,7 @@ void DUETFitter::LoadMC(){
 void DUETFitter::LoadMCVector(){
   
   if( ActiveSample->Raw ){ 
-    DoReweightFSVector( ActiveSample->abs, ActiveSample->cex );
+    DoReweightFSVector( 1.,1./*ActiveSample->abs, ActiveSample->cex */);
     fMCTree = Reweighter->GetTree();
   }
   else{
@@ -440,7 +440,7 @@ void DUETFitter::ClearMemory(){
   delete MC_xsec_cex;
 }
 
-void DUETFitter::ParseXML(std::string FileName){
+/*void DUETFitter::ParseXML(std::string FileName){
 
   tinyxml2::XMLDocument doc;
 
@@ -524,4 +524,4 @@ void DUETFitter::ParseXML(std::string FileName){
   std::cout << "Data: " << dataFile << std::endl;
 
   fDataFileName = dataFile;
-}
+}*/

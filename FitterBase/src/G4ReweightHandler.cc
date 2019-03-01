@@ -47,6 +47,7 @@ void G4ReweightHandler::DefineInters( std::vector< fhicl::ParameterSet > ps ){
 }
 
 void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitParameter > > pars ){
+  ActiveParameters.clear();
   std::cout << "Defining Inters" << std::endl;
 
 
@@ -71,6 +72,7 @@ void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitPar
       }
   
       else{        
+        ActiveParameters.push_back( itPar->second.at(i) );
         double value = itPar->second.at( i ).Value;
         std::pair< double, double > range = itPar->second.at( i ).Range;
 
@@ -149,7 +151,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double 
   theSample.theName = theName;
   theSample.theFile = RWFileName;
   theSample.Raw = false;
-
+  theSample.Parameters = ActiveParameters;
 
   //memory management
   delete FSReweighter;
@@ -159,7 +161,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double 
   return theSample;
 }
 
-void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
+/*void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
 
   tinyxml2::XMLDocument doc;
 
@@ -222,7 +224,7 @@ void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string 
 
   }
 
-}
+}*/
 
 void G4ReweightHandler::ParseFHiCL( std::vector<fhicl::ParameterSet> ps_vec){
 

@@ -1,3 +1,17 @@
+check_sample: {
+  Name: "AbsLow1.00_AbsHigh1.00_CexLow1.00"
+  Files:  [ 
+    ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"]
+  ]
+  Raw: [ [ "C_piplus", true] ]
+  Variations: { 
+  }
+
+  Max: 300.
+  Min: 200.
+}
+
+
 a: {
   Name: "AbsLow1.00_AbsHigh1.00_CexLow1.00"
   Files:  [
@@ -14,6 +28,7 @@ a: {
     ["Pb_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piplus_abs1.00_cex1.00.root"],
     ["Pb_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piminus_abs1.00_cex1.00.root"]
   ]
+
   Raw: [ 
     ["C_piplus",  true],
     ["C_piminus", false],   
@@ -35,8 +50,6 @@ a: {
     fCexLow:  1.0
   }
 
-  abs: 1.00
-  cex: 1.00
   Max: 300. 
   Min: 200.
 }
@@ -85,5 +98,5 @@ b: {
 }
 
 #Samples: [ @local::a, @local::b ]
-Samples: [ @local::a ]
+Samples: [ @local::check_sample ]
 

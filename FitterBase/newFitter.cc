@@ -74,23 +74,6 @@ int main(int argc, char ** argv){
   }
   /////////////////////////////////////////////////
 
-  ///Defining experiments
-  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
-  std::cout << "Getting Experiments: "  << exps.size() << std::endl;
-  for(size_t i = 0; i < exps.size(); ++i){
-    G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
-    std::cout << std::endl;
-    mapSetsToFitters[ exp->GetType() ].push_back( exp ); 
-  }
-
-  bool includeDUET = ps.get< bool >("IncludeDUET");
-  newDUETFitter df(out);
-  if( includeDUET ){ 
-    std::cout << "Including DUET" << std::endl;
-    mapSetsToFitters["C_piplus"].push_back( &df );
-  }
-  ///////////////////////////////////////////
-
   ///Defining MC Sets
   std::vector< std::string > sets;
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
@@ -101,6 +84,28 @@ int main(int argc, char ** argv){
 
   G4ReweightHandler handler(true);  
   handler.ParseFHiCL( FCLSets );
+  ///////////////////////////////////////////
+
+  ///Defining experiments
+  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
+  std::cout << "Getting Experiments: "  << exps.size() << std::endl;
+  for(size_t i = 0; i < exps.size(); ++i){
+    std::cout << std::endl;
+    std::cout << "Trying to find " << exps.at(i).get<std::string>("Name") << " " << exps.at(i).get<std::string>("Type") << std::endl;
+    if( std::find( sets.begin(), sets.end(), exps.at(i).get< std::string >( "Type" ) ) != sets.end() ){
+      G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
+      mapSetsToFitters[ exp->GetType() ].push_back( exp ); 
+    }
+  }
+
+  if( std::find( sets.begin(), sets.end(), "C_piplus" ) != sets.end() ){ 
+    bool includeDUET = ps.get< bool >("IncludeDUET");
+    newDUETFitter * df = new newDUETFitter(out);
+    if( includeDUET ){ 
+      std::cout << "Including DUET" << std::endl;
+      mapSetsToFitters["C_piplus"].push_back( df );
+    }
+  }
   ///////////////////////////////////////////
 
   //Defining varied samples
@@ -116,15 +121,8 @@ int main(int argc, char ** argv){
     std::map< std::string, bool > Raw = std::map< std::string, bool >(tempRaw.begin(), tempRaw.end());
     
 
-    //Get Rid of this
-//    double abs = sampleSet.get<double>("abs");
-//    double cex = sampleSet.get<double>("cex");
     std::string Name = sampleSet.get<std::string>("Name");
-
     std::cout << Name << std::endl;
-//    std::cout << "abs: " << abs << std::endl;
-//    std::cout << "cex: " << cex << std::endl;
-
     
     std::vector< std::string >::iterator itSet = sets.begin();
     for( itSet; itSet != sets.end(); ++itSet ){
@@ -133,15 +131,7 @@ int main(int argc, char ** argv){
       
       std::cout << "Checking " << theSet << std::endl;
 
-      //At this point: Replace the static members with 2 vectors:
-      //a) Parameter Names
-      //b) Parameter Values
       FitSample theSample;
-//      theSample.abs = abs;
-//      theSample.cex = cex;
-//      theSample.dcex = 0.;
-//      theSample.inel = 0.;
-//      theSample.prod = 0.;
 
       fhicl::ParameterSet variations = sampleSet.get< fhicl::ParameterSet >( "Variations" );
       //Go through each of the pre-defined parameters and see if there is a value in Variations
@@ -235,13 +225,6 @@ int main(int argc, char ** argv){
     std::string dir_name = tempSample.theName;
     std::cout << dir_name << std::endl;
 
-    //double abs =  tempSample.abs;
-    //double cex =  tempSample.cex;
-    //std::cout << "Vals: " << abs << " " << cex << std::endl;
-    //double inel = tempSample.inel;
-    //double prod = tempSample.prod;
-    //double dcex = tempSample.dcex;
-
     TDirectory * outdir = out->mkdir( dir_name.c_str() );
 
     outdir->cd();
@@ -274,26 +257,12 @@ int main(int argc, char ** argv){
     outdir->cd();
     chi2_result.Write("Chi2");
 
-    //abs_vector.push_back( abs );
-    //cex_vector.push_back( cex );
     chi2_vector.push_back( chi2 );
   }
 
-  //out->cd();
-
-  //Get Rid of this
-//  TGraph2D * fitSurf = new TGraph2D( abs_vector.size(), &abs_vector[0], &cex_vector[0], &chi2_vector[0]); 
-  
- // fitSurf->Write("chi2_surf");
   out->Close();
 
   std::cout << "Done" << std::endl;
 
   return 0;
 }
-
-/*std::string set_prec(double input){
-  std::stringstream stream_in; 
-  stream_in << std::fixed << std::setprecision(2) << input;
-  return stream_in.str();
-}*/

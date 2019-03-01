@@ -343,22 +343,18 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   for( size_t i = 0; i < theInts.size(); ++i ){
     TGraph * theVar = theVariations.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    std::cout << "Varying " << theInts.at(i) << std::endl;
     for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
       double binCenter   = theGraph->GetX()[bin];
       double theScale    = theVar->Eval(binCenter); 
-      std::cout << Content << " " << binCenter << " " << theScale << std::endl;
       
       //Check if >/< max/min of var graph
       if( ( binCenter < Minimum ) 
       ||  ( binCenter > Maximum ) ){
-        std::cout << "OOB" << std::endl;
         theGraph->SetPoint( bin, binCenter, Content );
       }
       else{
-        std::cout << "Varying" << std::endl;
         theGraph->SetPoint( bin, binCenter, theScale * Content ); 
       }
     }

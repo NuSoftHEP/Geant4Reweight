@@ -16,6 +16,7 @@
 #include "G4RunManager.hh"
 #include "G4PiCascadeDetectorConstruction.hh"
 #include "G4PiCascadePhysicsList.hh"
+#include "G4HadronicException.hh"
 
 
 #include <utility>
@@ -105,15 +106,25 @@ int main(int argc, char * argv[]){
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
 
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
+    std::cout << "Momentum: " << momenta.at(iM) << std::endl;
     double theMomentum = momenta[iM]; 
     double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );
     for( size_t iC = 0; iC < nCascades; ++iC ){
+
+      if( !(iC % 1000) ) std::cout << "\tCascade: " << iC << std::endl;
+
       nPi0 = 0; 
       nPiPlus = 0; 
       nPiMinus = 0;
       momentum = dynamic_part->GetTotalMomentum();
-      G4HadFinalState * theFS = theCascade->ApplyYourself( *dynamic_part, *theNucleus );
+      G4HadFinalState * theFS;
+      try{
+        theFS = theCascade->ApplyYourself( *dynamic_part, *theNucleus );
+      }
+      catch( G4HadronicException aR ){
+        std::cout << "Something went wrong" <<  std::endl;
+      }
 //      std::cout << "Secondaries: " << theFS->GetNumberOfSecondaries() << std::endl;
 
       size_t nSecondaries = theFS->GetNumberOfSecondaries();

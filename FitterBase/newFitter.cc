@@ -17,10 +17,13 @@ std::string set_prec(double);
 
 int main(int argc, char ** argv){
 
+
+  //G4ReweightFitManager FitMan( outFileName );
   TFile * out = new TFile ("newFitter_try.root", "RECREATE");
   out->cd();
   TDirectory * data_dir = out->mkdir( "Data" );
 
+  //remove this
   std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
@@ -28,7 +31,9 @@ int main(int argc, char ** argv){
 
   std::map< std::string, std::vector< FitParameter > > FullParameterSet;
 
+
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
+  //FitMan.MakeFitParameters( FitParSets );
   std::cout << "Making parameter sets" << std::endl;
   for( size_t i = 0; i < FitParSets.size(); ++i ){
     fhicl::ParameterSet theSet = FitParSets.at(i);
@@ -78,6 +83,7 @@ int main(int argc, char ** argv){
   std::vector< std::string > sets;
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
   
+  //FitMan.DefineMCSets( FCLSets );
   for( size_t i = 0; i < FCLSets.size(); ++i ){
     sets.push_back( FCLSets[i].get< std::string >("Name") );
   }
@@ -87,6 +93,7 @@ int main(int argc, char ** argv){
   ///////////////////////////////////////////
 
   ///Defining experiments
+  //FitMan.DefineExperiments( ps );
   std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
   std::cout << "Getting Experiments: "  << exps.size() << std::endl;
   for(size_t i = 0; i < exps.size(); ++i){
@@ -110,6 +117,7 @@ int main(int argc, char ** argv){
 
   //Defining varied samples
   std::vector< fhicl::ParameterSet > samples = ps.get< std::vector< fhicl::ParameterSet > >("Samples"); 
+  //FitMan.GetAllSamples( samples );
   std::cout << "Got " << samples.size() << " samples" << std::endl;
   size_t nSamples = samples.size();
 
@@ -194,6 +202,7 @@ int main(int argc, char ** argv){
 
  
   //Flatten the map to fitters while loading data for ease 
+  //FitMan.GetAllData();
   std::vector< G4ReweightFitter* > allFitters;
  
   std::map< std::string, std::vector< G4ReweightFitter* > >::iterator itSet;
@@ -211,14 +220,27 @@ int main(int argc, char ** argv){
   
   std::cout << "Have: " << nSamples << " samples" << std::endl;
 
-  std::vector< double > abs_vector; 
-  std::vector< double > cex_vector; 
-  std::vector< double > chi2_vector; 
+  //FitMan.RunFitAndSave();
+  //Create Fit Tree to store the chi2 values and parameters
+  TTree * fit_tree = new TTree( "FitTree", "");
+  double chi2 = 0.;
+  fit_tree->Branch( "Chi2", &chi2 );
+  
+  //Go through and get the parameters
+  FitSample tempSample = allFitters[0]->GetSample(0);
+  std::map< std::string, double > parameter_values;
+  for( size_t i = 0; i < tempSample.Parameters.size(); ++i ){
+    std::string branch_name = tempSample.Parameters.at(i).Name;
+    std::cout << "Making branch for " << branch_name << std::endl;
+    
+    parameter_values[ branch_name ] = 0.; 
+    fit_tree->Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );
+  }
+
 
   for( size_t i = 0; i < nSamples; ++i ){
 
-    double chi2 = 0.;
-    
+    chi2 = 0.;    
     //Just for getting the parameter values
     auto tempFitter = allFitters[0];
     FitSample tempSample = tempFitter->GetSample(i);
@@ -234,6 +256,8 @@ int main(int argc, char ** argv){
       TVectorD par_val(1);
       par_val[0] = tempSample.Parameters.at(i).Value;
       par_val.Write( tempSample.Parameters.at(i).Name.c_str() );
+
+      parameter_values.at( tempSample.Parameters.at(i).Name ) = tempSample.Parameters.at(i).Value;
     }
 
     for( size_t j = 0; j < allFitters.size(); ++j ){
@@ -257,9 +281,12 @@ int main(int argc, char ** argv){
     outdir->cd();
     chi2_result.Write("Chi2");
 
-    chi2_vector.push_back( chi2 );
+    fit_tree->Fill();
+
   }
 
+  out->cd();
+  fit_tree->Write();
   out->Close();
 
   std::cout << "Done" << std::endl;

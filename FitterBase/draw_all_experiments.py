@@ -31,10 +31,13 @@ for exp in exps:
     
     MCs = []
     chi2_vals = []
+    ncolor = kRed - 4
     for Dir in theDirs:
       MC = f.Get(Dir + "/" + exp + "/" + cut)
-      MC.SetLineColor(2)
-      MC.SetMarkerColor(2)
+      MC.SetLineColor(ncolor)
+      MC.SetLineWidth(2)
+      MC.SetMarkerColor(ncolor)
+      ncolor = ncolor + 1
       MC.SetMarkerStyle(20)
 
       MCs.append(MC)

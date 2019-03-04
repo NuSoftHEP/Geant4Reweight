@@ -46,6 +46,7 @@ void G4ReweightHandler::DefineInters( std::vector< fhicl::ParameterSet > ps ){
   }
 }
 
+///Replace the dummy checking with giving a map< std::string, bool > isDummy
 void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitParameter > > pars ){
   ActiveParameters.clear();
   std::cout << "Defining Inters" << std::endl;

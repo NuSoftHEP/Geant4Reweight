@@ -1,77 +1,60 @@
-check_sample: {
+a: {
   Name: "AbsLow1.00_AbsHigh1.00_CexLow1.00"
   Files:  [ 
-    ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"]
+    ["C_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/C_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["C_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/C_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["O_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/O_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["O_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/O_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Al_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Al_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Al_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Al_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Fe_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Fe_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Fe_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Fe_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Cu_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Cu_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Cu_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Cu_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Pb_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piplus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"],
+    ["Pb_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"]
   ]
-  Raw: [ [ "C_piplus", true] ]
+  Raw: [ 
+    ["C_piplus",  false],
+    ["C_piminus", false],   
+    ["O_piplus",  false],
+    ["O_piminus", false],
+    ["Al_piplus",  false],
+    ["Al_piminus", false],
+    ["Fe_piplus",  false],
+    ["Fe_piminus", false],
+    ["Cu_piplus",  false],
+    ["Cu_piminus", false],
+    ["Pb_piplus",  false],
+    ["Pb_piminus", false]
+  ]
+
   Variations: { 
   }
 
-  Max: 300.
+  Max: 400.
   Min: 200.
 }
 
-
-a: {
-  Name: "AbsLow1.00_AbsHigh1.00_CexLow1.00"
-  Files:  [
-    ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"],
-    ["C_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piminus_abs1.00_cex1.00.root"],
-    ["O_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piplus_abs1.00_cex1.00.root"],
-    ["O_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piminus_abs1.00_cex1.00.root"],
-    ["Al_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piplus_abs1.00_cex1.00.root"],
-    ["Al_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piminus_abs1.00_cex1.00.root"],
-    ["Fe_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piplus_abs1.00_cex1.00.root"],
-    ["Fe_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piminus_abs1.00_cex1.00.root"],
-    ["Cu_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piplus_abs1.00_cex1.00.root"],
-    ["Cu_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piminus_abs1.00_cex1.00.root"],
-    ["Pb_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piplus_abs1.00_cex1.00.root"],
-    ["Pb_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piminus_abs1.00_cex1.00.root"]
-  ]
-
-  Raw: [ 
-    ["C_piplus",  true],
-    ["C_piminus", false],   
-    ["O_piplus",  false],
-    ["O_piminus", false],
-    ["Al_piplus",  false],
-    ["Al_piminus", false],
-    ["Fe_piplus",  false],
-    ["Fe_piminus", false],
-    ["Cu_piplus",  false],
-    ["Cu_piminus", false],
-    ["Pb_piplus",  false],
-    ["Pb_piminus", false]
-  ]
-
-  Variations: {  
-    fAbsLow:  1.0
-    fAbsHigh: 1.0
-    fCexLow:  1.0
-  }
-
-  Max: 300. 
-  Min: 200.
-}
 
 b: {
-  Name: "AbsLow1.10_AbsHigh0.90_CexLow1.00"
-  Files:  [
-    ["C_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piplus_abs1.00_cex1.00.root"],
-    ["C_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/C_piminus_abs1.00_cex1.00.root"],
-    ["O_piplus",    "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piplus_abs1.00_cex1.00.root"],
-    ["O_piminus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/O_piminus_abs1.00_cex1.00.root"],
-    ["Al_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piplus_abs1.00_cex1.00.root"],
-    ["Al_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Al_piminus_abs1.00_cex1.00.root"],
-    ["Fe_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piplus_abs1.00_cex1.00.root"],
-    ["Fe_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Fe_piminus_abs1.00_cex1.00.root"],
-    ["Cu_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piplus_abs1.00_cex1.00.root"],
-    ["Cu_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Cu_piminus_abs1.00_cex1.00.root"],
-    ["Pb_piplus",   "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piplus_abs1.00_cex1.00.root"],
-    ["Pb_piminus",  "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/Pb_piminus_abs1.00_cex1.00.root"]
+  Name: "AbsLow0.90_AbsHigh1.10_CexLow1.00"
+  Files:  [ 
+    ["C_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/C_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["C_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/C_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["O_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/O_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["O_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/O_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Al_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Al_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Al_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Al_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Fe_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Fe_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Fe_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Fe_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Cu_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Cu_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Cu_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Cu_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Pb_piplus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piplus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"],
+    ["Pb_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"]
   ]
   Raw: [ 
-    ["C_piplus",  true],
+    ["C_piplus",  false],
     ["C_piminus", false],   
     ["O_piplus",  false],
     ["O_piminus", false],
@@ -85,18 +68,15 @@ b: {
     ["Pb_piminus", false]
   ]
 
-  Variations: {  
-    fAbsLow:  1.1
+  Variations: { 
+    fAbsLow: 1.1
     fAbsHigh: 0.9
-    fCexLow:  1.0
+    fCexLow: 1.0
   }
 
-  abs: 1.00
-  cex: 1.00
-  Max: 400. 
+  Max: 400.
   Min: 200.
 }
 
-#Samples: [ @local::a, @local::b ]
-Samples: [ @local::check_sample ]
+Samples: [ @local::a, @local::b ]
 

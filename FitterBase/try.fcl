@@ -10,26 +10,26 @@
 
 Sets: [
   @local::C_piplus,
-#  @local::C_piminus,
-#  @local::O_piplus,
-#  @local::O_piminus,
-#  @local::Al_piplus,
-#  @local::Al_piminus,
-#  @local::Fe_piplus,
-#  @local::Fe_piminus,
-#  @local::Cu_piplus,
-#  @local::Cu_piminus,
-#  @local::Pb_piplus,
-#  @local::Pb_piminus
+  @local::C_piminus,
+  @local::O_piplus,
+  @local::O_piminus,
+  @local::Al_piplus,
+  @local::Al_piminus,
+  @local::Fe_piplus,
+  @local::Fe_piminus,
+  @local::Cu_piplus,
+  @local::Cu_piminus,
+  @local::Pb_piplus,
+  @local::Pb_piminus
 ]
 
 Experiments: [ 
   @sequence::C_experiments,
-#  @sequence::O_experiments,
-#  @sequence::Al_experiments,
-#  @sequence::Fe_experiments,
-#  @sequence::Cu_experiments,
-#  @sequence::Pb_experiments
+  @sequence::O_experiments,
+  @sequence::Al_experiments,
+  @sequence::Fe_experiments,
+  @sequence::Cu_experiments,
+  @sequence::Pb_experiments
 ]
 
 IncludeDUET: true

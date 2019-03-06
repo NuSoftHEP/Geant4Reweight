@@ -40,20 +40,8 @@ echo "copied tar"
 cd ${_CONDOR_SCRATCH_DIR}/code/
 tar -xf GRWTar.tar 
 
-#cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/
-#tar -xf geant4_new_install.tar
-#
-#cd ${_CONDOR_SCRATCH_DIR}/code/geant-build
-#tar -xf geant4_build.tar
-#
-#cd ${_CONDOR_SCRATCH_DIR}/code/G4Sim-build/
-#tar -xf G4Sim_build.tar 
-
 cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-build/
 tar -xf G4Reweight.tar
-
-#cd ${_CONDOR_SCRATCH_DIR}/code/macros/
-#tar -xf macros.tar
 
 cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-install/
 tar -xf ReweightBase-install.tar
@@ -73,23 +61,17 @@ tar -xf Reweight-Data.tar
 ls
 ######################
 
-#cd ${_CONDOR_SCRATCH_DIR}/code/geant4-install/bin/
-##source geant4_lite.sh
-#source geant4.sh
-
-
-
 ###Uncomment this
-cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-install/lib/
+cd ${_CONDOR_SCRATCH_DIR}/code/ReweightBase-install/ReweightBase-install/lib/
 export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
 
-cd ${_CONDOR_SCRATCH_DIR}/code/tinyxml2-install/lib64/
+cd ${_CONDOR_SCRATCH_DIR}/code/tinyxml2-install/tinyxml/tinyxml2-install/lib64/
 export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
 echo "ADDED TO LD LIBRARY PATH"
 echo ${LD_LIBRARY_PATH}
 
 
-cd ${_CONDOR_SCRATCH_DIR}/code/FittertBase-Build/
+cd ${_CONDOR_SCRATCH_DIR}/code/FitterBase-Build/
 
 echo $(pwd) 
 ls 
@@ -99,3 +81,5 @@ ifdh mkdir /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/DoingFit/${JOBSUB
 ${EXE} ${FCL} 
 
 ifdh cp newFitter_try.root /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/DoingFit/${JOBSUBJOBID:0:10}/newFitter_try.root
+tar -cf output.tar *_pi*us*root 
+ifdh cp output.tar /pnfs/dune/scratch/users/calcuttj/GeantReweight/Fit/DoingFit/${JOBSUBJOBID:0:10}/output.tar

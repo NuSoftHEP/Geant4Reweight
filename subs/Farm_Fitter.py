@@ -30,7 +30,12 @@ theFCL = args.fcl
 my_env = environ
 my_env["EXE"] = exe
 my_env["FCL"] = theFCL
-command = ["jobsub_submit","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC", "-e", "FCL", "-e", "EXE",  "file:///dune/app/users/calcuttj/geant/GeantReweight/subs/" + batch]
+command = ["jobsub_submit","-M","--OS=SL6","--group=dune","--memory="+memory]
+if not( timeout == "0"  ):
+  print "using timeout", timeout
+  command.append( "--timeout="+timeout )
+command = command + ["--resource-provides=usage_model=OPPORTUNISTIC", "-e", "FCL", "-e", "EXE",  "file:///dune/app/users/calcuttj/geant/GeantReweight/subs/" + batch] 
+#command = ["jobsub_submit","-M","--OS=SL6","--group=dune","--memory="+memory,"--timeout="+timeout,"--resource-provides=usage_model=OPPORTUNISTIC", "-e", "FCL", "-e", "EXE",  "file:///dune/app/users/calcuttj/geant/GeantReweight/subs/" + batch]
 p = Popen(command, env = my_env, stdout=PIPE, stderr=PIPE)
 stdout, stderr = p.communicate()
 if not stderr: 

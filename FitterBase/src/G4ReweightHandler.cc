@@ -68,6 +68,7 @@ void G4ReweightHandler::DefineInters( std::map< std::string, std::vector< FitPar
         std::cout << "Dummy" << std::endl;
         FSInters[name] = dummy;
         FSGraphs[name] = dummyGraph;
+        std::cout << "Dummy N: " << dummyGraph->GetN() << std::endl;
         isDummy = true;
         break;
       }

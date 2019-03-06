@@ -15,18 +15,18 @@ a: {
     ["Pb_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piminus_AbsLow1.00_AbsHigh1.00_CexLow1.00.root"]
   ]
   Raw: [ 
-    ["C_piplus",  false],
-    ["C_piminus", false],   
-    ["O_piplus",  false],
-    ["O_piminus", false],
-    ["Al_piplus",  false],
-    ["Al_piminus", false],
-    ["Fe_piplus",  false],
-    ["Fe_piminus", false],
-    ["Cu_piplus",  false],
-    ["Cu_piminus", false],
-    ["Pb_piplus",  false],
-    ["Pb_piminus", false]
+    ["C_piplus",  true],
+    ["C_piminus", true],   
+    ["O_piplus",  true],
+    ["O_piminus", true],
+    ["Al_piplus",  true],
+    ["Al_piminus", true],
+    ["Fe_piplus",  true],
+    ["Fe_piminus", true],
+    ["Cu_piplus",  true],
+    ["Cu_piminus", true],
+    ["Pb_piplus",  true],
+    ["Pb_piminus", true]
   ]
 
   Variations: { 
@@ -54,18 +54,18 @@ b: {
     ["Pb_piminus",    "/pnfs/dune/scratch/users/calcuttj/FitterTesting/Pb_piminus_AbsLow0.90_AbsHigh1.10_CexLow1.00.root"]
   ]
   Raw: [ 
-    ["C_piplus",  false],
-    ["C_piminus", false],   
-    ["O_piplus",  false],
-    ["O_piminus", false],
-    ["Al_piplus",  false],
-    ["Al_piminus", false],
-    ["Fe_piplus",  false],
-    ["Fe_piminus", false],
-    ["Cu_piplus",  false],
-    ["Cu_piminus", false],
-    ["Pb_piplus",  false],
-    ["Pb_piminus", false]
+    ["C_piplus",  true],
+    ["C_piminus", true],   
+    ["O_piplus",  true],
+    ["O_piminus", true],
+    ["Al_piplus",  true],
+    ["Al_piminus", true],
+    ["Fe_piplus",  true],
+    ["Fe_piminus", true],
+    ["Cu_piplus",  true],
+    ["Cu_piminus", true],
+    ["Pb_piplus",  true],
+    ["Pb_piminus", true]
   ]
 
   Variations: { 

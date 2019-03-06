@@ -33,3 +33,4 @@ Experiments: [
 ]
 
 IncludeDUET: true
+DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"

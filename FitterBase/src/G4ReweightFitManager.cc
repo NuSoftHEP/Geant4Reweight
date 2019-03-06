@@ -3,10 +3,10 @@
 #include "TVectorD.h"
 #include "TTree.h"
 
-G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName){
+G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName) :   handler(true)
+{
   out = new TFile( fOutFileName.c_str(), "RECREATE" );
   data_dir = out->mkdir( "Data" );
-  G4ReweightHandler handler(true);
 }
 
 void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
@@ -82,7 +82,8 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
 
   if( IsSetActive( "C_piplus" ) ){
     bool includeDUET = ps.get< bool >("IncludeDUET");
-    newDUETFitter * df = new newDUETFitter(out);
+    std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
+    newDUETFitter * df = new newDUETFitter(out, DUET_data);
     if( includeDUET ){
       std::cout << "Including DUET" << std::endl;
       mapSetsToFitters["C_piplus"].push_back( df );

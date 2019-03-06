@@ -341,13 +341,18 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
 
   //Now go through and vary the exclusive channels  
   for( size_t i = 0; i < theInts.size(); ++i ){
+    std::cout << theInts.at(i) << std::endl;
     TGraph * theVar = theVariations.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
+    std::cout << "Got Graphs " << theVar << " " << theGraph << std::endl;
     for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
+     // std::cout << "Content: " << Content << std::endl;
       double binCenter   = theGraph->GetX()[bin];
+     // std::cout << "binCenter: " << binCenter << std::endl;
       double theScale    = theVar->Eval(binCenter); 
+      //std::cout << "theScale: " << theScale << std::endl;
       
       //Check if >/< max/min of var graph
       if( ( binCenter < Minimum ) 

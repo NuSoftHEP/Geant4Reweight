@@ -95,10 +95,10 @@ int main(int argc, char * argv[]){
 
   fhicl::ParameterSet MaterialParameters = ps.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
-  int MaterialA = MaterialParameters.get< int >( "A" );
+  int MaterialZ = MaterialParameters.get< int >( "Z" );
   double MaterialMass = MaterialParameters.get< double >( "Mass" );
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
-  G4Material * theMaterial = new G4Material(MaterialName, MaterialA, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
   G4Nucleus * theNucleus = new G4Nucleus( theMaterial );
   G4CascadeInterface * theCascade = new G4CascadeInterface( "BertiniCascade" );
   

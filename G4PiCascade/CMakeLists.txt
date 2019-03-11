@@ -59,6 +59,14 @@ endif()
 
 target_link_libraries(G4PiCascade ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
+add_executable(G4CrossSection G4CrossSection.cc ${sources} ${headers})
+
+if(DEFINED USE_FHICL AND USE_FHICL)
+  message( "Adding FHICL")
+  add_dependencies(G4CrossSection fhiclcpp-simple)
+endif()
+
+target_link_libraries(G4CrossSection ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 install(TARGETS G4PiCascade DESTINATION bin)
 

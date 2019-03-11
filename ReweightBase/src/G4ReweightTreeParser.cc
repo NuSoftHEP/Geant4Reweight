@@ -1040,6 +1040,17 @@ void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
 
   //MakeOutputBranches();
 
+  std::cout << "Saving Variations from FinalState reweighter" << std::endl;
+  fout->cd();
+  
+  theFS->GetTotalVariationGraph()->Write( "TotalVar" );
+  std::vector< std::string > cuts = {"abs", "inel", "cex", "dcex", "prod"};
+  for( size_t iC = 0; iC < cuts.size(); ++iC ){
+    theFS->GetExclusiveVariationGraph( cuts.at(iC) )->Write( (cuts.at(iC) + "Var").c_str() );
+    theFS->GetOldGraph( cuts.at(iC) )->Write( (cuts.at(iC) + "Old").c_str() );
+    theFS->GetNewGraph( cuts.at(iC) )->Write( (cuts.at(iC) + "New").c_str() );
+  }
+
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
   

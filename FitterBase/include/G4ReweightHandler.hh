@@ -32,7 +32,7 @@ class G4ReweightHandler{
     void ParseXML(std::string, std::vector< std::string >);
     void ParseFHiCL( std::vector<fhicl::ParameterSet> );
 //    FitSample DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus=false);
-    FitSample DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus );
+    FitSample DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus);
     void SetInters( std::map< std::string, G4ReweightInter* > & );
     void DefineInters( std::vector< fhicl::ParameterSet > );
     void DefineInters( std::map< std::string, std::vector< FitParameter > > );

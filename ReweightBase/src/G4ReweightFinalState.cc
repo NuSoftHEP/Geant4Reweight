@@ -334,8 +334,59 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
     std::cout << theInts.at(i) << std::endl;
     theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
     //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
+
+    //New: Accounting for parameter edges between bins in the fraction graphs
+    std::cout << "Adding points around parameter edges" << std::endl;
+    for( int j = 0; j < theVariations[ theInts.at(i) ]->GetN() - 1; ++j ){
+      double ptX = theVariations[ theInts.at(i) ]->GetX()[ j ];
+      if( ptX == 0. ) continue;
+
+      double new_x = ptX - .01;
+      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+
+      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
+        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        continue;
+      }
+      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
+        continue;
+      }
+      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
+        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
+        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
+          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+        }
+      }
+    }
+    //Do the last bin as well
+    if( theVariations[ theInts.at(i) ]->GetN() > 0 ){
+      double ptX = theVariations[ theInts.at(i) ]->GetX()[ theVariations[ theInts.at(i) ]->GetN() - 1 ];
+      if( ptX == 0. ) continue;
+
+      double new_x = ptX + .01;
+      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+
+      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
+        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        continue;
+      }
+      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
+        continue;
+      }
+      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
+        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
+        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
+          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+        }
+      }
+    }
   }
   std::cout << "Stored" << std::endl;
+
 
   //fout->cd();
 
@@ -356,7 +407,9 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
       
       //Check if >/< max/min of var graph
       if( ( binCenter < Minimum ) 
-      ||  ( binCenter > Maximum ) ){
+      ||  ( binCenter > Maximum ) 
+      ||  ( binCenter < theVar->GetX()[0]) 
+      ||  ( binCenter > theVar->GetX()[ theVar->GetN() - 1 ] ) ){
         theGraph->SetPoint( bin, binCenter, Content );
       }
       else{

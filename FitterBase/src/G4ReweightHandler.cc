@@ -108,7 +108,7 @@ void G4ReweightHandler::SetInters( std::map< std::string, G4ReweightInter* > & t
   }
 }
 
-FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus ){
+FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus){
 
   G4ReweightFinalState * FSReweighter;
   if( enable_graphs ){
@@ -163,71 +163,6 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double 
   return theSample;
 }
 
-/*void G4ReweightHandler::ParseXML(std::string FileName, std::vector< std::string > vector_names){
-
-  tinyxml2::XMLDocument doc;
-
-  tinyxml2::XMLError loadResult = doc.LoadFile( FileName.c_str() );
-  if( loadResult != tinyxml2::XML_SUCCESS ){
-    std::cout << "Could not load file" << std::endl;
-    return;
-  }
-
-  tinyxml2::XMLNode * theRoot = doc.FirstChild();
-  if( !theRoot ){
-    std::cout << "Could Not get first child" << std::endl;
-    return;
-  }
-
-
-  //std::vector< std::string > vector_names = {"C_piplus"};
-
-  for( std::vector< std::string >::iterator vector_name = vector_names.begin(); vector_name != vector_names.end(); ++vector_name){
-
-    //Create the entry in the map 
-    fMapToFiles[ *vector_name ]; 
-
-    std::string element_name = *vector_name + "_Files";
-
-    tinyxml2::XMLElement * Files = theRoot->FirstChildElement( element_name.c_str() );
-    if( !Files ){
-      std::cout << "Could Not get " << *vector_name + "_Files" << std::endl;
-      return;
-    }
-  
-    tinyxml2::XMLElement * theFile = Files->FirstChildElement( "File" );
-  
-    while(theFile){
-      std::string reweightFile;
-  
-      const char * reweightFileText = nullptr;
-  
-      reweightFileText = theFile->Attribute("Name");
-      if (reweightFileText != nullptr) reweightFile = reweightFileText;
-  
-      std::cout << "File: " << reweightFile << std::endl;
-  
-      fMapToFiles[ *vector_name ].push_back( reweightFile );
-      
-      theFile = theFile->NextSiblingElement("File");
-    }
-  
-    tinyxml2::XMLElement * theFSFile = Files->FirstChildElement( "FSFile");
-    std::string FSFile;
-  
-    const char * FSFileText = nullptr;
-  
-    FSFileText = theFSFile->Attribute("Name");
-    if (FSFileText != nullptr) FSFile = FSFileText;
-  
-    std::cout << "File: " << FSFile << std::endl;
-  
-    fMapToFSFiles[ *vector_name ] = FSFile;
-
-  }
-
-}*/
-
 void G4ReweightHandler::ParseFHiCL( std::vector<fhicl::ParameterSet> ps_vec){
 
   for( size_t i = 0; i < ps_vec.size(); ++i){
@@ -260,9 +195,4 @@ void G4ReweightHandler::SetFiles( std::string name ){
 void G4ReweightHandler::ClearFSInters(){
       abs_vector.clear();
       cex_vector.clear();
-
-//      std::map<std::string, G4ReweightInter*>::iterator itInter;
-//      for( itInter = FSInters.begin(); itInter != FSInters.end(); ++itInter ){
-//        delete itInter->second;
-//      }
 }

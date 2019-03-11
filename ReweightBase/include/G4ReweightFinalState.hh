@@ -37,6 +37,8 @@ class G4ReweightFinalState{
     TGraph * GetExclusiveVariationGraph( std::string );
     TH1D * GetOldHist( std::string cut ){ return oldHists[cut]; };
     TH1D * GetNewHist( std::string cut ){ return newHists[cut]; };
+    TGraph * GetOldGraph( std::string cut ){ return oldGraphs[cut]; };
+    TGraph * GetNewGraph( std::string cut ){ return newGraphs[cut]; };
 
     bool IsPiMinus(){return PiMinusFlag;};
 

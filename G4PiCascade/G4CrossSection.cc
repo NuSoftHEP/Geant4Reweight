@@ -5,6 +5,7 @@
 #include "G4CrossSectionDataStore.hh"
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
+#include "G4Proton.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4DynamicParticle.hh"
 #include "G4ThreeVector.hh"
@@ -87,6 +88,7 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus;
   G4PionMinus * piminus;
+  G4Proton * proton;
   G4ParticleDefinition * part_def;
   G4String inel_name;
   if( type == 211 ){
@@ -99,8 +101,13 @@ int main(int argc, char * argv[]){
     part_def = piminus->Definition();
     inel_name = "pi-Inelastic";
   }
+  else if( type == 2212 ){
+    std::cout << "Chose Proton" << std::endl;
+    part_def = proton->Definition();
+    inel_name = "protonInelastic";
+  }
   else{
-    std::cout << "Please specify either 211 or -211" << std::endl;
+    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
     return 0;
   }
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );

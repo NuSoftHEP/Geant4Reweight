@@ -25,7 +25,7 @@ G4PiCascadePhysicsList::~G4PiCascadePhysicsList(){}
 
 void G4PiCascadePhysicsList::SetCuts(){
   G4cout << "Set Cuts" << G4endl; 
-//  G4VUserPhysicsList::SetCuts();
+  G4VUserPhysicsList::SetCuts();
 }
 
 

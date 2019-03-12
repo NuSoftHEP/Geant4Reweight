@@ -107,6 +107,8 @@ int main(int argc, char * argv[]){
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
 
 
+
+
   //Material
   fhicl::ParameterSet MaterialParameters = ps.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
@@ -115,16 +117,49 @@ int main(int argc, char * argv[]){
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
   G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
 
+  std::cout << "Checking material" << std::endl;
+  std::cout << "N Elements: " << theMaterial->GetNumberOfElements() << std::endl;
+  if( theMaterial->GetNumberOfElements() != 1 ){
+    std::cout << "Fatal: exiting the application because NElements != 1" << std::endl;
+    return 0;
+  }
+  auto theElement = (*theMaterial->GetElementVector())[0];
+  std::cout << theElement->GetName() << " " << theElement->GetSymbol() << " " << theElement->GetZ() << " " << theElement->GetN() << std::endl;
+  ///////////
+
   
-  //Defining the Cross Section
-  G4PiNuclearCrossSection * theInelasticXSec = (G4PiNuclearCrossSection*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet(G4PiNuclearCrossSection::Default_Name());
-  std::cout << "Got the inelastic cross section: " << theInelasticXSec << std::endl;
-
-  //G4BGGPionElasticXS * theElasticXSec = (G4BGGPionElasticXS*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet("Barashenkov-Glauber");
-  G4HadronElasticDataSet * theElasticXSec = (G4HadronElasticDataSet*)G4CrossSectionDataSetRegistry::Instance()->GetCrossSectionDataSet("GheishaElastic");
-  std::cout << "Got the elastic cross section: " << theElasticXSec << std::endl;
-
   std::vector< double > total_xsecs, elastic_xsecs, inelastic_xsecs, momenta, kinetic_energies;
+
+
+  //Getting the cross sections from the processes
+  G4ProcessManager * pm = part_def->GetProcessManager();
+  G4ProcessVector  * pv = pm->GetProcessList();
+  
+  G4HadronElasticProcess   * elastic_proc;
+  G4HadronInelasticProcess * inelastic_proc;
+
+  for( int i = 0; i < pv->size(); ++i ){
+    G4VProcess * proc = (*pv)(i);
+    std::string theName = proc->GetProcessName();
+    std::cout <<  theName << std::endl;
+    if( theName == "hadElastic" ){          
+      std::cout << "Found elastic" << std::endl;
+      elastic_proc = (G4HadronElasticProcess*)proc;
+    }
+    else if( theName == inel_name ){
+      std::cout << "Found inelastic" << std::endl;
+      inelastic_proc = (G4HadronInelasticProcess*)proc;
+    }
+  }
+
+  G4CrossSectionDataStore *theElastStore, *theInelastStore;
+  if( elastic_proc ){
+    theElastStore = elastic_proc->GetCrossSectionDataStore();
+  }
+  if( inelastic_proc ){
+    theInelastStore = inelastic_proc->GetCrossSectionDataStore();
+  }
+
 
   //Getting the values
   double theMomentum = range.first;
@@ -135,14 +170,17 @@ int main(int argc, char * argv[]){
 
     momentum = theMomentum;
     kinetic_energy = KE;
-    inelastic_xsec = theInelasticXSec->GetElementCrossSection( dynamic_part, MaterialZ, theMaterial ) / millibarn;
-    elastic_xsec = theElasticXSec->GetElementCrossSection( dynamic_part, MaterialZ, theMaterial ) / millibarn;
+
+    inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
+    elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
     tree->Fill();
     if( verbose && !( n % 100) ){
       std::cout << "Inelastic XSec at " << KE << " MeV " <<  inelastic_xsec << std::endl;
       std::cout << "Elastic XSec at " << KE << " MeV " <<  elastic_xsec << std::endl;
+      std::cout << std::endl;
     }
+
     inelastic_xsecs.push_back( inelastic_xsec );
     elastic_xsecs.push_back( elastic_xsec );
     total_xsecs.push_back( elastic_xsec + inelastic_xsec );

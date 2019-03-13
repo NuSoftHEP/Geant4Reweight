@@ -1,10 +1,13 @@
 #include "G4CascadeInterface.hh"
+#include "G4HadronInelasticProcess.hh"
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4DynamicParticle.hh"
 #include "G4ThreeVector.hh"
 #include "G4Track.hh"
+#include "G4Step.hh"
+#include "G4StepPoint.hh"
 #include "G4Material.hh"
 #include "G4Nucleus.hh"
 #include "G4SystemOfUnits.hh"
@@ -12,11 +15,13 @@
 #include "G4HadProjectile.hh"
 #include "G4HadFinalState.hh"
 #include "G4ParticleTable.hh"
+#include "G4ProcessVector.hh"
 #include "G4ProcessManager.hh"
 #include "G4RunManager.hh"
 #include "G4PiCascadeDetectorConstruction.hh"
 #include "G4PiCascadePhysicsList.hh"
 #include "G4HadronicException.hh"
+#include "G4VParticleChange.hh"
 
 
 #include <utility>
@@ -80,18 +85,38 @@ int main(int argc, char * argv[]){
   G4PionPlus  * piplus;
   G4PionMinus * piminus;
   G4ParticleDefinition * part_def;
+  std::string inel_name;
   if( type == 211 ){
     std::cout << "Chose PiPlus" << std::endl;
     part_def = piplus->Definition();
+    inel_name = "pi+Inelastic";
   }
   else if( type == -211 ){
     std::cout << "Chose PiMinus" << std::endl;
     part_def = piminus->Definition();
+    inel_name = "pi-Inelastic";
   }
   else{
     std::cout << "Please specify either 211 or -211" << std::endl;
     return 0;
   }
+
+  G4ProcessManager * pm = part_def->GetProcessManager();
+  G4ProcessVector  * pv = pm->GetProcessList();
+  
+  G4HadronInelasticProcess * inelastic_proc;
+
+  for( int i = 0; i < pv->size(); ++i ){
+    G4VProcess * proc = (*pv)(i);
+    std::string theName = proc->GetProcessName();
+    std::cout <<  theName << std::endl;
+    if( theName == inel_name ){
+      std::cout << "Found inelastic" << std::endl;
+      inelastic_proc = (G4HadronInelasticProcess*)proc;
+    }
+  }
+
+  if( !inelastic_proc ) return 0;
 
   fhicl::ParameterSet MaterialParameters = ps.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
@@ -100,10 +125,19 @@ int main(int argc, char * argv[]){
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
   G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
   G4Nucleus * theNucleus = new G4Nucleus( theMaterial );
-  G4CascadeInterface * theCascade = new G4CascadeInterface( "BertiniCascade" );
+
+
+//  G4CascadeInterface * theCascade = new G4CascadeInterface( "BertiniCascade" );
   
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
+
+  G4Track * theTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  G4Step * theStep = new G4Step();
+  G4StepPoint * thePoint = new G4StepPoint();
+  thePoint->SetMaterial( theMaterial );
+  theStep->SetPreStepPoint( thePoint );
+  theTrack->SetStep( theStep );
 
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
@@ -118,18 +152,22 @@ int main(int argc, char * argv[]){
       nPiPlus = 0; 
       nPiMinus = 0;
       momentum = dynamic_part->GetTotalMomentum();
-      G4HadFinalState * theFS;
-      try{
-        theFS = theCascade->ApplyYourself( *dynamic_part, *theNucleus );
-      }
-      catch( G4HadronicException aR ){
-        std::cout << "Something went wrong" <<  std::endl;
-      }
+      //G4HadFinalState * theFS;
+      G4VParticleChange * thePC; 
+      thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
+      //try{
+      //  //theFS = theCascade->ApplyYourself( *dynamic_part, *theNucleus );
+      //}
+      //catch( G4HadronicException aR ){
+      //  std::cout << "Something went wrong" <<  std::endl;
+      //}
 //      std::cout << "Secondaries: " << theFS->GetNumberOfSecondaries() << std::endl;
 
-      size_t nSecondaries = theFS->GetNumberOfSecondaries();
+      //size_t nSecondaries = theFS->GetNumberOfSecondaries();
+      size_t nSecondaries = thePC->GetNumberOfSecondaries();
       for( size_t i = 0; i < nSecondaries; ++i ){
-        auto part = theFS->GetSecondary(i)->GetParticle();
+        //auto part = theFS->GetSecondary(i)->GetParticle();
+        auto part = thePC->GetSecondary(i)->GetDynamicParticle();
       //  std::cout << i << " " << part->GetPDGcode() << " " << part->GetTotalMomentum() << std::endl;
 
         switch( part->GetPDGcode() ){
@@ -143,6 +181,10 @@ int main(int argc, char * argv[]){
             break;
         }
       }
+      
+      thePC->SetVerboseLevel(0);
+      thePC->Initialize(*theTrack);
+
       //std::cout << "nPiPlus: " << nPiPlus << std::endl;
       //std::cout << "nPiMinus: " << nPiMinus << std::endl;
       //std::cout << "nPi0: " << nPi0 << std::endl;

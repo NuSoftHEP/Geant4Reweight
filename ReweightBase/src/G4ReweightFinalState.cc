@@ -2,6 +2,7 @@
 
 #include "tinyxml2.h"
 #include <utility>
+#include <algorithm>
 #include <iostream>
 
 #include "TROOT.h"
@@ -324,67 +325,54 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   //delete fout;
 
    
+  std::vector< double > newPoints;
+
   std::cout << "Storing" << std::endl;
-  //Just for loading. Could do everything in one shot, but it's
-  //more understandable if it's compartmentalized like this
   //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
-    //TGraph * theInter = FSScales[ theInts.at(i) ]; 
-    //theVariations[ theInts.at(i) ] = theInter;
-    std::cout << theInts.at(i) << std::endl;
     theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
     //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
 
     //New: Accounting for parameter edges between bins in the fraction graphs
     std::cout << "Adding points around parameter edges" << std::endl;
-    for( int j = 0; j < theVariations[ theInts.at(i) ]->GetN() - 1; ++j ){
+    for( int j = 0; j < theVariations[ theInts.at(i) ]->GetN(); ++j ){
       double ptX = theVariations[ theInts.at(i) ]->GetX()[ j ];
       if( ptX == 0. ) continue;
 
-      double new_x = ptX - .01;
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
-        continue;
+      if( std::find( newPoints.begin(), newPoints.end(), ptX - .01 ) == newPoints.end() ){
+        newPoints.push_back( ptX - .01 );
       }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
-        continue;
-      }
-      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-    }
-    //Do the last bin as well
-    if( theVariations[ theInts.at(i) ]->GetN() > 0 ){
-      double ptX = theVariations[ theInts.at(i) ]->GetX()[ theVariations[ theInts.at(i) ]->GetN() - 1 ];
-      if( ptX == 0. ) continue;
-
-      double new_x = ptX + .01;
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
-        continue;
-      }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
-        continue;
-      }
-      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
+      if( std::find( newPoints.begin(), newPoints.end(), ptX + .01 ) == newPoints.end() ){
+        newPoints.push_back( ptX + .01 );
       }
     }
   }
+  
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    for( size_t j = 0; j < newPoints.size(); ++j ){
+      
+      double new_x = newPoints.at(j);
+      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+
+      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
+        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+        continue;
+      }
+      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
+        continue;
+      }
+      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
+        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
+        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
+          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+        }
+      }
+
+    }
+  }
+
   std::cout << "Stored" << std::endl;
 
 

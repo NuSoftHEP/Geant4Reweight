@@ -92,8 +92,6 @@ class G4ReweightTraj{
   private:
     std::vector<G4ReweightStep *> steps;
     std::vector<G4ReweightTraj *> children;
-//    static const int nRW = 1;
-//    std::string reweightable[nRW] = {"pi+Inelastic"};
 };
 
 

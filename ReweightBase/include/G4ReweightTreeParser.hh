@@ -23,13 +23,11 @@ class G4ReweightTreeParser{
   public:
     //Functions
     G4ReweightTreeParser(std::string, std::string);
-//    G4ReweightTreeParser(std::string, TFile *, TTree *);
 
    ~G4ReweightTreeParser();
 
     void SetBranches();
     void MakeOutputBranches();
-//    void SetOutputBranches();
 
     void SetSteps(G4ReweightTraj *);
     void FillCollection();
@@ -53,9 +51,7 @@ class G4ReweightTreeParser{
     TTree * GetTree(){ return tree; };
 
     size_t GetNTrajs();
-  //  size_t GetNEvents();
     G4ReweightTraj * GetTraj(size_t, size_t);
-//    void SortCollection();
 
     bool skipEM = true;
 
@@ -126,15 +122,22 @@ class G4ReweightTreeParser{
     int intType; 
 
 
+    //Eventually: Remove active post procs
     std::vector<std::string> * stepActivePostProcNames = 0;
-    std::vector<std::string> * stepActiveAlongProcNames = 0;
     std::vector<double> *      stepActivePostProcMFPs = 0;
-    std::vector<double> *      stepActiveAlongProcMFPs = 0;
     std::string *              stepChosenProc = 0;
 
     //To check if sorted and filled
     bool filled = false;
     bool sorted = false;
+
+
+    //G4CrossSectionDataStore
+    //G4RunManager
+    //G4ProcessManager
+    //G4ProcessVector
+    //G4HadronInelasticProcess
+    //G4HadronElasticProcess
 };
 
 

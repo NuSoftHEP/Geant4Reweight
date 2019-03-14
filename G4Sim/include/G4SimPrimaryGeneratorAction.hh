@@ -17,7 +17,6 @@ class G4SimPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction{
     G4SimPrimaryGeneratorAction(
       const G4String & particleName = "pi+",
       G4double energy = 100.*MeV,
-      /*G4ThreeVector position = G4ThreeVector(),*/ 
       G4ThreeVector momentumDirection = G4ThreeVector(0,0,1));
 
    ~G4SimPrimaryGeneratorAction();

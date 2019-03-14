@@ -12,7 +12,6 @@ struct Proc{
   double MFP;
 };
 
-//Forward Declaration to let step know of traj
 class G4ReweightTraj;
 
 class G4ReweightStep{
@@ -44,26 +43,27 @@ class G4ReweightStep{
     double stepLength;
 
     std::string stepChosenProc;
+
+    //Remove post proc after trimming down
     void AddActivePostProc(std::pair< std::string, double >);
-    void AddActiveAlongProc(std::pair< std::string, double >);
     void AddActivePostProc(Proc);
-    void AddActiveAlongProc(Proc);
 
     size_t GetNActivePostProcs();
-    size_t GetNActiveAlongProcs();
 
     Proc GetActivePostProc(size_t ip);
-    Proc GetActiveAlongProc(size_t ip);
    
-    //double GetWeight(double bias);
-
-    //Function:
-    //Return traj: Get pointer to the subsuming trajectory.
 
   private:
 
+    //int preStepMaterialZ
+    //double preStepMaterialMass
+    //double preStepMaterialDensity
+    //std::string preStepMaterialName
+    //
+    //Or pointer to G4Material
+
+    //Remove
     std::vector<Proc> stepActivePostProcs;
-    std::vector<Proc> stepActiveAlongProcs;
 
 };
 

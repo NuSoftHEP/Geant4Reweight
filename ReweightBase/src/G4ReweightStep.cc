@@ -25,18 +25,12 @@ G4ReweightStep::G4ReweightStep(int tid, int pid, int parid, int eventnum,
 }
 
 G4ReweightStep::~G4ReweightStep(){
+  //Remove
   stepActivePostProcs.clear();
-  stepActiveAlongProcs.clear();
 }
 
 void G4ReweightStep::AddActivePostProc(std::pair< std::string, double > proc){  
-  Proc temp;
-  temp.Name = proc.first;
-  temp.MFP = proc.second;
-  stepActivePostProcs.push_back(temp);
-}
-
-void G4ReweightStep::AddActiveAlongProc(std::pair< std::string, double > proc){
+  //Remove
   Proc temp;
   temp.Name = proc.first;
   temp.MFP = proc.second;
@@ -44,22 +38,17 @@ void G4ReweightStep::AddActiveAlongProc(std::pair< std::string, double > proc){
 }
 
 void G4ReweightStep::AddActivePostProc(Proc theProc){  
+  //Remove
   stepActivePostProcs.push_back(theProc);
 }
 
-void G4ReweightStep::AddActiveAlongProc(Proc theProc){
-  stepActiveAlongProcs.push_back(theProc);
-}
-
 size_t G4ReweightStep::GetNActivePostProcs(){
+  //Remove
   return stepActivePostProcs.size(); 
 }
 
-size_t G4ReweightStep::GetNActiveAlongProcs(){
-  return stepActiveAlongProcs.size(); 
-}
-
 Proc G4ReweightStep::GetActivePostProc(size_t ip){
+  //Remove
   size_t NProcs = GetNActivePostProcs();
 
   if( NProcs == 0 ){
@@ -81,28 +70,4 @@ Proc G4ReweightStep::GetActivePostProc(size_t ip){
     return stepActivePostProcs.at(ip); 
   }
 }
-
-Proc G4ReweightStep::GetActiveAlongProc(size_t ip){
-  size_t NProcs = GetNActiveAlongProcs();
-
-  if( NProcs == 0 ){
-    std::cout << "No associated along-step processes" << std::endl;
-    Proc temp; 
-    temp.Name = "";
-    temp.MFP = 0.;
-    return temp;
-  }
-  else if (ip > NProcs - 1){
-    std::cout << "Requested Process Out of Range" << std::endl <<
-    "Please Provide index in Range [0, " << NProcs - 1 << "]" << std::endl;
-    Proc temp; 
-    temp.Name = "";
-    temp.MFP = 0.;
-    return temp;
-  }
-  else{
-    return stepActiveAlongProcs.at(ip); 
-  }
-}
-
 

@@ -4,13 +4,6 @@
 #include "TH1D.h"
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::string fOutputFileName){
-/*  fin = new TFile(fInputFileName.c_str(), "READ"); 
-  track = (TTree*)fin->Get("track");
-  step = (TTree*)fin->Get("step");
-
-  SetBranches();
-*/
-
   OpenNewInput( fInputFileName );
 
   fout = new TFile(fOutputFileName.c_str(), "RECREATE"); 
@@ -36,27 +29,6 @@ void G4ReweightTreeParser::OpenNewInput(std::string fInputFileName){
 
 }
 
-/*G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, TFile * fOutputFile, TTree * fOutputTree){
-  fin = new TFile(fInputFileName.c_str(), "READ"); 
-  track = (TTree*)fin->Get("track");
-  step = (TTree*)fin->Get("step");
-
-  SetBranches();
-
-  fout = fOutputFile; 
-  tree = new TTree("tree","");
-
-  mapPIDtoN = { {211, &nPiPlus},
-                {-211, &nPiMinus},
-                {111, &nPi0},
-                {2212, &nProton},
-                {2112, &nNeutron} };
-
-  MakeOutputBranches();
-
-}
-*/
-
 void G4ReweightTreeParser::CloseInput(){
 
   delete track;  
@@ -71,11 +43,8 @@ void G4ReweightTreeParser::CloseInput(){
 
 G4ReweightTreeParser::~G4ReweightTreeParser(){
   stepActivePostProcNames->clear();
-  stepActiveAlongProcNames->clear();
   stepActivePostProcMFPs->clear();
-  stepActiveAlongProcMFPs->clear();
 
-//  trajCollection->clear();
   std::map< std::pair< size_t, size_t >, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( ; itTraj != trajCollection->end(); ++itTraj ){
     delete itTraj->second;
@@ -103,9 +72,7 @@ void G4ReweightTreeParser::SetBranches(){
   step->SetBranchAddress("postStepPz", &postStepPz);
   step->SetBranchAddress("stepChosenProc", &stepChosenProc);
   step->SetBranchAddress("stepActivePostProcNames", &stepActivePostProcNames);
-  step->SetBranchAddress("stepActiveAlongProcNames", &stepActiveAlongProcNames);
   step->SetBranchAddress("stepActivePostProcMFPs", &stepActivePostProcMFPs);
-  step->SetBranchAddress("stepActiveAlongProcMFPs", &stepActiveAlongProcMFPs);
   step->SetBranchAddress("stepLen", &stepLength);
   step->SetBranchAddress("deltaX", &deltaX);
   step->SetBranchAddress("deltaY", &deltaY);
@@ -140,15 +107,6 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
       theProc.MFP = theMFP;
 
       G4RStep->AddActivePostProc(theProc);
-    }
-    for(size_t ip = 0; ip < stepActiveAlongProcMFPs->size(); ++ip){
-      std::string theName = stepActiveAlongProcNames->at(ip);
-      double theMFP = stepActiveAlongProcMFPs->at(ip); 
-
-      theProc.Name = theName;
-      theProc.MFP = theMFP;
-
-      G4RStep->AddActiveAlongProc(theProc);
     }
 
     G4RTraj->AddStep(G4RStep);
@@ -213,15 +171,6 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
     std::cout << "Traj collection is empty" << std::endl;
     return NULL;
   }
-/*  else if(eventIndex > (GetNEvents() - 1) ){
-    std::cout << "Event index out of range. Expecting index between 0 and " <<
-    (GetNEvents() - 1) << std::endl;
-    return NULL;
-  }
-  else if( (trajCollection->at(eventIndex))->count(trackIndex) == 0) {
-    std::cout << "No trackID matching " << trackIndex << " within Event " << eventIndex << std::endl;
-    return NULL;
-  }*/
   else if( !( trajCollection->count( std::make_pair(trackIndex, eventIndex) ) ) ){
     std::cout << "No traj matching trackID, eventNum: " << trackIndex << " " << eventIndex << std::endl;
     return NULL;

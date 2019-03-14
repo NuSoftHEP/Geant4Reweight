@@ -15,12 +15,10 @@ struct StepTreeBuffer{
 
   std::string  stepChosenProc;
 
+  //Remove
   std::vector<std::string> * stepActivePostProcNames;
-  std::vector<std::string> * stepActiveAlongProcNames;
   std::vector<double> * stepActivePostProcMFPs;
-  std::vector<double> * stepActiveAlongProcMFPs;
   std::vector<double> * stepActivePostProcLens;
-  std::vector<double> * stepActiveAlongProcLens;
 
 
   double preStepPx, preStepPy, preStepPz; 

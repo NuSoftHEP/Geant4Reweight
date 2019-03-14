@@ -130,6 +130,13 @@ double G4ReweightTraj::GetWeight(double bias){
   size_t nsteps = GetNSteps();
   if( GetFinalProc() == fInelastic )nsteps--;
 
+
+  //Switching to using the cross section 
+  //double nominal_MFP =  
+  //
+  //
+  ////////////////////////////////////
+  
   for(size_t is = 0; is < nsteps; ++is){   
 
     auto theStep = GetStep(is);

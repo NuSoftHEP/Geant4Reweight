@@ -2,7 +2,6 @@
 #define G4SimActionInitialization_h 1
 
 #include "G4VUserActionInitialization.hh"
-#include "TreeBuffer.hh"
 #include "StepTreeBuffer.hh"
 #include "TrackTreeBuffer.hh"
 
@@ -20,11 +19,9 @@ class G4SimActionInitialization : public G4VUserActionInitialization{
     void Build() const;
 
     TFile * fout;
-//    TTree * tree;
     TTree * step;
     TTree * track;
 
-//    TreeBuffer * MyTreeBuffer;
     StepTreeBuffer * MyStepTreeBuffer;
     TrackTreeBuffer * MyTrackTreeBuffer;
 };

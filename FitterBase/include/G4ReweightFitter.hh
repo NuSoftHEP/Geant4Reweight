@@ -15,6 +15,8 @@
 #include <string>
 #include "tinyxml2.h"
 
+#include "G4ReweightFinalState.hh"
+
 #include "fhiclcpp/ParameterSet.h"
 
 class G4ReweightFitter{
@@ -30,6 +32,7 @@ class G4ReweightFitter{
 
 
     void GetMCGraphs();
+    void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > > );
     TTree * GetReweightFS( );
 
     size_t    GetNSamples(){return samples.size();};
@@ -41,12 +44,15 @@ class G4ReweightFitter{
     */
 
     void SaveExpChi2( double &, std::string & );
+    void FinishUp();
 
     void SetActiveSample( size_t, TDirectory * );
+    void MakeFitDir( TDirectory * );
     void AddSample( FitSample theSample ){ samples.push_back( theSample); };
     //void ParseXML(std::string);
 
     std::string GetType(){ return type; };
+    std::string GetName(){ return fExperimentName; };
 
     void BuildCuts(){
       for( std::map< std::string, std::string >::iterator itCuts = cuts.begin(); itCuts != cuts.end(); ++itCuts ){
@@ -103,6 +109,10 @@ class G4ReweightFitter{
       stream_in << std::fixed << std::setprecision(2) << input;
       return stream_in.str();
     };
+
+    G4ReweightFinalState *theFS;
+    TGraph * dummyGraph;
+    TGraph * total_inel;
 };
 
 #endif

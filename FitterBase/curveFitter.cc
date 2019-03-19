@@ -1,7 +1,4 @@
-#include "G4ReweightFitManager.hh"
-#include "G4ReweightFitter.hh"
-#include "G4ReweightHandler.hh"
-#include "newDUETFitter.hh"
+#include "G4ReweightCurveFitManager.hh"
 #include "FitParameter.hh"
 #include <vector>
 #include <string>
@@ -18,20 +15,21 @@ std::string set_prec(double);
 
 int main(int argc, char ** argv){
 
-  std::string outFileName = "newFitter_try.root";
-  G4ReweightFitManager FitMan( outFileName );
+  std::string outFileName = "curveFitter_try.root";
+  G4ReweightCurveFitManager FitMan( outFileName );
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
   ///Making Fit Parameters
 
-  std::map< std::string, std::vector< FitParameter > > FullParameterSet;
+//  std::map< std::string, std::vector< FitParameter > > FullParameterSet;
 
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   FitMan.MakeFitParameters( FitParSets );
+
+
   ///Defining MC Sets
   std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
-  
   FitMan.DefineMCSets( FCLSets );
   ///////////////////////////////////////////
 
@@ -39,10 +37,7 @@ int main(int argc, char ** argv){
   FitMan.DefineExperiments( ps );
   ///////////////////////////////////////////
 
-  //Defining varied samples
-  std::vector< fhicl::ParameterSet > samples = ps.get< std::vector< fhicl::ParameterSet > >("Samples"); 
-  FitMan.GetAllSamples( samples );
- 
+
   FitMan.GetAllData();
 
   FitMan.RunFitAndSave();

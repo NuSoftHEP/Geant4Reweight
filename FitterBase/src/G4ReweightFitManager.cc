@@ -226,13 +226,13 @@ void G4ReweightFitManager::RunFitAndSave(){
     std::cout << "Saving Parameters" << std::endl;
     TDirectory * pardir = outdir->mkdir( "Parameters" );
     pardir->cd();
-    for( size_t i = 0; i < tempSample.Parameters.size(); ++i ){
-      std::cout << "\t" << tempSample.Parameters.at(i).Name << " " << tempSample.Parameters.at(i).Value << std::endl;
+    for( size_t j = 0; j < tempSample.Parameters.size(); ++j ){
+      std::cout << "\t" << tempSample.Parameters.at(j).Name << " " << tempSample.Parameters.at(j).Value << std::endl;
       TVectorD par_val(1);
-      par_val[0] = tempSample.Parameters.at(i).Value;
-      par_val.Write( tempSample.Parameters.at(i).Name.c_str() );
+      par_val[0] = tempSample.Parameters.at(j).Value;
+      par_val.Write( tempSample.Parameters.at(j).Name.c_str() );
 
-      parameter_values.at( tempSample.Parameters.at(i).Name ) = tempSample.Parameters.at(i).Value;
+      parameter_values.at( tempSample.Parameters.at(j).Name ) = tempSample.Parameters.at(j).Value;
     }
     outdir->cd();
 

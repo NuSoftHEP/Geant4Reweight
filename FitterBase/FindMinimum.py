@@ -9,8 +9,10 @@ def FindMinimum( infile ):
   topdirs = [i.GetName() for i in f.GetListOfKeys()]
   print topdirs
   
-  topdirs.remove("Data")
-  topdirs.remove("FitTree")
+  if( "Data" in topdirs ):
+    topdirs.remove("Data")
+  if( "FitTree" in topdirs ):
+    topdirs.remove("FitTree")
   
   topdir = topdirs[0]
   print topdir

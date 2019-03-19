@@ -43,6 +43,11 @@ void newDUETFitter::SaveData(TDirectory * data_dir){
   DUET_cov_inv->Write("cov_inv");
 
 
+  double dummyX = 0.;
+  double dummyY = 1.;
+
+  dummyGraph = new TGraph(1, &dummyX, &dummyY );
+
 }
 
 void newDUETFitter::LoadData(){

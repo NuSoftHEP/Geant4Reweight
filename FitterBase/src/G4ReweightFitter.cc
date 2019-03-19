@@ -58,7 +58,157 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
     std::cout << it->first << " " << it->second << std::endl;
   }
 
+  double dummyX = 0.;
+  double dummyY = 1.;
+
+  dummyGraph = new TGraph(1, &dummyX, &dummyY );
+
+
 }
+
+void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars){
+  
+  //Remove me
+  TFile tryout("try.root", "RECREATE");
+
+  TFile TotalXSecFile(TotalXSecFileName.c_str(), "OPEN");
+
+  total_inel = (TGraph*)TotalXSecFile.Get("inel_momentum");
+  tryout.cd();
+
+  total_inel->Write("inel_momentum");
+
+  std::map< std::string, TGraph* > FSGraphs;
+  std::map< std::string, std::vector< FitParameter > >::iterator itPar;
+  for( itPar = pars.begin(); itPar != pars.end(); ++itPar ){
+    std::string name = itPar->first;  
+    std::cout << "Cut: " << name << std::endl;
+    
+    bool isDummy = false;
+
+    std::vector< std::pair< double, double > > vars;
+    std::vector< double > varX, varY; 
+
+    for( size_t i = 0; i < itPar->second.size(); ++i ){
+      
+      if( itPar->second.at( i ).Dummy ){
+        std::cout << "Dummy" << std::endl;
+        FSGraphs[name] = dummyGraph;
+        std::cout << "Dummy N: " << dummyGraph->GetN() << std::endl;
+        isDummy = true;
+        break;
+      }
+  
+      else{        
+        double value = itPar->second.at( i ).Value;
+        std::pair< double, double > range = itPar->second.at( i ).Range;
+
+        vars.push_back( std::make_pair( range.first,  value ) );
+        vars.push_back( std::make_pair( range.second, value ) );
+
+        varX.push_back( range.first );
+        varX.push_back( range.second );
+        varY.push_back( value );
+        varY.push_back( value );
+      }
+  
+    }
+    
+    if( !isDummy ){
+      for( size_t i = 0; i < vars.size(); ++i ){
+        std::cout << vars.at(i).first << " " << vars.at(i).second << std::endl;
+      }
+
+      FSGraphs[name] = new TGraph(varX.size(), &varX[0], &varY[0]);
+    }
+  }
+
+
+  TFile FracFile(FracFileName.c_str(), "OPEN");
+
+  double max = 2000., min = 10.;
+  theFS = new G4ReweightFinalState(&FracFile, FSGraphs, max, min, false);
+
+  
+  tryout.cd();
+  TGraph * total_var = theFS->GetTotalVariationGraph();
+  total_var->Write("TotalVar");
+  for( std::map<std::string, TGraph*>::iterator itGr = FSGraphs.begin(); 
+    itGr != FSGraphs.end(); ++itGr ){
+
+    theFS->GetOldGraph( itGr->first )->Write( ("Old" + itGr->first).c_str() );
+    theFS->GetNewGraph( itGr->first )->Write( ("New" + itGr->first).c_str() );
+    theFS->GetExclusiveVariationGraph( itGr->first )->Write( ("Var" + itGr->first ).c_str() );
+  }
+
+
+  std::map< std::string, std::string >::iterator itCut = cuts.begin();
+  for( itCut; itCut != cuts.end(); ++itCut ){
+    tryout.cd();
+    std::vector< double > xs,ys;
+    std::cout << "Cut: " << itCut->first << std::endl;
+
+    if(itCut->first == "reac"){
+      for( int i = 0; i < total_inel->GetN(); ++i ){
+        double x = total_inel->GetX()[i];
+        double y = total_inel->GetY()[i];
+        xs.push_back( x );
+        if( x > total_var->GetX()[ total_var->GetN() -1 ] ){
+          break;
+        }
+        ys.push_back( y * total_var->Eval( x ) ); 
+      }   
+      MC_xsec_graphs[ "reac" ] = new TGraph( xs.size(), &xs[0], &ys[0] );
+      MC_xsec_graphs[ "reac" ]->Write( ("new_xsec_" + itCut->first).c_str() );
+    }
+    else if( itCut->first == "abscx" ){
+      for( int i = 0; i < total_inel->GetN(); ++i ){
+        double x = total_inel->GetX()[i];
+
+        if( x > theFS->GetNewGraph( "abs" )->GetX()[ theFS->GetNewGraph( "abs" )->GetN() -1 ] ){
+          break;
+        }
+
+        double y = total_inel->GetY()[i];
+        xs.push_back( x );
+        ys.push_back( y * ( theFS->GetNewGraph( "abs" )->Eval( x ) + theFS->GetNewGraph( "cex" )->Eval( x ) ) ); 
+      }
+      MC_xsec_graphs[ itCut->first ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
+      MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );    
+    }
+    else{
+
+      for( int i = 0; i < total_inel->GetN(); ++i ){
+        double x = total_inel->GetX()[i];
+        if( x > theFS->GetNewGraph( itCut->first )->GetX()[ theFS->GetNewGraph( itCut->first )->GetN() -1 ] ){
+          break;
+        }
+        double y = total_inel->GetY()[i];
+        xs.push_back( x );
+        ys.push_back( y * theFS->GetNewGraph( itCut->first )->Eval( x ) ); 
+      }
+      MC_xsec_graphs[ itCut->first ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
+      MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );
+    }
+
+    fFitDir->cd();
+
+    MC_xsec_graphs[ itCut->first ]->Write(itCut->first.c_str()); 
+  }
+
+  tryout.Close();
+}
+
+void G4ReweightFitter::FinishUp(){
+  std::map< std::string, TGraph* >::iterator it =
+    MC_xsec_graphs.begin();
+
+  for( ; it!= MC_xsec_graphs.end(); ++it ){
+    delete it->second;
+  }
+  delete theFS;
+}
+
 
 void G4ReweightFitter::GetMCGraphs(){
   std::cout << "Sample: " << std::endl;
@@ -173,14 +323,18 @@ double G4ReweightFitter::DoFit(){
   double x;
 
   //Go through each cut defined for the experiment
-  std::map< std::string, TGraph * >::iterator itXSec = MC_xsec_graphs.begin();
-  for( itXSec; itXSec != MC_xsec_graphs.end(); ++itXSec ){
+//  std::map< std::string, TGraph * >::iterator itXSec = MC_xsec_graphs.begin();
+//  for( itXSec; itXSec != MC_xsec_graphs.end(); ++itXSec ){
+  std::map< std::string, TGraphErrors * >::iterator itXSec = Data_xsec_graphs.begin();
+  for( itXSec; itXSec != Data_xsec_graphs.end(); ++itXSec ){
     std::string name = itXSec->first;
 
     std::cout << "Fitting " << name << " now" << std::endl;
 
-    TGraph * MC_xsec = itXSec->second;
-    TGraphErrors * Data_xsec = Data_xsec_graphs.at(name);
+    //TGraph * MC_xsec = itXSec->second;
+    //TGraphErrors * Data_xsec = Data_xsec_graphs.at(name);
+    TGraph * MC_xsec = MC_xsec_graphs.at(name);
+    TGraphErrors * Data_xsec = itXSec->second;
 
     int nPoints = MC_xsec->GetN(); 
    
@@ -189,19 +343,12 @@ double G4ReweightFitter::DoFit(){
 
       Data_xsec->GetPoint(i, x, Data_val);
       Data_err = Data_xsec->GetErrorY(i);
-      MC_xsec->GetPoint(i, x, MC_val);
-
+      MC_val = MC_xsec->Eval( x );
+//      MC_xsec->GetPoint(i, x, MC_val);
 
       partial_chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }
     
-    /*
-    fFitDir->cd();
-    TVectorD chi2_val(1);
-    chi2_val[0] = partial_chi2;
-    chi2_val.Write( (name + "_chi2").c_str() );
-    */
-
     SaveExpChi2( partial_chi2, name ); 
 
     Chi2 += partial_chi2;
@@ -217,117 +364,6 @@ void G4ReweightFitter::SaveExpChi2( double &theChi2, std::string &name ){
   chi2_val.Write( (name + "_chi2").c_str() );
 }
 
-/*void G4ReweightFitter::ParseXML(std::string FileName){
-
-  tinyxml2::XMLDocument doc;
-
-  tinyxml2::XMLError loadResult = doc.LoadFile( FileName.c_str() );
-  if( loadResult != tinyxml2::XML_SUCCESS ){
-    std::cout << "Could not load file" << std::endl;
-    return;
-  }
-
-  tinyxml2::XMLNode * theRoot = doc.FirstChild();
-  if( !theRoot ){
-    std::cout << "Could Not get first child" << std::endl;
-    return;
-  }
-
- 
-  tinyxml2::XMLElement * theSample = theRoot->FirstChildElement( "Sample" );
-  if( !theSample ){
-    std::cout << "Could Not get element " << std::endl;
-    return;
-  }
-
-
-  
-  while( theSample ){
-
-    double abs, cex, dcex, prod, inel;
-
-    std::map< std::string, double > factors = {
-      { "abs",  0. },
-      { "cex",  0. },
-      { "dcex", 0. },
-      { "prod", 0. },
-      { "inel", 0. }
-    };
-
-   
-    std::map< std::string , double >::iterator itFactor = factors.begin();
-    
-    tinyxml2::XMLError attResult;
-
-    for( itFactor; itFactor != factors.end(); ++itFactor ){
-      std::string name = itFactor->first;
-      attResult = theSample->QueryDoubleAttribute(name.c_str(), &(itFactor->second) );
-
-      if( attResult != tinyxml2::XML_SUCCESS ){
-        std::cout << "Could not get " << name << std::endl;
-        std::cout << "Setting to 1."  << std::endl;
-
-        itFactor->second = 1.;
-      }
-
-      else std::cout << "Got " << name << ": " << itFactor->second << std::endl;
-
-
-    }
-    
-    bool Raw;
-    attResult = theSample->QueryBoolAttribute("Raw", &Raw);
-    if( attResult != tinyxml2::XML_SUCCESS ){
-      std::cout << "Could not get Raw" << std::endl;
-    }
-
-    std::string reweightFile;
-
-    if( !Raw ){ 
-      const char * reweightFileText = nullptr;
-
-      reweightFileText = theSample->Attribute("File");
-      if (reweightFileText != nullptr) reweightFile = reweightFileText;
-
-      std::cout << "File: " << reweightFile << std::endl;
-    }
-    else std::cout << "Need to run reweighting" << std::endl;
-    
-    FitSample theFitSample;
-    theFitSample.Raw  = Raw;
-    theFitSample.abs  = factors["abs"];
-    theFitSample.cex  = factors["cex"];
-    theFitSample.inel = factors["inel"];
-    theFitSample.prod = factors["prod"];
-    theFitSample.dcex = factors["dcex"];
-    theFitSample.theFile = reweightFile;
-
-    //std::cout << "CHECKING " << std::endl;
-    //std::cout << "abs: "  << theFitSample.abs << std::endl;
-    //std::cout << "cex: "  << theFitSample.cex << std::endl;
-    //std::cout << "File: " << theFitSample.theFile << std::endl;
-   
-    samples.push_back( theFitSample );
-    
-    theSample = theSample->NextSiblingElement("Sample");
-  }
-
-  tinyxml2::XMLElement * theData = theRoot->FirstChildElement("Data");
-  if( !theData ){
-    std::cout << "Could Not get Data " << std::endl;
-    return;
-  }
-
-  std::string dataFile;
-  const char * dataFileText = nullptr;
-  dataFileText = theData->Attribute("File");
-  if (dataFileText != nullptr) dataFile = dataFileText;
-
-  //std::cout << "Data: " << dataFile << std::endl;
-
-  //fDataFileName = dataFile;
-}*/
-
 void G4ReweightFitter::SetActiveSample( size_t i, TDirectory * output_dir){ 
   ActiveSample = &samples[i]; 
   fTopDir = output_dir;
@@ -335,6 +371,16 @@ void G4ReweightFitter::SetActiveSample( size_t i, TDirectory * output_dir){
 
   fFitDir = output_dir->mkdir( fExperimentName.c_str() );
   fFitDir->cd();
+}
+
+void G4ReweightFitter::MakeFitDir( TDirectory *output_dir ){
+
+  fTopDir = output_dir;
+  fTopDir->cd();
+
+  fFitDir = output_dir->mkdir( fExperimentName.c_str() );
+  fFitDir->cd();
+
 }
 
 void G4ReweightFitter::LoadData(){

@@ -13,11 +13,6 @@ G4ReweightHandler::G4ReweightHandler(bool as_graphs): enable_graphs(as_graphs){
 G4ReweightHandler::~G4ReweightHandler(){
   delete dummy;
   delete dummyGraph;
- 
-//  std::map<std::string, G4ReweightInter*>::iterator itInter;
-//  for( itInter = FSInters.begin(); itInter != FSInters.end(); ++itInter ){
-//    delete itInter->second;
-//  }
 }
 
 void G4ReweightHandler::DefineInters( std::vector< fhicl::ParameterSet > ps ){

@@ -69,14 +69,14 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars){
   
   //Remove me
-  TFile tryout("try.root", "RECREATE");
+  //TFile tryout("try.root", "RECREATE");
 
   TFile TotalXSecFile(TotalXSecFileName.c_str(), "OPEN");
 
   total_inel = (TGraph*)TotalXSecFile.Get("inel_momentum");
-  tryout.cd();
+  //tryout.cd();
 
-  total_inel->Write("inel_momentum");
+  //total_inel->Write("inel_momentum");
 
   std::map< std::string, TGraph* > FSGraphs;
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
@@ -130,21 +130,21 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
   theFS = new G4ReweightFinalState(&FracFile, FSGraphs, max, min, false);
 
   
-  tryout.cd();
+  //tryout.cd();
   TGraph * total_var = theFS->GetTotalVariationGraph();
-  total_var->Write("TotalVar");
-  for( std::map<std::string, TGraph*>::iterator itGr = FSGraphs.begin(); 
+  //total_var->Write("TotalVar");
+  /*for( std::map<std::string, TGraph*>::iterator itGr = FSGraphs.begin(); 
     itGr != FSGraphs.end(); ++itGr ){
 
     theFS->GetOldGraph( itGr->first )->Write( ("Old" + itGr->first).c_str() );
     theFS->GetNewGraph( itGr->first )->Write( ("New" + itGr->first).c_str() );
     theFS->GetExclusiveVariationGraph( itGr->first )->Write( ("Var" + itGr->first ).c_str() );
-  }
+  }*/
 
 
   std::map< std::string, std::string >::iterator itCut = cuts.begin();
   for( itCut; itCut != cuts.end(); ++itCut ){
-    tryout.cd();
+    //tryout.cd();
     std::vector< double > xs,ys;
     std::cout << "Cut: " << itCut->first << std::endl;
 
@@ -159,7 +159,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         ys.push_back( y * total_var->Eval( x ) ); 
       }   
       MC_xsec_graphs[ "reac" ] = new TGraph( xs.size(), &xs[0], &ys[0] );
-      MC_xsec_graphs[ "reac" ]->Write( ("new_xsec_" + itCut->first).c_str() );
+      //MC_xsec_graphs[ "reac" ]->Write( ("new_xsec_" + itCut->first).c_str() );
     }
     else if( itCut->first == "abscx" ){
       for( int i = 0; i < total_inel->GetN(); ++i ){
@@ -174,7 +174,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         ys.push_back( y * ( theFS->GetNewGraph( "abs" )->Eval( x ) + theFS->GetNewGraph( "cex" )->Eval( x ) ) ); 
       }
       MC_xsec_graphs[ itCut->first ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
-      MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );    
+      //MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );    
     }
     else{
 
@@ -188,7 +188,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         ys.push_back( y * theFS->GetNewGraph( itCut->first )->Eval( x ) ); 
       }
       MC_xsec_graphs[ itCut->first ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
-      MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );
+      //MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );
     }
 
     fFitDir->cd();
@@ -196,7 +196,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
     MC_xsec_graphs[ itCut->first ]->Write(itCut->first.c_str()); 
   }
 
-  tryout.Close();
+  //tryout.Close();
 }
 
 void G4ReweightFitter::FinishUp(){
@@ -336,15 +336,18 @@ double G4ReweightFitter::DoFit(){
     TGraph * MC_xsec = MC_xsec_graphs.at(name);
     TGraphErrors * Data_xsec = itXSec->second;
 
-    int nPoints = MC_xsec->GetN(); 
+    int nPoints = Data_xsec->GetN(); 
    
     double partial_chi2 = 0.;
     for( int i = 0; i < nPoints; ++i ){
 
+
       Data_xsec->GetPoint(i, x, Data_val);
+//      std::cout << "\t" << i << " X: " << x << " Data Val: " << Data_val << " Err: ";
       Data_err = Data_xsec->GetErrorY(i);
+//      std::cout << Data_err << " MC Val: ";
       MC_val = MC_xsec->Eval( x );
-//      MC_xsec->GetPoint(i, x, MC_val);
+//      std::cout << MC_val << std::endl;
 
       partial_chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }
@@ -378,7 +381,12 @@ void G4ReweightFitter::MakeFitDir( TDirectory *output_dir ){
   fTopDir = output_dir;
   fTopDir->cd();
 
-  fFitDir = output_dir->mkdir( fExperimentName.c_str() );
+  if( !output_dir->Get( fExperimentName.c_str() ) ){
+    fFitDir = output_dir->mkdir( fExperimentName.c_str() );
+  }
+  else{
+    fFitDir = (TDirectory*)output_dir->Get( fExperimentName.c_str() );
+  }
   fFitDir->cd();
 
 }

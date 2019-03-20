@@ -34,3 +34,8 @@ Experiments: [
 
 IncludeDUET: true
 DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"
+
+MaxCalls: 10
+Tolerance: 1.e-3
+UpperLimit: 1.5
+LowerLimit: .5

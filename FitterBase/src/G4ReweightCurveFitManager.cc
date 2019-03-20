@@ -2,6 +2,9 @@
 #include "newDUETFitter.hh"
 #include "TVectorD.h"
 #include "TTree.h"
+#include "TMatrixD.h"
+#include "Math/Factory.h"
+#include "Math/Functor.h"
 
 G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName) {
   out = new TFile( fOutFileName.c_str(), "RECREATE" );
@@ -50,6 +53,8 @@ void G4ReweightCurveFitManager::MakeFitParameters( std::vector< fhicl::Parameter
         par.Value = 1.; 
         par.Range = theRange;
         FullParameterSet[ theCut ].push_back( par );
+        thePars.push_back( par.Name );
+        theVals.push_back( 1. );
       }   
       CutIsDummy[ theCut ] = false;
     }   
@@ -108,7 +113,7 @@ void G4ReweightCurveFitManager::GetAllData(){
 }
 
 
-void G4ReweightCurveFitManager::RunFitAndSave( ){
+void G4ReweightCurveFitManager::RunFitAndSave(){
   //Create Fit Tree to store the chi2 values and parameters
   TTree fit_tree( "FitTree", "");
   double chi2 = 0.;
@@ -125,7 +130,8 @@ void G4ReweightCurveFitManager::RunFitAndSave( ){
   }
 
   std::map< std::string, double > parameter_values;
-  std::vector< std::string > thePars = {"fAbsHigh", "fAbsLow"};
+  //thePars = {"fAbsHigh", "fAbsLow"};
+  //std::vector< double > theVals = {1.0, 1.0};
   for( int i = 0; i < thePars.size(); ++i ){
     std::string branch_name = thePars.at(i);
     std::cout << "Making branch for " << branch_name << std::endl;
@@ -134,7 +140,7 @@ void G4ReweightCurveFitManager::RunFitAndSave( ){
     fit_tree.Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );   
   }
 
-  for( int k = 0; k < 5; ++k ){
+/*  for( int k = 0; k < 5; ++k ){
     std::vector< double > theVals = {1.0, 1.0};
     theVals[0] += .1 * k;
     std::string dir_name = "";
@@ -157,6 +163,9 @@ void G4ReweightCurveFitManager::RunFitAndSave( ){
 
     TDirectory * outdir = out->mkdir( dir_name.c_str() );
 
+
+
+   
     double chi2 = 0.;
     std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
       itSet = mapSetsToFitters.begin();
@@ -185,12 +194,129 @@ void G4ReweightCurveFitManager::RunFitAndSave( ){
     }
     fit_tree.Fill();
   }
-   
+*/
+
+
+    
+
+
+
+
+
+  ROOT::Math::Functor fcn(
+      [&](double const *coeffs) {
+        
+        std::string dir_name = "";
+
+        int a = 0;
+        //Setting parameters
+        for(size_t i = 0; i < thePars.size(); ++i){
+
+          std::map< std::string, std::vector< FitParameter > >::iterator it;
+          for( it = FullParameterSet.begin(); it != FullParameterSet.end(); ++it ){
+            std::cout << it->first << std::endl;
+            for( size_t j = 0; j < it->second.size(); ++j ){
+              if( it->second[j].Name == thePars[i] ){
+                it->second[j].Value = coeffs[a];
+                std::cout << "i,a " << i << " " << a << std::endl;
+
+                std::cout << "coeff: " << coeffs[a] << std::endl;
+                dir_name += thePars[i] + std::to_string( coeffs[a] );
+
+                ++a;
+              }
+            }
+          }   
+        }
+
+
+        TDirectory * outdir;
+        if( !out->Get( dir_name.c_str() ) ){
+          outdir = out->mkdir( dir_name.c_str() );
+        }
+        else{
+          outdir = (TDirectory*)out->Get( dir_name.c_str() );
+        }
+
+        double chi2 = 0.;
+
+	std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
+          itSet = mapSetsToFitters.begin();
+    
+        for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+          std::cout << itSet->first << std::endl;
+          for( size_t i = 0; i < itSet->second.size(); ++i ){
+            auto theFitter = itSet->second.at(i); 
+            std::cout << "Fitter: " << theFitter->GetName() << std::endl;
+    
+            std::string NominalFile = mapSetsToNominal[ itSet->first ];
+            std::string FracsFile = mapSetsToFracs[ itSet->first ];
+            std::cout << NominalFile << " " << FracsFile << std::endl;
+    
+            theFitter->MakeFitDir( outdir );
+            theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet);
+            double fit_chi2 = theFitter->DoFit();
+    
+            std::cout << fit_chi2 << std::endl;
+    
+            chi2 += fit_chi2;
+    
+            theFitter->FinishUp();
+    
+          }
+        }	
+	
+        return chi2;
+      },
+      thePars.size() 
+    );
+  
+  fMinimizer->SetFunction( fcn );
+
+  std::cout << "Doing minimizing" << std::endl;
+  int fitstatus = fMinimizer->Minimize();
+
+
+  TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
+
+  std::cout << "fitstatus: " << fitstatus << std::endl;
+  if( !fitstatus ){
+    std::cout << "Failed to find minimum: " << std::endl;
+  }
+  else{
+    std::cout << "Found minimum: " << std::endl;    
+    for( size_t i = 0; i < thePars.size(); ++i ){
+      std::cout << thePars[i] << " " << fMinimizer->X()[i] << std::endl;
+
+      for( size_t j = 0; j < thePars.size(); ++j ){
+        (*cov)(i,j) = fMinimizer->CovMatrix(i,j);
+      }
+    }
+  }
+
+  
   out->cd();
   fit_tree.Write();
+  cov->Write( "FitCovariance" );
   out->Close();
   std::cout << "Done" << std::endl;
  
   
 }
 
+void G4ReweightCurveFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
+  fMinimizer = std::unique_ptr<ROOT::Math::Minimizer>
+    ( ROOT::Math::Factory::CreateMinimizer( "Minuit2", "Migrad" ) );
+  
+  //Configure
+  fMinimizer->SetMaxFunctionCalls( ps.get< int >("MaxCalls") );
+  fMinimizer->SetTolerance( ps.get< double >("Tolerance") );
+  double LowerLimit = ps.get< double >("LowerLimit");
+  double UpperLimit = ps.get< double >("UpperLimit");
+  
+  for( size_t i = 0; i < thePars.size(); ++i ){
+    fMinimizer->SetVariable( i, thePars[i].c_str(), theVals[i], 0.1 );
+    fMinimizer->SetVariableLimits( i, LowerLimit, UpperLimit );
+  }
+
+}

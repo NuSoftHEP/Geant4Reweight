@@ -40,6 +40,7 @@ int main(int argc, char ** argv){
 
   FitMan.GetAllData();
 
+  FitMan.MakeMinimizer( ps );
   FitMan.RunFitAndSave();
  return 0;
 }

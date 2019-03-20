@@ -6,6 +6,7 @@
 #include "TGraphErrors.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "Math/Minimizer.h"
 #include "TDirectory.h"
 #include "FitSample.hh"
 #include "FitParameter.hh"
@@ -18,6 +19,7 @@
 #include <map>
 #include <string>
 #include "tinyxml2.h"
+#include <utility>
 
 #include "fhiclcpp/ParameterSet.h"
 
@@ -35,6 +37,7 @@ class G4ReweightCurveFitManager{
     void DefineExperiments( fhicl::ParameterSet &);
     void GetAllData();
     void RunFitAndSave();
+    void MakeMinimizer( fhicl::ParameterSet & );
     
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
@@ -56,6 +59,11 @@ class G4ReweightCurveFitManager{
     std::vector< std::string > sets;
 
     size_t nSamples;
+
+    std::unique_ptr< ROOT::Math::Minimizer > fMinimizer;
+
+    std::vector< std::string > thePars;
+    std::vector< double > theVals;
     
 
 };

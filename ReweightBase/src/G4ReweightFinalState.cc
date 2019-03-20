@@ -355,8 +355,16 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
       double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
 
       if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(0, new_x, new_y );
+
+        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
+        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
+
+        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+
+        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+
         continue;
       }
       else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
@@ -472,8 +480,8 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   }
 
   //Now go through and clear from memory all of the pointers
-//  delete newTotal;
-//  delete oldTotal;
+  delete newTotal;
+  delete oldTotal;
 //
 //  gDirectory->Delete("oldTotal");
 //  gDirectory->Delete("newTotal");
@@ -631,6 +639,7 @@ G4ReweightFinalState::~G4ReweightFinalState(){
     if( newGraphs.find( theInts.at(i) ) != newGraphs.end() )
       delete newGraphs.at( theInts.at(i) );
   } 
+
 }
 
 void G4ReweightFinalState::AddGraphs( TGraph *target, TGraph* adder  ){

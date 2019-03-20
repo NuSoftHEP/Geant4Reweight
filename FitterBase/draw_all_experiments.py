@@ -23,7 +23,7 @@ theDir = sys.argv[2]
 theDirs = []
 if( theDir == "all" ):
   for k in f.GetListOfKeys():
-    if (k.GetName() == "Data" or k.GetName() == "chi2_surf" or k.GetName() == "FitTree" or k.GetName() == "FitCovariance"): continue
+    if (k.GetName() == "Data" or k.GetName() == "chi2_surf" or k.GetName() == "FitTree" or k.GetName() == "FitCovariance" or k.GetName() == "parsHist"): continue
 
     theDirs.append( k.GetName() )
 else: theDirs.append( theDir )

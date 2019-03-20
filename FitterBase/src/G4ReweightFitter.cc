@@ -58,6 +58,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
     std::cout << it->first << " " << it->second << std::endl;
   }
 
+
   double dummyX = 0.;
   double dummyY = 1.;
 
@@ -67,6 +68,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 }
 
 void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars){
+
   
   //Remove me
   //TFile tryout("try.root", "RECREATE");
@@ -80,6 +82,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   std::map< std::string, TGraph* > FSGraphs;
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
+  std::map< std::string, bool > CutIsDummy;
   for( itPar = pars.begin(); itPar != pars.end(); ++itPar ){
     std::string name = itPar->first;  
     std::cout << "Cut: " << name << std::endl;
@@ -113,6 +116,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       }
   
     }
+
+    CutIsDummy[ name ] = isDummy;
     
     if( !isDummy ){
       for( size_t i = 0; i < vars.size(); ++i ){
@@ -197,6 +202,13 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
   }
 
   //tryout.Close();
+
+  std::map < std::string, TGraph *>::iterator it = 
+    FSGraphs.begin();
+  for( ; it != FSGraphs.end(); ++it ){
+    if( !CutIsDummy[it->first] )
+      delete it->second;
+  }
 }
 
 void G4ReweightFitter::FinishUp(){

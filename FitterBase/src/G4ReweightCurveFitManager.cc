@@ -278,6 +278,7 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
 
 
   TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
+  TH1D parsHist("parsHist", "", thePars.size(), 0,thePars.size());
 
   std::cout << "fitstatus: " << fitstatus << std::endl;
   if( !fitstatus ){
@@ -287,6 +288,10 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
     std::cout << "Found minimum: " << std::endl;    
     for( size_t i = 0; i < thePars.size(); ++i ){
       std::cout << thePars[i] << " " << fMinimizer->X()[i] << std::endl;
+
+      parsHist.SetBinContent( i+1, fMinimizer->X()[i] );
+      parsHist.GetXaxis()->SetBinLabel( i+1, thePars[i].c_str() );
+      parsHist.SetBinError( i+1, sqrt( fMinimizer->CovMatrix(i,i) ) );
 
       for( size_t j = 0; j < thePars.size(); ++j ){
         (*cov)(i,j) = fMinimizer->CovMatrix(i,j);
@@ -298,6 +303,7 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
   out->cd();
   fit_tree.Write();
   cov->Write( "FitCovariance" );
+  parsHist.Write();
   out->Close();
   std::cout << "Done" << std::endl;
  

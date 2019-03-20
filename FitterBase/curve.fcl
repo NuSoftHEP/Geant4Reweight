@@ -1,6 +1,6 @@
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/curve_sets.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/samples.fcl"
-#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/parameters.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/curve_parameters.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/C_experiments.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/O_experiments.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Al_experiments.fcl"
@@ -35,7 +35,7 @@ Experiments: [
 IncludeDUET: true
 DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"
 
-MaxCalls: 10
+MaxCalls: 500
 Tolerance: 1.e-3
-UpperLimit: 1.5
+UpperLimit: 2.0 
 LowerLimit: .5

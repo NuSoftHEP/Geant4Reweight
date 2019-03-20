@@ -157,11 +157,12 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       for( int i = 0; i < total_inel->GetN(); ++i ){
         double x = total_inel->GetX()[i];
         double y = total_inel->GetY()[i];
-        xs.push_back( x );
         if( x > total_var->GetX()[ total_var->GetN() -1 ] ){
           break;
         }
+        xs.push_back( x );
         ys.push_back( y * total_var->Eval( x ) ); 
+        std::cout << xs.back() << " " << ys.back() << std::endl;
       }   
       MC_xsec_graphs[ "reac" ] = new TGraph( xs.size(), &xs[0], &ys[0] );
       //MC_xsec_graphs[ "reac" ]->Write( ("new_xsec_" + itCut->first).c_str() );

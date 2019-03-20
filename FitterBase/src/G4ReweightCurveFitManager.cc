@@ -285,17 +285,65 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
     std::cout << "Failed to find minimum: " << std::endl;
   }
   else{
+    std::vector< double > vals, errs;
     std::cout << "Found minimum: " << std::endl;    
     for( size_t i = 0; i < thePars.size(); ++i ){
       std::cout << thePars[i] << " " << fMinimizer->X()[i] << std::endl;
 
-      parsHist.SetBinContent( i+1, fMinimizer->X()[i] );
+      vals.push_back( fMinimizer->X()[i] );
+      errs.push_back( sqrt( fMinimizer->CovMatrix(i,i) ) );
+
+      parsHist.SetBinContent( i+1, vals.back() );
       parsHist.GetXaxis()->SetBinLabel( i+1, thePars[i].c_str() );
-      parsHist.SetBinError( i+1, sqrt( fMinimizer->CovMatrix(i,i) ) );
+      parsHist.SetBinError( i+1, errs.back() );
+
 
       for( size_t j = 0; j < thePars.size(); ++j ){
         (*cov)(i,j) = fMinimizer->CovMatrix(i,j);
       }
+    }
+
+
+    std::string dir_names[3] = {"MinusSigma", "Nominal", "PlusSigma"};
+
+    for( int sigma_it = 0; sigma_it < 3; ++sigma_it ){
+      //Setting parameters
+      for(size_t i = 0; i < thePars.size(); ++i){
+
+        std::map< std::string, std::vector< FitParameter > >::iterator it;
+        for( it = FullParameterSet.begin(); it != FullParameterSet.end(); ++it ){
+          std::cout << it->first << std::endl;
+          for( size_t j = 0; j < it->second.size(); ++j ){
+            if( it->second[j].Name == thePars[i] ){
+              it->second[j].Value = vals[i] + (sigma_it - 1)*errs[i];
+            }
+          }
+        }   
+      }
+
+
+      TDirectory * outdir = out->mkdir( dir_names[sigma_it].c_str() );
+
+      std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
+        itSet = mapSetsToFitters.begin();
+      
+      for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+        std::cout << itSet->first << std::endl;
+        for( size_t i = 0; i < itSet->second.size(); ++i ){
+          auto theFitter = itSet->second.at(i); 
+          std::cout << "Fitter: " << theFitter->GetName() << std::endl;
+      
+          std::string NominalFile = mapSetsToNominal[ itSet->first ];
+          std::string FracsFile = mapSetsToFracs[ itSet->first ];
+          std::cout << NominalFile << " " << FracsFile << std::endl;
+      
+          theFitter->MakeFitDir( outdir );
+          theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet);
+      
+          theFitter->FinishUp();
+      
+        }
+      }	
     }
   }
 

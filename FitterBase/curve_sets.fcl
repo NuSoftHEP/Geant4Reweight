@@ -6,7 +6,7 @@ C_piplus: {
 
   Name: "C_piplus"
   
-  File: "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade-build/C_cross_section_out.root"
+  File: "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade-build/C_PiPlus_cross_section_out.root"
 
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
 }
@@ -15,7 +15,7 @@ C_piminus: {
 
   Name: "C_piminus"
   
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_0.root"
+  File: "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade-build/C_PiMinus_cross_section_out.root"
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiMinus_cascade.root" 
 }
 

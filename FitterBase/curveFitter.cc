@@ -15,14 +15,10 @@ std::string set_prec(double);
 
 int main(int argc, char ** argv){
 
-  std::string outFileName = "curveFitter_try.root";
-  G4ReweightCurveFitManager FitMan( outFileName );
-
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
-  ///Making Fit Parameters
 
-//  std::map< std::string, std::vector< FitParameter > > FullParameterSet;
-
+  std::string outFileName = ps.get< std::string >( "OutputFile" );
+  G4ReweightCurveFitManager FitMan( outFileName );
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   FitMan.MakeFitParameters( FitParSets );

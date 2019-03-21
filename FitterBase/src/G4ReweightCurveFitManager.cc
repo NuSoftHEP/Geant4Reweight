@@ -5,6 +5,9 @@
 #include "TMatrixD.h"
 #include "Math/Factory.h"
 #include "Math/Functor.h"
+#include "TCanvas.h"
+#include "TPad.h"
+#include "TROOT.h"
 
 G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName) {
   out = new TFile( fOutFileName.c_str(), "RECREATE" );
@@ -279,6 +282,7 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
 
   TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
   TH1D parsHist("parsHist", "", thePars.size(), 0,thePars.size());
+  TH2D covHist("covHist", "", thePars.size(), 0,thePars.size(), thePars.size(), 0,thePars.size());
 
   std::cout << "fitstatus: " << fitstatus << std::endl;
   if( !fitstatus ){
@@ -297,16 +301,20 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
       parsHist.GetXaxis()->SetBinLabel( i+1, thePars[i].c_str() );
       parsHist.SetBinError( i+1, errs.back() );
 
+      covHist.GetXaxis()->SetBinLabel( i+1, thePars[i].c_str() );
+      covHist.GetYaxis()->SetBinLabel( i+1, thePars[i].c_str() );
+
 
       for( size_t j = 0; j < thePars.size(); ++j ){
         (*cov)(i,j) = fMinimizer->CovMatrix(i,j);
+        covHist.SetBinContent(i+1, j+1, fMinimizer->CovMatrix(i,j));
       }
     }
 
 
-    std::string dir_names[3] = {"MinusSigma", "Nominal", "PlusSigma"};
+    std::string dir_names[4] = {"MinusSigma", "BestFit", "PlusSigma", "Nominal"};
 
-    for( int sigma_it = 0; sigma_it < 3; ++sigma_it ){
+    for( int sigma_it = 0; sigma_it < 4; ++sigma_it ){
       //Setting parameters
       for(size_t i = 0; i < thePars.size(); ++i){
 
@@ -315,7 +323,10 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
           std::cout << it->first << std::endl;
           for( size_t j = 0; j < it->second.size(); ++j ){
             if( it->second[j].Name == thePars[i] ){
-              it->second[j].Value = vals[i] + (sigma_it - 1)*errs[i];
+              if( sigma_it < 3 )
+                it->second[j].Value = vals[i] + (sigma_it - 1)*errs[i];
+              else if( sigma_it == 3 )
+                 it->second[j].Value = 1.;               
             }
           }
         }   
@@ -345,12 +356,15 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
         }
       }	
     }
+
+    DrawFitResults();
   }
 
   
   out->cd();
   fit_tree.Write();
   cov->Write( "FitCovariance" );
+  covHist.Write( "FitCovHist" );
   parsHist.Write();
   out->Close();
   std::cout << "Done" << std::endl;
@@ -371,6 +385,170 @@ void G4ReweightCurveFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
   for( size_t i = 0; i < thePars.size(); ++i ){
     fMinimizer->SetVariable( i, thePars[i].c_str(), theVals[i], 0.1 );
     fMinimizer->SetVariableLimits( i, LowerLimit, UpperLimit );
+  }
+
+}
+
+void G4ReweightCurveFitManager::DrawFitResults(){
+
+  std::map< std::string, std::string > titles = {
+    {"reac", "Reactive"},
+    {"inel", "Quasi-Elastic"},
+    {"abs", "Absorption"},
+    {"cex", "Charge Exchange"},
+    {"abscx", "Abs + CEx"}
+  };
+
+  out->mkdir("Fit"); 
+  gROOT->SetBatch(1);
+  std::vector< std::string > all_cuts, dirs;
+
+  std::map< std::string, std::vector< TGraphErrors * > > all_data;
+
+  TList * data_keys = data_dir->GetListOfKeys();
+  for( int i = 0; i < data_keys->GetSize(); ++i ){
+
+    std::string data_name = data_keys->At(i)->GetName();
+    TDirectory * sub_dir = (TDirectory*)data_dir->Get( data_name.c_str() );
+    
+    TList * exp_keys = sub_dir->GetListOfKeys();
+    std::vector< std::string > data_graph_names;
+
+    for( int j = 0; j < exp_keys->GetSize(); ++j ){
+      std::string key_name = exp_keys->At(j)->GetName();
+
+      //Excluding Covariance from DUET
+      if( key_name.find( "cov" ) != std::string::npos )
+        continue;
+
+      all_data[ key_name ].push_back( (TGraphErrors*)sub_dir->Get( key_name.c_str() ) );
+
+      bool found = false;
+      for( size_t k = 0; k < all_cuts.size(); ++k ){
+        if( all_cuts[k] == key_name ){
+          found = true;
+          break;
+        }
+      }
+
+      if( !found ){
+        all_cuts.push_back( key_name );
+        dirs.push_back( data_name );
+      }
+    }
+     
+  }
+
+  for( size_t i = 0; i < all_cuts.size(); ++i ){
+    std::string cut_name = all_cuts[i];
+    std::cout << "Drawing: " << cut_name << std::endl;
+   
+    double max = 0.;     
+    std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
+    for( size_t j = 0; j < data_vec.size(); ++j ){
+
+      TGraphErrors * data_gr = data_vec[j];
+      data_gr->SetMarkerColor(1);
+      data_gr->SetMarkerStyle(20);
+      
+      for( int k = 0; k < data_gr->GetN(); ++k ){
+        double val = data_gr->GetY()[k] + data_gr->GetEY()[k];
+        if( val > max) max = val;
+      }
+    }
+
+    //PlusSigma
+    std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;
+    TGraph * plus_sigma  = (TGraph*)out->Get( plus_name.c_str() );
+
+    double old_x = plus_sigma->GetX()[0];
+    double old_y = plus_sigma->GetY()[0];
+    plus_sigma->InsertPointBefore(1, old_x, old_y);
+    plus_sigma->SetPoint(0, old_x-.001, 0.);
+
+    old_x = plus_sigma->GetX()[ plus_sigma->GetN() - 1 ];
+    old_y = plus_sigma->GetY()[ plus_sigma->GetN() - 1 ];
+    plus_sigma->InsertPointBefore( (plus_sigma->GetN() - 1), old_x, old_y );
+    plus_sigma->SetPoint( (plus_sigma->GetN() - 1), old_x+.001, 0. );
+
+    for( int j = 0; j < plus_sigma->GetN(); ++j ){
+      if( plus_sigma->GetY()[j] > max ) max = plus_sigma->GetY()[j];
+    }
+
+    ////////////
+
+    //Nominal
+    std::string nominal_name = "Nominal/" + dirs[i] + "/" + cut_name;
+    TGraph * nominal = (TGraph*)out->Get( nominal_name.c_str() );
+    for( int j = 0; j < nominal->GetN(); ++j ){
+      if( nominal->GetY()[j] > max ) max = nominal->GetY()[j];
+    }
+    ///////////
+
+    std::cout << "Found max: " << max << std::endl;
+
+
+    //MinusSigma
+    std::string minus_name = "MinusSigma/" + dirs[i] + "/" + cut_name;
+    TGraph * minus_sigma  = (TGraph*)out->Get( minus_name.c_str() );
+
+    old_x = minus_sigma->GetX()[0];
+    old_y = minus_sigma->GetY()[0];
+    minus_sigma->InsertPointBefore(1, old_x, old_y);
+    minus_sigma->SetPoint(0, old_x-.001, 0.);
+
+    old_x = minus_sigma->GetX()[ minus_sigma->GetN() - 1 ];
+    old_y = minus_sigma->GetY()[ minus_sigma->GetN() - 1 ];
+    minus_sigma->InsertPointBefore( (minus_sigma->GetN() - 1), old_x, old_y );
+    minus_sigma->SetPoint( (minus_sigma->GetN() - 1), old_x+.001, 0. );
+    ////////////
+
+
+
+    TCanvas c1("c1","c1", 500, 400);
+
+    c1.SetTickx(1);
+    c1.SetTicky(1);
+    c1.SetBottomMargin( c1.GetBottomMargin() * 1.1 );
+    c1.SetLeftMargin( c1.GetLeftMargin() * 1.1 );
+
+    plus_sigma->SetFillColor(2);
+    plus_sigma->SetMaximum( 1.2 * max );
+    plus_sigma->SetMinimum(0.);
+    std::string title = titles[cut_name] + ";Pion Momentum (MeV/c);#sigma (mb)";
+    plus_sigma->SetTitle( title.c_str() ); 
+    plus_sigma->GetXaxis()->SetTitleSize(.06);
+    plus_sigma->GetXaxis()->SetTitleOffset(.75);
+    plus_sigma->GetYaxis()->SetTitleSize(.06);
+    plus_sigma->GetYaxis()->SetTitleOffset(.75);
+    plus_sigma->GetXaxis()->SetLabelSize(.04);
+    plus_sigma->GetYaxis()->SetLabelSize(.04);
+
+    minus_sigma->SetFillColor(0);
+
+    plus_sigma->Draw("AF");
+    minus_sigma->Draw("F same");
+
+    //BestFit
+    std::string best_fit_name = "BestFit/" + dirs[i] + "/" + cut_name;
+    TGraph * best_fit = (TGraph*)out->Get( best_fit_name.c_str() );
+    best_fit->SetLineStyle(10);
+    best_fit->SetLineColor(1);
+    best_fit->Draw("same");
+
+    nominal->SetLineStyle(10);
+    nominal->SetLineColor(4);
+    nominal->Draw("same");
+
+    for( size_t j = 0; j < data_vec.size(); ++j ){
+      data_vec[j]->Draw( "P same" );
+    }
+
+    gPad->RedrawAxis();
+
+    out->cd("Fit");
+    c1.Write( cut_name.c_str() );
+
   }
 
 }

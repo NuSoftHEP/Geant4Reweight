@@ -8,6 +8,8 @@
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Cu_experiments.fcl"
 #include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Pb_experiments.fcl"
 
+OutputFile: "curveFitter_try.root"
+
 Sets: [
   @local::C_piplus,
 #  @local::C_piminus,

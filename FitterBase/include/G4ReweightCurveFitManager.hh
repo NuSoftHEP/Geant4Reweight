@@ -38,6 +38,7 @@ class G4ReweightCurveFitManager{
     void GetAllData();
     void RunFitAndSave();
     void MakeMinimizer( fhicl::ParameterSet & );
+    void DrawFitResults();
     
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );

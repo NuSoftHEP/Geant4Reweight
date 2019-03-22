@@ -1,0 +1,16 @@
+##Type: ABS,CX
+##Nuclei: Carbon
+##Particle: piP
+##Reference: Phys. Rev. C 95, 045203
+##Note: 5 first entries are CX, the remaining 5 are ABS. The covariance is in duet_cov_corr.root
+##Mom xsec error
+201.6 44.0 7.9
+216.6 33.8 10.2
+237.2 55.8 10.8
+265.5 63.5 10.8
+295.1 52.0 9.3
+201.6 153.8 12.0
+216.6 182.1 19.2
+237.2 160.8 16.6
+265.5 161.4 15.7
+295.1 159.4 15.3

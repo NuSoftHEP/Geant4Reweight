@@ -1,0 +1,11 @@
+##Type: Inel
+##Nuclei: Fe
+##Particle: piP
+##Reference: D. Ashery, et al. True absorption and scattering of pions on nuclei. Phys. Rev., Vol. C23,p. 2173, 1981
+##Mom xsec error
+175.935 784 115
+224.761 644 123
+270.708 474 130
+315.037 360 125
+358.349 430 110
+432.613 389 100

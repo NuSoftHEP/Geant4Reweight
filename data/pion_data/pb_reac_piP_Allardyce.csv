@@ -1,0 +1,9 @@
+##Type: Reactive
+##Nuclei: Pb
+##Particle: piP
+##Reference: B. W. Allayrdice, et al. Pion Reaction Cross Sections and Nuclear Sizes. Allardyce Nucl Phys A 209 1 -51, 1973
+##Note: Errors bloated to RMS (TN-108, Page 71)
+##Mom xsec error
+840 1764 42
+1000 1762 42
+1360 1742 42

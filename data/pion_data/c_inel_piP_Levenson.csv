@@ -1,0 +1,9 @@
+##Type: Inelastic
+##Nuclei: Carbon
+##Particle: piP
+##Reference: S. M. Levenson, et al. Inclusive pion scattering in the δ(1232) region. Phys. Rev, Vol. C28, p. 326, 1983
+##Mom xsec error
+194.715 150 45
+265.070 280 56
+331.377 240 48
+416.824 169 50.7

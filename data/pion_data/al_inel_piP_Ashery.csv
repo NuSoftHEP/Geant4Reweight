@@ -1,0 +1,11 @@
+##Type: Inel
+##Nuclei: Aluminum
+##Particle: piP
+##Reference: D. Ashery, et al. True absorption and scattering of pions on nuclei. Phys. Rev., Vol. C23,p. 2173, 1981
+##Mom xsec error
+175.935 331 56
+224.761 342 70
+270.708 321 72
+315.037 269 72
+358.349 296 62
+432.613 307 54

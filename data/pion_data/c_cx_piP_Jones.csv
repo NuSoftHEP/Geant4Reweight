@@ -1,0 +1,10 @@
+##Type: CX
+##Nuclei: Carbon
+##Particle: piP
+##Reference: M. K. Jones, et al. Pion absorption above the ∆(1232) resonance. Phys. Rev., Vol. C48, p. 2800, 1993
+##Note: Paper doesn't provide uncertainty. Used 50% conservatively.
+##Mom xsec error
+363.710 46 23
+416.824 55 27.5
+521.206 59 19.5
+624.155 91 45.5

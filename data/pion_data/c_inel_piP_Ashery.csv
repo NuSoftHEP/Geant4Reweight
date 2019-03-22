@@ -1,0 +1,11 @@
+##Type: Inel
+##Nuclei: Carbon
+##Particle: piP
+##Reference: D. Ashery, et al. True absorption and scattering of pions on nuclei. Phys. Rev., Vol. C23,p. 2173, 1981
+##Mom xsec error
+175.935 143 26
+224.761 213 33
+270.708 207 33
+315.037 210 51
+358.349 224 30
+432.613 200 22

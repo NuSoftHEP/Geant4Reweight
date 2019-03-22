@@ -1,0 +1,13 @@
+##Type: Reactive
+##Nuclei: Carbon
+##Particle: piP
+##Reference: A. Saunders, et al. Reaction and total cross sections for low energy π+ and π− on isospin zero nuclei. Phys. Rev., Vol. C53, p. 1745, 1996
+##Mom xsec error
+116.137 125 14
+#120.773 135 15
+#123.054 137 14
+#125.310 140 20
+#127.544 158 19
+128.284 152 14
+#134.125 147 14
+149.563 202 17

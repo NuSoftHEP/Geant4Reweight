@@ -1,0 +1,8 @@
+##Type: Inelastic
+##Nuclei: Carbon
+##Particle: piP
+##Reference: M. K. Jones, et al. Pion absorption above the ∆(1232) resonance. Phys. Rev., Vol. C48, p. 2800, 1993
+##Note: Using 30% error for all points (see last paragraph)
+##Mom xsec error
+363.710 230 69
+416.824 250 75

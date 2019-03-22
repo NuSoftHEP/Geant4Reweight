@@ -1,0 +1,16 @@
+##Type: ABS
+##Nuclei: Cu
+##Particle: piM
+##Reference: K. Nakai, et al. Measurements of Cross Sections for Pion Absorption by Nuclei. Physical Review Letters, 44(22):1446, 1979
+##Note: Uncertainty is manually increased by 20% as indicated by authors
+##Mom xsec error
+108.153 736 154.0
+131.222 758 153.0
+153.640 712 143.8
+173.371 695 140.0
+194.715 683 138.0
+224.761 655 132.5
+254.855 584 120.0
+295.242 495 103.4
+345.439 449 100.4
+395.675 400 91.8

@@ -1,0 +1,17 @@
+##Type: ABS
+##Nuclei: Aluminum
+##Particle: piP
+##Reference: K. Nakai, et al. Measurements of Cross Sections for Pion Absorption by Nuclei. Physical Review Letters, 44(22):1446, 1979
+##Note: Uncertainty is manually increased by 20% as indicated by authors
+##Mom xsec error
+83.361 102 25.3
+108.153 148 33.2
+131.222 220 46.5
+153.640 260 55.7
+173.371 282 59.8
+194.715 275 62.2
+224.761 256 55.0
+254.855 259 59.4
+295.242 256 55.0
+345.439 211 46.7
+395.675 187 45.0

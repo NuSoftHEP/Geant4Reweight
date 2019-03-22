@@ -162,7 +162,6 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         }
         xs.push_back( x );
         ys.push_back( y * total_var->Eval( x ) ); 
-        std::cout << xs.back() << " " << ys.back() << std::endl;
       }   
       MC_xsec_graphs[ "reac" ] = new TGraph( xs.size(), &xs[0], &ys[0] );
       //MC_xsec_graphs[ "reac" ]->Write( ("new_xsec_" + itCut->first).c_str() );

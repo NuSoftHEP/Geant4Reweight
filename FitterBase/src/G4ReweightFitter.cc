@@ -13,6 +13,9 @@
 G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp ){
   fOutputFile = output_file;
 
+  //Increase later
+  nDOF = 0;
+
   fExperimentName = exp.get< std::string >("Name");
   std::vector< std::pair< std::string, std::vector< double > > > temp_points;
   temp_points = exp.get< std::vector< std::pair< std::string, std::vector< double > > > >("Points");
@@ -34,6 +37,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
   std::cout << "Cuts: " << std::endl;
   for( std::map< std::string, std::string >::iterator it = cuts.begin(); it != cuts.end(); ++it ){ 
     std::cout << it->first << " " << it->second << std::endl;
+    ++nDOF;
   }
 
   std::vector< std::pair< std::string, std::string > > temp_graph_names = exp.get< std::vector< std::pair<std::string, std::string> > >("Graphs");
@@ -85,6 +89,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
   std::map< std::string, bool > CutIsDummy;
   for( itPar = pars.begin(); itPar != pars.end(); ++itPar ){
     std::string name = itPar->first;  
+    if( name == "reac" ) continue;
     std::cout << "Cut: " << name << std::endl;
     
     bool isDummy = false;
@@ -128,11 +133,80 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
     }
   }
 
+  /*if( pars.find( "reac" ) != pars.end() ){
+    if( !pars[ "reac" ].at(0).Dummy ){
+      //If reac exists and is not a dummy, go through the exclusive channels 
+      //and vary each by the reac variations
+
+      //Build the reac graph
+      std::vector< double > varX, varY, newPoints;
+      for( size_t i = 0; i < pars["reac"].size(); ++i ){
+        double value = itPar->second.at( i ).Value;
+        std::pair< double, double > range = itPar->second.at( i ).Range;
+
+        varX.push_back( range.first );
+        varX.push_back( range.second );
+
+        newPoints.push_back( range.first - .001 );
+        newPoints.push_back( range.first + .001 );
+        newPoints.push_back( range.second - .001 );
+        newPoints.push_back( range.second + .001 );
+        varY.push_back( value );
+        varY.push_back( value );
+      }
+
+      TGraph reac_graph( varX.size(), &varX[0], &varY[0] );
+
+      
+      std::cout << "reac found. Varying exclusives:" << std::endl;
+      for( auto itGr = FSGraphs.begin(); itGr != FSGraphs.end(); ++itGr ){
+        std::cout << itGr->first << std::endl;
+        int np   = itGr->second.GetN();
+        double minX = itGr->second.GetX()[0];
+        double maxX = itGr->second.GetX()[ np-1 ]; 
+
+        for( size_t j = 0; j < newPoints.size(); ++j ){
+              
+          double new_x = newPoints.at(j);
+          double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+    
+          if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
+    
+            double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
+            double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
+    
+            oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+            newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+    
+            oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+            newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+    
+            continue;
+          }   
+          else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
+            continue;
+          }   
+          for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
+            if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
+            &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
+              oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+              newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+            }   
+          }   
+        }
+           
+        
+
+      }
+    }   
+  }*/
+
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
 
-  double max = 2000., min = 10.;
-  theFS = new G4ReweightFinalState(&FracFile, FSGraphs, max, min, false);
+  ////FIX
+//  double max = 2000., min = 10.;
+  theFS = new G4ReweightFinalState(&FracFile, FSGraphs,/* max, min,*/ false);
 
   
   //tryout.cd();

@@ -168,7 +168,7 @@ int main(int argc, char ** argv){
     std::cout << "Added the graphs" << std::endl;
 
      
-    G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), vars, 300., 200., false  ); 
+    G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), vars,/* 300., 200.,*/ false  ); 
     if( enablePiMinus ) theFS->SetPiMinus();
 
     tp->FillAndAnalyzeFS(theFS);

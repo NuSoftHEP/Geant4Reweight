@@ -66,6 +66,8 @@ class G4ReweightCurveFitManager{
     std::vector< std::string > thePars;
     std::vector< double > theVals;
     
+    int nDOF;
+    
 
 };
 

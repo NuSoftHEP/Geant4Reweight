@@ -13,7 +13,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piplus"
+    Type:   "Pb_PiPlus"
   },
 
   {
@@ -30,7 +30,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piminus"
+    Type:   "Pb_PiMinus"
   },
 
   {
@@ -47,7 +47,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piminus"
+    Type:   "Pb_PiMinus"
   },
 
   {
@@ -70,7 +70,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piplus"
+    Type:   "Pb_PiPlus"
   }, 
 
   {
@@ -91,7 +91,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piplus"
+    Type:   "Pb_PiPlus"
   },
 
   {
@@ -112,7 +112,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piminus"
+    Type:   "Pb_PiMinus"
   }, 
 
   {
@@ -133,7 +133,7 @@ Pb_experiments: [
     Mass:      207.2
     Density:   11.35
 
-    Type:   "Pb_piminus"
+    Type:   "Pb_PiMinus"
   }
 ]
 

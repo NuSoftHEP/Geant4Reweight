@@ -19,7 +19,7 @@ Fe_experiments: [
     Mass:      55.85
     Density:   7.874
 
-    Type:   "Fe_piplus"
+    Type:   "Fe_PiPlus"
   },
 
   {
@@ -42,7 +42,7 @@ Fe_experiments: [
     Mass:      55.85
     Density:   7.874
 
-    Type:   "Fe_piminus"
+    Type:   "Fe_PiMinus"
   }, 
 
   {
@@ -63,7 +63,7 @@ Fe_experiments: [
     Mass:      55.85
     Density:   7.874
 
-    Type:   "Fe_piplus"
+    Type:   "Fe_PiPlus"
   }
 
 ]

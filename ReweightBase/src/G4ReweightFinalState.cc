@@ -297,8 +297,8 @@ G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string,
   //fout->Close();
 }
 
-G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string, TGraph* > &FSScales, double max, double min, bool PiMinus) 
-: Maximum(max), Minimum(min){
+G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string, TGraph* > &FSScales, /*double max, double min, */bool PiMinus) 
+/*: Maximum(max), Minimum(min)*/{
 
   as_graphs = true;
   if( PiMinus ) SetPiMinus();
@@ -339,11 +339,11 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
       double ptX = theVariations[ theInts.at(i) ]->GetX()[ j ];
       if( ptX == 0. ) continue;
 
-      if( std::find( newPoints.begin(), newPoints.end(), ptX - .01 ) == newPoints.end() ){
-        newPoints.push_back( ptX - .01 );
+      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
+        newPoints.push_back( ptX - .001 );
       }
-      if( std::find( newPoints.begin(), newPoints.end(), ptX + .01 ) == newPoints.end() ){
-        newPoints.push_back( ptX + .01 );
+      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
+        newPoints.push_back( ptX + .001 );
       }
     }
   }
@@ -402,9 +402,9 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
       //std::cout << "theScale: " << theScale << std::endl;
       
       //Check if >/< max/min of var graph
-      if( ( binCenter < Minimum ) 
+      if( /*( binCenter < Minimum ) 
       ||  ( binCenter > Maximum ) 
-      ||  ( binCenter < theVar->GetX()[0]) 
+      ||*/  ( binCenter < theVar->GetX()[0]) 
       ||  ( binCenter > theVar->GetX()[ theVar->GetN() - 1 ] ) ){
         theGraph->SetPoint( bin, binCenter, Content );
       }

@@ -19,7 +19,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piminus"
+    Type:   "O_PiMinus"
   }, 
 
   {
@@ -41,7 +41,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piplus"
+    Type:   "O_PiPlus"
   },
 
   {
@@ -63,7 +63,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piplus"
+    Type:   "O_PiPlus"
   },
   
   {
@@ -85,7 +85,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piplus"
+    Type:   "O_PiPlus"
   },
   
   {
@@ -107,7 +107,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piplus"
+    Type:   "O_PiPlus"
   },
 
   {
@@ -129,7 +129,7 @@ O_experiments: [
     Mass:      16.
     Density:   1.141
 
-    Type:   "O_piminus"
+    Type:   "O_PiMinus"
   }
 
 

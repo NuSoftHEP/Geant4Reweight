@@ -107,7 +107,7 @@ FitSample G4ReweightHandler::DoReweight(std::string theName, double max, double 
 
   G4ReweightFinalState * FSReweighter;
   if( enable_graphs ){
-    FSReweighter = new G4ReweightFinalState( fFSFile, FSGraphs, max, min, PiMinus );
+    FSReweighter = new G4ReweightFinalState( fFSFile, FSGraphs, /*max, min,*/ PiMinus );
   }
   else{
     FSReweighter = new G4ReweightFinalState( fFSTree, FSInters, max, min, PiMinus );

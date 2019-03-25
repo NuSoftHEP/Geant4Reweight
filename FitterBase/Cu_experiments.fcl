@@ -14,7 +14,7 @@ Cu_experiments: [
     Mass:      63.55
     Density:   8.960
 
-    Type:   "Cu_piminus"
+    Type:   "Cu_PiMinus"
   },
 
   {
@@ -33,7 +33,7 @@ Cu_experiments: [
 
 
 
-    Type:   "Cu_piplus"
+    Type:   "Cu_PiPlus"
   },
 
   {
@@ -52,7 +52,7 @@ Cu_experiments: [
 
 
 
-    Type:   "Cu_piminus"
+    Type:   "Cu_PiMinus"
   }
 
 ]

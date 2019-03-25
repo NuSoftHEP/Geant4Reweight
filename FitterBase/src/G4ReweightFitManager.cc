@@ -80,13 +80,13 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
     }
   }
 
-  if( IsSetActive( "C_piplus" ) ){
+  if( IsSetActive( "C_PiPlus" ) ){
     bool includeDUET = ps.get< bool >("IncludeDUET");
     std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
     newDUETFitter * df = new newDUETFitter(out, DUET_data);
     if( includeDUET ){
       std::cout << "Including DUET" << std::endl;
-      mapSetsToFitters["C_piplus"].push_back( df );
+      mapSetsToFitters["C_PiPlus"].push_back( df );
     }
   }
 }

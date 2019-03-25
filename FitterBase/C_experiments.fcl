@@ -18,7 +18,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   }, 
 
   {
@@ -40,7 +40,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   }, 
 
   {
@@ -62,7 +62,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   }, 
 
   {
@@ -79,7 +79,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -96,7 +96,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   },
 
   {
@@ -113,7 +113,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -130,7 +130,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   },
 
   {
@@ -147,7 +147,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   },
 
   {
@@ -164,7 +164,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -187,7 +187,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   }, 
 
   {
@@ -210,7 +210,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -233,7 +233,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   }, 
 
   {
@@ -254,7 +254,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   },
 
   {
@@ -275,7 +275,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -296,7 +296,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   }, 
 
   {
@@ -319,7 +319,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -340,7 +340,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piplus"
+    Type:   "C_PiPlus"
   },
 
   {
@@ -361,7 +361,7 @@ C_experiments: [
     Mass:      12.01
     Density:   2.266
 
-    Type:   "C_piminus"
+    Type:   "C_PiMinus"
   }
 ]
 

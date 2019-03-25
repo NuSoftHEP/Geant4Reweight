@@ -1,6 +1,6 @@
-C_piplus: {
+C_PiPlus: {
 
-  Name: "C_piplus"
+  Name: "C_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_0.root",
@@ -13,9 +13,9 @@ C_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
 }
 
-C_piminus: {
+C_PiMinus: {
 
-  Name: "C_piminus"
+  Name: "C_PiMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piminus_nom_0.root",
@@ -28,9 +28,9 @@ C_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiMinus_cascade.root" 
 }
 
-O_piplus: {
+O_PiPlus: {
 
-  Name: "O_piplus"
+  Name: "O_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_0.root",
@@ -43,9 +43,9 @@ O_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiPlus_cascade.root" 
 }
 
-O_piminus: {
+O_PiMinus: {
 
-  Name: "O_piminus"
+  Name: "O_PiMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_0.root",
@@ -58,9 +58,9 @@ O_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiMinus_cascade.root" 
 }
 
-Al_piplus: {
+Al_PiPlus: {
 
-  Name: "Al_piplus"
+  Name: "Al_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_0.root",
@@ -73,9 +73,9 @@ Al_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiPlus_cascade.root" 
 }
 
-Al_piminus: {
+Al_PiMinus: {
 
-  Name: "Al_piminus"
+  Name: "Al_PiMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_0.root",
@@ -88,9 +88,9 @@ Al_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiMinus_cascade.root" 
 }
 
-Fe_piplus: {
+Fe_PiPlus: {
 
-  Name: "Fe_piplus"
+  Name: "Fe_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_0.root",
@@ -103,9 +103,9 @@ Fe_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiPlus_cascade.root" 
 }
 
-Fe_piminus: {
+Fe_PiMinus: {
 
-  Name: "Fe_piminus"
+  Name: "Fe_PiMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_0.root",
@@ -118,9 +118,9 @@ Fe_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiMinus_cascade.root" 
 }
 
-Cu_piplus: {
+Cu_PiPlus: {
 
-  Name: "Cu_piplus"
+  Name: "Cu_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_0.root",
@@ -133,9 +133,9 @@ Cu_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiPlus_cascade.root" 
 }
 
-Cu_piminus: {
+Cu_PiMinus: {
 
-  Name: "Cu_piminus"
+  Name: "Cu_PiMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_0.root",
@@ -148,9 +148,9 @@ Cu_piminus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiMinus_cascade.root" 
 }
 
-Pb_piplus: {
+Pb_PiPlus: {
 
-  Name: "Pb_piplus"
+  Name: "Pb_PiPlus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_0.root",
@@ -163,9 +163,9 @@ Pb_piplus: {
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiPlus_cascade.root" 
 }
 
-Pb_piminus: {
+Pb_PiMinus: {
 
-  Name: "Pb_piminus"
+  Name: "Pb_piMinus"
   
   Files: [
      "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_0.root",

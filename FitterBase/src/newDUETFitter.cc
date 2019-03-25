@@ -19,10 +19,10 @@ newDUETFitter::newDUETFitter(TFile * output_file, std::string data_file) /*:
 
   scale = 1.E27 / (.5 * 2.266 * 6.022E23 / 12.01 );
 
-  fExperimentName = "DUET";
+  fExperimentName = "DUET_C_PiPlus";
   //fDataFileName = "/dune/app/users/calcuttj/geant/GeantReweight/data/DUET.root"; 
   fDataFileName = data_file; 
-
+  nDOF = 10;
 }; 
 
 void newDUETFitter::SaveData(TDirectory * data_dir){

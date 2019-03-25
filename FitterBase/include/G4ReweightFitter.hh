@@ -30,6 +30,8 @@ class G4ReweightFitter{
     virtual double DoFit();
     virtual void   LoadMC(){};
 
+    double GetNDOF(){ return nDOF; };
+
 
     void GetMCGraphs();
     void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > > );
@@ -113,6 +115,8 @@ class G4ReweightFitter{
     G4ReweightFinalState *theFS;
     TGraph * dummyGraph;
     TGraph * total_inel;
+
+    int nDOF;
 };
 
 #endif

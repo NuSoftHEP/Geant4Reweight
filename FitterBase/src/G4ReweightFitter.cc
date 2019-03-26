@@ -71,7 +71,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
 
 }
 
-void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars){
+void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars, bool fSave){
 
   
   //Remove me
@@ -101,8 +101,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       
       if( itPar->second.at( i ).Dummy ){
         std::cout << "Dummy" << std::endl;
-        FSGraphs[name] = dummyGraph;
-        std::cout << "Dummy N: " << dummyGraph->GetN() << std::endl;
+        FSGraphs[name] = (TGraph*)dummyGraph->Clone();
+        std::cout << "Dummy N: " << FSGraphs[name]->GetN() << std::endl;
         isDummy = true;
         break;
       }
@@ -133,7 +133,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
     }
   }
 
-  /*if( pars.find( "reac" ) != pars.end() ){
+  if( pars.find( "reac" ) != pars.end() ){
     if( !pars[ "reac" ].at(0).Dummy ){
       //If reac exists and is not a dummy, go through the exclusive channels 
       //and vary each by the reac variations
@@ -141,65 +141,100 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       //Build the reac graph
       std::vector< double > varX, varY, newPoints;
       for( size_t i = 0; i < pars["reac"].size(); ++i ){
-        double value = itPar->second.at( i ).Value;
-        std::pair< double, double > range = itPar->second.at( i ).Range;
+        double value = pars["reac"].at( i ).Value;
+        std::pair< double, double > range = pars["reac"].at( i ).Range;
+        std::cout << i << " Range: " << range.first << " " << range.second << std::endl;
+        std::cout << i << " Value: " << value << std::endl;
 
+        varX.push_back( range.first - .001);
         varX.push_back( range.first );
         varX.push_back( range.second );
+        varX.push_back( range.second + .001 );
 
         newPoints.push_back( range.first - .001 );
         newPoints.push_back( range.first + .001 );
         newPoints.push_back( range.second - .001 );
         newPoints.push_back( range.second + .001 );
+        varY.push_back( 1. );
         varY.push_back( value );
         varY.push_back( value );
+        varY.push_back( 1. );
       }
+
+      std::cout << "newPoints: ";
+      for( size_t i = 0; i < newPoints.size(); ++i ){
+        std::cout << newPoints[i] << " ";
+      }
+      std::cout << std::endl;
 
       TGraph reac_graph( varX.size(), &varX[0], &varY[0] );
 
       
       std::cout << "reac found. Varying exclusives:" << std::endl;
       for( auto itGr = FSGraphs.begin(); itGr != FSGraphs.end(); ++itGr ){
-        std::cout << itGr->first << std::endl;
-        int np   = itGr->second.GetN();
-        double minX = itGr->second.GetX()[0];
-        double maxX = itGr->second.GetX()[ np-1 ]; 
+        std::string name = itGr->first;
+        auto excGraph = itGr->second;
+
+        std::cout << name << " " << itGr->second << std::endl;
+
+        std::vector< double > excX, excY;
+        for( int i = 0; i < excGraph->GetN(); ++i ){
+          excX.push_back( excGraph->GetX()[i] );
+          excY.push_back( excGraph->GetY()[i] );
+        }
+
+        double minX = excX[0];
+        double maxX = excX.back(); 
+
+        if( newPoints[0] < minX ){
+          double old_x = excX[0];
+
+          excX.insert( excX.begin(), old_x - .001 );
+          excY.insert( excY.begin(), 1. );
+        }
+        if( newPoints.back() > maxX ){
+          double old_x = excX.back();
+          excX.insert( excX.end(), old_x + .001 );
+          excY.insert( excY.end(), 1. );
+        }
 
         for( size_t j = 0; j < newPoints.size(); ++j ){
               
           double new_x = newPoints.at(j);
-          double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+          double new_y = excGraph->Eval( new_x );
     
-          if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-    
-            double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
-            double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
-    
-            oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-            newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-    
-            oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-            newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-    
-            continue;
+          if( new_x < excX[0] ){
+            excX.insert( excX.begin(), new_x );
+            excY.insert( excY.begin(), new_y );
           }   
-          else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
-            continue;
+          else if( new_x > excGraph->GetX()[ excGraph->GetN() - 1 ] ){ 
+            excX.insert( excX.end(), new_x );
+            excY.insert( excY.end(), new_y );
           }   
-          for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-            if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
-            &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-              oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-              newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+          for( int k = 0; k < excX.size() - 1; ++k ){
+            if( new_x > excX[k] 
+            &&  new_x < excX[k + 1] ){
+              excX.insert( (excX.begin() + (k+1)) , new_x );
+              excY.insert( (excY.begin() + (k+1)) , new_y );
             }   
           }   
         }
-           
-        
+
+        (*excGraph) = TGraph( excX.size(), &excX[0], &excY[0] );
+
+        std::cout << "Varying: " << std::endl;
+        for( int j = 0; j < excGraph->GetN(); ++j ){
+          double x = excGraph->GetX()[ j ];
+          double y = excGraph->GetY()[ j ];
+          std::cout << j << " " << x << " " << y << " " << reac_graph.Eval(x) << std::endl;
+          excGraph->SetPoint( j, x, y * reac_graph.Eval(x) );
+        }
+
 
       }
+
     }   
-  }*/
+  }
 
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
@@ -270,9 +305,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       //MC_xsec_graphs[ itCut->first ]->Write( ("new_xsec_" + itCut->first).c_str() );
     }
 
-    fFitDir->cd();
-
-    MC_xsec_graphs[ itCut->first ]->Write(itCut->first.c_str()); 
+    if( fSave ){
+      fFitDir->cd();
+      MC_xsec_graphs[ itCut->first ]->Write(itCut->first.c_str()); 
+    }
   }
 
   //tryout.Close();
@@ -280,7 +316,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
   std::map < std::string, TGraph *>::iterator it = 
     FSGraphs.begin();
   for( ; it != FSGraphs.end(); ++it ){
-    if( !CutIsDummy[it->first] )
+//    if( !CutIsDummy[it->first] )
       delete it->second;
   }
 }

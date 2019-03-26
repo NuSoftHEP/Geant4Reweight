@@ -34,7 +34,7 @@ class G4ReweightFitter{
 
 
     void GetMCGraphs();
-    void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > > );
+    void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > >, bool fSave=false);
     TTree * GetReweightFS( );
 
     size_t    GetNSamples(){return samples.size();};

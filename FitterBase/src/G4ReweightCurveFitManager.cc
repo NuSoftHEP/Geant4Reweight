@@ -125,8 +125,8 @@ void G4ReweightCurveFitManager::GetAllData(){
 void G4ReweightCurveFitManager::RunFitAndSave(){
   //Create Fit Tree to store the chi2 values and parameters
   TTree fit_tree( "FitTree", "");
-  double chi2 = 0.;
-  fit_tree.Branch( "Chi2", &chi2 );
+  double tree_chi2 = 0.;
+  fit_tree.Branch( "Chi2", &tree_chi2 );
 
 
   std::cout << "Nominal: " << std::endl;
@@ -232,6 +232,8 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
                 std::cout << "coeff: " << coeffs[a] << std::endl;
                 dir_name += thePars[i] + std::to_string( coeffs[a] );
 
+                parameter_values[ thePars[i] ] = coeffs[a];
+
                 ++a;
               }
             }
@@ -275,6 +277,8 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
           }
         }	
 	
+        tree_chi2 = chi2;
+        fit_tree.Fill();
         return chi2;
       },
       thePars.size() 
@@ -355,7 +359,7 @@ void G4ReweightCurveFitManager::RunFitAndSave(){
           std::cout << NominalFile << " " << FracsFile << std::endl;
       
           theFitter->MakeFitDir( outdir );
-          theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet);
+          theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet, true);
       
           theFitter->FinishUp();
       

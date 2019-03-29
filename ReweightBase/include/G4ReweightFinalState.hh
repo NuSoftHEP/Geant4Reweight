@@ -24,6 +24,7 @@ class G4ReweightFinalState{
     //G4ReweightFinalState(TFile * FinalStateFinal, std::string FSScaleFileName);    
     G4ReweightFinalState(TTree *, std::map< std::string, G4ReweightInter*> &, double, double, bool PiMinus = false);    
     G4ReweightFinalState(TFile *, std::map< std::string, TGraph*> &,/* double, double,*/ bool PiMinus = false);    
+    G4ReweightFinalState(TFile *, std::map< std::string, TH1D*> &,/* double, double,*/ bool PiMinus = false);    
     ~G4ReweightFinalState();
 
     G4ReweightInter * GetInter(std::string, std::string);

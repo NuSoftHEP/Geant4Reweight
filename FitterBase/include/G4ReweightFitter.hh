@@ -3,6 +3,7 @@
 
 
 #include "TGraph.h"
+#include "TH1D.h"
 #include "TGraphErrors.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -114,6 +115,7 @@ class G4ReweightFitter{
 
     G4ReweightFinalState *theFS;
     TGraph * dummyGraph;
+    TH1D * dummyHist;
     TGraph * total_inel;
 
     int nDOF;

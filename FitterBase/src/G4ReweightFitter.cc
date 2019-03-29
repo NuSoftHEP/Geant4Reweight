@@ -67,8 +67,11 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
   double dummyY = 1.;
 
   dummyGraph = new TGraph(1, &dummyX, &dummyY );
-
-
+  dummyHist  = new TH1D("dummy", "", 1,0,1);
+  //Set the over/underflow bins for the dummy 
+  dummyHist->SetBinContent(0,1.);
+  dummyHist->SetBinContent(1,1.);
+  dummyHist->SetBinContent(2,1.);
 }
 
 void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::string FracFileName, std::map< std::string, std::vector< FitParameter > > pars, bool fSave){
@@ -84,7 +87,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   //total_inel->Write("inel_momentum");
 
-  std::map< std::string, TGraph* > FSGraphs;
+  std::map< std::string, TH1D* > FSHists;
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
   std::map< std::string, bool > CutIsDummy;
   for( itPar = pars.begin(); itPar != pars.end(); ++itPar ){
@@ -101,8 +104,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       
       if( itPar->second.at( i ).Dummy ){
         std::cout << "Dummy" << std::endl;
-        FSGraphs[name] = (TGraph*)dummyGraph->Clone();
-        std::cout << "Dummy N: " << FSGraphs[name]->GetN() << std::endl;
+        FSHists[name] = (TH1D*)dummyHist->Clone();
+        std::cout << "Dummy N: " << FSHists[name]->GetNbinsX() << std::endl;
         isDummy = true;
         break;
       }
@@ -112,28 +115,26 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         double value = itPar->second.at( i ).Value;
         std::pair< double, double > range = itPar->second.at( i ).Range;
 
-        if( i == 0 ){
-          if( range.first > 0. ){
-            varX.push_back( 0. );
-            varY.push_back( 1. );
-          }
-          varX.push_back( range.first - .01 );
-          varY.push_back( 1. );
-        }
-        else if( i == itPar->second.size() - 1 ){
-          varX.push_back( range.second + .01 );
-          varX.push_back( range.second + .011 );
-          varY.push_back( 1. );
-          varY.push_back( 1. );
-        }
-
         vars.push_back( std::make_pair( range.first,  value ) );
         vars.push_back( std::make_pair( range.second, value ) );
 
-        varX.push_back( range.first );
+        bool addDummyBin = false;
+        if( varX.size() ){
+          //If the end of last bin == start of this bin
+          //don't need to add a dummy
+          if( varX.back() < range.first ){
+            varX.push_back( range.first );
+            addDummyBin = true;
+          }
+        }
+        else
+          varX.push_back(range.first);
+        
         varX.push_back( range.second );
+
         varY.push_back( value );
-        varY.push_back( value );
+        if( addDummyBin )
+          varY.push_back( 1. );
       }
   
     }
@@ -145,11 +146,16 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         std::cout << vars.at(i).first << " " << vars.at(i).second << std::endl;
       }
 
-      FSGraphs[name] = new TGraph(varX.size(), &varX[0], &varY[0]);
-      std::cout << "Checking" << std::endl;
-      for( size_t i = 0; i < varX.size(); ++i ){
+      std::cout << "Sizes: " << varX.size() << " " << varY.size() << std::endl;
+      FSHists[name] = new TH1D( ("var"+name).c_str(),"", varX.size()-1, &varX[0]);
+      std::cout << "Setting" << std::endl;
+      for( size_t i = 0; i < varY.size(); ++i ){
         std::cout << i << " " << varX[i] << " " << varY[i] << std::endl;
+        FSHists[name]->SetBinContent(i+1, varY[i]);
       }
+      //Set under/overflow
+      FSHists[name]->SetBinContent( 0, 1. );
+      FSHists[name]->SetBinContent( FSHists[name]->GetNbinsX()+1, 1. );
     }
   }
 
@@ -159,104 +165,84 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       //and vary each by the reac variations
 
       //Build the reac graph
-      std::vector< double > varX, varY, newPoints;
+      std::vector< double > reac_bins, varY, reacBins;
       for( size_t i = 0; i < pars["reac"].size(); ++i ){
         double value = pars["reac"].at( i ).Value;
         std::pair< double, double > range = pars["reac"].at( i ).Range;
         std::cout << i << " Range: " << range.first << " " << range.second << std::endl;
         std::cout << i << " Value: " << value << std::endl;
 
-        varX.push_back( range.first - .001);
-        varX.push_back( range.first - .0005);
-        varX.push_back( range.first );
-        varX.push_back( range.second );
-        varX.push_back( range.second + .0005);
-        varX.push_back( range.second + .001 );
+        bool addDummyBin = false;
+        if( reac_bins.size() ){
+          //If the end of last bin == start of this bin
+          //don't need to add a dummy
+          if( reac_bins.back() < range.first ){
+            reac_bins.push_back( range.first );
+            addDummyBin = true;
+          }
+        }
+        else
+          reac_bins.push_back(range.first);
+        
+        reac_bins.push_back( range.second );
 
-        newPoints.push_back( range.first - .001 );
-        newPoints.push_back( range.first + .001 );
-        newPoints.push_back( range.second - .001 );
-        newPoints.push_back( range.second + .001 );
-        varY.push_back( 1. );
-        varY.push_back( 1. );
         varY.push_back( value );
-        varY.push_back( value );
-        varY.push_back( 1. );
-        varY.push_back( 1. );
+        if( addDummyBin )
+          varY.push_back( 1. );
+
       }
 
-      std::cout << "newPoints: ";
-      for( size_t i = 0; i < newPoints.size(); ++i ){
-        std::cout << newPoints[i] << " ";
+      std::cout << "Sizes: " << reac_bins.size() << " " << varY.size() << std::endl;
+      TH1D reac_hist( "var_reac","", reac_bins.size()-1, &reac_bins[0]);
+      std::cout << "Setting" << std::endl;
+      for( size_t i = 0; i < varY.size(); ++i ){
+        std::cout << i << " " << reac_bins[i] << " " << varY[i] << std::endl;
+        reac_hist.SetBinContent(i+1, varY[i]);
       }
-      std::cout << std::endl;
+      //Set under/overflow
+      reac_hist.SetBinContent( 0, 1. );
+      reac_hist.SetBinContent( reac_hist.GetNbinsX()+1, 1. );      
 
-      TGraph reac_graph( varX.size(), &varX[0], &varY[0] );
-
-      
       std::cout << "reac found. Varying exclusives:" << std::endl;
-      for( auto itGr = FSGraphs.begin(); itGr != FSGraphs.end(); ++itGr ){
+      for( auto itGr = FSHists.begin(); itGr != FSHists.end(); ++itGr ){
         std::string name = itGr->first;
-        auto excGraph = itGr->second;
-
         std::cout << name << " " << itGr->second << std::endl;
 
-        std::vector< double > excX, excY;
-        for( int i = 0; i < excGraph->GetN(); ++i ){
-          excX.push_back( excGraph->GetX()[i] );
-          excY.push_back( excGraph->GetY()[i] );
-          std::cout << "\tX: " << excX.back() << std::endl;
-          std::cout << "\tY: " << excY.back() << std::endl;
+        auto excHist = itGr->second;
+        std::vector< double > exc_bins;
+        for( int i = 1; i < excHist->GetNbinsX(); ++i ){
+          exc_bins.push_back( excHist->GetBinLowEdge(i) );         
+        }
+        exc_bins.push_back( excHist->GetBinLowEdge(excHist->GetNbinsX()+1) + excHist->GetBinWidth(excHist->GetNbinsX()+1) ); 
+
+        std::vector< double > new_bins = exc_bins;
+        for( size_t i = 0; i < reac_bins.size(); ++i ){
+          if( std::find( new_bins.begin(), new_bins.end(), reac_bins[i] ) 
+          == new_bins.end() ){
+            new_bins.push_back( reac_bins[i] );  
+          }
         }
 
-        double minX = excX[0];
-        double maxX = excX.back(); 
-
-        if( newPoints[0] < minX ){
-          double old_x = excX[0];
-
-          excX.insert( excX.begin(), old_x - .001 );
-          excY.insert( excY.begin(), 1. );
-        }
-        if( newPoints.back() > maxX ){
-          double old_x = excX.back();
-          excX.insert( excX.end(), old_x + .001 );
-          excY.insert( excY.end(), 1. );
+        std::sort( new_bins.begin(), new_bins.end() );
+        for( size_t i = 0; i < new_bins.size(); ++i ){
+          std::cout << new_bins[i] << std::endl;
         }
 
-        for( size_t j = 0; j < newPoints.size(); ++j ){
-              
-          double new_x = newPoints.at(j);
-          double new_y = excGraph->Eval( new_x );
-    
-          if( new_x < excX[0] ){
-            excX.insert( excX.begin(), new_x );
-            excY.insert( excY.begin(), new_y );
-          }   
-          else if( new_x > excGraph->GetX()[ excGraph->GetN() - 1 ] ){ 
-            excX.insert( excX.end(), new_x );
-            excY.insert( excY.end(), new_y );
-          }   
-          for( int k = 0; k < excX.size() - 1; ++k ){
-            if( new_x > excX[k] 
-            &&  new_x < excX[k + 1] ){
-              excX.insert( (excX.begin() + (k+1)) , new_x );
-              excY.insert( (excY.begin() + (k+1)) , new_y );
-            }   
-          }   
+        TH1D new_hist( "new_hist", "", new_bins.size()-1, &new_bins[0] );
+        for( int i = 1; i <= new_hist.GetNbinsX(); ++i ){
+          double x = new_hist.GetBinCenter( i );
+          int reac_bin = reac_hist.FindBin( x );
+          int exc_bin = excHist->FindBin( x );
+
+          double content = reac_hist.GetBinContent( reac_bin );
+          content *= excHist->GetBinContent( exc_bin );
+
+          new_hist.SetBinContent(i, content );
         }
 
-        (*excGraph) = TGraph( excX.size(), &excX[0], &excY[0] );
-
-        std::cout << "Varying: " << std::endl;
-        for( int j = 0; j < excGraph->GetN(); ++j ){
-          double x = excGraph->GetX()[ j ];
-          double y = excGraph->GetY()[ j ];
-          std::cout << j << " " << x << " " << y << " " << reac_graph.Eval(x) << std::endl;
-          excGraph->SetPoint( j, x, y * reac_graph.Eval(x) );
-          std::cout << excGraph->GetX()[j] << " " << excGraph->GetY()[j] << std::endl;
-        }
-
+        std::string exc_name = excHist->GetName();
+        (*excHist) = new_hist;
+        excHist->SetName( exc_name.c_str() );
 
       }
 
@@ -268,7 +254,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   ////FIX
 //  double max = 2000., min = 10.;
-  theFS = new G4ReweightFinalState(&FracFile, FSGraphs,/* max, min,*/ false);
+  theFS = new G4ReweightFinalState(&FracFile, FSHists,/* max, min,*/ false);
 
   
   //tryout.cd();
@@ -340,9 +326,9 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   //tryout.Close();
 
-  std::map < std::string, TGraph *>::iterator it = 
-    FSGraphs.begin();
-  for( ; it != FSGraphs.end(); ++it ){
+  std::map < std::string, TH1D *>::iterator it = 
+    FSHists.begin();
+  for( ; it != FSHists.end(); ++it ){
 //    if( !CutIsDummy[it->first] )
       delete it->second;
   }

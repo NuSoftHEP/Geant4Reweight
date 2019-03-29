@@ -489,6 +489,150 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   //fout->Close();
 }
 
+G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string, TH1D* > &FSScales, /*double max, double min, */bool PiMinus) 
+/*: Maximum(max), Minimum(min)*/{
+
+  as_graphs = true;
+  if( PiMinus ) SetPiMinus();
+  
+  std::map< std::string, TH1D* > theVariations;
+  std::map< std::string, std::string >::iterator it = theCuts.begin();
+  //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
+  for( ; it != theCuts.end(); ++it ){
+    std::string name = it->first;
+    std::string cut  = it->second;
+
+    std::cout << "Loading " << name << std::endl;
+
+    TGraph * theGraph = (TGraph*)input->Get(name.c_str());
+    //theHist->Write();
+
+    //Load the Hists
+    newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
+    oldGraphs[ name ] = (TGraph*)theGraph->Clone();
+    //fout->cd();
+    //oldGraphs[ name ]->Write( ("old_" + name).c_str());
+  }
+  std::cout << "Loaded Graphs" << std::endl;
+  //delete fout;
+
+   
+  std::vector< double > newPoints;
+
+  std::cout << "Storing" << std::endl;
+  //fout->cd();
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
+    //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
+
+  }
+  
+  std::cout << "Stored" << std::endl;
+
+
+  //fout->cd();
+
+  //Now go through and vary the exclusive channels  
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    std::cout << theInts.at(i) << std::endl;
+    TH1D * theVar = theVariations.at( theInts.at(i) );
+    TGraph * theGraph = newGraphs.at( theInts.at(i) );
+    std::cout << "Got Graphs " << theVar << " " << theGraph << std::endl;
+    for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
+      
+      double Content = theGraph->GetY()[bin];
+     // std::cout << "Content: " << Content << std::endl;
+      double point   = theGraph->GetX()[bin];
+     // std::cout << "point: " << point << std::endl;
+      double theScale    = theVar->GetBinContent( theVar->FindBin( point ) ); 
+      //std::cout << "theScale: " << theScale << std::endl;
+      
+      //Check if >/< max/min of var graph
+      if( ( point < theVar->GetBinLowEdge(1)) 
+      ||  ( point > ( theVar->GetBinLowEdge( theVar->GetNbinsX() ) + theVar->GetBinWidth( theVar->GetNbinsX() ) ) ) ){
+        theGraph->SetPoint( bin, point, Content );
+      }
+      else{
+        theGraph->SetPoint( bin, point, theScale * Content ); 
+      }
+    }
+    //theGraph->Write();
+
+    //Save the varied and nominal
+    //theHist->Write();
+    //oldHists.at( theInts.at(i) )->Write();
+  }
+
+  //Form the total cross sections from 
+  //the nominal and varied exlcusive channels
+  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
+  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
+  
+  for(size_t i = 1; i < theInts.size(); ++i){
+    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
+    AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
+  }
+  //oldTotal->Write("oldTotal");
+  //newTotal->Write("newTotal");
+
+  //Save the Totals
+  //oldTotal->Write();
+  //newTotal->Write();
+
+  //Need to make this smarter when going through the bins.
+  //What if there's an empty bin?
+/*
+  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
+
+    if( oldTotal->GetBinContent( bin ) == 0. ){
+      oldTotal->SetBinContent( bin, 1. );
+    }
+
+    if( ( newTotal->GetBinCenter( bin ) < Minimum ) 
+    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
+      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
+    }
+  }
+*/
+
+  //Form the variation from the new and old totals 
+  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
+  DivideGraphs(totalVariationGraph, oldTotal);
+  //totalVariationGraph->Write("totalVar");
+
+  //Now go back through the varied exclusive channels
+  //and compute the final scale
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
+
+    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
+
+    DivideGraphs( exclusiveVariation, totalVariationGraph );
+    //exclusiveVariation->Write();
+
+    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation; 
+
+    std::string name = theInts.at(i);
+    std::string new_name = "new_" + name;
+    //exclusiveVariation->Write((name + "Var").c_str());
+
+    //Delete the pointers here
+//    delete newHists.at( theInts.at(i) );
+//    delete oldHists.at( theInts.at(i) );
+//    gDirectory->Delete(name.c_str());
+//    gDirectory->Delete(new_name.c_str());
+  }
+
+  //Now go through and clear from memory all of the pointers
+  delete newTotal;
+  delete oldTotal;
+//
+//  gDirectory->Delete("oldTotal");
+//  gDirectory->Delete("newTotal");
+
+  //fout->Close();
+}
+
 void G4ReweightFinalState::GetMaxAndMin( std::string FileName ){
   tinyxml2::XMLDocument doc;
 

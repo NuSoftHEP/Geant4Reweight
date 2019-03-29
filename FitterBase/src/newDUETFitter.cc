@@ -47,7 +47,11 @@ void newDUETFitter::SaveData(TDirectory * data_dir){
   double dummyY = 1.;
 
   dummyGraph = new TGraph(1, &dummyX, &dummyY );
-
+  dummyHist  = new TH1D("dummy", "", 1,0,1);
+  //Set the over/underflow bins for the dummy 
+  dummyHist->SetBinContent(0,1.);
+  dummyHist->SetBinContent(1,1.);
+  dummyHist->SetBinContent(2,1.);
 }
 
 void newDUETFitter::LoadData(){

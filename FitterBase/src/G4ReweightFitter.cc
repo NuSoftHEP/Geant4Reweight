@@ -108,8 +108,24 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       }
   
       else{        
+        
         double value = itPar->second.at( i ).Value;
         std::pair< double, double > range = itPar->second.at( i ).Range;
+
+        if( i == 0 ){
+          if( range.first > 0. ){
+            varX.push_back( 0. );
+            varY.push_back( 1. );
+          }
+          varX.push_back( range.first - .01 );
+          varY.push_back( 1. );
+        }
+        else if( i == itPar->second.size() - 1 ){
+          varX.push_back( range.second + .01 );
+          varX.push_back( range.second + .011 );
+          varY.push_back( 1. );
+          varY.push_back( 1. );
+        }
 
         vars.push_back( std::make_pair( range.first,  value ) );
         vars.push_back( std::make_pair( range.second, value ) );
@@ -130,6 +146,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       }
 
       FSGraphs[name] = new TGraph(varX.size(), &varX[0], &varY[0]);
+      std::cout << "Checking" << std::endl;
+      for( size_t i = 0; i < varX.size(); ++i ){
+        std::cout << i << " " << varX[i] << " " << varY[i] << std::endl;
+      }
     }
   }
 
@@ -147,8 +167,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         std::cout << i << " Value: " << value << std::endl;
 
         varX.push_back( range.first - .001);
+        varX.push_back( range.first - .0005);
         varX.push_back( range.first );
         varX.push_back( range.second );
+        varX.push_back( range.second + .0005);
         varX.push_back( range.second + .001 );
 
         newPoints.push_back( range.first - .001 );
@@ -156,8 +178,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         newPoints.push_back( range.second - .001 );
         newPoints.push_back( range.second + .001 );
         varY.push_back( 1. );
+        varY.push_back( 1. );
         varY.push_back( value );
         varY.push_back( value );
+        varY.push_back( 1. );
         varY.push_back( 1. );
       }
 
@@ -181,6 +205,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         for( int i = 0; i < excGraph->GetN(); ++i ){
           excX.push_back( excGraph->GetX()[i] );
           excY.push_back( excGraph->GetY()[i] );
+          std::cout << "\tX: " << excX.back() << std::endl;
+          std::cout << "\tY: " << excY.back() << std::endl;
         }
 
         double minX = excX[0];
@@ -228,6 +254,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
           double y = excGraph->GetY()[ j ];
           std::cout << j << " " << x << " " << y << " " << reac_graph.Eval(x) << std::endl;
           excGraph->SetPoint( j, x, y * reac_graph.Eval(x) );
+          std::cout << excGraph->GetX()[j] << " " << excGraph->GetY()[j] << std::endl;
         }
 
 
@@ -465,11 +492,11 @@ double G4ReweightFitter::DoFit(){
 
 
       Data_xsec->GetPoint(i, x, Data_val);
-//      std::cout << "\t" << i << " X: " << x << " Data Val: " << Data_val << " Err: ";
+      std::cout << "\t" << i << " X: " << x << " Data Val: " << Data_val << " Err: ";
       Data_err = Data_xsec->GetErrorY(i);
-//      std::cout << Data_err << " MC Val: ";
+      std::cout << Data_err << " MC Val: ";
       MC_val = MC_xsec->Eval( x );
-//      std::cout << MC_val << std::endl;
+      std::cout << MC_val << std::endl;
 
       partial_chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }

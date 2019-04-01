@@ -517,15 +517,80 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   //delete fout;
 
    
+
+  std::cout << "Stored" << std::endl;
+
   std::vector< double > newPoints;
 
   std::cout << "Storing" << std::endl;
   //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
     theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
-    //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
 
+    std::cout << "Adding points around parameter edges" << std::endl;
+
+    int nBins = theVariations[ theInts.at(i) ]->GetNbinsX();
+    for( int j = 1; j <= nBins; ++j ){
+      double ptX = theVariations[ theInts.at(i) ]->GetBinLowEdge(j);
+      std::cout << j << " " << ptX << std::endl;
+      if( ptX == 0. ) continue;
+
+      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
+        newPoints.push_back( ptX - .001 );
+      }
+      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
+        newPoints.push_back( ptX + .001 );
+      }
+    }
+
+    //Add last upper bin edge
+    double ptX = theVariations[ theInts.at(i) ]->GetBinLowEdge( nBins ); 
+    ptX += theVariations[ theInts.at(i) ]->GetBinWidth( nBins );
+    std::cout << "Last bin: " << ptX << std::endl;
+
+    if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
+      newPoints.push_back( ptX - .001 );
+    }
+    if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
+      newPoints.push_back( ptX + .001 );
+    }
   }
+
+
+  for( size_t i = 0; i < theInts.size(); ++i ){
+    for( size_t j = 0; j < newPoints.size(); ++j ){
+      
+      double new_x = newPoints.at(j);
+      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
+
+      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
+
+        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
+        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
+
+        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
+
+        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
+
+        continue;
+      }
+      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
+        continue;
+      }
+      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
+        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
+        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
+          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
+        }
+      }
+
+    }
+  }
+
+
   
   std::cout << "Stored" << std::endl;
 

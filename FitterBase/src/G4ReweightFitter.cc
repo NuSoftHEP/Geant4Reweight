@@ -67,7 +67,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
   double dummyY = 1.;
 
   dummyGraph = new TGraph(1, &dummyX, &dummyY );
-  dummyHist  = new TH1D("dummy", "", 1,0,1);
+  dummyHist  = new TH1D("dummy", "", 1,0,0);
   //Set the over/underflow bins for the dummy 
   dummyHist->SetBinContent(0,1.);
   dummyHist->SetBinContent(1,1.);
@@ -132,9 +132,9 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         
         varX.push_back( range.second );
 
-        varY.push_back( value );
         if( addDummyBin )
           varY.push_back( 1. );
+        varY.push_back( value );
       }
   
     }
@@ -186,9 +186,9 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         
         reac_bins.push_back( range.second );
 
-        varY.push_back( value );
         if( addDummyBin )
           varY.push_back( 1. );
+        varY.push_back( value );
 
       }
 
@@ -210,10 +210,12 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
         auto excHist = itGr->second;
         std::vector< double > exc_bins;
-        for( int i = 1; i < excHist->GetNbinsX(); ++i ){
-          exc_bins.push_back( excHist->GetBinLowEdge(i) );         
+        if( !CutIsDummy[name] ){
+          for( int i = 1; i < excHist->GetNbinsX(); ++i ){
+            exc_bins.push_back( excHist->GetBinLowEdge(i) );         
+          }
+          exc_bins.push_back( excHist->GetBinLowEdge(excHist->GetNbinsX()+1) + excHist->GetBinWidth(excHist->GetNbinsX()+1) ); 
         }
-        exc_bins.push_back( excHist->GetBinLowEdge(excHist->GetNbinsX()+1) + excHist->GetBinWidth(excHist->GetNbinsX()+1) ); 
 
         std::vector< double > new_bins = exc_bins;
         for( size_t i = 0; i < reac_bins.size(); ++i ){
@@ -234,6 +236,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
           int reac_bin = reac_hist.FindBin( x );
           int exc_bin = excHist->FindBin( x );
 
+          std::cout << i << " " << x << " " << reac_bin << " " << exc_bin << std::endl;
+          std::cout << "\t" << reac_hist.GetBinContent( reac_bin ) << " " << excHist->GetBinContent( exc_bin ) << std::endl;
           double content = reac_hist.GetBinContent( reac_bin );
           content *= excHist->GetBinContent( exc_bin );
 

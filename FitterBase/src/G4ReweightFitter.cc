@@ -456,7 +456,7 @@ TTree* G4ReweightFitter::GetReweightFS( /*FitSample theSample*/ ){
 //
 //}
 
-double G4ReweightFitter::DoFit(){
+double G4ReweightFitter::DoFit(bool fSave){
   double Chi2 = 0.;
   double Data_val, MC_val, Data_err;
   double x;
@@ -491,7 +491,8 @@ double G4ReweightFitter::DoFit(){
       partial_chi2 += (1. / nPoints ) * ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
     }
     
-    SaveExpChi2( partial_chi2, name ); 
+    if( fSave )
+      SaveExpChi2( partial_chi2, name ); 
 
     Chi2 += partial_chi2;
   }

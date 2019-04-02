@@ -20,6 +20,9 @@
 #include <string>
 #include "tinyxml2.h"
 #include <utility>
+#include "Math/Factory.h"
+#include "Math/Functor.h"
+
 
 #include "fhiclcpp/ParameterSet.h"
 
@@ -36,13 +39,15 @@ class G4ReweightCurveFitManager{
     void DefineMCSets( std::vector< fhicl::ParameterSet > &);
     void DefineExperiments( fhicl::ParameterSet &);
     void GetAllData();
-    void RunFitAndSave();
+    void RunFitAndSave(bool fFitScan=false);
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
     
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
+
+    void DefineFCN();
 
 
   protected:
@@ -67,7 +72,13 @@ class G4ReweightCurveFitManager{
     std::vector< double > theVals;
     
     int nDOF;
-    
+
+    ROOT::Math::Functor theFCN;
+
+    TTree fit_tree;
+    double tree_chi2 = 0.;
+    std::map< std::string, double > parameter_values;
+
 
 };
 

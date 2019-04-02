@@ -28,7 +28,7 @@ class G4ReweightFitter{
 
     virtual void   LoadData()/* = 0*/;
     virtual void   SaveData( TDirectory * );
-    virtual double DoFit();
+    virtual double DoFit(bool fSave=true);
     virtual void   LoadMC(){};
 
     double GetNDOF(){ return nDOF; };

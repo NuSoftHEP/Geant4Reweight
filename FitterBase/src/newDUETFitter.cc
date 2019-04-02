@@ -70,7 +70,7 @@ void newDUETFitter::LoadData(){
 
 }
 
-double newDUETFitter::DoFit(){
+double newDUETFitter::DoFit(bool fSave){
   //BinnedChi2 = new TH2D( ("BinnedChi2_abs_" + set_prec(norm_abs_param) + "_cex_" + set_prec(norm_cex_param)).c_str(), "", 10, 0, 10, 10, 0, 10 );
 
   double Chi2 = 0.;
@@ -116,9 +116,11 @@ double newDUETFitter::DoFit(){
   //the_Chi2 = Chi2;
   //SaveInfo();
   //BinnedChi2->Write();
-  std::string name = "abs";
-  SaveExpChi2( Chi2, name );
-  name = "cex";
-  SaveExpChi2( Chi2, name );
+  if( fSave ){
+    std::string name = "abs";
+    SaveExpChi2( Chi2, name );
+    name = "cex";
+    SaveExpChi2( Chi2, name );
+  }
   return Chi2;
 }

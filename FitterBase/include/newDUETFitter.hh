@@ -25,7 +25,7 @@ class newDUETFitter : public G4ReweightFitter {
     newDUETFitter( TFile * output, std::string data_file );
     virtual void   LoadData();
     void SaveData( TDirectory * ) override;
-    double DoFit() override;
+    double DoFit(bool fSave=true) override;
 
 //    newDUETFitter(){fOutFile = new TFile("DUET_fit.root", "RECREATE"); };
 //    newDUETFitter( std::string/*, std::string*/ );

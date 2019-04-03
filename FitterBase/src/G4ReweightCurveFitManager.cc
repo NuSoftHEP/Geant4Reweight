@@ -65,6 +65,16 @@ void G4ReweightCurveFitManager::MakeFitParameters( std::vector< fhicl::Parameter
         thePars.push_back( par.Name );
         theVals.push_back( nominal );
 
+        double scan_start = thePar.get< double >("ScanStart", 1.);
+        int    nsteps =     thePar.get< int >("NScanSteps", 10);
+        double scan_delta = thePar.get< double >("ScanDelta", .1);
+
+        theScanStarts.push_back( scan_start );
+        theScanSteps.push_back( nsteps );
+        theScanDeltas.push_back( scan_delta );
+
+
+
         //Remove 1 DOF for each non-dummy parameter
         --nDOF;
       }   
@@ -315,9 +325,45 @@ void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan ){
   else{
    std::cout << "Doing scan" << std::endl;
    
-   double a;
-   a = 1.;
-   std::cout << "FCN output: " << theFCN(&a) << std::endl; 
+   //Build the input to the FCN
+   int total_steps = 1;
+   for( size_t i = 0; i < theScanSteps.size(); ++i )
+     total_steps *= theScanSteps[i];
+
+   std::cout << "Factors: " << std::endl;
+   std::vector< int > theFactors;
+   for( size_t i = 0; i < theScanSteps.size(); ++i ){
+     std::cout << i << " Steps: " << theScanSteps[i] << std::endl;
+     if( i == 0 )
+       theFactors.push_back( total_steps / theScanSteps[i] );
+     else
+       theFactors.push_back( theFactors[i - 1] / theScanSteps[i] );
+
+     std::cout << theFactors.back() << std::endl;
+   }
+
+   std::cout << "Steps: " << std::endl;
+   for( int z = 0; z < total_steps; ++z ){
+     
+     std::vector< int > input; 
+     std::vector< double > input_coeffs;
+     for( size_t i = 0; i < theFactors.size(); ++i ){
+      
+       int val = z;
+       
+       for( size_t j = 0; j < i; ++j )
+         val -= ( theFactors[j] * input[j] );
+
+       input.push_back( val / theFactors[i] );
+       input_coeffs.push_back( theScanStarts[i] + ( input.back() * theScanDeltas[i] ) );
+
+       std::cout << input.back() << " " << input_coeffs.back() << " ";
+     }
+     std::cout << std::endl;
+
+     std::cout << "FCN output: " << z << " " << theFCN(&input_coeffs[0]) << std::endl; 
+   }
+
   }
 
   

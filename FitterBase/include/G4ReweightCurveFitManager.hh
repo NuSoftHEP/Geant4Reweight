@@ -39,7 +39,7 @@ class G4ReweightCurveFitManager{
     void DefineMCSets( std::vector< fhicl::ParameterSet > &);
     void DefineExperiments( fhicl::ParameterSet &);
     void GetAllData();
-    void RunFitAndSave(bool fFitScan=false);
+    void RunFitAndSave(bool fFitScan=false, bool fSave = false);
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
     
@@ -47,7 +47,7 @@ class G4ReweightCurveFitManager{
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
 
-    void DefineFCN();
+    void DefineFCN(bool fSave=false);
 
 
   protected:

@@ -86,23 +86,27 @@ double newDUETFitter::DoFit(bool fSave){
     
     if( i < 5 ){
       Data_xsec_graphs["cex"]->GetPoint(i, x, Data_val_i);
-      MC_xsec_graphs["cex"]->GetPoint(i, x, MC_val_i);
+//      MC_xsec_graphs["cex"]->GetPoint(i, x, MC_val_i);
+      MC_val_i = MC_xsec_graphs["cex"]->Eval( x );
     }
     else{
-      MC_xsec_graphs["abs"]->GetPoint(i - 5, x, MC_val_i);
+      //MC_xsec_graphs["abs"]->GetPoint(i - 5, x, MC_val_i);
       Data_xsec_graphs["abs"]->GetPoint(i - 5, x, Data_val_i);
+      MC_val_i = MC_xsec_graphs["abs"]->Eval(x);
     }
 
 
     for( int j = 0; j < NPoints; ++j ){
    
       if( j < 5 ){
-        MC_xsec_graphs["cex"]->GetPoint(j, x, MC_val_j);
+        //MC_xsec_graphs["cex"]->GetPoint(j, x, MC_val_j);
         Data_xsec_graphs["cex"]->GetPoint(j, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["cex"]->Eval(x);
       }
       else{
-        MC_xsec_graphs["abs"]->GetPoint(j - 5, x, MC_val_j);
+        //MC_xsec_graphs["abs"]->GetPoint(j - 5, x, MC_val_j);
         Data_xsec_graphs["abs"]->GetPoint(j - 5, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["abs"]->Eval(x);
       }
 
       cov_val = DUET_cov_inv[0][i][j];

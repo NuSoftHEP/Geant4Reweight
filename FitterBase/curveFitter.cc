@@ -39,6 +39,7 @@ int main(int argc, char ** argv){
   FitMan.MakeMinimizer( ps );
 
   bool fFitScan = ps.get< bool >( "FitScan", false );
-  FitMan.RunFitAndSave(fFitScan);
+  bool fSave    = ps.get< bool >( "Save", false );
+  FitMan.RunFitAndSave(fFitScan, fSave);
   return 0;
 }

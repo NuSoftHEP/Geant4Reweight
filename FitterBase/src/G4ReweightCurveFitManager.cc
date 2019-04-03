@@ -145,7 +145,7 @@ void G4ReweightCurveFitManager::GetAllData(){
 
 }
 
-void G4ReweightCurveFitManager::DefineFCN(){
+void G4ReweightCurveFitManager::DefineFCN(bool fSave){
   theFCN = ROOT::Math::Functor(
       [&](double const *coeffs) {
         
@@ -174,15 +174,16 @@ void G4ReweightCurveFitManager::DefineFCN(){
           }   
         }
 
-
-//        TDirectory * outdir;
-//        if( !out->Get( dir_name.c_str() ) ){
-//          outdir = out->mkdir( dir_name.c_str() );
-//        }
-//        else{
-//          outdir = (TDirectory*)out->Get( dir_name.c_str() );
-//        }
-
+        TDirectory * outdir;
+        if( fSave ){
+          if( !out->Get( dir_name.c_str() ) ){
+            outdir = out->mkdir( dir_name.c_str() );
+          }
+          else{
+            outdir = (TDirectory*)out->Get( dir_name.c_str() );
+          }
+        }
+  
         double chi2 = 0.;
 
 	std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
@@ -198,8 +199,10 @@ void G4ReweightCurveFitManager::DefineFCN(){
             std::string FracsFile = mapSetsToFracs[ itSet->first ];
             std::cout << NominalFile << " " << FracsFile << std::endl;
     
-//            theFitter->MakeFitDir( outdir );
-            theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet);
+            if( fSave )
+              theFitter->MakeFitDir( outdir );
+
+            theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet, fSave);
             double fit_chi2 = theFitter->DoFit(false);
     
             std::cout << fit_chi2 << std::endl;
@@ -219,7 +222,7 @@ void G4ReweightCurveFitManager::DefineFCN(){
     );
 }
 
-void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan ){
+void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan, bool fSave ){
 
   TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
   TH1D parsHist("parsHist", "", thePars.size(), 0,thePars.size());
@@ -235,7 +238,7 @@ void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan ){
   }
 
 
-  DefineFCN();
+  DefineFCN(fSave);
 
 
   if( !fFitScan ){

@@ -152,6 +152,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       for( size_t i = 0; i < varY.size(); ++i ){
         std::cout << i << " " << varX[i] << " " << varY[i] << std::endl;
         FSHists[name]->SetBinContent(i+1, varY[i]);
+        std::cout << "Center,Content: " << FSHists[name]->GetBinCenter(i+1) << " " << FSHists[name]->GetBinContent(i+1) << std::endl;
       }
       //Set under/overflow
       FSHists[name]->SetBinContent( 0, 1. );
@@ -211,10 +212,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
         auto excHist = itGr->second;
         std::vector< double > exc_bins;
         if( !CutIsDummy[name] ){
-          for( int i = 1; i < excHist->GetNbinsX(); ++i ){
+          for( int i = 1; i <= excHist->GetNbinsX(); ++i ){
             exc_bins.push_back( excHist->GetBinLowEdge(i) );         
           }
-          exc_bins.push_back( excHist->GetBinLowEdge(excHist->GetNbinsX()+1) + excHist->GetBinWidth(excHist->GetNbinsX()+1) ); 
+          exc_bins.push_back( excHist->GetBinLowEdge(excHist->GetNbinsX()) + excHist->GetBinWidth(excHist->GetNbinsX()) ); 
         }
 
         std::vector< double > new_bins = exc_bins;

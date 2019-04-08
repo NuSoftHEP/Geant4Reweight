@@ -79,14 +79,6 @@ int main( int argc, char ** argv ){
     itHist->second->Write( ("nominal_" + itHist->first).c_str() );
   }
   
-  /*
-  FullParameterSet[ "reac" ].at(0).Value = 2.;
-  FullParameterSet[ "reac" ].at(1).Value = .5;
-  FullParameterSet[ "abs"  ].at(0).Value = 1.5;
-  FullParameterSet[ "cex"  ].at(0).Value = 2.;
-  FullParameterSet[ "inel"  ].at(0).Value = .5;
-  */
-
   TFile FitResults( "alt_curveFitter_try.root", "OPEN" );
   G4ReweightThrowManager throwMan( FitResults );
   if( throwMan.Decomp() ){

@@ -196,14 +196,16 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vec
     std::string name = itPar->first;
     if( name == "reac" ) continue;   
 
+    //Go through and set all bins to 1. as a reset 
     TH1D * excHist = FSHists[name];
+    for( int i = 1; i <= excHist->GetNbinsX(); ++i ) 
+      excHist->SetBinContent(i, 1.);
 
     auto thePars = itPar->second;
     for( size_t i = 0; i < thePars.size(); ++i ){
 
       //First check if it is a dummy
       if( thePars[i].Dummy ){
-        std::cout << "Dummy" << std::endl;
         for( int j = 1; j <= excHist->GetNbinsX(); ++j ){
           excHist->SetBinContent(j,1.);
         }
@@ -213,15 +215,11 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vec
       double start = thePars[i].Range.first;
       double end   = thePars[i].Range.second;
       
-      std::cout << "Bins:" << std::endl;
       for( int j = 1; j <= excHist->GetNbinsX(); ++j ){
         double bin_low = excHist->GetBinLowEdge(j);
         double bin_high = excHist->GetBinLowEdge(j+1);
 
-        std::cout << bin_low << " " << bin_high << std::endl; 
-
         if( ( start <= excHist->GetBinLowEdge(j) ) && ( end >= excHist->GetBinLowEdge(j+1) ) ){
-          std::cout << "Bin is in range " << std::endl;
           excHist->SetBinContent(j, thePars[i].Value);
         }
 
@@ -248,11 +246,7 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vec
             double bin_low = excHist->GetBinLowEdge(j);
             double bin_high = excHist->GetBinLowEdge(j+1);
             
-            std::cout << bin_low << " " << bin_high << std::endl;
-
             if( ( reac_start <= excHist->GetBinLowEdge(j) ) && ( reac_end >= excHist->GetBinLowEdge(j+1) ) ){
-              std::cout << "Bin is in range " << std::endl;
-              
               double exc_val = excHist->GetBinContent(j);
               excHist->SetBinContent(j, reac_val * exc_val);
             }

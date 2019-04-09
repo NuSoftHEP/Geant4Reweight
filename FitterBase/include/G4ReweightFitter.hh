@@ -14,7 +14,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "tinyxml2.h"
 
 #include "G4ReweightFinalState.hh"
 
@@ -52,7 +51,6 @@ class G4ReweightFitter{
     void SetActiveSample( size_t, TDirectory * );
     void MakeFitDir( TDirectory * );
     void AddSample( FitSample theSample ){ samples.push_back( theSample); };
-    //void ParseXML(std::string);
 
     std::string GetType(){ return type; };
     std::string GetName(){ return fExperimentName; };

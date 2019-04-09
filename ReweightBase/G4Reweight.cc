@@ -32,7 +32,7 @@ bool enableFS = false;
 bool enablePiMinus = false;
 
 std::string FinalStateFracsFile = "FinalStateFile.root";
-std::string FinalStateVarsFile  = "try.xml";
+std::string FinalStateVarsFile  = "";
 
 
 bool parseArgs(int argc, char ** argv);
@@ -57,11 +57,12 @@ int main(int argc, char ** argv){
     std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;
     std::cout << "Using FinalStateVarsFile: " << FinalStateVarsFile << std::endl;
 
-    G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
-    if( enablePiMinus ) theFS->SetPiMinus();
+    //Commenting out for now. Need to figure out how to run this with a different style of final state reweighter
+ //   G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
+ //   if( enablePiMinus ) theFS->SetPiMinus();
 
-    tp->FillAndAnalyzeFS(theFS);
-    tp->CloseAndSaveOutput();
+ //   tp->FillAndAnalyzeFS(theFS);
+ //   tp->CloseAndSaveOutput();
 
     return 0;
   }

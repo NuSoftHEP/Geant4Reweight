@@ -18,7 +18,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "tinyxml2.h"
 
 #include "TGraph.h"
 #include "fhiclcpp/make_ParameterSet.h"
@@ -29,7 +28,6 @@ class G4ReweightHandler{
     G4ReweightHandler(bool as_graphs = false);
     ~G4ReweightHandler();
 
-    void ParseXML(std::string, std::vector< std::string >);
     void ParseFHiCL( std::vector<fhicl::ParameterSet> );
 //    FitSample DoReweight(std::string theName, double norm_abs, double norm_cex, std::string outName, bool PiMinus=false);
     FitSample DoReweight(std::string theName, double max, double min, std::string outName, bool PiMinus);

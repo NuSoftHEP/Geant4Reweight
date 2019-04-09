@@ -17,7 +17,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "tinyxml2.h"
 
 #include "fhiclcpp/ParameterSet.h"
 

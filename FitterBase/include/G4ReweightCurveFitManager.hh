@@ -18,7 +18,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "tinyxml2.h"
 #include <utility>
 #include "Math/Factory.h"
 #include "Math/Functor.h"

@@ -6,6 +6,8 @@
 #include "G4ReweightInter.hh"
 #include "G4ReweightFinalState.hh"
 
+#include "G4ReweightParameterMaker.hh"
+#include "G4ReweightThrowManager.hh"
 
 //#include "G4RunManager.hh"
 
@@ -43,8 +45,11 @@ class G4ReweightTreeParser{
     void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
 
     void FillAndAnalyzeFS( G4ReweightFinalState * );
+    void FillAndAnalyzeFSThrows( TFile * FracsFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
     void AnalyzeFS( G4ReweightFinalState * );
+    void AnalyzeFSThrows( G4ReweightFinalState *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
     void GetWeightFS( G4ReweightFinalState *, double );
+    double ReturnWeightFS( G4ReweightFinalState * theFS, double theMomentum, bool IsPiMinus=false );
 
     void OpenNewInput( std::string );
     void CloseInput();
@@ -70,6 +75,7 @@ class G4ReweightTreeParser{
 
     double theLen;
     double theWeight;
+    std::vector<double> ThrowWeights;
     double theFSWeight;
     double altFSWeight;
     double theElastWeight;

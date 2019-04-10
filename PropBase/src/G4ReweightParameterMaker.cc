@@ -1,22 +1,68 @@
 #include "G4ReweightParameterMaker.hh"
 
-G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars ){
+G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars ) :
+  FullParameterSet( pars ) {
+
+  BuildHistsFromPars();
+}
+
+G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets ){
+
+  for( size_t i = 0; i < FitParSets.size(); ++i ){
+    fhicl::ParameterSet theSet = FitParSets.at(i);
+    std::string theCut = theSet.get< std::string >("Cut");
+
+    if( FullParameterSet.find( theCut ) == FullParameterSet.end() ){  
+      FullParameterSet[ theCut ] = std::vector< FitParameter  >();
+    }   
+
+    bool isDummy = theSet.get< bool >("Dummy");
+    if( isDummy ){
+      FitParameter dummyPar;
+      dummyPar.Name = "dummy";
+      dummyPar.Cut = theCut;
+      dummyPar.Value = 1.; 
+      dummyPar.Range = std::make_pair( 0., 0.);
+      dummyPar.Dummy = true;
+          
+      FullParameterSet[ theCut ].push_back( dummyPar );
+    }   
+    else{ 
+      std::cout << "Making parameters for " << theCut << std::endl;
+        
+      std::vector< fhicl::ParameterSet > theParameters = theSet.get< std::vector< fhicl::ParameterSet > >("Parameters");
+      for( size_t j = 0; j < theParameters.size(); ++j ){
+        fhicl::ParameterSet thePar = theParameters.at(j);
 
 
-  double dummyX = 0.;
-  double dummyY = 1.;
+        std::string theName = thePar.get< std::string >("Name");
+        std::cout << theName << std::endl;
+            
+        std::pair< double, double > theRange = thePar.get< std::pair< double, double > >("Range");
+        std::cout << "Range Low: " << theRange.first << " High: " << theRange.second << std::endl;
 
-/*
-  dummyHist  = new TH1D("dummy", "", 1,0,0);
-  //Set the over/underflow bins for the dummy 
-  dummyHist->SetBinContent(0,1.);
-  dummyHist->SetBinContent(1,1.);
-  dummyHist->SetBinContent(2,1.);
-*/
+        double nominal = thePar.get< double >("Nominal",1.);
+
+        FitParameter par;
+        par.Name = theName;
+        par.Cut = theCut;
+        par.Dummy = false;
+        par.Value = nominal; 
+        par.Range = theRange;
+        FullParameterSet[ theCut ].push_back( par );
+
+      }   
+    }   
+  }
+
+  BuildHistsFromPars();
+}
+
+void G4ReweightParameterMaker::BuildHistsFromPars(){
 
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
   std::map< std::string, bool > CutIsDummy;
-  for( auto itPar = pars.begin(); itPar != pars.end(); ++itPar ){
+  for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
     std::string name = itPar->first;  
     if( name == "reac" ) continue;
     std::cout << "Cut: " << name << std::endl;
@@ -30,10 +76,8 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
       
       if( itPar->second.at( i ).Dummy ){
         std::cout << "Dummy" << std::endl;
-//        FSHists[name] = (TH1D*)dummyHist->Clone();
         FSHists[name]  = new TH1D( ("dummy_" + name).c_str(), "", 1,0,0);
         std::cout << "Made" << std::endl;
-        //Set the over/underflow bins for the dummy 
         FSHists[name]->SetBinContent(0,1.);
         FSHists[name]->SetBinContent(1,1.);
         FSHists[name]->SetBinContent(2,1.);
@@ -93,16 +137,16 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
     }
   }
 
-  if( pars.find( "reac" ) != pars.end() ){
-    if( !pars.at( "reac" ).at(0).Dummy ){
+  if( FullParameterSet.find( "reac" ) != FullParameterSet.end() ){
+    if( !FullParameterSet.at( "reac" ).at(0).Dummy ){
       //If reac exists and is not a dummy, go through the exclusive channels 
       //and vary each by the reac variations
 
       //Build the reac graph
       std::vector< double > reac_bins, varY, reacBins;
-      for( size_t i = 0; i < pars.at( "reac" ).size(); ++i ){
-        double value = pars.at( "reac" ).at( i ).Value;
-        std::pair< double, double > range = pars.at( "reac" ).at( i ).Range;
+      for( size_t i = 0; i < FullParameterSet.at( "reac" ).size(); ++i ){
+        double value = FullParameterSet.at( "reac" ).at( i ).Value;
+        std::pair< double, double > range = FullParameterSet.at( "reac" ).at( i ).Range;
         std::cout << i << " Range: " << range.first << " " << range.second << std::endl;
         std::cout << i << " Value: " << value << std::endl;
 
@@ -188,10 +232,11 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
   }
 }
 
-void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vector< FitParameter > > & pars ){
+void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double > & input ){
 
+  SetParamVals( input );
   
-  for( auto itPar = pars.begin(); itPar != pars.end(); ++itPar ){
+  for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
 
     std::string name = itPar->first;
     if( name == "reac" ) continue;   
@@ -230,9 +275,9 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vec
   }
 
   //Now Get the reactive and go back and vary all others
-  if( pars.find( "reac" ) != pars.end() ){
+  if( FullParameterSet.find( "reac" ) != FullParameterSet.end() ){
    
-    auto reacPars = pars.at( "reac" );
+    auto reacPars = FullParameterSet.at( "reac" );
     if( !reacPars[0].Dummy ){
       for( size_t i = 0; i < reacPars.size(); ++i ){
         double reac_start = reacPars[i].Range.first; 
@@ -252,6 +297,16 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, std::vec
             }
           }
         }
+      }
+    }
+  }
+}
+
+void G4ReweightParameterMaker::SetParamVals( const std::map< std::string, double > & input ){
+  for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
+    if( !itPar->second.at(0).Dummy ){
+      for( size_t j = 0; j < itPar->second.size(); ++j ){ 
+        itPar->second.at(j).Value = input.at(itPar->second.at(j).Name);
       }
     }
   }

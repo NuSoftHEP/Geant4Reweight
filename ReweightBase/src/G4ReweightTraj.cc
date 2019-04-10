@@ -179,19 +179,20 @@ double G4ReweightTraj::GetWeight(double bias){
 }
 
 double G4ReweightTraj::GetWeight(TH1F * biasHist){
+
   double total, bias_total;
 
   //Decrement in the case an inelastic interaction occurred.
   size_t nsteps = GetNSteps();
   if( GetFinalProc() == fInelastic )nsteps--;
+  std::cout << GetFinalProc() << std::endl;
 
   for(size_t is = 0; is < nsteps; ++is){   
-
     auto theStep = GetStep(is);
-        
+    
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
       auto theProc = theStep->GetActivePostProc(ip);
+
 
       if( theProc.Name == fInelastic ){
 

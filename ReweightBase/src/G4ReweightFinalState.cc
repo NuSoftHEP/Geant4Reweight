@@ -1,10 +1,12 @@
 #include "G4ReweightFinalState.hh"
+#include "G4ReweightStep.hh"
 
 #include <utility>
 #include <algorithm>
 #include <iostream>
 
 #include "TROOT.h"
+#include "TVectorD.h"
 
 
 G4ReweightFinalState::G4ReweightFinalState(TTree * input, std::map< std::string, G4ReweightInter* > &FSScales, double max, double min, bool PiMinus) 
@@ -361,6 +363,11 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
 }
 
 G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::string, TH1D* > &FSScales, bool PiMinus){
+  TVectorD * m_vec = (TVectorD*)input->Get("Mass");
+  Mass = (*m_vec)(0);
+
+  TVectorD * d_vec = (TVectorD*)input->Get("Density");
+  Density = (*d_vec)(0);
 
   as_graphs = true;
   if( PiMinus ) SetPiMinus();
@@ -498,10 +505,9 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
   //the nominal and varied exlcusive channels
   TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
   TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-  
   for(size_t i = 1; i < theInts.size(); ++i){
     AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
+    AddGraphs( newTotal,   newGraphs[ theInts.at(i) ] );
   }
   //oldTotal->Write("oldTotal");
   //newTotal->Write("newTotal");
@@ -556,7 +562,8 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
 
   //Now go through and clear from memory all of the pointers
   delete newTotal;
-  delete oldTotal;
+  //delete oldTotal;
+  totalGraph = oldTotal;
 //
 //  gDirectory->Delete("oldTotal");
 //  gDirectory->Delete("newTotal");
@@ -599,11 +606,11 @@ void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSS
 
   //Form the total cross sections from 
   //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
+//  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
   TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
   
   for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
+//    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
     AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
   }
 
@@ -611,7 +618,8 @@ void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSS
   if( totalVariationGraph )
     delete totalVariationGraph;
   totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
+//  DivideGraphs(totalVariationGraph, oldTotal);
+  DivideGraphs(totalVariationGraph, totalGraph);
 
   //Now go back through the varied exclusive channels
   //and compute the final scale
@@ -631,7 +639,7 @@ void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSS
 
   //Now go through and clear from memory all of the pointers
   delete newTotal;
-  delete oldTotal;
+  //delete oldTotal;
 
 }
 
@@ -669,6 +677,93 @@ double G4ReweightFinalState::GetWeightFromGraph( std::string theInt, double theM
   //std::cout << "Weight: " << theWeight << std::endl;
 
   return theWeight;
+}
+
+
+double G4ReweightFinalState::GetNominalMFP( double theMom ){
+  double xsec = totalGraph->Eval( theMom );
+  return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
+}
+
+double G4ReweightFinalState::GetBiasedMFP( double theMom ){
+  double b = 1.;
+  if( as_graphs ){
+    b = totalGraph->Eval( theMom );
+  }
+
+  return b * GetNominalMFP( theMom );
+}
+
+double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
+
+  double total, bias_total;
+
+  size_t nsteps = theTraj->GetNSteps();
+  for(size_t is = 0; is < nsteps; ++is){   
+
+    auto theStep = theTraj->GetStep(is);
+        
+    double theMom = theStep->GetFullPreStepP();
+
+    //Convert xsec to MFP   
+    //Note: taking away the factor of 10. used elsewhere
+    //
+    total += ( theStep->stepLength / GetNominalMFP(theMom) );
+    bias_total += ( theStep->stepLength / GetBiasedMFP( theMom ) );
+
+  }
+
+
+  double weight = exp( total - bias_total );
+
+
+
+  if( theTraj->GetFinalProc() == fInelastic ){
+    int nPi0     = theTraj->HasChild(111).size();  
+    int nPiPlus  = theTraj->HasChild(211).size();
+    int nPiMinus = theTraj->HasChild(-211).size();
+
+    std::string cut;
+    if( (nPi0 + nPiPlus + nPiMinus) == 0){
+      cut = "abs";
+    }
+    else if( (nPiPlus + nPiMinus) == 0 && nPi0 == 1 ){
+      cut = "cex";
+    }
+    else if( (nPiPlus + nPiMinus + nPi0) > 1 ){
+      cut = "prod";
+    }
+    else{
+      if( theTraj->PID == 211 ){
+        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
+          cut = "inel";
+        }
+        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
+          cut = "dcex"; 
+        }
+      }
+      else if( theTraj->PID == -211 ){
+        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
+          cut = "dcex";
+        }
+        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
+          cut = "inel"; 
+        }
+      }
+    }
+    TGraph * theGraph = GetExclusiveVariationGraph( cut ); 
+
+    auto lastStep = theTraj->GetStep( theTraj->GetNSteps() - 1 );
+    double theMom = lastStep->GetFullPreStepP();
+
+    double exclusive_factor = 1;
+
+    if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] )
+      exclusive_factor = theGraph->Eval( theMom );
+
+    weight *= exclusive_factor;
+  }
+  return weight;
 }
 
 TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){

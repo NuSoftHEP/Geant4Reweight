@@ -9,12 +9,16 @@
 #include "TGraph.h"
 
 #include "G4ReweightInter.hh"
+#include "G4ReweightTraj.hh"
 
 #include <cmath>
 #include <map>
 #include "TTree.h"
 
 #include <iostream> 
+
+class G4ReweightTraj;
+//class G4ReweightStep;
 
 class G4ReweightFinalState{
   public:
@@ -31,6 +35,11 @@ class G4ReweightFinalState{
     //void GetMaxAndMin( std::string );
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );
+
+    double GetWeight( G4ReweightTraj * );
+    double GetNominalMFP( double );
+    double GetBiasedMFP( double );
+
 
     void SetNewHists( const std::map< std::string, TH1D* > &FSScales );
 
@@ -50,7 +59,7 @@ class G4ReweightFinalState{
     bool AsGraph(){return as_graphs; };
 
     void SetPiMinus(){
-
+      fInelastic = "pi-Inelastic";
       abs_cut =  "(int == \"pi-Inelastic\" && ( (nPi0 + nPiPlus + nPiMinus)  == 0) )";
       inel_cut = "(int == \"pi-Inelastic\" && ( (nPi0 + nPiPlus) == 0 ) && (nPiMinus == 1))";
       cex_cut =  "(int == \"pi-Inelastic\" && ( (nPiPlus + nPiMinus) == 0 ) && (nPi0 == 1))";
@@ -79,8 +88,12 @@ class G4ReweightFinalState{
     std::map< std::string, TGraph* > exclusiveVariationGraphs; 
     TGraph * totalVariationGraph;
 
+    TGraph * totalGraph;
+
     double Maximum;
     double Minimum;
+
+    std::string fInelastic = "pi+Inelastic";
   
     std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
 
@@ -102,6 +115,9 @@ class G4ReweightFinalState{
     std::map< std::string, TH1D* > newHists;
     std::map< std::string, TGraph* > oldGraphs;
     std::map< std::string, TGraph* > newGraphs;
+
+    double Mass;
+    double Density;
 };
 
 #endif

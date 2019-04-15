@@ -848,12 +848,20 @@ double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
   size_t nsteps = GetNSteps();
 
 
+  //Remove this when switching to new weighting scheme 
   if( GetFinalProc() == fInelastic )nsteps--;
 
   for(size_t is = 0; is < nsteps; ++is){   
 
     auto theStep = GetStep(is);
         
+   // double theMom = theStep->GetFullPreStepP();
+
+   // total += (10. *  theStep->stepLength / theFS->GetNominalMFP(theMom) );
+   // bias_total += ( 10. * theStep->stepLength / theFS->GetBiasedMFP( theMom ) );
+
+    
+
     for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
 
       auto theProc = theStep->GetActivePostProc(ip);
@@ -920,6 +928,10 @@ double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
         }
       }
     }
+
+    //New weighting scheme
+    //double exclusive_factor = theFS->GetExclusiveFactor( cut );
+    //weight *= exclusive_factor;
     
 
     TH1D* theOldHist = theFS->GetOldHist( cut );

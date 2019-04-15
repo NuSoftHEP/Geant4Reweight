@@ -76,6 +76,7 @@ class G4ReweightTreeParser{
     double theLen;
     double theWeight;
     std::vector<double> ThrowWeights;
+    std::vector<double> AltThrowWeights;
     double theFSWeight;
     double altFSWeight;
     double theElastWeight;

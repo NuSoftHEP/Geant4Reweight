@@ -27,6 +27,8 @@ template<class T> class DeleteVector
 //Forward Declaration to let Traj know of step
 class G4ReweightStep;
 
+class G4ReweightFinalState;
+
 class G4ReweightTraj{
 
   public:

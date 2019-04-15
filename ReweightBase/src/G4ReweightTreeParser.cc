@@ -1166,6 +1166,7 @@ void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4Rewei
       //GetWeightFS( theFS, preFinalP );
 
       ThrowWeights.clear();
+      AltThrowWeights.clear();
       for( size_t i = 0; i < nThrows; ++i ){
         std::map< std::string, double > temp_throw;
         for( auto itPar = ThrowVals.begin(); itPar != ThrowVals.end(); ++itPar ){
@@ -1178,6 +1179,7 @@ void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4Rewei
         double temp_weight = theTraj->GetWeight( theFS->GetTotalVariationGraph() ); 
         temp_weight *= ReturnWeightFS( theFS, preFinalP, is_piminus );
         ThrowWeights.push_back( temp_weight );
+        AltThrowWeights.push_back( theFS->GetWeight( theTraj ) );
 
       }
 
@@ -1240,4 +1242,5 @@ void G4ReweightTreeParser::MakeOutputBranches(){
   tree->Branch("intType", &intType);
 
   tree->Branch("ThrowWeights", &ThrowWeights);
+  tree->Branch("AltThrowWeights", &AltThrowWeights);
 }

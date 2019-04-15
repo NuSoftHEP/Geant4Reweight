@@ -15,6 +15,7 @@ int main(int argc, char ** argv){
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
   std::string inFileName  = ps.get< std::string >( "InputFile" ); 
+  int nThrows = ps.get< int >( "nThrows" );
 
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(inFileName.c_str(), outFileName.c_str());
 

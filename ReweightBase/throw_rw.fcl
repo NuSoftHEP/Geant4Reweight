@@ -6,3 +6,4 @@ InputFile:  "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_
 Fracs:      "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
 FitResults: "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase-Build/alt_curveFitter_try.root"
 
+nThrows: 1

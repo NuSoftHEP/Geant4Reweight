@@ -995,11 +995,12 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
   }
 }
 
-void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows ){
+void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows ){
 
   std::map< std::string, std::vector< double > > ThrowVals;
   //Doing throws
   for( int i = 0; i < nThrows; ++i ){
+
     std::map< std::string, double > vals = ThrowMan.DoThrow();
     for( auto itVal = vals.begin(); itVal != vals.end(); ++itVal ){
       ThrowVals[ itVal->first ].push_back( itVal->second );
@@ -1007,6 +1008,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, G4Reweight
   }
 
   G4ReweightFinalState theFS = G4ReweightFinalState(FracsFile, ParMaker.GetFSHists() );
+  theFS.SetTotalGraph(XSecFile);
   
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
@@ -1074,6 +1076,31 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, G4Reweight
 }
 
 void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows){
+
+  for( size_t i = 0; i < nThrows; ++i ){
+    std::map< std::string, double > temp_throw;
+    for( auto itPar = ThrowVals.begin(); itPar != ThrowVals.end(); ++itPar ){
+      temp_throw[ itPar->first ] = itPar->second.at(i);
+    }
+
+    ParMaker.SetNewVals( temp_throw );       
+    theFS->SetNewHists( ParMaker.GetFSHists() );
+
+    std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
+    for( ; itTraj != trajCollection->end(); ++itTraj){
+      auto theTraj = itTraj->second; 
+       
+      if(theTraj->parID != 0)continue;
+      if( theTraj->PID == 211 ) Inel = "pi+Inelastic";
+      else if( theTraj->PID == -211 ) Inel = "pi-Inelastic";
+      else continue;
+
+      double temp_alt_weight = theFS->GetWeight( theTraj );
+      theTraj->AddWeight( temp_alt_weight );
+      
+    }
+
+  }
 
   std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
   for( ; itTraj != trajCollection->end(); ++itTraj){
@@ -1165,8 +1192,13 @@ void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4Rewei
       //theWeight      = theTraj->GetWeight( (TH1F*)theFS->GetTotalVariation() );
       //GetWeightFS( theFS, preFinalP );
 
+
+      ThrowWeights = theTraj->GetWeights();
+/*    
       ThrowWeights.clear();
       AltThrowWeights.clear();
+
+
       for( size_t i = 0; i < nThrows; ++i ){
         std::map< std::string, double > temp_throw;
         for( auto itPar = ThrowVals.begin(); itPar != ThrowVals.end(); ++itPar ){
@@ -1179,9 +1211,13 @@ void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4Rewei
         double temp_weight = theTraj->GetWeight( theFS->GetTotalVariationGraph() ); 
         temp_weight *= ReturnWeightFS( theFS, preFinalP, is_piminus );
         ThrowWeights.push_back( temp_weight );
-        AltThrowWeights.push_back( theFS->GetWeight( theTraj ) );
+
+        double temp_alt_weight = theFS->GetWeight( theTraj );
+        AltThrowWeights.push_back( temp_alt_weight );
 
       }
+*/      
+      
 
       tree->Fill();
        

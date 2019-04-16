@@ -45,7 +45,7 @@ class G4ReweightTreeParser{
     void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
 
     void FillAndAnalyzeFS( G4ReweightFinalState * );
-    void FillAndAnalyzeFSThrows( TFile * FracsFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
+    void FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
     void AnalyzeFS( G4ReweightFinalState * );
     void AnalyzeFSThrows( G4ReweightFinalState *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
     void GetWeightFS( G4ReweightFinalState *, double );

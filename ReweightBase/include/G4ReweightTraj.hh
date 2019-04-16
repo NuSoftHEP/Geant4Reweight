@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <iostream>
 
 #include "TH1F.h"
 #include "TGraph.h" 
@@ -89,11 +90,28 @@ class G4ReweightTraj{
     std::vector< std::pair<double,int> > ThinSliceMethodInelastic(double);
     double BetheBloch(double);
 
+    void AddWeight( double w ){
+       weights.push_back(w);
+    };
+
+    double GetWeight( size_t i ){
+      if( i > weights.size() - 1 ){
+        std::cout << "Error: out of weights vector range" << std::endl;
+        return -1;
+      }
+    };
+
+    const std::vector< double > & GetWeights() const{
+      return weights;
+    };
+
   protected:
 
   private:
     std::vector<G4ReweightStep *> steps;
     std::vector<G4ReweightTraj *> children;
+
+    std::vector< double > weights;
 };
 
 

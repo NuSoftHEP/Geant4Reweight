@@ -23,6 +23,9 @@ int main(int argc, char ** argv){
   std::string FracsFileName = ps.get< std::string >( "Fracs" );
   TFile FracsFile( FracsFileName.c_str(), "OPEN" );
 
+  std::string XSecFileName = ps.get< std::string >( "XSec" );
+  TFile XSecFile( XSecFileName.c_str(), "OPEN" );
+
   std::string FitResultsFileName = ps.get< std::string >( "FitResults" );
   TFile FitResultsFile( FitResultsFileName.c_str(), "OPEN" );
   G4ReweightThrowManager ThrowMan( FitResultsFile );
@@ -41,7 +44,7 @@ int main(int argc, char ** argv){
   //Will have to do the throws. Save them (maybe in a vector of vectors/maps?, map of vectors?).
   //Then for each set of throws, create teh parameters (hists) and do the reweighting.
   //Weights from these will need to be saved in a tree branch of a vector<double> 
-  tp->FillAndAnalyzeFSThrows( &FracsFile, ParMaker, ThrowMan );
+  tp->FillAndAnalyzeFSThrows( &FracsFile, &XSecFile, ParMaker, ThrowMan, nThrows );
   tp->CloseAndSaveOutput();
 
   return 0;

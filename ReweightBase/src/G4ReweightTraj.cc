@@ -322,7 +322,6 @@ double G4ReweightTraj::GetWeight(TGraph * theGraph ){
         double bias;
         bias = theGraph->Eval(theMom);
         bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-
       }
     }
   }

@@ -40,6 +40,7 @@ class G4ReweightFinalState{
     double GetNominalMFP( double );
     double GetBiasedMFP( double );
 
+    void SetTotalGraph( TFile * );
 
     void SetNewHists( const std::map< std::string, TH1D* > &FSScales );
 

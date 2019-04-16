@@ -217,32 +217,68 @@ For tracks that end in an Inelastic interaction, the last step will receive a fa
 \end{equation}
 Where the sums in the exponents now leave out the last step.
 
-\subsection{Elastic Interaction Weights}
-We now move on to discussing reweighting the Elastic scattering cross section. As mentioned before, the track is not terminated when Elastic scatters occur. This has two effects on the weigthing scheme:
-\begin{enumerate}
-\item The weight is calculated independently of Inelastic scatters
-\item The track can have multiple Elastic scatters before termination, each with associated weighting factors. 
-\end{enumerate}
+%\subsection{Elastic Interaction Weights}
+%We now move on to discussing reweighting the Elastic scattering cross section. As mentioned before, the track is not terminated when Elastic scatters occur. This has two effects on the weigthing scheme:
+%\begin{enumerate}
+%\item The weight is calculated independently of Inelastic scatters
+%\item The track can have multiple Elastic scatters before termination, each with associated weighting factors. 
+%\end{enumerate}
+%
+%Because a track will never end in an Elastic scatter, the weight will always contain a term in the form of Equation \ref{eq:surv_weight}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
+%
+%In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight}.
+%
+%The resulting weight then takes the form of:
+%\begin{equation}\label{ref:elastFull}
+%W_{elast} = \Bigg( \prod \limits_{e} \frac{\sigma_{e}'}{\sigma_{e}} \frac{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i}')}{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i})} \Bigg)
+%\Bigg( \frac{\exp(-\sum \limits_j^{end} L_j \sigma_{j}')} {\exp(-\sum \limits_j^{end} L_j \sigma_{j})} \Bigg)
+%\end{equation}
+%Here, all $\sigma$ are the Elastic scattering cross section depending on surrounding material and pion momentum at the denoted step. The product in the first term runs over all of the Elastic scatters throughout the track. The sums in the first term run from either the first step in the track or the first step after each scatter $e$. The sums in the second term run from the step after the last elastic scatter to the end of the track. Essentially, the first term contains the contributions from all of the elastic scatters within the track, while the second term contains the contribution from the steps after the last elastic scatter.
 
-Because a track will never end in an Elastic scatter, the weight will always contain a term in the form of Equation \ref{eq:surv_weight}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
-
-In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight}.
-
-The resulting weight then takes the form of:
-\begin{equation}\label{ref:elastFull}
-W_{elast} = \Bigg( \prod \limits_{e} \frac{\sigma_{e}'}{\sigma_{e}} \frac{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i}')}{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i})} \Bigg)
-\Bigg( \frac{\exp(-\sum \limits_j^{end} L_j \sigma_{j}')} {\exp(-\sum \limits_j^{end} L_j \sigma_{j})} \Bigg)
-\end{equation}
-Here, all $\sigma$ are the Elastic scattering cross section depending on surrounding material and pion momentum at the denoted step. The product in the first term runs over all of the Elastic scatters throughout the track. The sums in the first term run from either the first step in the track or the first step after each scatter $e$. The sums in the second term run from the step after the last elastic scatter to the end of the track. Essentially, the first term contains the contributions from all of the elastic scatters within the track, while the second term contains the contribution from the steps after the last elastic scatter.
-
-\subsection{Plan for Reweighting Final States}
+\subsection{Reweighting Final States}
 The exclusive channels\footnote{The definitions of these can be found in Table \ref{tab:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. 
 
 First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$. User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
 From here, the total cross section variation, $c_{inel}$, is used to vary the nominal simulation according to the technique described in Section \ref{subsec:inel_weights}. Events ending in a specific exclusive channel $i$ are given an additional weight $W_{i} = \frac{c_i}{c_{inel}}$. The presence of $c_{inel}$ in the denominator is due to the event already being weighted as an inelastic interaction. 
 
-Testing and validation can be seen in \ref{subsec:exclusive_validation}
+
+\section{Software}
+GeantReweight consists of several base packages:
+\begin{itemize}
+	\item \textbf{FitterBase} -- Handles the fitting of Geant's predictions for the total and exclusive cross sections to external data sets.
+	\item \textbf{ReweightBase} -- Handles the reweighting of Geant simulation output
+	\item \textbf{G4PiCascade} -- Produces root files that store the nominal exclusive and inclusive cross sections. These are used by FitterBase and ReweightBase. 
+	\item \textbf{PropBase} -- Handles producing throws using output from FitterBase.
+\end{itemize}
+
+\subsection{FitterBase}
+The Fitting portion of the software takes in ROOT TGraphs representing the predictions for the inclusive and exclusive cross sections and fits these to data from various experiments. The data is retrieved from  An instance of the class \textbf{G4ReweightFitter} is created for each experiment/data set. The experiments are separated by probe ($\pi^+$ or $\pi^-$) and nuclear target. To configure, the user provides the following:
+\begin{itemize}
+	\item Name -- Name of the experiment.
+	\item Type -- Represents the target and probe.
+	\item Data File -- The location of the ROOT file associated to this data set.
+	\item Graphs -- Set of graph names in the ROOT file and their cut types (absorption, charge exchange, etc.).
+\end{itemize}
+
+After creating an instance of \textbf{G4ReweightFitter} for an experiment and pointing it to data, the GetMCFromCurves method is used to produce varied predictions given nominal  Geant predictions and a set of user defined parameters (scaling factors for the exclusive channels and the total cross section). Once this is called, the DoFit method will produce the $\chi^2$ value between the data and varied predictions defined as: 
+
+\begin{equation}
+\chi^2_{i} = \sum\limits_j^{n_i} \frac{1}{n_i}\left(\frac{\sigma_j^{Data} - \sigma_j^{Geant}}{\Delta\sigma_j^{Data}}\right)^2
+\end{equation}
+
+Here, $n_i$ is the number of data points in set $i$, $\sigma^{Data}$ and $\sigma^{Geant}$ are the cross section values from the data and varied Geant respectively. $\Delta\sigma^{Data}$ is the error on the measurement. 
+
+\subsubsection{DUETFitter}
+A special version of the \textbf{G4ReweightFitter} class exists for data from the DUET experiment. Unlike the other data included in this project, this data was published along with correlations between the data points for its measurements.CITE The \textbf{DUETFitter} class is derived from \textbf{G4ReweightFitter}, and has its own versions of the constructor, SaveData, and DoFit methods to account for the correlations. The $\chi^2$ produced by DoFit is defined as:
+
+\begin{equation}
+\chi^2_{DUET} = \sum\limits_{i,j}^{10}(\sigma^{DUET}_i - \sigma^{Geant}_i)(V_{ij}^{-1})(\sigma^{DUET}_j - \sigma^{Geant}_j)
+\end{equation}
+
+Here, $\sigma^{DUET}$ and $\sigma^{Geant}$ are the cross sections from the DUET measurement and the varied Geant prediction. $V_{ij}$ is the DUET correlation matrix.
+
+START TALKING ABOUT G4REWEIGHTCURVEFITMANAGER
 
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta.

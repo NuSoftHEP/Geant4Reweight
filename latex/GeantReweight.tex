@@ -253,7 +253,10 @@ GeantReweight consists of several base packages:
 \end{itemize}
 
 \subsection{FitterBase}
-The Fitting portion of the software takes in ROOT TGraphs representing the predictions for the inclusive and exclusive cross sections and fits these to data from various experiments. The data is retrieved from  An instance of the class \textbf{G4ReweightFitter} is created for each experiment/data set. The experiments are separated by probe ($\pi^+$ or $\pi^-$) and nuclear target. To configure, the user provides the following:
+The Fitting portion of the software takes in ROOT TGraphs representing the predictions for the inclusive and exclusive cross sections and fits these to data from various experiments.
+
+\subsubsection{G4ReweightFitter}
+An instance of the class \textbf{G4ReweightFitter} is created for each experiment/data set. The experiments are separated by probe ($\pi^+$ or $\pi^-$) and nuclear target. To configure, the user provides the following:
 \begin{itemize}
 	\item Name -- Name of the experiment.
 	\item Type -- Represents the target and probe.
@@ -278,8 +281,26 @@ A special version of the \textbf{G4ReweightFitter} class exists for data from th
 
 Here, $\sigma^{DUET}$ and $\sigma^{Geant}$ are the cross sections from the DUET measurement and the varied Geant prediction. $V_{ij}$ is the DUET correlation matrix.
 
-START TALKING ABOUT G4REWEIGHTCURVEFITMANAGER
+\subsubsection{G4ReweightCurveFitManager} 
 
+The fit is managed by the \textbf{G4ReweightCurveFitManager} class. The user provides it a set of fit parameters which define the variations to be applied to the Geant predictions. It also defines the set of \textbf{G4ReweightFitter}s to be fit to nominal predictions. The manager calculates the number of degrees of freedom in the fit by using the GetNDOF method from \textbf{G4ReweightFitter}s\footnote{Note: for most of the experiments in the fit, the NDOF is 1 (each are treated as uncorrelated points in the fit). However, DUET provides 10 degrees of freedom (one for each correlated data point).}, summing this, and then subtracting the number of parameters defined for the fit. After defining the experiments to be fit, it creates an instance of a ROOT Minimizer. (MENTION THAT IT'S MIGRAD?) At this point, it either performs the fit with the Minimizer, or runs scans of the fit's $\chi^2$ depending on user input. If the fit is successful at finding a minimum, the manager also draws fit results. 
+
+\subsubsection{Fitter Output}
+
+Once the fit is performed, a ROOT file is saved containing the following:
+\begin{itemize}
+	\item A histogram of the best fit values and 1 dimensional errors on the parameters.
+	\item The fit's resulting covariance matrix.
+	\item A tree containing sets of parameter values and their associated $\chi^2$. If the scanning option was chosen, the user can use this tree to draw the results of the scans.
+	\item A directory (Data) that holds all of the data used within the fit.
+	\item A directory (Fit) that holds:
+	\begin{itemize}
+		\item The minimum $\chi^2$ value.
+		\item A directory for each type (probe, nucleus combination) of experiment containing a set of TCanvas objects. There is one TCanvas for each channel (Reactive, Absorption, etc.) included in the fit for that type of experiment. These display the nominal prediction, best fit, and $\pm 1\sigma$ error bands along with all  data for that experiment type and channel.
+	\end{itemize}
+    \item If the user configures the manager to do so, a directory is created for each set of parameter values. This directory contains the resulting varied Geant predictions which were used to fit to that experiment's data.
+	
+\end{itemize}
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta.
 

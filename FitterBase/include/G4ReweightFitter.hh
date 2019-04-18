@@ -8,7 +8,6 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "TDirectory.h"
-#include "FitSample.hh"
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -16,6 +15,7 @@
 #include <string>
 
 #include "G4ReweightFinalState.hh"
+#include "FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 

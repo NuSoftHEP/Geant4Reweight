@@ -1,4 +1,4 @@
-#include "G4ReweightCurveFitManager.hh"
+#include "G4ReweightFitManager.hh"
 #include "FitParameter.hh"
 #include <vector>
 #include <string>
@@ -31,7 +31,7 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
-  G4ReweightCurveFitManager FitMan( outFileName, fSave);
+  G4ReweightFitManager FitMan( outFileName, fSave);
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   FitMan.MakeFitParameters( FitParSets );

@@ -1,5 +1,5 @@
-#ifndef G4ReweightCurveFitManager_h
-#define G4ReweightCurveFitManager_h
+#ifndef G4ReweightFitManager_h
+#define G4ReweightFitManager_h
 
 
 #include "TGraph.h"
@@ -23,9 +23,9 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-class G4ReweightCurveFitManager{
+class G4ReweightFitManager{
   public:
-    G4ReweightCurveFitManager(std::string &, bool );
+    G4ReweightFitManager(std::string &, bool );
     void MakeFitParameters( std::vector< fhicl::ParameterSet > &);
 
     bool CheckIsDummy( std::string theCut ){

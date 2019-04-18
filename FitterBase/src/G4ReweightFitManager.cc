@@ -1,4 +1,4 @@
-#include "G4ReweightCurveFitManager.hh"
+#include "G4ReweightFitManager.hh"
 #include "DUETFitter.hh"
 #include "TVectorD.h"
 #include "TTree.h"
@@ -9,7 +9,7 @@
 #include "TPad.h"
 #include "TROOT.h"
 
-G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName, bool do_save) : 
+G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save) : 
   fit_tree("FitTree", ""),
   fSave( do_save )
 {
@@ -19,7 +19,7 @@ G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName,
   fit_tree.Branch( "Chi2", &tree_chi2 );
 }
 
-void G4ReweightCurveFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
+void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
   for( size_t i = 0; i < FitParSets.size(); ++i ){
     fhicl::ParameterSet theSet = FitParSets.at(i);
     std::string theCut = theSet.get< std::string >("Cut");
@@ -93,7 +93,7 @@ void G4ReweightCurveFitManager::MakeFitParameters( std::vector< fhicl::Parameter
 
 }
 
-void G4ReweightCurveFitManager::DefineMCSets( std::vector< fhicl::ParameterSet > &MCSets ){
+void G4ReweightFitManager::DefineMCSets( std::vector< fhicl::ParameterSet > &MCSets ){
 
   for( size_t i = 0; i < MCSets.size(); ++i ){
     std::string theSet = MCSets[i].get< std::string >("Name");
@@ -104,7 +104,7 @@ void G4ReweightCurveFitManager::DefineMCSets( std::vector< fhicl::ParameterSet >
 
 }
 
-void G4ReweightCurveFitManager::DefineExperiments( fhicl::ParameterSet &ps){
+void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
   std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
   std::cout << "Getting Experiments: "  << exps.size() << std::endl;
   for(size_t i = 0; i < exps.size(); ++i){
@@ -128,7 +128,7 @@ void G4ReweightCurveFitManager::DefineExperiments( fhicl::ParameterSet &ps){
   }
 }
 
-void G4ReweightCurveFitManager::GetAllData(){
+void G4ReweightFitManager::GetAllData(){
   std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
     itSet = mapSetsToFitters.begin();
   for( ; itSet != mapSetsToFitters.end(); ++itSet ){
@@ -146,7 +146,7 @@ void G4ReweightCurveFitManager::GetAllData(){
 
 }
 
-void G4ReweightCurveFitManager::DefineFCN(/*bool fSave*/){
+void G4ReweightFitManager::DefineFCN(/*bool fSave*/){
   theFCN = ROOT::Math::Functor(
       [&](double const *coeffs) {
         
@@ -214,7 +214,7 @@ void G4ReweightCurveFitManager::DefineFCN(/*bool fSave*/){
     );
 }
 
-void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
+void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
   TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
   TH1D parsHist("parsHist", "", thePars.size(), 0,thePars.size());
@@ -373,7 +373,7 @@ void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
   
 }
 
-void G4ReweightCurveFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
+void G4ReweightFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
   fMinimizer = std::unique_ptr<ROOT::Math::Minimizer>
     ( ROOT::Math::Factory::CreateMinimizer( "Minuit2", "Migrad" ) );
   
@@ -390,7 +390,7 @@ void G4ReweightCurveFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
 
 }
 
-void G4ReweightCurveFitManager::DrawFitResults(){
+void G4ReweightFitManager::DrawFitResults(){
 
   std::vector< std::string > types;
   std::cout << "Active Sets: " << std::endl;

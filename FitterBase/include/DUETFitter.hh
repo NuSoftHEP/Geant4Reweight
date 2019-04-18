@@ -2,7 +2,6 @@
 #define DUETFitter_h
 
 #include "G4ReweightFitter.hh"
-#include "FitSample.hh"
 
 #include <iostream>
 #include <string>

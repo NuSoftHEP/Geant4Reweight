@@ -8,7 +8,6 @@
 #include "TFile.h"
 #include "Math/Minimizer.h"
 #include "TDirectory.h"
-#include "FitSample.hh"
 #include "FitParameter.hh"
 #include "G4ReweightFitter.hh"
 

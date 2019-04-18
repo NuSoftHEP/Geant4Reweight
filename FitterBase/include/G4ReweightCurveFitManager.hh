@@ -11,7 +11,6 @@
 #include "FitSample.hh"
 #include "FitParameter.hh"
 #include "G4ReweightFitter.hh"
-#include "G4ReweightHandler.hh"
 
 #include <iostream>
 #include <iomanip>

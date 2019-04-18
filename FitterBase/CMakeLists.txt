@@ -37,18 +37,14 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
 
-add_executable(newFitter newFitter.cc ${sources} ${headers})
 add_executable(curveFitter curveFitter.cc ${sources} ${headers})
 
 if(DEFINED USE_FHICL AND USE_FHICL)
-  add_dependencies(newFitter fhiclcpp-simple)
   add_dependencies(curveFitter fhiclcpp-simple)
 endif()
 
 #target_link_libraries(Fitter ${G4REWEIGHT_LIBRARIES} ${ROOT_LIBRARIES}     )
-target_link_libraries(newFitter ${G4REWEIGHT_LIBRARIES} ${PROP_LIBRARIES} ${ROOT_LIBRARIES}   )
 target_link_libraries(curveFitter ${G4REWEIGHT_LIBRARIES} ${PROP_LIBRARIES} ${ROOT_LIBRARIES} )
 
-install(TARGETS newFitter DESTINATION bin)
 install(TARGETS curveFitter DESTINATION bin)
 

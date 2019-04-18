@@ -1,0 +1,46 @@
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/curve_sets.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/alt_curve_parameters.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/C_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/O_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Al_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Fe_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Cu_experiments.fcl"
+#include "/dune/app/users/calcuttj/geant/GeantReweight/FitterBase/Pb_experiments.fcl"
+
+OutputFile: "alt_curveFitter_try.root"
+#FitScan: true
+#Save: true
+
+Sets: [
+  @local::C_PiPlus,
+#  @local::C_PiMinus,
+#  @local::O_PiPlus,
+#  @local::O_PiMinus,
+#  @local::Al_PiPlus,
+#  @local::Al_PiMinus,
+#  @local::Fe_PiPlus,
+#  @local::Fe_PiMinus,
+#  @local::Cu_PiPlus,
+#  @local::Cu_PiMinus,
+#  @local::Pb_PiPlus,
+#  @local::Pb_PiMinus
+]
+
+Experiments: [ 
+  @sequence::C_experiments,
+#  @sequence::O_experiments,
+#  @sequence::Al_experiments,
+#  @sequence::Fe_experiments,
+#  @sequence::Cu_experiments,
+#  @sequence::Pb_experiments
+]
+
+ParameterSet: @local::TheParameters
+
+IncludeDUET: true
+DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"
+
+MaxCalls: 500
+Tolerance: 1.e-5
+UpperLimit: 2.0 
+LowerLimit: .5

@@ -1,3 +1,5 @@
+BEGIN_PROLOG
+
 C_PiPlus: {
 
   Name: "C_PiPlus"
@@ -102,3 +104,5 @@ Pb_PiMinus: {
 
   FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiMinus_cascade.root" 
 }
+
+END_PROLOG

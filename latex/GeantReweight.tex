@@ -117,6 +117,10 @@
 
 \graphicspath{{figs/}}
 
+
+\lstset{backgroundcolor=\color{lightgray}}
+
+
 \title{GeantReweight \\ 
    \large A Framework for Pion Scattering Reweighting}
 
@@ -301,10 +305,54 @@ Once the fit is performed, a ROOT file is saved containing the following:
     \item If the user configures the manager to do so, a directory is created for each set of parameter values. This directory contains the resulting varied Geant predictions which were used to fit to that experiment's data.
 \end{itemize}
 
-\subsubsection{How To Run A Fit}
-The Fitter is configured via FHiCL(CITE). 
+\subsubsection{How To Run A Fit}\label{sssec:HowToFit}
+The Fitter is configured via FHiCL(CITE). The following is a list of options that are passed to the executable:
+\begin{itemize}
+	\item OutputFile -- Name of the output file. This can be overridden with the command line option ``-o  filename.root".
+	\item FitScan -- Tells the Fitter to run a scan over values of the fit parameters and output the resulting $\chi^2$.
+	\item Save -- Tells the Fitter to save a directory for each set of parameter values.
+	\item Sets -- A list of FHiCL parameter sets that define where the \textbf{G4ReweightFitters} get the nominal predictions based on the type (probe and nucleus) of the experiment. These have the structure of:
+	\begin{itemize}
+		\item Name -- What the set is called. This will be referenced by the experiments to access the corresponding predictions.
+		\item File -- Location of the file containing the nominal total inelastic cross section from Geant. This is produced by \textbf{G4PiCascade}. (REFERENCE THIS SECTION?)
+		\item FSFile -- Location of the file containing the nominal exclusive channel rates from Geant. This is produced by \textbf{G4PiCascade}. (REFERENCE THIS SECTION?)
+	\end{itemize}
+	\item Experiments -- A list of FHiCL parameter sets defining the individual experiments used within the fit. These have the structure of:
+	\begin{itemize}
+		\item Name -- Name of the experiment.
+		\item Graphs -- A table relating the exclusive channels (reac, abs, cex, abscx, inel, dcex, prod) to their name in the data file.
+		\item Data -- Location of the file containing the data for this experiment. 
+		\item Type -- Probe and nuclear target. Used to relate experiments to the Geant predictions defined in the Sets parameters above.
+	\end{itemize}
+	\item ParameterSets -- A list of FHiCL parameter sets defining the fit parameters. These have the structure of:
+	\begin{itemize}
+		\item Cut -- Which exclusive channel will this be applied to (reac, abs, cex, inel, prod, dcex).
+		\item Dummy -- Set to true if you no variation should be applied directly to this channel.
+		\item Parameters -- A list of fit parameters that will apply to this channel. These have the following form:
+		\begin{itemize}
+			\item Name -- Parameter name.
+			\item Range -- What momentum values this encompasses.
+			\item Nominal -- Starting value of the fit for this parameter. 
+		\end{itemize}
+    \end{itemize}	 
+    
+    \item IncludeDUET -- Tells the manager to create and include an instance of\textbf{DUETFitter}.
+    \item DUETDataFile -- Tells the \textbf{DUETFitter} where its data is.
+    \item MaxCalls -- ROOT Minimizer option: max number of calls in the fit.
+    \item Tolerance -- ROOT Minimizer option:
+    \item UpperLimit -- ROOT Minimizer option: Maximum value any parameter can take.
+    \item LowerLimt -- ROOT Minimizer option: Minimum value any parameter can take.
+\end{itemize}
 
-\subsection{ReweightBase}
+An example of a full set of FHiCL parameters can be found in Appendix \ref{app:FHiCL}.
+
+Once these are set, the user can execute the Fitter using
+
+\begin{lstlisting}
+Fitter -c configuration.fcl
+\end{lstlisting}
+
+\subsection{ReweightBase}\label{ssec:ReweightBase}
 
 \subsection{G4PiCascade}
 
@@ -737,10 +785,162 @@ Both options require specific changes to Geant4's base build:
 	
 \end{enumerate}
 
+\newpage
+\appendix
 
+\section{FHiCL Example}\label{app:FHiCL}
 
+Below is an example of a FHiCL configuration that can be supplied to the Fitter. Note that this example employs FHiCL use of prologs to allow parameters to be taken from multiple files. The explanation of all fields can be found in \ref{ssec:ReweightBase}\\
 
-%\appendix
+fit.fcl:
+\begin{lstlisting}
+  1 #include "sets.fcl"
+  2 #include "parameters.fcl"
+  3 #include "C_experiments.fcl"
+  4 
+  5 OutputFile: "example.root"
+  6 FitScan: false
+  7 Save: false
+  8 
+  9 #Taken from sets.fcl
+ 10 Sets: [
+ 11   @local::C_PiPlus
+ 12 ]
+ 13 
+ 14 #Taken from C_experiments.fcl
+ 15 Experiments: [ 
+ 16   @sequence::C_experiments
+ 17 ]
+ 18 
+ 19 #Taken from parameters.fcl
+ 20 ParameterSet: @local::TheParameters
+ 21 
+ 22 IncludeDUET: true
+ 23 DUETDataFile: "/path/to/DUET.root"
+ 24 
+ 25 MaxCalls: 500
+ 26 Tolerance: 1.e-5
+ 27 UpperLimit: 2.0
+ 28 LowerLimit: .5
+
+\end{lstlisting}
+\newpage
+
+sets.fcl:
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 C_PiPlus: {
+  4 
+  5   Name: "C_PiPlus"
+  6 
+  7   File: "/path/to/C_PiPlus_cross_section.root"
+  8 
+  9   FSFile: "/path/to/C_PiPlus_cascade.root"
+ 10 }
+ 11 
+ 12 END_PROLOG
+\end{lstlisting}
+\newpage
+
+experiments.fcl:
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 C_experiments: [
+  4   {
+  5     Name:    "Experiment1_C_PiPlus"
+  6     Graphs:  [
+  7       ["reac", "C_xsec_reac_piplus"]
+  8     ]
+  9 
+ 10     Data:   "/path/to/Experiment1.root"
+ 11 
+ 12     Type:   "C_PiPlus"
+ 13   },
+ 14 
+ 15   {
+ 16     Name:    "Experiment2_C_PiPlus"
+ 17 
+ 18     Graphs:  [
+ 19       ["inel", "C_xsec_inel_piplus"],
+ 20       ["abscx", "C_xsec_abscx_piplus"]
+ 21     ]
+ 22     Data:   "/path/to/Experiment1.root"
+ 23 
+ 24     Type:   "C_PiPlus"
+ 25   }
+ 26
+ 27 END_PROLOG
+\end{lstlisting}
+\newpage 
+
+parameters.fcl:
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 TheParameters: [
+  4   { 
+  5     Cut:    "reac"
+  6     Dummy: false
+  7     Parameters: [
+  8       {
+  9         Name: "fReacLow"
+ 10         Range: [10., 200.]
+ 11         Nominal: 1.0
+ 12       },
+ 13       {
+ 14         Name: "fReacHigh"
+ 15         Range: [700., 2005.]
+ 16       }
+ 17     ]
+ 18   },
+ 19   { 
+ 20     Cut:    "abs"
+ 21     Dummy: false 
+ 22     Parameters:  [
+ 23       {
+ 24         Name: "fAbs"
+ 25         Range: [200.0, 700.00]
+ 26       }
+ 27     ]
+ 28   },
+ 29 
+ 30   { 
+ 31     Cut:   "cex"
+ 32     Dummy: false 
+ 33     Parameters:  [
+ 34       { 
+ 35         Name: "fCex"
+ 36         Range: [200.0, 700.00]
+ 37       }
+ 38     ]
+ 39   },
+ 40 
+ 41   {
+ 42     Cut:    "inel"
+ 43     Dummy: false
+ 44     Parameters:  [
+ 45       {
+ 46         Name: "fInel"
+ 47         Range: [200.0, 700.00]
+ 48       }
+ 49     ]
+ 50   },
+ 51 
+ 52   { Cut:    "prod"
+ 53     Dummy:  true
+ 54   },
+ 55 
+ 56   { Cut:    "dcex"
+ 57     Dummy:  true
+ 58   }
+ 59 ]
+ 60 
+ 61 END_PROLOG
+
+\end{lstlisting}
+
 %\section{Interaction Probability Derivation}
 %the derivation for the probability of interaction given a cross section
 %

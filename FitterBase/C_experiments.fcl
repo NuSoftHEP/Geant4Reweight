@@ -1,3 +1,5 @@
+BEGIN_PROLOG
+
 C_experiments: [  
   {
     Name:    "Binon_C_PiMinus"
@@ -45,7 +47,6 @@ C_experiments: [
 
   {
     Name:   "Allarydyce_C_PiMinus"
-    Points: [ ["reac", [710., 840., 1000., 1360., 1580., 2000.] ] ]
     Graphs: [ ["reac", "C_xsec_reac_piminus"] ]
 
     Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
@@ -174,4 +175,4 @@ C_experiments: [
   }
 ]
 
-
+END_PROLOG

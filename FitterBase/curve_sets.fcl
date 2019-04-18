@@ -1,7 +1,3 @@
-DefaultMax: 2005.
-DefualtMin: 10. 
-
-
 C_PiPlus: {
 
   Name: "C_PiPlus"

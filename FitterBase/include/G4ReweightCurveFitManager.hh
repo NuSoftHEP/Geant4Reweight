@@ -45,7 +45,7 @@ class G4ReweightCurveFitManager{
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
 
-    void DefineFCN(/*bool fSave=false*/);
+    void DefineFCN();
 
 
   protected:
@@ -62,7 +62,6 @@ class G4ReweightCurveFitManager{
 
     std::vector< std::string > sets;
 
-    size_t nSamples;
 
     std::unique_ptr< ROOT::Math::Minimizer > fMinimizer;
 

@@ -9,8 +9,9 @@
 #include "TPad.h"
 #include "TROOT.h"
 
-G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName) : 
-  fit_tree("FitTree", "")
+G4ReweightCurveFitManager::G4ReweightCurveFitManager(std::string & fOutFileName, bool do_save) : 
+  fit_tree("FitTree", ""),
+  fSave( do_save )
 {
   out = new TFile( fOutFileName.c_str(), "RECREATE" );
   data_dir = out->mkdir( "Data" );
@@ -145,7 +146,7 @@ void G4ReweightCurveFitManager::GetAllData(){
 
 }
 
-void G4ReweightCurveFitManager::DefineFCN(bool fSave){
+void G4ReweightCurveFitManager::DefineFCN(/*bool fSave*/){
   theFCN = ROOT::Math::Functor(
       [&](double const *coeffs) {
         
@@ -203,7 +204,7 @@ void G4ReweightCurveFitManager::DefineFCN(bool fSave){
               theFitter->MakeFitDir( outdir );
 
             theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet, fSave);
-            double fit_chi2 = theFitter->DoFit(false);
+            double fit_chi2 = theFitter->DoFit(fSave);
     
             std::cout << fit_chi2 << std::endl;
     
@@ -222,7 +223,7 @@ void G4ReweightCurveFitManager::DefineFCN(bool fSave){
     );
 }
 
-void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan, bool fSave ){
+void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
   TMatrixD *cov = new TMatrixD( thePars.size(), thePars.size() );
   TH1D parsHist("parsHist", "", thePars.size(), 0,thePars.size());
@@ -238,7 +239,7 @@ void G4ReweightCurveFitManager::RunFitAndSave( bool fFitScan, bool fSave ){
   }
 
 
-  DefineFCN(fSave);
+  DefineFCN(/*fSave*/);
 
 
   if( !fFitScan ){

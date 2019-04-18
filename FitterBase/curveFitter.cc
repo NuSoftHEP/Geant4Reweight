@@ -16,9 +16,10 @@ std::string set_prec(double);
 int main(int argc, char ** argv){
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
+  bool fSave    = ps.get< bool >( "Save", false );
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
-  G4ReweightCurveFitManager FitMan( outFileName );
+  G4ReweightCurveFitManager FitMan( outFileName, fSave);
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   FitMan.MakeFitParameters( FitParSets );
@@ -39,7 +40,6 @@ int main(int argc, char ** argv){
   FitMan.MakeMinimizer( ps );
 
   bool fFitScan = ps.get< bool >( "FitScan", false );
-  bool fSave    = ps.get< bool >( "Save", false );
-  FitMan.RunFitAndSave(fFitScan, fSave);
+  FitMan.RunFitAndSave(fFitScan/*, fSave*/);
   return 0;
 }

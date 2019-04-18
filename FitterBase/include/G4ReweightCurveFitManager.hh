@@ -27,7 +27,7 @@
 
 class G4ReweightCurveFitManager{
   public:
-    G4ReweightCurveFitManager(std::string &);
+    G4ReweightCurveFitManager(std::string &, bool );
     void MakeFitParameters( std::vector< fhicl::ParameterSet > &);
 
     bool CheckIsDummy( std::string theCut ){
@@ -38,7 +38,7 @@ class G4ReweightCurveFitManager{
     void DefineMCSets( std::vector< fhicl::ParameterSet > &);
     void DefineExperiments( fhicl::ParameterSet &);
     void GetAllData();
-    void RunFitAndSave(bool fFitScan=false, bool fSave = false);
+    void RunFitAndSave(bool fFitScan=false/*, bool fSave = false*/);
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
     
@@ -46,7 +46,7 @@ class G4ReweightCurveFitManager{
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
 
-    void DefineFCN(bool fSave=false);
+    void DefineFCN(/*bool fSave=false*/);
 
 
   protected:
@@ -80,7 +80,7 @@ class G4ReweightCurveFitManager{
     double tree_chi2 = 0.;
     std::map< std::string, double > parameter_values;
 
-
+    bool fSave;
 };
 
 #endif

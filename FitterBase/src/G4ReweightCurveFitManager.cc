@@ -1,5 +1,5 @@
 #include "G4ReweightCurveFitManager.hh"
-#include "newDUETFitter.hh"
+#include "DUETFitter.hh"
 #include "TVectorD.h"
 #include "TTree.h"
 #include "TMatrixD.h"
@@ -120,7 +120,7 @@ void G4ReweightCurveFitManager::DefineExperiments( fhicl::ParameterSet &ps){
   if( IsSetActive( "C_PiPlus" ) ){
     bool includeDUET = ps.get< bool >("IncludeDUET");
     std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
-    newDUETFitter * df = new newDUETFitter(out, DUET_data);
+    DUETFitter * df = new DUETFitter(out, DUET_data);
     if( includeDUET ){
       std::cout << "Including DUET" << std::endl;
       mapSetsToFitters["C_PiPlus"].push_back( df );
@@ -158,13 +158,9 @@ void G4ReweightCurveFitManager::DefineFCN(/*bool fSave*/){
 
           std::map< std::string, std::vector< FitParameter > >::iterator it;
           for( it = FullParameterSet.begin(); it != FullParameterSet.end(); ++it ){
-            std::cout << it->first << std::endl;
             for( size_t j = 0; j < it->second.size(); ++j ){
               if( it->second[j].Name == thePars[i] ){
                 it->second[j].Value = coeffs[a];
-                std::cout << "i,a " << i << " " << a << std::endl;
-
-                std::cout << "coeff: " << coeffs[a] << std::endl;
                 dir_name += thePars[i] + std::to_string( coeffs[a] );
 
                 parameter_values[ thePars[i] ] = coeffs[a];
@@ -191,22 +187,17 @@ void G4ReweightCurveFitManager::DefineFCN(/*bool fSave*/){
           itSet = mapSetsToFitters.begin();
     
         for( ; itSet != mapSetsToFitters.end(); ++itSet ){
-          std::cout << itSet->first << std::endl;
           for( size_t i = 0; i < itSet->second.size(); ++i ){
             auto theFitter = itSet->second.at(i); 
-            std::cout << "Fitter: " << theFitter->GetName() << std::endl;
     
             std::string NominalFile = mapSetsToNominal[ itSet->first ];
             std::string FracsFile = mapSetsToFracs[ itSet->first ];
-            std::cout << NominalFile << " " << FracsFile << std::endl;
     
             if( fSave )
               theFitter->MakeFitDir( outdir );
 
             theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet, fSave);
             double fit_chi2 = theFitter->DoFit(fSave);
-    
-            std::cout << fit_chi2 << std::endl;
     
             chi2 += fit_chi2;
     

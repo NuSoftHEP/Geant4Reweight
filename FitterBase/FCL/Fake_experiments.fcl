@@ -1,0 +1,27 @@
+BEGIN_PROLOG
+
+C_experiments: [  
+  {
+    Name:    "Fake_C_PiPlus"
+    Points:  [ ["reac", [100., 150., 175.] ] ]
+    Binning:  ["25", "150", "400"]
+
+    Cuts:    [
+      ["reac", "1"]
+    ]
+
+    Graphs:  [
+      ["reac", "C_xsec_reac_piplus"]
+    ]
+
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Fake.root"
+
+    Thickness: .5
+    Mass:      12.01
+    Density:   2.266
+
+    Type:   "C_PiPlus"
+  }
+]
+
+END_PROLOG

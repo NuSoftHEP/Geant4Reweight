@@ -1,0 +1,21 @@
+#include "sets.fcl"
+#include "parameters.fcl"
+#include "Fake_experiments.fcl"
+
+OutputFile: "fake_curveFitter_try.root"
+
+Sets: [
+  @local::C_PiPlus
+]
+
+Experiments: [ 
+  @sequence::C_experiments,
+]
+
+IncludeDUET: false
+DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"
+
+MaxCalls: 500
+Tolerance: 1.e-5
+UpperLimit: 2.0 
+LowerLimit: .5

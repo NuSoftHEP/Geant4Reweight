@@ -403,6 +403,8 @@ The program is configurable via FHiCL, with optional command line arguments to o
 	\end{itemize}
 \end{itemize}
 
+An example FHiCL file can be found in Appendix \ref{app:Prediction_FHICL}.
+
 \subsubsection{How To Run G4CrossSection}
 The usage for this program is: 
 
@@ -430,6 +432,8 @@ where $f_i$ is the fraction of times the Bertini cascade ends in a specific fina
 The \textbf{G4PiCascade} invokes the Bertini cascade a number of times across a momentum range for a specific projectile (currently only $\pi^{\pm}$) and nuclear target. For each call to the cascade, it looks at the outgoing particles to determine the final state. It detrmines the fraction of times this occurs for each step in momentum. Currently, the final state categories are defined as in Table \ref{tab:fates}.
 
 Similar to \textbf{G4CrossSection}, this is configurable with FHiCL and optional command line arguments to override the FHiCL options. It shares the same FHiCL parameters as \textbf{G4CrossSection} with an additional parameter (NCascades) that determines the number of cascades done at each point in momentum space. 
+
+An example FHiCL file can be found in Appendix \ref{app:Prediction_FHICL}.
 \newpage
 \subsubsection{How To Run G4PiCascade}
 The usage for this program is: 
@@ -986,7 +990,7 @@ parameters.fcl:
 
 \newpage
 
-\section{Example FHiCLs for G4CrossSection and G4PiCascade}
+\section{Example FHiCLs for G4CrossSection and G4PiCascade}\label{app:Prediction_FHICL}
 cross$\_$section.fcl:
 \begin{lstlisting}
   1 #include "material.fcl"

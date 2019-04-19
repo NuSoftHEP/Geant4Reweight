@@ -85,8 +85,6 @@ void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet >
 
   for( int i = 0; i < thePars.size(); ++i ){
     std::string branch_name = thePars.at(i);
-    std::cout << "Making branch for " << branch_name << std::endl;
-
     parameter_values[ branch_name ] = 0.;
     fit_tree.Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );   
   }
@@ -109,8 +107,7 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
   std::cout << "Getting Experiments: "  << exps.size() << std::endl;
   for(size_t i = 0; i < exps.size(); ++i){
     std::cout << std::endl;
-    std::cout << "Trying to find " << exps.at(i).get<std::string>("Name") << " " << exps.at(i).get<std::string>("Type") << std::endl;
-    
+
     if( IsSetActive( exps.at(i).get<std::string >( "Type" ) ) ){
       G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
       mapSetsToFitters[ exp->GetType() ].push_back( exp );
@@ -122,7 +119,6 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
     std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
     DUETFitter * df = new DUETFitter(out, DUET_data);
     if( includeDUET ){
-      std::cout << "Including DUET" << std::endl;
       mapSetsToFitters["C_PiPlus"].push_back( df );
     }
   }
@@ -133,7 +129,7 @@ void G4ReweightFitManager::GetAllData(){
     itSet = mapSetsToFitters.begin();
   for( ; itSet != mapSetsToFitters.end(); ++itSet ){
 
-    std::cout << "Loading Data for Set: " << itSet->first;
+    std::cout << "Loading Data for Set: " << itSet->first << std::endl;;
     std::vector< G4ReweightFitter* > fitters = itSet->second;
     for( size_t i = 0; i < fitters.size(); ++i ){
       fitters[i]->LoadData();
@@ -277,7 +273,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
           std::map< std::string, std::vector< FitParameter > >::iterator it;
           for( it = FullParameterSet.begin(); it != FullParameterSet.end(); ++it ){
-            std::cout << it->first << std::endl;
             for( size_t j = 0; j < it->second.size(); ++j ){
               if( it->second[j].Name == thePars[i] ){
                 if( sigma_it < 3 )
@@ -296,14 +291,11 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
           itSet = mapSetsToFitters.begin();
         
         for( ; itSet != mapSetsToFitters.end(); ++itSet ){
-          std::cout << itSet->first << std::endl;
           for( size_t i = 0; i < itSet->second.size(); ++i ){
             auto theFitter = itSet->second.at(i); 
-            std::cout << "Fitter: " << theFitter->GetName() << std::endl;
         
             std::string NominalFile = mapSetsToNominal[ itSet->first ];
             std::string FracsFile = mapSetsToFracs[ itSet->first ];
-            std::cout << NominalFile << " " << FracsFile << std::endl;
         
             theFitter->MakeFitDir( outdir );
             theFitter->GetMCFromCurves( NominalFile, FracsFile, FullParameterSet, true);
@@ -393,10 +385,8 @@ void G4ReweightFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
 void G4ReweightFitManager::DrawFitResults(){
 
   std::vector< std::string > types;
-  std::cout << "Active Sets: " << std::endl;
   for( auto itSets = mapSetsToFitters.begin(); itSets != mapSetsToFitters.end(); ++itSets ){
     types.push_back( itSets->first );
-    std::cout << "\t" << types.back() << std::endl;
   }
 
   std::map< std::string, std::string > titles = {
@@ -458,7 +448,6 @@ void G4ReweightFitManager::DrawFitResults(){
 
     for( size_t i = 0; i < all_cuts.size(); ++i ){
       std::string cut_name = all_cuts[i];
-      std::cout << "Drawing: " << cut_name << std::endl;
      
       double max = 0.;     
       std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
@@ -502,7 +491,6 @@ void G4ReweightFitManager::DrawFitResults(){
       }
       ///////////
 
-      std::cout << "Found max: " << max << std::endl;
 
 
       //MinusSigma

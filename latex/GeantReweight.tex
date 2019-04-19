@@ -344,7 +344,7 @@ The Fitter is configured via FHiCL(CITE). The following is a list of options tha
     \item LowerLimt -- ROOT Minimizer option: Minimum value any parameter can take.
 \end{itemize}
 
-An example of a full set of FHiCL parameters can be found in Appendix \ref{app:FHiCL}.
+An example of a full set of FHiCL parameters can be found in Appendix \ref{app:Fitter_FHiCL}.
 
 Once these are set, the user can execute the Fitter using
 
@@ -383,12 +383,75 @@ This class represents information taken at the level of a track within Geant and
 This class handles the reweighting. It is given a set of nominal exclusive and total inelastic cross sections, as well as variations to the individual exclusive channels. It then takes a \textbf{G4ReweightTraj} and computes a weight according to the scheme described in Sections \ref{subsec:inel_weights} and \ref{subsec:fs_rw}.
 
 \subsection{G4PiCascade}
+This portion of the software provides the nominal Geant predictions for the fitting and reweighting portions of the software. It is split up into 2 programs: \textbf{G4CrossSection} and \textbf{G4PiCascade}. 
+\subsubsection{G4CrossSection}
+This program accesses the inelastic and elastic cross sections for a specific hadronic proble and target material. These are the values that are used by Geant to determine \underline{when} an interaction occurs. The output is a root file containing TGraphs for the inelastic, elastic, and total (inelastic + elastic) cross sections as functions of both momentum and kinetic energy, as well as a TTree containing branches for momentum, kinetic energy, the inelastic cross section, and elastic cross section. 
 
+The program is configurable via FHiCL, with optional command line arguments to override FHiCL options. The FHiCL options are:
+\begin{itemize}
+	\item Type -- The PDG code of the projectile. Currently supported are $\pi^{\pm}$ ($\pm211$) and protons ($2212$).
+	\item Range -- The range of momentum used as input. 
+	\item NDivisions -- Number of 'bins' used to extract the cross section. This is 1 less than the number of points in the output graphs.
+	\item Verbose -- Controls how noisy the output of the program is.
+	\item Outfile -- Location/name of output file.
+	\item Material -- A FHiCL parameter set defining the target material. This has the following structure:
+	\begin{itemize}
+		\item Name -- What the material will be called.
+		\item Z -- Atomic number of the material.
+		\item Mass -- Atomic mass (units of $\textrm{g/mol}$).
+		\item Density -- Density (units of $\textrm{g/cm}^3$).
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{How To Run G4CrossSection}
+The usage for this program is: 
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+Usage: ./G4CrossSection -c <xsec_config>.fcl [options]
+
+Options: 
+	-o     <output_file_override>.root
+	--low  <range_low_value> 
+	--high <range_high_value>
+	--ND   <divisor_of_range> 
+	-t     <probe type>
+\end{lstlisting}
+\end{minipage}
+
+
+\subsubsection{G4PiCascade}
+Inelastic interactions within Geant4 invoke the Bertini cascade. This model results places the hadronic projectile within the nuclear medium with its incoming kinematics. Then, the hadron starts to step through the medium, potentially interacting with other hadrons within the nucleus. When an interaction occurs, the results of that interaction proceed to traverse the nuclear medium. This goes on until all cascading particles either stop within the nuclear medium or are ejected. The ejected particles are then passed back to Geant's tracking manager to become ``live" particles within the detector. Because inelastic interactions occur this way, the concept of ``exclusive" interactions -- which are normally used by experiments -- is a slightly foreign one in this context. Thus, if one wants to know the exclusive cross sections, it is necessary to run the Bertini cascade many times to determine the fraction of inelastic scatters that end in a certain final state. The exclusive cross sections are thus defined as:
+\begin{equation}
+	\sigma_{i} = f_{i} * \sigma_{inel}
+\end{equation}
+where $f_i$ is the fraction of times the Bertini cascade ends in a specific final state $i$, and $\sigma_{inel}$ is the inelastic cross section (which would be extracted using the \textbf{G4CrossSection} program).
+
+The \textbf{G4PiCascade} invokes the Bertini cascade a number of times across a momentum range for a specific projectile (currently only $\pi^{\pm}$) and nuclear target. For each call to the cascade, it looks at the outgoing particles to determine the final state. It detrmines the fraction of times this occurs for each step in momentum. Currently, the final state categories are defined as in Table \ref{tab:fates}.
+
+Similar to \textbf{G4CrossSection}, this is configurable with FHiCL and optional command line arguments to override the FHiCL options. It shares the same FHiCL parameters as \textbf{G4CrossSection} with an additional parameter (NCascades) that determines the number of cascades done at each point in momentum space. 
+\newpage
+\subsubsection{How To Run G4PiCascade}
+The usage for this program is: 
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+Usage: ./G4PiCascade -c <cascade_config>.fcl [options]
+
+Options: 
+	-o     <output_file_override>.root
+	--low  <range_low_value> 
+	--high <range_high_value> 
+	--NC   <number_of_cascades_per_point> 
+	--ND   <divisor_of_range> 
+	-t     <probe type> 
+\end{lstlisting}
+\end{minipage}
 \subsection{PropBase}
 
 
 \section{Testing and Validation - Flat Variations}
-The first implemenation of the reweighting consisted of flat variations across all momenta.
+The first implemenation of the reweighting consisted of flat variations across all momenta. 
 
 
 \subsection{Thin Target Scattering}
@@ -816,7 +879,7 @@ Both options require specific changes to Geant4's base build:
 \newpage
 \appendix
 
-\section{FHiCL Example}\label{app:FHiCL}
+\section{Fitter FHiCL Example}\label{app:Fitter_FHiCL}
 
 Below is an example of a FHiCL configuration that can be supplied to the Fitter. Note that this example employs FHiCL use of prologs to allow parameters to be taken from multiple files. The explanation of all fields can be found in \ref{ssec:ReweightBase}\\
 
@@ -968,6 +1031,50 @@ parameters.fcl:
  61 END_PROLOG
 
 \end{lstlisting}
+
+\newpage
+
+\section{Example FHiCLs for G4CrossSection and G4PiCascade}
+cross$\_$section.fcl:
+\begin{lstlisting}
+  1 #include "material.fcl"
+  2 Type: 211
+  3 Range: [10., 8000.]
+  4 NDivisions: 7989
+  5 Verbose: "true"
+  6 Outfile: "CrossSectionOutput.root"
+  7 
+  8 Material: @local::LAr
+\end{lstlisting}
+
+cascade.fcl:
+\begin{lstlisting}
+  1 #include "material.fcl"
+  2 Type: 211
+  3 NCascades: 10000
+  4 Range: [50., 600.]
+  5 #NDivisions: 55
+  6 NDivisions: 1
+  7 Outfile: "CascadeOutput.root"
+  8 
+  9 Material: @local::LAr
+\end{lstlisting}
+
+material.fcl:
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 LAr: {
+  4   Name: "liquidArgon"
+  5   Z:    18
+  6   Mass: 39.95
+  7   Density: 1.390
+  8 }
+  9 
+ 10 END_PROLOG
+\end{lstlisting}
+
+Both cross$\_$section.fcl and cascade.fcl can use material.fcl.
 
 %\section{Interaction Probability Derivation}
 %the derivation for the probability of interaction given a cross section

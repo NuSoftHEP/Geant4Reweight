@@ -183,7 +183,6 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   for( ; it != theCuts.end(); ++it ){
     std::string name = it->first;
 
-    std::cout << "Loading " << name << std::endl;
 
     TGraph * theGraph = (TGraph*)input->Get(name.c_str());
     //theHist->Write();
@@ -194,20 +193,17 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
     //fout->cd();
     //oldGraphs[ name ]->Write( ("old_" + name).c_str());
   }
-  std::cout << "Loaded Graphs" << std::endl;
   //delete fout;
 
    
   std::vector< double > newPoints;
 
-  std::cout << "Storing" << std::endl;
   //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
     theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
     //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
 
     //New: Accounting for parameter edges between bins in the fraction graphs
-    std::cout << "Adding points around parameter edges" << std::endl;
     for( int j = 0; j < theVariations[ theInts.at(i) ]->GetN(); ++j ){
       double ptX = theVariations[ theInts.at(i) ]->GetX()[ j ];
       if( ptX == 0. ) continue;
@@ -254,25 +250,19 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
     }
   }
 
-  std::cout << "Stored" << std::endl;
 
 
   //fout->cd();
 
   //Now go through and vary the exclusive channels  
   for( size_t i = 0; i < theInts.size(); ++i ){
-    std::cout << theInts.at(i) << std::endl;
     TGraph * theVar = theVariations.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    std::cout << "Got Graphs " << theVar << " " << theGraph << std::endl;
     for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
-     // std::cout << "Content: " << Content << std::endl;
       double binCenter   = theGraph->GetX()[bin];
-     // std::cout << "binCenter: " << binCenter << std::endl;
       double theScale    = theVar->Eval(binCenter); 
-      //std::cout << "theScale: " << theScale << std::endl;
       
       //Check if >/< max/min of var graph
       if( /*( binCenter < Minimum ) 
@@ -377,7 +367,6 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
   for( ; it != theCuts.end(); ++it ){
     std::string name = it->first;
 
-    std::cout << "Loading " << name << std::endl;
 
     TGraph * theGraph = (TGraph*)input->Get(name.c_str());
     //theHist->Write();
@@ -388,24 +377,19 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
     //fout->cd();
     //oldGraphs[ name ]->Write( ("old_" + name).c_str());
   }
-  std::cout << "Loaded Graphs" << std::endl;
   //delete fout;
 
    
 
-  std::cout << "Stored" << std::endl;
 
   std::vector< double > newPoints;
 
-  std::cout << "Storing" << std::endl;
   //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
-    std::cout << "Adding points around parameter edges" << std::endl;
     TH1D * theVar = FSScales.at( theInts.at(i) );
     int nBins = theVar->GetNbinsX();
     for( int j = 1; j <= nBins; ++j ){
       double ptX = theVar->GetBinLowEdge(j);
-      std::cout << j << " " << ptX << std::endl;
       if( ptX == 0. ) continue;
 
       if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
@@ -419,7 +403,6 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
     //Add last upper bin edge
     double ptX = theVar->GetBinLowEdge( nBins ); 
     ptX += theVar->GetBinWidth( nBins );
-    std::cout << "Last bin: " << ptX << std::endl;
 
     if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
       newPoints.push_back( ptX - .001 );
@@ -465,25 +448,17 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
 
 
   
-  std::cout << "Stored" << std::endl;
-
-
   //fout->cd();
 
   //Now go through and vary the exclusive channels  
   for( size_t i = 0; i < theInts.size(); ++i ){
-    std::cout << theInts.at(i) << std::endl;
     TH1D * theVar = FSScales.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    std::cout << "Got Graphs " << theVar << " " << theGraph << std::endl;
     for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
-     // std::cout << "Content: " << Content << std::endl;
       double point   = theGraph->GetX()[bin];
-     // std::cout << "point: " << point << std::endl;
       double theScale    = theVar->GetBinContent( theVar->FindBin( point ) ); 
-      //std::cout << "theScale: " << theScale << std::endl;
       
       //Check if >/< max/min of var graph
       if( ( point < theVar->GetBinLowEdge(1)) 
@@ -644,17 +619,12 @@ void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSS
 double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum ){
   
   if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
-    //std::cout << "Out of bounds. Returning 1" << std::endl;
     return 1.;
   }
 
-  //std::cout << "Getting hist for interaction: " << theInt << std::endl;
   TH1D * theHist = GetExclusiveVariation( theInt ); 
-  //std::cout << "Hist exists: " << theHist << std::endl;
   int theBin = theHist->FindBin( theMomentum );
-  //std::cout << "Bin: " << theBin << std::endl;
   double theWeight = theHist->GetBinContent( theBin );
-  //std::cout << "Weight: " << theWeight << std::endl;
 
   return theWeight;
 }
@@ -662,17 +632,11 @@ double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum )
 double G4ReweightFinalState::GetWeightFromGraph( std::string theInt, double theMomentum ){
   
   if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
-    //std::cout << "Out of bounds. Returning 1" << std::endl;
     return 1.;
   }
 
-  //std::cout << "Getting hist for interaction: " << theInt << std::endl;
   TGraph * theGraph = GetExclusiveVariationGraph( theInt ); 
-  //std::cout << "Hist exists: " << theHist << std::endl;
-//  int theBin = theHist->FindBin( theMomentum );
-  //std::cout << "Bin: " << theBin << std::endl;
   double theWeight = theGraph->Eval( theMomentum );
-  //std::cout << "Weight: " << theWeight << std::endl;
 
   return theWeight;
 }
@@ -830,6 +794,3 @@ void G4ReweightFinalState::DivideGraphs( TGraph *target, TGraph* divider  ){
   }
 }
 
-/*G4ReweightFinalState::ClearVariations(){
-  std::map< std::string, G4ReweightInter * >::iterator it = exclusiveVariations.at(
-}*/

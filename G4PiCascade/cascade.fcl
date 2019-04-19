@@ -1,8 +1,0 @@
-#include "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade/cascade_material.fcl"
-Type: 211
-NCascades: 10000
-Range: [50., 600.]
-NDivisions: 55
-Outfile: "cascade_out.root"
-
-Material: @local::LAr

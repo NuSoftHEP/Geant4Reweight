@@ -4,55 +4,27 @@ Cu_experiments: [
 
   {
     Name:   "Gelderloos_Cu_PiMinus"
-    Points: [ ["reac", [531.552, 587.211, 615.955] ] ] 
-    Binning: ["150", "500", "650"]
-
-    Cuts:   [ ["reac", "1"] ]  
     Graphs: [ ["reac", "Cu_xsec_reac_piminus"] ]
 
     Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Gelderloos.root"
-
-    Thickness: .5
-    Mass:      63.55
-    Density:   8.960
 
     Type:   "Cu_PiMinus"
   },
 
   {
     Name:   "Nakai_Cu_PiPlus"
-    Points: [ ["abs", [83.362, 108.154, 131.222, 153.641, 173.371, 194.715, 224.761, 254.855, 295.243, 345.440, 395.676] ] ]
-    Binning: ["320", "80", "400"]
-
-    Cuts:   [ ["abs", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 0) )"] ]
     Graphs: [ ["abs", "Cu_xsec_abs_piplus"] ]
 
     Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
-
-    Thickness: .5
-    Mass:      63.55
-    Density:   8.960
-
-
 
     Type:   "Cu_PiPlus"
   },
 
   {
     Name:   "Nakai_Cu_PiMinus"
-    Points: [ ["abs", [108.154, 131.222, 153.641, 173.371, 194.715, 224.761, 254.855, 295.243, 345.440, 395.676] ] ]
-    Binning: ["300", "100", "400"]
-
-    Cuts:   [ ["abs", "( ( (nPiMinus + nPiPlus) == 0 ) && (nPi0 == 0) )"] ]
     Graphs: [ ["abs", "Cu_xsec_abs_piminus"] ]
 
     Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
-
-    Thickness: .5
-    Mass:      63.55
-    Density:   8.960
-
-
 
     Type:   "Cu_PiMinus"
   }

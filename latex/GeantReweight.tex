@@ -451,6 +451,17 @@ Options:
 	-t     <probe type> 
 \end{lstlisting}
 \end{minipage}
+
+\subsubsection{An Important Note on G4PiCascade}
+As projectile momentum increases, the Bertini cascade takes longer to run on average due to the increased number of interactions and cascading particles within the cascade. Because of this, it is suggested to break up the momentum range and run multiple iterations of \textbf{G4PiCascade} in parallel, and then stitch the results together using the python script \textbf{stitch$\_$results.py}. This appends the TGraphs together and saves them in another ROOT file. To use this script, type:
+
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+python stitch_results.py OutputFile.root f1.root,f2.root,...
+\end{lstlisting}
+\end{minipage}
+The second argument is a comma-separated list of input files which should be given in increasing order of momentum range.
 \subsection{PropBase}
 
 

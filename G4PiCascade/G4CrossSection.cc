@@ -45,16 +45,41 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
+std::string fcl_file;
+
+bool range_override = false;
+double range_low_override = 0.;
+double range_high_override = 0.;
+
+std::string output_file_override = "empty"; 
+
+int ndiv_override = 0;
+int type_override = -999;
+
+bool parseArgs(int argc, char* argv[]);
 
 int main(int argc, char * argv[]){
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
+  if( !parseArgs(argc, argv) ) 
+    return 0;
+
+  fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
 
   //FHICL parameters here
   int type      = ps.get< int >("Type");
+  if( type_override != -999 )
+    type = type_override;
+
   bool verbose  = ps.get< bool >("Verbose");
+
   std::pair< double, double > range = ps.get< std::pair< double, double > >("Range");
+  if( range_override) 
+    range = std::make_pair(range_low_override, range_high_override);
+
   int nDivisions = ps.get< int >("NDivisions");
+  if( ndiv_override > 0 ) 
+    nDivisions = ndiv_override;
+
   if( nDivisions < 1 ){
     std::cout << "Please give NDivision >= 1" << std::endl;
     return 0;
@@ -67,6 +92,10 @@ int main(int argc, char * argv[]){
 
   //Root Output here
   std::string outFileName = ps.get< std::string >("Outfile");
+   if( output_file_override  != "empty" ){
+    outFileName = output_file_override;
+  }
+
   TFile * fout = new TFile( outFileName.c_str(), "RECREATE");
   TTree * tree = new TTree("tree","");  
   double inelastic_xsec, elastic_xsec;  
@@ -218,4 +247,71 @@ int main(int argc, char * argv[]){
 
   delete rm;
   return 0;
+}
+
+bool parseArgs(int argc, char ** argv){
+
+  bool found_fcl_file = false;
+
+  bool found_range_low = false;
+  bool found_range_high = false;
+
+  for( int i = 1; i < argc; ++i ){
+    if( ( strcmp( argv[i], "--help" )  == 0 ) || ( strcmp( argv[i], "-h" ) == 0 ) ){
+      std::cout << "Usage: ./G4CrossSection -c <xsec_config>.fcl [options]" << std::endl;
+      std::cout << std::endl;
+      std::cout << "Options: " << std::endl;
+      std::cout << "\t-o <output_file_override>.root" << std::endl;
+      std::cout << "\t--low <range_low_value> (must be provided along with -high)" << std::endl; 
+      std::cout << "\t--high <range_high_value> (must be provided along with -low)" << std::endl; 
+      std::cout << "\t--ND <divisor_of_range> (must be > 0 to work)" << std::endl;
+      std::cout << "\t-t <probe type> (currently only works with 211, -211, and 2212)" << std::endl;
+
+      return false;
+    }
+
+    else if( strcmp( argv[i], "-c" ) == 0 ){
+      fcl_file = argv[i+1];
+      found_fcl_file = true;
+    }
+
+    else if( strcmp( argv[i], "-o" ) == 0 ){
+      output_file_override = argv[i+1];
+    }
+
+    else if( strcmp( argv[i], "--low" ) == 0 ){
+      range_low_override = atof( argv[i+1] ); 
+      found_range_low = true;
+    }
+
+    else if( strcmp( argv[i], "--high" ) == 0 ){
+      range_high_override = atof( argv[i+1] ); 
+      found_range_high = true;
+    }
+
+    else if( strcmp( argv[i], "--ND" ) == 0 ){
+      ndiv_override = atoi( argv[i+1] ); 
+    }
+
+    else if( strcmp( argv[i], "-t" ) == 0 ){
+      type_override = atoi( argv[i+1] );
+    }
+  }
+
+  if( !found_fcl_file ){
+    std::cout << "Error: Must provide fcl file with option '-c'" << std::endl;
+    return false;
+  }
+
+  if( found_range_low != found_range_high ){
+    std::cout << "Error: If overriding fcl range, you must provide both values with options '-l' and '-h'" << std::endl;
+    return false;
+  }
+  else{
+    range_override = found_range_low;
+  }
+
+  
+
+  return true;
 }

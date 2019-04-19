@@ -52,7 +52,8 @@ bool parseArgs(int argc, char* argv[]);
 
 int main(int argc, char * argv[]){
 
-  if( !parseArgs(argc, argv) ) return 0;
+  if( !parseArgs(argc, argv) ) 
+    return 0;
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
 

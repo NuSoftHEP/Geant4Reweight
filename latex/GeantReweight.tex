@@ -827,54 +827,6 @@ A thin target of Carbon was used to test the exclusive channel reweighting. The 
 \caption{Exclusive Reweighting in LAr }
 \end{figure}
 
-\section{Edits to Geant4.10.03.p03}
-
-As well as creating the simulation and reweighting packge, I also made edits to Geant4's base code. The edits are summarized here:
-\begin{enumerate}
-\item Added two extra physics list based off of the G4HadronPhysicsFTFP\_BERT and G4HadronElasticPhysics lists. 
-	\begin{enumerate}
-	\item These allow the user to specify - at run-time - a factor that scales the inelastic and elastic pion cross sections, respectively. 
-	\item Additionally, had to add versions of respective 'particle builder' and 'list constructor' classes. 
-	\end{enumerate}
-	
-\item The G4Step object now contains information related to the various active process names, as well as their mean free paths (dependent on surrounding material and current momentum)
-\item Implemented methods in various physics process classes that extract the mean free path of the particle in its current state.
-	\begin{enumerate}
-	\item The original methods that do this were private within their respective classes, and so could not be called by higher levels of Geant.
-
-	\end{enumerate}
-\item Edited the G4SteppingManager to handle extracting information about active processes (name and Mean Free Path) at each step.
-	\begin{enumerate}
-	\item The last three changes are what enable the reweighting process. The package needs to know the cross section (mean free path) and step length at runtime. 
-	\end{enumerate}
-\end{enumerate}
-
-\section{What We Need From Geant4 Developers}
-
-\subsection{Releasing GeantReweight}
-Two options for releasing this code:
-\begin{enumerate}
-\item It is released as part of Geant4. It can be integrated into the package in various ways
-\item It is released standalone to Geant4.
-\end{enumerate}
-
-\subsection{Changes to Geant4}
-Both options require specific changes to Geant4's base build:
-\begin{enumerate}
-\item The G4Step object needs to include:
-	\begin{itemize}
-	\item Active process names
-	\item The current mean free path of each process
-	\end{itemize}
-	
-\item The G4SteppingManager class must place the new information listed in 1. into the G4Step object. 
-
-\item Some methods need to be added or changed from private/protected to public within various hadronic process classes in order to perform 2.
-	\begin{itemize}
-	\item These are used to extract the mean free path/cross section of the process at a given point in the simulation.
-	\end{itemize}	
-	
-\end{enumerate}
 
 \newpage
 \appendix

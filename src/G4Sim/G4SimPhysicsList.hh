@@ -8,7 +8,7 @@ class G4SimPhysicsList : public G4VModularPhysicsList
 {
 
   public:
-    G4SimPhysicsList(double inelasticBias, double elasticBias);
+    G4SimPhysicsList();
     virtual ~G4SimPhysicsList();
 
   protected:

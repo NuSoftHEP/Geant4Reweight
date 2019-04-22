@@ -252,7 +252,7 @@ GeantReweight consists of several base packages:
 \begin{itemize}
 	\item \textbf{FitterBase} -- Handles the fitting of Geant's predictions for the total and exclusive cross sections to external data sets.
 	\item \textbf{ReweightBase} -- Handles the reweighting of Geant simulation output
-	\item \textbf{G4PiCascade} -- Produces root files that store the nominal exclusive and inclusive cross sections. These are used by FitterBase and ReweightBase. 
+	\item \textbf{PredictionBase} -- Produces root files that store the nominal exclusive and inclusive cross sections. These are used by FitterBase and ReweightBase. 
 	\item \textbf{PropBase} -- Handles producing throws using output from FitterBase.
 \end{itemize}
 
@@ -314,8 +314,8 @@ The Fitter is configured via FHiCL(CITE). The following is a list of options tha
 	\item Sets -- A list of FHiCL parameter sets that define where the \textbf{G4ReweightFitters} get the nominal predictions based on the type (probe and nucleus) of the experiment. These have the structure of:
 	\begin{itemize}
 		\item Name -- What the set is called. This will be referenced by the experiments to access the corresponding predictions.
-		\item File -- Location of the file containing the nominal total inelastic cross section from Geant. This is produced by \textbf{G4PiCascade}. (REFERENCE THIS SECTION?)
-		\item FSFile -- Location of the file containing the nominal exclusive channel rates from Geant. This is produced by \textbf{G4PiCascade}. (REFERENCE THIS SECTION?)
+		\item File -- Location of the file containing the nominal total inelastic cross section from Geant. This is produced by \textbf{G4PiCascade} in \textbf{PredictionBase} (see \ref{sub:PredictionBase}). 
+		\item FSFile -- Location of the file containing the nominal exclusive channel rates from Geant. This is produced by \textbf{G4CrossSection} in \textbf{PredictionBase} (see \ref{sub:PredictionBase}). 
 	\end{itemize}
 	\item Experiments -- A list of FHiCL parameter sets defining the individual experiments used within the fit. These have the structure of:
 	\begin{itemize}
@@ -382,7 +382,7 @@ This class represents information taken at the level of a track within Geant and
 \subsubsection{G4ReweightFinalState}
 This class handles the reweighting. It is given a set of nominal exclusive and total inelastic cross sections, as well as variations to the individual exclusive channels. It then takes a \textbf{G4ReweightTraj} and computes a weight according to the scheme described in Sections \ref{subsec:inel_weights} and \ref{subsec:fs_rw}.
 
-\subsection{G4PiCascade}
+\subsection{PredictionBase}\label{sub:PredictionBase}
 This portion of the software provides the nominal Geant predictions for the fitting and reweighting portions of the software. It is split up into 2 programs: \textbf{G4CrossSection} and \textbf{G4PiCascade}. 
 \subsubsection{G4CrossSection}
 This program accesses the inelastic and elastic cross sections for a specific hadronic proble and target material. These are the values that are used by Geant to determine \underline{when} an interaction occurs. The output is a root file containing TGraphs for the inelastic, elastic, and total (inelastic + elastic) cross sections as functions of both momentum and kinetic energy, as well as a TTree containing branches for momentum, kinetic energy, the inelastic cross section, and elastic cross section. 
@@ -463,7 +463,7 @@ python stitch_results.py OutputFile.root f1.root,f2.root,...
 \end{minipage}
 The second argument is a comma-separated list of input files which should be given in increasing order of momentum range.
 \subsection{PropBase}
-
+This portion of the software is used to take the output from a Fit, then produce throws of the fit parameters to the resulting covariance matrix.  ... 
 
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta. 

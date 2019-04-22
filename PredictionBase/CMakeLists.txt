@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(G4PiCascade)
+project(G4Prediction)
 
 include(ExternalProject)
 
@@ -69,5 +69,6 @@ endif()
 target_link_libraries(G4CrossSection ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 install(TARGETS G4PiCascade DESTINATION bin)
+install(TARGETS G4CrossSection DESTINATION bin)
 
 

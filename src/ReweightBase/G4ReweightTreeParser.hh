@@ -35,21 +35,20 @@ class G4ReweightTreeParser{
     void MakeOutputBranches();
 
     void SetSteps(G4ReweightTraj *);
-    void FillCollection();
 
-    void Analyze(double, double);
-    void Analyze(TH1F *, TH1F *);
-    void AnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
-    void FillAndAnalyze(double, double);
-    void FillAndAnalyze(TH1F *, TH1F *);
-    void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
+    //void Analyze(double, double);
+    //void Analyze(TH1F *, TH1F *);
+    //void AnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
+    //void FillAndAnalyze(double, double);
+    //void FillAndAnalyze(TH1F *, TH1F *);
+    //void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
 
     void FillAndAnalyzeFS( G4ReweightFinalState * );
     void FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
     void AnalyzeFS( G4ReweightFinalState * );
     void AnalyzeFSThrows( G4ReweightFinalState *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
-    void GetWeightFS( G4ReweightFinalState *, double );
-    double ReturnWeightFS( G4ReweightFinalState * theFS, double theMomentum, bool IsPiMinus=false );
+    //void GetWeightFS( G4ReweightFinalState *, double );
+    //double ReturnWeightFS( G4ReweightFinalState * theFS, double theMomentum, bool IsPiMinus=false );
 
     void OpenNewInput( std::string );
     void CloseInput();

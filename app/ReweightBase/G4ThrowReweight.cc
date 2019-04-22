@@ -34,7 +34,7 @@ int main(int argc, char ** argv){
     return 0;
 
 
-  //Input the ParameterSets somehow (might have to change how it's normally created) 
+  //Input the ParameterSets somehow 
   //Then create the paramater maker
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   G4ReweightParameterMaker ParMaker( FitParSets );

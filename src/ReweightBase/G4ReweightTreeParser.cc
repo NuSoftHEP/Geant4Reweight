@@ -80,25 +80,19 @@ void G4ReweightTreeParser::SetBranches(){
 }
 
 void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
-//  std::cout << G4RTraj->eventNum << " " << G4RTraj->trackID << " " << G4RTraj->PID << " " << G4RTraj->parID << " " <<G4RTraj->stepRange.first << " " << G4RTraj->stepRange.second << std::endl;
   for(int is = G4RTraj->stepRange.first; is < G4RTraj->stepRange.second; ++is){
-//    std::cout << is << std::endl;
     step->GetEntry(is);
 
-   // std::cout << preStepPx << " " << preStepPy << " " << preStepPz << std::endl;
-   // std::cout << postStepPx << " " << postStepPy << " " << postStepPz << std::endl;
     double preStepP[3] = {preStepPx,preStepPy,preStepPz};
     double postStepP[3] = {postStepPx,postStepPy,postStepPz};
 
     G4ReweightStep * G4RStep = new G4ReweightStep(sTrackID, sPID, sParID, sEventNum,
                                                   preStepP, postStepP, stepLength, *stepChosenProc);
-    // std::cout << is << " " << *stepChosenProc << std::endl;                                                  
-
     G4RStep->deltaX = deltaX;
     G4RStep->deltaY = deltaY;
     G4RStep->deltaZ = deltaZ;
 
-    Proc theProc;
+/*    Proc theProc;
     for(size_t ip = 0; ip < stepActivePostProcMFPs->size(); ++ip){
       std::string theName = stepActivePostProcNames->at(ip);
       double theMFP = stepActivePostProcMFPs->at(ip); 
@@ -108,58 +102,10 @@ void G4ReweightTreeParser::SetSteps(G4ReweightTraj * G4RTraj){
 
       G4RStep->AddActivePostProc(theProc);
     }
-
+*/
     G4RTraj->AddStep(G4RStep);
   }
 
-}
-
-void G4ReweightTreeParser::FillCollection(){
-
-  std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
-  if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}
-  
-
-  for(int ie = 0; ie < track->GetEntries(); ++ie){    
-    track->GetEntry(ie);
-
-//    if(!(ie%10000)){std::cout << ie << std::endl;}
-
-    G4ReweightTraj * G4RTraj = new G4ReweightTraj(tTrackID, tPID, tParID, tEventNum, *tSteps);   
-    SetSteps(G4RTraj);
-   
-    std::pair<size_t,size_t> thisPair = std::make_pair(tTrackID,tEventNum);
-    std::pair<size_t,size_t> parentPair = std::make_pair(tParID,tEventNum);
-
-    //Primary particle
-    if(tParID == 0){
-      (*trajCollection)[thisPair] = G4RTraj;
-//      std::cout << "Added primary " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
-    }
-    //The particle's parent is in the map
-    else if( trajCollection->count( parentPair ) ){      
-      if( (*trajCollection)[ parentPair ]->AddChild( G4RTraj ) ){
-        (*trajCollection)[thisPair] = G4RTraj;
-        std::cout << "Added child " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
-        std::cout << "\tTo " << tParID << std::endl;
-      }
-/*      else{
-        std::cout << "Failed to add child " <<tTrackID << " " << tPID << " " << tEventNum << std::endl;
-        std::cout << "\tTo " << tParID << std::endl;
-      }     
-*/
-    }
-    else{
-//      std::cout << "Did not find parent " << tParID << " in map" << std::endl;
-//      std::cout << "Deleting traj " << tTrackID << " " << tPID << " " << tEventNum << std::endl;
-      delete G4RTraj;
-    }
-    
-  }
-
-  
-  std::cout << "Got " << GetNTrajs() << " trajectories" << std::endl;
-  filled = true;
 }
 
 size_t G4ReweightTreeParser::GetNTrajs(){ 
@@ -180,6 +126,7 @@ G4ReweightTraj* G4ReweightTreeParser::GetTraj(size_t eventIndex, size_t trackInd
   }
 }
 
+/*//REMOVE
 void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
       for( ; itTraj != trajCollection->end(); ++itTraj){
@@ -285,6 +232,7 @@ void G4ReweightTreeParser::Analyze(double bias, double elastBias){
       }
 }
 
+//REMOVE
 void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
 
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
@@ -395,6 +343,7 @@ void G4ReweightTreeParser::Analyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
       }
 }
 
+//REMOVE
 void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
 
       std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
@@ -504,6 +453,7 @@ void G4ReweightTreeParser::AnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInt
         //}
       }
 }
+*/
 
 
 void G4ReweightTreeParser::GetInteractionType(int thePID){
@@ -541,6 +491,8 @@ void G4ReweightTreeParser::GetInteractionType(int thePID){
   }
 }
 
+/*
+//REMOVE
 void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double theMomentum ){
 
   //std::cout << "Getting FS weight" << std::endl;
@@ -580,6 +532,7 @@ void G4ReweightTreeParser::GetWeightFS( G4ReweightFinalState * theFS, double the
 
 }
 
+//REMOVE
 double G4ReweightTreeParser::ReturnWeightFS( G4ReweightFinalState * theFS, double theMomentum, bool IsPiMinus ){
 
   if( theInt != Inel ){
@@ -609,6 +562,8 @@ double G4ReweightTreeParser::ReturnWeightFS( G4ReweightFinalState * theFS, doubl
 
 }
 
+
+//Remove
 void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
@@ -677,6 +632,7 @@ void G4ReweightTreeParser::FillAndAnalyze(double bias, double elastBias){
 
 }
 
+//Remove
 void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasHist){
   
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
@@ -745,6 +701,7 @@ void G4ReweightTreeParser::FillAndAnalyze(TH1F * inelBiasHist, TH1F * elastBiasH
 
 }
 
+//REMOVE
 void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4ReweightInter * elastBias){
 
 
@@ -813,8 +770,9 @@ void G4ReweightTreeParser::FillAndAnalyzeFunc(G4ReweightInter * inelBias, G4Rewe
   trajCollection->clear();
 
 }
+*/
 
-//At some point add in elastic? 
+//Make this use the new style of weighting from 'G4ReweightFinalState'
 void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
   
   std::cout << "Saving Variations from FinalState reweighter" << std::endl;
@@ -893,7 +851,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
 
 }
 
-//Add in elastic reweighting?
+//Make this use the new style of weighting from 'G4ReweightFinalState'
 void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
 
   std::map< std::pair<size_t,size_t>, G4ReweightTraj* >::iterator itTraj = trajCollection->begin();
@@ -915,12 +873,14 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
       if(totalDeltaZ < 0.) continue;
 
       theLen         = theTraj->GetTotalLength();
-      if( theFS->AsGraph() ){
+      theWeight = theFS->GetWeight( theTraj );
+/*      if( theFS->AsGraph() ){
         theWeight      = theTraj->GetWeight( theFS->GetTotalVariationGraph() );          
       }
       else{
         theWeight      = theTraj->GetWeight( (TH1F*)theFS->GetTotalVariation() );
       }
+*/
 
       theElastWeight = 1.;
       theInt         = theTraj->GetFinalProc();
@@ -985,7 +945,7 @@ void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
       GetInteractionType(theTraj->PID);         
       Energy = theTraj->Energy;
 
-      GetWeightFS( theFS, preFinalP );
+      //GetWeightFS( theFS, preFinalP );
 
       //altFSWeight = theTraj->GetWeightFS( theFS );
 

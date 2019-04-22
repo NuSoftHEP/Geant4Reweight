@@ -1,0 +1,37 @@
+#
+# Macro file for MyExample
+#
+# set verbose level for this run
+#
+
+/run/verbose    1
+/run/setCut     0.04 mm
+/event/verbose  1
+/process/verbose 10
+/random/setSeeds 770353837 70597151
+#/random/setSeeds 575841909 838392975
+# Set the particle source properties
+# 
+/gps/particle    pi+
+/gps/direction   0 0 1
+/gps/pos/type    Plane 
+/gps/pos/shape   Circle
+/gps/pos/centre  0 0 0 mm
+/gps/pos/radius  5 cm
+
+/gps/ene/type    Arb
+/gps/hist/type   arb
+/gps/ene/emspec  1 #choose to produce momentum rather than KE
+/gps/hist/point  0.9999 0.
+/gps/hist/point  1.0 1.
+/gps/hist/point  1.1 1. 
+/gps/hist/point  1.1001 0. 
+/gps/hist/point  1.9 0.
+/gps/hist/point  2.0 1.
+/gps/hist/point  2.1 1.
+/gps/hist/point  2.2 0.
+/gps/hist/inter  Lin
+
+
+/run/beamOn 1000
+#/run/beamOn 1

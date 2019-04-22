@@ -1,0 +1,108 @@
+BEGIN_PROLOG
+
+C_PiPlus: {
+
+  Name: "C_PiPlus"
+  
+  File: "/dune/app/users/calcuttj/geant/GeantReweight/PredictionBase-build/C_PiPlus_cross_section_out.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
+}
+
+C_PiMinus: {
+
+  Name: "C_PiMinus"
+  
+  File: "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade-build/C_PiMinus_cross_section_out.root"
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiMinus_cascade.root" 
+}
+
+O_PiPlus: {
+
+  Name: "O_PiPlus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_0.root"
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiPlus_cascade.root" 
+}
+
+O_PiMinus: {
+
+  Name: "O_PiMinus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_0.root"
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiMinus_cascade.root" 
+}
+
+Al_PiPlus: {
+
+  Name: "Al_PiPlus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiPlus_cascade.root" 
+}
+
+Al_PiMinus: {
+
+  Name: "Al_PiMinus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiMinus_cascade.root" 
+}
+
+Fe_PiPlus: {
+
+  Name: "Fe_PiPlus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiPlus_cascade.root" 
+}
+
+Fe_PiMinus: {
+
+  Name: "Fe_PiMinus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiMinus_cascade.root" 
+}
+
+Cu_PiPlus: {
+
+  Name: "Cu_PiPlus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiPlus_cascade.root" 
+}
+
+Cu_PiMinus: {
+
+  Name: "Cu_PiMinus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiMinus_cascade.root" 
+}
+
+Pb_PiPlus: {
+
+  Name: "Pb_PiPlus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiPlus_cascade.root" 
+}
+
+Pb_PiMinus: {
+
+  Name: "Pb_PiMinus"
+  
+  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_0.root"
+
+  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiMinus_cascade.root" 
+}
+
+END_PROLOG

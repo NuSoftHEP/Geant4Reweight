@@ -1,0 +1,5 @@
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/G4Sim/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/PredictionBase/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/PropBase/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ReweightBase/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/FitterBase/)

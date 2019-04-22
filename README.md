@@ -1,13 +1,5 @@
 # GeantReweight
 Repository for implementing reweighting in Geant4
 
-#####source#####
-Built off geant4.10.03.p03. Directory 'source' is intended as
-a patch for Geant4. 
-################
-
-
-#####G4SIM######
-G4Sim is a customizable MC project that produces output which 
-will be used by future projects to parse info and do reweighting.
-################
+# Building
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/GeantReweight-install/ -DUSE_FHICL=1 -DGeant4_DIR=/path/to/geant4-install/lib64/Geant4-<version>/ relative/path/to/GeantReweight/

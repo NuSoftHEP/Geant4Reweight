@@ -41,19 +41,6 @@ void G4SimSteppingAction::UserSteppingAction(const G4Step * step){
   MyStepTreeBuffer->stepChosenProc = std::string(postProName);
   ///
 
-  int nPostProcs = step->postStepProcNames->size();
-
-  MyStepTreeBuffer->stepActivePostProcNames->clear();
-  MyStepTreeBuffer->stepActivePostProcMFPs->clear();
-  MyStepTreeBuffer->stepActivePostProcLens->clear();
-  for(int ip = 0; ip < nPostProcs; ++ip){
-    MyStepTreeBuffer->stepActivePostProcNames->push_back(step->postStepProcNames->at(ip));
-    MyStepTreeBuffer->stepActivePostProcMFPs->push_back(step->postStepProcMFPs->at(ip));
-    MyStepTreeBuffer->stepActivePostProcLens->push_back(step->postStepProcIntLens->at(ip));
-  }
-
-
-
   MyStepTreeBuffer->preStepPx = prestep->GetMomentum()[0];
   MyStepTreeBuffer->preStepPy = prestep->GetMomentum()[1];
   MyStepTreeBuffer->preStepPz = prestep->GetMomentum()[2];

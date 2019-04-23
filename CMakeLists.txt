@@ -7,7 +7,10 @@ project(GeantReweight)
 
 include(ExternalProject)
 
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -24,10 +27,6 @@ endif()
 ##################################  ROOT  ######################################
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS RIO Net)
-
-message(${ROOT_INCLUDE_DIRS})
-message("Found ROOT" ${ROOT_FOUND})
-
 
 ###############################  fhiclcpp  #####################################
 include(${CMAKE_SOURCE_DIR}/cmake/fhiclcppSetup.cmake)

@@ -26,7 +26,6 @@ enum interactionType {
 class G4ReweightTreeParser{
 
   public:
-    //Functions
     G4ReweightTreeParser(std::string, std::string);
 
    ~G4ReweightTreeParser();
@@ -36,20 +35,11 @@ class G4ReweightTreeParser{
 
     void SetSteps(G4ReweightTraj *);
 
-    //void Analyze(double, double);
-    //void Analyze(TH1F *, TH1F *);
-    //void AnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
-    //void FillAndAnalyze(double, double);
-    //void FillAndAnalyze(TH1F *, TH1F *);
-    //void FillAndAnalyzeFunc(G4ReweightInter *, G4ReweightInter *);
-
     void FillAndAnalyzeFS( G4ReweightFinalState * );
     void FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
     void AnalyzeFS( G4ReweightFinalState * );
     void AnalyzeFSThrows( G4ReweightFinalState *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
-    //void GetWeightFS( G4ReweightFinalState *, double );
-    //double ReturnWeightFS( G4ReweightFinalState * theFS, double theMomentum, bool IsPiMinus=false );
-
+    void ClearCollection();
     void OpenNewInput( std::string );
     void CloseInput();
     void CloseAndSaveOutput(){ fout->cd(); tree->Write(); delete tree; fout->Delete("tree"); fout->Close(); };

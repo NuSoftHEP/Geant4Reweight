@@ -7,11 +7,6 @@
 
 #include <cmath>
 
-struct Proc{
-  std::string Name;
-  double MFP;
-};
-
 class G4ReweightTraj;
 
 class G4ReweightStep{
@@ -21,9 +16,38 @@ class G4ReweightStep{
     G4ReweightStep(int tid, int pid, int parid, int eventnum, double preStepP[3], double postStepP[3], double len, std::string chosenProc);
     ~G4ReweightStep();
 
+    double GetFullPreStepP()  { return sqrt( preStepPx*preStepPx + preStepPy*preStepPy + preStepPz*preStepPz ); };
+    double GetFullPostStepP() { return sqrt( postStepPx*postStepPx + postStepPy*postStepPy + postStepPz*postStepPz ); };
+
+    int GetTrackID(){ return trackID; };
+    int GetEventNum(){ return eventNum; };
+    int GetPDG(){ return PDG; };
+    int GetParID(){ return parID; };
+
+    double GetPreStepPx(){ return preStepPx; };
+    double GetPreStepPy(){ return preStepPy; };
+    double GetPreStepPz(){ return preStepPz; };
+    double GetPostStepPx(){ return postStepPx; };
+    double GetPostStepPy(){ return postStepPy; };
+    double GetPostStepPz(){ return postStepPz; };
+
+    double GetDeltaX(){ return deltaX; };
+    double GetDeltaY(){ return deltaY; };
+    double GetDeltaZ(){ return deltaZ; };
+
+    double SetDeltaX( double dX ){ deltaX = dX; };
+    double SetDeltaY( double dY ){ deltaX = dY; };
+    double SetDeltaZ( double dZ ){ deltaX = dZ; };
+
+    double GetStepLength(){ return stepLength; };
+
+    std::string GetStepChosenProc(){ return stepChosenProc; };
+
+
+  private:
     int trackID; 
     int eventNum;
-    int PID;
+    int PDG;
     int parID;
 
     double preStepPx;
@@ -33,9 +57,6 @@ class G4ReweightStep{
     double postStepPy;
     double postStepPz;
 
-    double GetFullPreStepP()  { return sqrt( preStepPx*preStepPx + preStepPy*preStepPy + preStepPz*preStepPz ); };
-    double GetFullPostStepP() { return sqrt( postStepPx*postStepPx + postStepPy*postStepPy + postStepPz*postStepPz ); };
-
     double deltaX;
     double deltaY;
     double deltaZ;
@@ -44,26 +65,6 @@ class G4ReweightStep{
 
     std::string stepChosenProc;
 
-    //Remove post proc after trimming down
-    void AddActivePostProc(std::pair< std::string, double >);
-    void AddActivePostProc(Proc);
-
-    size_t GetNActivePostProcs();
-
-    Proc GetActivePostProc(size_t ip);
-   
-
-  private:
-
-    //int preStepMaterialZ
-    //double preStepMaterialMass
-    //double preStepMaterialDensity
-    //std::string preStepMaterialName
-    //
-    //Or pointer to G4Material
-
-    //Remove
-    std::vector<Proc> stepActivePostProcs;
 
 };
 

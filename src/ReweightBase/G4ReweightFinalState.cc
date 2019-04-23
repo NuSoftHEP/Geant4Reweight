@@ -515,8 +515,8 @@ double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
     //Convert xsec to MFP   
     //Note: taking away the factor of 10. used in conversion
     //
-    total += ( theStep->stepLength / GetNominalMFP(theMom) );
-    bias_total += ( theStep->stepLength / GetBiasedMFP( theMom ) );
+    total += ( theStep->GetStepLength() / GetNominalMFP(theMom) );
+    bias_total += ( theStep->GetStepLength() / GetBiasedMFP( theMom ) );
 
   }
 
@@ -528,8 +528,8 @@ double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
     auto lastStep = theTraj->GetStep( theTraj->GetNSteps() - 1 );
     double theMom = lastStep->GetFullPreStepP();
 
-    weight *= ( 1 - exp(lastStep->stepLength / GetBiasedMFP( theMom ) ) );
-    weight *= ( 1. / ( 1 - exp( lastStep->stepLength / GetNominalMFP( theMom ) ) ) );
+    weight *= ( 1 - exp(lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
+    weight *= ( 1. / ( 1 - exp( lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
 
 
     int nPi0     = theTraj->HasChild(111).size();  
@@ -547,7 +547,7 @@ double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
       cut = "prod";
     }
     else{
-      if( theTraj->PID == 211 ){
+      if( theTraj->GetPDG() == 211 ){
         if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
           cut = "inel";
         }
@@ -555,7 +555,7 @@ double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
           cut = "dcex"; 
         }
       }
-      else if( theTraj->PID == -211 ){
+      else if( theTraj->GetPDG() == -211 ){
         if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
           cut = "dcex";
         }

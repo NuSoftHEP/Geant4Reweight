@@ -5,12 +5,12 @@
 #include <math.h>
 #include <algorithm>
 
-G4ReweightTraj::G4ReweightTraj(int tid, int pid, int parid, int eventnum, std::pair<int,int> range) :
-trackID(tid), PID(pid), parID(parid), eventNum(eventnum), stepRange(range){
-  if( PID == 211 ){ 
+G4ReweightTraj::G4ReweightTraj(int tid, int pdg, int parid, int eventnum, std::pair<int,int> range) :
+trackID(tid), PDG(pdg), parID(parid), eventNum(eventnum), stepRange(range){
+  if( PDG == 211 ){ 
     fInelastic = "pi+Inelastic";
   }
-  else if( PID == -211 ){
+  else if( PDG == -211 ){
      fInelastic = "pi-Inelastic";  
   }
 
@@ -110,370 +110,17 @@ G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic){
 }
 
 std::string G4ReweightTraj::GetFinalProc(){
-  return steps.back()->stepChosenProc;
+  return steps.back()->GetStepChosenProc();
 }
 
 double G4ReweightTraj::GetTotalLength(){
   double total = 0.;
 
   for(size_t is = 0; is < GetNSteps(); ++is){
-    total += steps.at(is)->stepLength;  
+    total += steps.at(is)->GetStepLength();  
   }
 
   return total;
-}
-
-double G4ReweightTraj::GetWeight(double bias){
-  double total, bias_total;
-
-  //Decrement in the case an inelastic interaction occurred.
-  size_t nsteps = GetNSteps();
-  if( GetFinalProc() == fInelastic )nsteps--;
-
-
-  //Switching to using the cross section 
-  //double nominal_MFP =  
-  //
-  //
-  ////////////////////////////////////
-  
-  for(size_t is = 0; is < nsteps; ++is){   
-
-    auto theStep = GetStep(is);
-        
-    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = theStep->GetActivePostProc(ip);
-
-      if( theProc.Name == fInelastic ){
-
-        total += (10.*theStep->stepLength/theProc.MFP);
-        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-      }
-    }
-  }
-
-
-  double weight = exp( total - bias_total );
-  if( GetFinalProc() == fInelastic ){
-    double mfp;
-
-    //Get the last step
-    auto lastStep = GetStep( nsteps );
-
-    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = lastStep->GetActivePostProc(ip);
-      if( theProc.Name == fInelastic ){
-        mfp = theProc.MFP;
-      }
-
-    }
-
-    //weight = weight * bias;
-    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
-    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
-  }
- 
-  return weight;
-}
-
-double G4ReweightTraj::GetWeight(TH1F * biasHist){
-
-  double total, bias_total;
-
-  //Decrement in the case an inelastic interaction occurred.
-  size_t nsteps = GetNSteps();
-  if( GetFinalProc() == fInelastic )nsteps--;
-  std::cout << GetFinalProc() << std::endl;
-
-  for(size_t is = 0; is < nsteps; ++is){   
-    auto theStep = GetStep(is);
-    
-    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-      auto theProc = theStep->GetActivePostProc(ip);
-
-
-      if( theProc.Name == fInelastic ){
-
-        total += (10.*theStep->stepLength/theProc.MFP);
-
-        double theMom = theStep->GetFullPreStepP();
-        int theBin    = biasHist->FindBin(theMom);
-        
-        double bias;
-        if(theBin < 1 || theBin > biasHist->GetNbinsX() ){
-          bias = 1.;
-        }
-        else{
-          bias = biasHist->GetBinContent(theBin); 
-        }
-
-        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-
-      }
-    }
-  }
-
-
-  double weight = exp( total - bias_total );
-  if( GetFinalProc() == fInelastic ){
-    auto lastStep = GetStep( GetNSteps() - 1 );
-    double mfp;
-
-    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = lastStep->GetActivePostProc(ip);
-      if( theProc.Name == fInelastic ){
-        mfp = theProc.MFP;
-      }
-
-    }
-
-
-    double theMom = lastStep->GetFullPreStepP();
-    int theBin    = biasHist->FindBin(theMom);
-
-    double bias;
-    if( theBin < 1 || theBin > biasHist->GetNbinsX() ) bias = 1.;
-    else bias = biasHist->GetBinContent(theBin); 
-
-    //weight = weight * bias;
-    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
-    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
-  }
- 
-  return weight;
-}
-
-double G4ReweightTraj::GetWeightFunc(G4ReweightInter * biasInter){
-  double total, bias_total;
-
-  //Decrement in the case an inelastic interaction occurred.
-  size_t nsteps = GetNSteps();
-  if( GetFinalProc() == fInelastic )nsteps--;
-
-  for(size_t is = 0; is < nsteps; ++is){   
-
-    auto theStep = GetStep(is);
-        
-    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = theStep->GetActivePostProc(ip);
-
-      if( theProc.Name == fInelastic ){
-
-        total += (10.*theStep->stepLength/theProc.MFP);
-        
-        double theMom = theStep->GetFullPreStepP();
-        double bias;
-        bias = biasInter->GetContent(theMom);
-        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-
-      }
-    }
-  }
-
-
-  double weight = exp( total - bias_total );
-  if( GetFinalProc() == fInelastic ){
-    auto lastStep = GetStep( GetNSteps() - 1 );
-    double mfp;
-
-    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = lastStep->GetActivePostProc(ip);
-      if( theProc.Name == fInelastic ){
-        mfp = theProc.MFP;
-      }
-
-    }
-
-    double theMom = lastStep->GetFullPreStepP();
-    double bias = biasInter->GetContent(theMom);
-//    weight = weight * bias;
-    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
-    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
-  }
- 
-  return weight;
-}
-
-double G4ReweightTraj::GetWeight(TGraph * theGraph ){
-  double total, bias_total;
-
-  //Decrement in the case an inelastic interaction occurred.
-  size_t nsteps = GetNSteps();
-  if( GetFinalProc() == fInelastic )nsteps--;
-
-  for(size_t is = 0; is < nsteps; ++is){   
-
-    auto theStep = GetStep(is);
-        
-    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = theStep->GetActivePostProc(ip);
-
-      if( theProc.Name == fInelastic ){
-
-        total += (10.*theStep->stepLength/theProc.MFP);
-        
-        double theMom = theStep->GetFullPreStepP();
-        double bias;
-        bias = theGraph->Eval(theMom);
-        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-      }
-    }
-  }
-
-
-  double weight = exp( total - bias_total );
-  if( GetFinalProc() == fInelastic ){
-    auto lastStep = GetStep( GetNSteps() - 1 );
-    double mfp;
-
-    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = lastStep->GetActivePostProc(ip);
-      if( theProc.Name == fInelastic ){
-        mfp = theProc.MFP;
-      }
-
-    }
-
-    double theMom = lastStep->GetFullPreStepP();
-    double bias = theGraph->Eval(theMom);
-//    weight = weight * bias;
-    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*bias / mfp ) );
-    weight = weight / ( 1 - exp( -10.*lastStep->stepLength / mfp ) );
-  }
- 
-  return weight;
-}
-
-double G4ReweightTraj::GetWeight_Elast(double elast_bias){
-
-  double elast_weight = 1.;
-  double elast_total = 0.;
-  double elast_bias_total = 0.;
-
-  for(size_t is = 0; is < GetNSteps(); ++is){   
-
-    auto theStep = GetStep(is);
-
-    //Check if the chosen proc was elastic. 
-    //If so, then multiply by the bias and don't
-    //add to the totals
-    if( theStep->stepChosenProc == "hadElastic" ){
-      elast_weight *=  elast_bias;
-    }
-    //If it wasn't elastic, then add to the totals
-    else{
-      for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-        auto theProc = theStep->GetActivePostProc(ip);
-
-        if(theProc.Name == "hadElastic"){
-
-          elast_total += ( (10.*theStep->stepLength) / theProc.MFP );
-          elast_bias_total += ( (10.*theStep->stepLength*elast_bias) / theProc.MFP );
-
-        }
-      }
-    }
-  }
-
-  //Now multiply by the factor for steps without elastic scatters 
-  elast_weight *= exp( elast_total - elast_bias_total ); 
-
-  return elast_weight;
-
-}
-
-double G4ReweightTraj::GetWeight_Elast(TH1F * elastBiasHist){
-
-  double elast_weight = 1.;
-  double elast_total = 0.;
-  double elast_bias_total = 0.;
-
-  for(size_t is = 0; is < GetNSteps(); ++is){   
-
-    auto theStep = GetStep(is);
-
-    double theMom = theStep->GetFullPreStepP();
-    int theBin    = elastBiasHist->FindBin(theMom);
-
-    double elastBias;
-    if(theBin < 1 || theBin > elastBiasHist->GetNbinsX() ) elastBias = 1.;
-    else elastBias = elastBiasHist->GetBinContent(theBin); 
-
-    //Check if the chosen proc was elastic. 
-    //If so, then multiply by the bias and don't
-    //add to the totals
-    if( theStep->stepChosenProc == "hadElastic" ){
-      elast_weight *=  elastBias;
-    }
-    //If it wasn't elastic, then add to the totals
-    else{
-      for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-        auto theProc = theStep->GetActivePostProc(ip);
-
-        if(theProc.Name == "hadElastic"){
-
-          elast_total += ( (10.*theStep->stepLength) / theProc.MFP );
-          elast_bias_total += ( (10.*theStep->stepLength*elastBias) / theProc.MFP );
-
-        }
-      }
-    }
-  }
-
-  //Now multiply by the factor for steps without elastic scatters 
-  elast_weight *= exp( elast_total - elast_bias_total ); 
-
-  return elast_weight;
-}
-
-double G4ReweightTraj::GetWeightFunc_Elast(G4ReweightInter * elastBiasInter){
-
-  double elast_weight = 1.;
-  double elast_total = 0.;
-  double elast_bias_total = 0.;
-
-  for(size_t is = 0; is < GetNSteps(); ++is){   
-
-    auto theStep = GetStep(is);
-
-    double theMom = theStep->GetFullPreStepP();
-    double elastBias = elastBiasInter->GetContent(theMom);
-
-    //Check if the chosen proc was elastic. 
-    //If so, then multiply by the bias and don't
-    //add to the totals
-    if( theStep->stepChosenProc == "hadElastic" ){
-      elast_weight *=  elastBias;
-    }
-    //If it wasn't elastic, then add to the totals
-    else{
-      for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-        auto theProc = theStep->GetActivePostProc(ip);
-
-        if(theProc.Name == "hadElastic"){
-
-          elast_total += ( (10.*theStep->stepLength) / theProc.MFP );
-          elast_bias_total += ( (10.*theStep->stepLength*elastBias) / theProc.MFP );
-
-        }
-      }
-    }
-  }
-
-  //Now multiply by the factor for steps without elastic scatters 
-  elast_weight *= exp( elast_total - elast_bias_total ); 
-
-  return elast_weight;
 }
 
 int G4ReweightTraj::GetNElastic(){
@@ -482,7 +129,8 @@ int G4ReweightTraj::GetNElastic(){
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
 
-    if(theStep->stepChosenProc == "hadElastic")total++;
+    if(theStep->GetStepChosenProc() == "hadElastic")
+      total++;
   }
 
   return total;
@@ -493,8 +141,8 @@ std::vector<double> G4ReweightTraj::GetElastDists(){
   double total = 0.;
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
-    total += theStep->stepLength;
-    if(theStep->stepChosenProc == "hadElastic"){
+    total += theStep->GetStepLength();
+    if(theStep->GetStepChosenProc() == "hadElastic"){
       dists.push_back(total);
       total = 0.;
     }     
@@ -505,7 +153,6 @@ std::vector<double> G4ReweightTraj::GetElastDists(){
 }
 
 std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res){
-//  std::cout <<"NEW" << std::endl;
 
   std::vector< std::pair<double, int> > result;
 
@@ -513,7 +160,6 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
   
   //First slice position
   double sliceEdge = res;
-//  double sliceEdge = res*ceil(nextPos/res);
   double lastPos = 0.;
   double nextPos = 0.;
   double px,py,pz;
@@ -523,16 +169,15 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethod(double res
   for(size_t is = 0; is < GetNSteps(); ++is){
     
     auto theStep = GetStep(is);
-    nextPos = lastPos + theStep->deltaZ; 
-    //nextPos = lastPos + theStep->stepLength; 
-    px = theStep->preStepPx; 
-    py = theStep->preStepPy; 
-    pz = theStep->preStepPz; 
+    nextPos = lastPos + theStep->GetDeltaZ(); 
+    px = theStep->GetPreStepPx(); 
+    py = theStep->GetPreStepPy(); 
+    pz = theStep->GetPreStepPz(); 
     sliceEnergy = sqrt( (px*px + py*py + pz*pz) + 139.57*139.57);
 
-    std::string theProc = theStep->stepChosenProc; 
+    std::string theProc = theStep->GetStepChosenProc(); 
 //    std::cout << "StepLen: " << theStep->stepLength << " Proc: " << theProc << std::endl;
-    if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;
+    if( (theProc == "hadElastic" || theProc == fInelastic) ) interactInSlice++;
     //std::cout << nextPos << " " << sliceEdge << " " << theProc << std::endl;
      
     //Passed the slice edge or it's the last step, save Energy
@@ -575,10 +220,10 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
 
-    disp += theStep->deltaZ;
+    disp += theStep->GetDeltaZ();
     currentSlice = floor(disp/res);
     
-    std::string theProc = theStep->stepChosenProc; 
+    std::string theProc = theStep->GetStepChosenProc(); 
     
     //Check to see if in a new slice and it's not the end
     if( oldSlice != currentSlice && is < GetNSteps() - 1){ 
@@ -610,7 +255,7 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBloch(double
         }
       }      
       
-      if( (theProc == "hadElastic" || theProc == "pi+Inelastic") ) interactInSlice++;      
+      if( (theProc == "hadElastic" || theProc == fInelastic) ) interactInSlice++;      
     }
     //It's crossed a slice and it's the last step. Save both info
     else if( oldSlice != currentSlice && is == GetNSteps() - 1 ){
@@ -695,13 +340,13 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceMethodInelastic(d
   for(size_t is = 0; is < GetNSteps(); ++is){
     
     auto theStep = GetStep(is);
-    nextPos = lastPos + theStep->deltaZ; 
-    px = theStep->preStepPx; 
-    py = theStep->preStepPy; 
-    pz = theStep->preStepPz; 
+    nextPos = lastPos + theStep->GetDeltaZ(); 
+    px = theStep->GetPreStepPx(); 
+    py = theStep->GetPreStepPy(); 
+    pz = theStep->GetPreStepPz(); 
     sliceEnergy = sqrt( (px*px + py*py + pz*pz) + 139.57*139.57);
 
-    std::string theProc = theStep->stepChosenProc; 
+    std::string theProc = theStep->GetStepChosenProc(); 
     if( (theProc == "pi+Inelastic") ) interactInSlice++;
      
     //Passed the slice edge or it's the last step, save Energy
@@ -740,10 +385,10 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);
 
-    disp += theStep->deltaZ;
+    disp += theStep->GetDeltaZ();
     currentSlice = floor(disp/res);
     
-    std::string theProc = theStep->stepChosenProc; 
+    std::string theProc = theStep->GetStepChosenProc(); 
     
     //Check to see if in a new slice and it's not the end
     if( oldSlice != currentSlice && is < GetNSteps() - 1){ 
@@ -825,180 +470,13 @@ std::vector< std::pair<double, int> > G4ReweightTraj::ThinSliceBetheBlochInelast
 }
 
 
-std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPID){
+std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPDG){
   std::vector<G4ReweightTraj*> childTrajs; 
   for(size_t ic = 0; ic < GetNChilds(); ++ic){
-    if( GetChild(ic)->PID == childPID){
+    if( GetChild(ic)->GetPDG() == childPDG){
       childTrajs.push_back(GetChild(ic));
     }
   }
   return childTrajs;
 }
 
-
-
-double G4ReweightTraj::GetWeightFS(G4ReweightFinalState * theFS){
-
-  TH1D * biasHist = theFS->GetTotalVariation(); 
-
-  double total, bias_total;
-
-  //Decrement in the case an inelastic interaction occurred.
-  size_t nsteps = GetNSteps();
-
-
-  //Remove this when switching to new weighting scheme 
-  if( GetFinalProc() == fInelastic )nsteps--;
-
-  for(size_t is = 0; is < nsteps; ++is){   
-
-    auto theStep = GetStep(is);
-        
-   // double theMom = theStep->GetFullPreStepP();
-
-   // total += (10. *  theStep->stepLength / theFS->GetNominalMFP(theMom) );
-   // bias_total += ( 10. * theStep->stepLength / theFS->GetBiasedMFP( theMom ) );
-
-    
-
-    for(size_t ip = 0; ip < theStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = theStep->GetActivePostProc(ip);
-
-      if( theProc.Name == fInelastic ){
-
-        total += (10.*theStep->stepLength/theProc.MFP);
-
-        double theMom = theStep->GetFullPreStepP();
-        int theBin    = biasHist->FindBin(theMom);
-        
-        double bias;
-        if(theBin < 1 || theBin > biasHist->GetNbinsX() ){
-          bias = 1.;
-        }
-        else{
-          bias = biasHist->GetBinContent(theBin); 
-        }
-
-        bias_total += ( (10.*theStep->stepLength*bias) / theProc.MFP);
-
-      }
-    }
-  }
-
-
-  double weight = exp( total - bias_total );
-
-
-
-  if( GetFinalProc() == fInelastic ){
-    auto lastStep = GetStep( GetNSteps() - 1 );
-    double xsec;
-
-    int nPi0 = HasChild(111).size();  
-    int nPiPlus = HasChild(211).size();
-    int nPiMinus = HasChild(-211).size();
-
-    std::string cut;
-    if( (nPi0 + nPiPlus + nPiMinus) == 0){
-      cut = "abs";
-    }
-    else if( (nPiPlus + nPiMinus) == 0 && nPi0 == 1 ){
-      cut = "cex";
-    }
-    else if( (nPiPlus + nPiMinus + nPi0) > 1 ){
-      cut = "prod";
-    }
-    else{
-      if( PID == 211 ){
-        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
-          cut = "inel";
-        }
-        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
-          cut = "dcex"; 
-        }
-      }
-      else if( PID == -211 ){
-        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
-          cut = "dcex";
-        }
-        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
-          cut = "inel"; 
-        }
-      }
-    }
-
-    //New weighting scheme
-    //double exclusive_factor = theFS->GetExclusiveFactor( cut );
-    //weight *= exclusive_factor;
-    
-
-    TH1D* theOldHist = theFS->GetOldHist( cut );
-    TH1D* theNewHist = theFS->GetNewHist( cut );
-
-    double theMom = lastStep->GetFullPreStepP();
-    int theBin; 
-    if( ( theMom < theOldHist->GetBinLowEdge(0) )
-     || ( theMom > theOldHist->GetBinLowEdge( theOldHist->GetNbinsX() ) + theOldHist->GetBinWidth( theOldHist->GetNbinsX() ) ) ){
-      theBin = 0;
-    }
-    else{
-      theBin = theOldHist->FindBin(theMom);
-    }
-
-
-
-    double oldVal;
-    double newVal;
-
-    if(theBin < 1 || theBin > theOldHist->GetNbinsX() ){
-      oldVal = 1.;
-      newVal = 1.;
-    }
-    else{
-      oldVal = theOldHist->GetBinContent( theBin ); 
-      newVal = theNewHist->GetBinContent( theBin ); 
-    }
-
-//    double bias = newVal / oldVal;
-
-
-    double oldTotal = 0.;
-    double newTotal = 0.;
-
-    std::vector< std::string > cuts = {"abs", "inel", "cex", "prod", "dcex"};
-
-    for( size_t i = 0; i < cuts.size(); ++i ){
-      std::string theCut = cuts[i];
-      oldTotal += theFS->GetOldHist( theCut )->GetBinContent( theBin );      
-      newTotal += theFS->GetNewHist( theCut )->GetBinContent( theBin );      
-    }
-
-    double oldFrac = oldVal / oldTotal;
-    double newFrac = newVal / newTotal;
-
-    double mfp;
-
-    for(size_t ip = 0; ip < lastStep->GetNActivePostProcs(); ++ip){
-
-      auto theProc = lastStep->GetActivePostProc(ip);
-      if( theProc.Name == fInelastic ){
-        mfp = theProc.MFP;
-      }
-
-    }
-
-    // mfp^-1 = xsec
-    // newFrac * xsec = new_xsec_exclusive
-
-    double totalVar = biasHist->GetBinContent( theBin );
-
-    
-
-    weight = weight * ( 1 - exp( -10.*lastStep->stepLength*newFrac*totalVar / mfp ) );
-
-    weight = weight / ( 1 - exp( -10.*lastStep->stepLength*oldFrac / mfp ) );
-  }
- 
-  return weight;
-}

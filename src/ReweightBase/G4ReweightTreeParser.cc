@@ -146,8 +146,7 @@ void G4ReweightTreeParser::GetInteractionType(int thePID){
   }
 }
 
-//Make this use the new style of weighting from 'G4ReweightFinalState'
-void G4ReweightTreeParser::FillAndAnalyzeFS(G4ReweightFinalState * theFS){
+void G4ReweightTreeParser::FillAndAnalyzeFS(G4Reweighter * theFS){
   
   std::cout << "Saving Variations from FinalState reweighter" << std::endl;
   fout->cd();
@@ -198,8 +197,7 @@ void G4ReweightTreeParser::ClearCollection(){
   trajCollection->clear(); 
 }
 
-//Make this use the new style of weighting from 'G4ReweightFinalState'
-void G4ReweightTreeParser::AnalyzeFS(G4ReweightFinalState * theFS){
+void G4ReweightTreeParser::AnalyzeFS(G4Reweighter * theFS){
 
   for( auto itTraj = trajCollection->begin(); itTraj != trajCollection->end(); ++itTraj){
     auto theTraj = itTraj->second; 
@@ -303,7 +301,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XS
     }
   }
 
-  G4ReweightFinalState theFS = G4ReweightFinalState(FracsFile, ParMaker.GetFSHists() );
+  G4Reweighter theFS = G4Reweighter(FracsFile, ParMaker.GetFSHists() );
   theFS.SetTotalGraph(XSecFile);
   
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
@@ -346,7 +344,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XS
   ClearCollection();
 }
 
-void G4ReweightTreeParser::AnalyzeFSThrows( G4ReweightFinalState *theFS, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows){
+void G4ReweightTreeParser::AnalyzeFSThrows( G4Reweighter *theFS, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows){
 
   for( size_t i = 0; i < nThrows; ++i ){
     std::map< std::string, double > temp_throw;

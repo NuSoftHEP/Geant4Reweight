@@ -5,7 +5,7 @@
 #include "TH1F.h"
 
 #include "G4ReweightTreeParser.hh"
-#include "G4ReweightFinalState.hh"
+#include "G4Reweighter.hh"
 
 #include "G4ReweightParameterMaker.hh"
 
@@ -36,14 +36,14 @@ int main(int argc, char ** argv){
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
   G4ReweightParameterMaker ParMaker( FitParSets );
 
-  G4ReweightFinalState * theFS = new G4ReweightFinalState( &FracsFile, ParMaker.GetFSHists() ); 
-  if( enablePiMinus ) theFS->SetPiMinus();
+  G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists() ); 
+  if( enablePiMinus ) theReweighter->SetPiMinus();
 
   std::string XSecFileName = ps.get< std::string >( "XSec" );
   TFile XSecFile( XSecFileName.c_str(), "OPEN" );
 
-  theFS->SetTotalGraph(&XSecFile);
-  tp->FillAndAnalyzeFS(theFS);
+  theReweighter->SetTotalGraph(&XSecFile);
+  tp->FillAndAnalyzeFS(theReweighter);
   tp->CloseAndSaveOutput();
   tp->CloseInput();
 

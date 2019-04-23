@@ -1,5 +1,5 @@
-#ifndef G4ReweightFinalState_h
-#define G4ReweightFinalState_h
+#ifndef G4Reweighter_h
+#define G4Reweighter_h
 
 #include <string>
 #include <utility>
@@ -19,13 +19,13 @@
 class G4ReweightTraj;
 //class G4ReweightStep;
 
-class G4ReweightFinalState{
+class G4Reweighter{
   public:
     
-    G4ReweightFinalState(){};
-    G4ReweightFinalState(TFile *, std::map< std::string, TGraph*> &,/* double, double,*/ bool PiMinus = false);    
-    G4ReweightFinalState(TFile *, const std::map< std::string, TH1D*> &, bool PiMinus = false);    
-    ~G4ReweightFinalState();
+    G4Reweighter(){};
+    G4Reweighter(TFile *, std::map< std::string, TGraph*> &,/* double, double,*/ bool PiMinus = false);    
+    G4Reweighter(TFile *, const std::map< std::string, TH1D*> &, bool PiMinus = false);    
+    ~G4Reweighter();
 
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );

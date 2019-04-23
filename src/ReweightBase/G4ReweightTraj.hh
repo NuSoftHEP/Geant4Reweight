@@ -1,8 +1,7 @@
 #ifndef G4ReweightTraj_h
 #define G4ReweightTraj_h 1
 
-#include "G4ReweightInter.hh"
-#include "G4ReweightFinalState.hh"
+#include "G4Reweighter.hh"
 
 #include <vector>
 #include <string>
@@ -28,7 +27,7 @@ template<class T> class DeleteVector
 //Forward Declaration to let Traj know of step
 class G4ReweightStep;
 
-class G4ReweightFinalState;
+class G4Reweighter;
 
 class G4ReweightTraj{
 

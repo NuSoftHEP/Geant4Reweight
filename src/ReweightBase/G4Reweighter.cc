@@ -1,4 +1,4 @@
-#include "G4ReweightFinalState.hh"
+#include "G4Reweighter.hh"
 #include "G4ReweightStep.hh"
 
 #include <utility>
@@ -9,7 +9,7 @@
 #include "TVectorD.h"
 
 
-G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string, TGraph* > &FSScales, /*double max, double min, */bool PiMinus) 
+G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSScales, /*double max, double min, */bool PiMinus) 
 /*: Maximum(max), Minimum(min)*/{
 
   as_graphs = true;
@@ -190,7 +190,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, std::map< std::string,
   //fout->Close();
 }
 
-G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::string, TH1D* > &FSScales, bool PiMinus){
+G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, bool PiMinus){
   TVectorD * m_vec = (TVectorD*)input->Get("Mass");
   Mass = (*m_vec)(0);
 
@@ -383,7 +383,7 @@ G4ReweightFinalState::G4ReweightFinalState(TFile * input, const std::map< std::s
   //fout->Close();
 }
 
-void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSScales){
+void G4Reweighter::SetNewHists(const std::map< std::string, TH1D* > &FSScales){
 
   std::map< std::string, std::string >::iterator it = theCuts.begin();
   for( ; it != theCuts.end(); ++it ){
@@ -454,7 +454,7 @@ void G4ReweightFinalState::SetNewHists(const std::map< std::string, TH1D* > &FSS
 
 }
 
-double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum ){
+double G4Reweighter::GetWeight( std::string theInt, double theMomentum ){
   
   if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
     return 1.;
@@ -467,7 +467,7 @@ double G4ReweightFinalState::GetWeight( std::string theInt, double theMomentum )
   return theWeight;
 }
 
-double G4ReweightFinalState::GetWeightFromGraph( std::string theInt, double theMomentum ){
+double G4Reweighter::GetWeightFromGraph( std::string theInt, double theMomentum ){
   
   if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
     return 1.;
@@ -479,17 +479,17 @@ double G4ReweightFinalState::GetWeightFromGraph( std::string theInt, double theM
   return theWeight;
 }
 
-void G4ReweightFinalState::SetTotalGraph( TFile * input ){
+void G4Reweighter::SetTotalGraph( TFile * input ){
   totalGraph = (TGraph*)input->Get( "inel_momentum" );
 }
 
 
-double G4ReweightFinalState::GetNominalMFP( double theMom ){
+double G4Reweighter::GetNominalMFP( double theMom ){
   double xsec = totalGraph->Eval( theMom );
   return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
 }
 
-double G4ReweightFinalState::GetBiasedMFP( double theMom ){
+double G4Reweighter::GetBiasedMFP( double theMom ){
   double b = 1.;
   if( as_graphs ){
     b = totalVariationGraph->Eval( theMom );
@@ -498,7 +498,7 @@ double G4ReweightFinalState::GetBiasedMFP( double theMom ){
   return  GetNominalMFP( theMom ) / b;
 }
 
-double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
+double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
 
   double total, bias_total;
 
@@ -577,19 +577,19 @@ double G4ReweightFinalState::GetWeight( G4ReweightTraj * theTraj ){
   return weight;
 }
 
-TH1D * G4ReweightFinalState::GetExclusiveVariation( std::string theInt ){
+TH1D * G4Reweighter::GetExclusiveVariation( std::string theInt ){
   //Add in check
   
   return exclusiveVariations.at( theInt ); 
 }
 
-TGraph * G4ReweightFinalState::GetExclusiveVariationGraph( std::string theInt ){
+TGraph * G4Reweighter::GetExclusiveVariationGraph( std::string theInt ){
   //Add in check
   
   return exclusiveVariationGraphs.at( theInt ); 
 }
 
-G4ReweightFinalState::~G4ReweightFinalState(){ 
+G4Reweighter::~G4Reweighter(){ 
   for( size_t i = 0; i < theInts.size(); ++i){ 
 //    delete gROOT->FindObject( theInts.at(i).c_str() ); 
     if( exclusiveVariations.find( theInts.at(i) ) != exclusiveVariations.end() )
@@ -613,14 +613,14 @@ G4ReweightFinalState::~G4ReweightFinalState(){
 
 }
 
-void G4ReweightFinalState::AddGraphs( TGraph *target, TGraph* adder  ){
+void G4Reweighter::AddGraphs( TGraph *target, TGraph* adder  ){
   int nbins = target->GetN();
   for( int i = 0; i < nbins; ++i ){
     target->SetPoint(i , target->GetX()[i], (target->GetY()[i] + adder->GetY()[i]) );
   }
 }
 
-void G4ReweightFinalState::DivideGraphs( TGraph *target, TGraph* divider  ){
+void G4Reweighter::DivideGraphs( TGraph *target, TGraph* divider  ){
   int nbins = target->GetN();
   for( int i = 0; i < nbins; ++i ){
     if( divider->GetY()[i] < 0.000001 ){

@@ -3,8 +3,7 @@
 
 #include "G4ReweightStep.hh"
 #include "G4ReweightTraj.hh"
-#include "G4ReweightInter.hh"
-#include "G4ReweightFinalState.hh"
+#include "G4Reweighter.hh"
 
 #include "G4ReweightParameterMaker.hh"
 #include "G4ReweightThrowManager.hh"
@@ -35,10 +34,10 @@ class G4ReweightTreeParser{
 
     void SetSteps(G4ReweightTraj *);
 
-    void FillAndAnalyzeFS( G4ReweightFinalState * );
+    void FillAndAnalyzeFS( G4Reweighter * );
     void FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows = 10 );
-    void AnalyzeFS( G4ReweightFinalState * );
-    void AnalyzeFSThrows( G4ReweightFinalState *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
+    void AnalyzeFS( G4Reweighter * );
+    void AnalyzeFSThrows( G4Reweighter *, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows );
     void ClearCollection();
     void OpenNewInput( std::string );
     void CloseInput();

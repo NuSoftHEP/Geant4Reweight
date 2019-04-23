@@ -14,7 +14,7 @@
 #include <map>
 #include <string>
 
-#include "G4ReweightFinalState.hh"
+#include "G4Reweighter.hh"
 #include "FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
@@ -68,7 +68,7 @@ class G4ReweightFitter{
       return stream_in.str();
     };
 
-    G4ReweightFinalState * theFS;
+    G4Reweighter * theReweighter;
     TGraph * dummyGraph;
     TH1D * dummyHist;
     TGraph * total_inel;

@@ -193,10 +193,10 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
 
-  theFS = new G4ReweightFinalState(&FracFile, FSHists, false);
+  theReweighter = new G4Reweighter(&FracFile, FSHists, false);
 
   
-  TGraph * total_var = theFS->GetTotalVariationGraph();
+  TGraph * total_var = theReweighter->GetTotalVariationGraph();
 
    
   for( auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut ){
@@ -220,13 +220,13 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
       for( int i = 0; i < total_inel->GetN(); ++i ){
         double x = total_inel->GetX()[i];
 
-        if( x > theFS->GetNewGraph( "abs" )->GetX()[ theFS->GetNewGraph( "abs" )->GetN() -1 ] ){
+        if( x > theReweighter->GetNewGraph( "abs" )->GetX()[ theReweighter->GetNewGraph( "abs" )->GetN() -1 ] ){
           break;
         }
 
         double y = total_inel->GetY()[i];
         xs.push_back( x );
-        ys.push_back( y * ( theFS->GetNewGraph( "abs" )->Eval( x ) + theFS->GetNewGraph( "cex" )->Eval( x ) ) ); 
+        ys.push_back( y * ( theReweighter->GetNewGraph( "abs" )->Eval( x ) + theReweighter->GetNewGraph( "cex" )->Eval( x ) ) ); 
       }
       MC_xsec_graphs[ cut_name ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
     }
@@ -234,12 +234,12 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
       for( int i = 0; i < total_inel->GetN(); ++i ){
         double x = total_inel->GetX()[i];
-        if( x > theFS->GetNewGraph( cut_name )->GetX()[ theFS->GetNewGraph( cut_name )->GetN() -1 ] ){
+        if( x > theReweighter->GetNewGraph( cut_name )->GetX()[ theReweighter->GetNewGraph( cut_name )->GetN() -1 ] ){
           break;
         }
         double y = total_inel->GetY()[i];
         xs.push_back( x );
-        ys.push_back( y * theFS->GetNewGraph( cut_name )->Eval( x ) ); 
+        ys.push_back( y * theReweighter->GetNewGraph( cut_name )->Eval( x ) ); 
       }
       MC_xsec_graphs[ cut_name ] = new TGraph( xs.size(), &xs[0], &ys[0] ); 
     }
@@ -264,7 +264,7 @@ void G4ReweightFitter::FinishUp(){
   for( ; it!= MC_xsec_graphs.end(); ++it ){
     delete it->second;
   }
-  delete theFS;
+  delete theReweighter;
 }
 
 

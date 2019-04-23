@@ -1,186 +1,50 @@
 #include <iostream>
-#include <utility>
 #include <string>
-#include <fstream>
-#include <iostream>
 #include "TTree.h"
 #include "TFile.h"
 #include "TH1F.h"
 
-#include "G4ReweightStep.hh"
-#include "G4ReweightTraj.hh"
 #include "G4ReweightTreeParser.hh"
-
 #include "G4ReweightFinalState.hh"
 
-#include "G4ReweightInter.hh"
+#include "G4ReweightParameterMaker.hh"
 
-std::string fileName = "try.root"; 
-std::string outFileName = "outtry.root";
+#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/ParameterSet.h"
 
-double weight = 1.;
-double elastWeight = 1.;
+std::string fcl_file;
 
-std::string inelasticBiasFile = "bias.root";
-std::string elasticBiasFile   = "bias.root";
-std::string inelasticBiasName = "inelastic";
-std::string elasticBiasName   = "elastic";
-
-std::string weightType        = "flat";
-
-bool enableFS = false;
 bool enablePiMinus = false;
 
-std::string FinalStateFracsFile = "FinalStateFile.root";
-std::string FinalStateVarsFile  = "";
-
-
 bool parseArgs(int argc, char ** argv);
-G4ReweightInter * GetInter(std::string);
 
 int main(int argc, char ** argv){
 
-  if(!parseArgs(argc, argv)) {return 0;}
-  std::cout << fileName << " " << outFileName << " " << weight << " " << elastWeight << std::endl;
-
-  TFile * inelasticFile; 
-  TFile * elasticFile; 
-
-  TH1F * inelasticHist;
-  TH1F * elasticHist;
-  
-
-  G4ReweightTreeParser * tp = new G4ReweightTreeParser(fileName.c_str(), outFileName.c_str());
-//  tp->SetBranches();
-  if(enableFS){
-    std::cout << "Enabling Final State Reweighting" << std::endl;
-    std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;
-    std::cout << "Using FinalStateVarsFile: " << FinalStateVarsFile << std::endl;
-
-    //Commenting out for now. Need to figure out how to run this with a different style of final state reweighter
- //   G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), FinalStateVarsFile ); 
- //   if( enablePiMinus ) theFS->SetPiMinus();
-
- //   tp->FillAndAnalyzeFS(theFS);
- //   tp->CloseAndSaveOutput();
-
+  if(!parseArgs(argc, argv)) 
     return 0;
-  }
 
-/*
-  if(weightType == "flat"){
+  fhicl::ParameterSet ps = fhicl::make_ParameterSet( fcl_file );
 
-    std::cout << "Doing flat reweighting" << std::endl;
-    std::cout << "\t" << weight << " " << elastWeight << std::endl;
+  std::string outFileName = ps.get< std::string >( "OutputFile" );
+  std::string inFileName  = ps.get< std::string >( "InputFile" ); 
 
-    tp->FillAndAnalyze(weight,elastWeight);
-    tp->CloseAndSaveOutput();
-  }
-  else if(weightType == "binned"){
+  std::string FracsFileName = ps.get< std::string >( "Fracs" );
+  TFile FracsFile( FracsFileName.c_str(), "OPEN" );
 
-    std::cout << "Doing binned reweight" << std::endl;
-    std::cout << "Inelastic Bias: " << inelasticBiasFile << " " << inelasticBiasName << std::endl; 
-    std::cout << "Elastic Bias:   " << elasticBiasFile   << " " << elasticBiasName   << std::endl; 
+  G4ReweightTreeParser * tp = new G4ReweightTreeParser(inFileName.c_str(), outFileName.c_str());
 
+  std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
+  G4ReweightParameterMaker ParMaker( FitParSets );
 
-    //Getting inelastic bias info
-    //
-    inelasticFile = new TFile(inelasticBiasFile.c_str());
-    if( !inelasticFile->IsOpen() ){
-      std::cout << "Error: Couldn't open the inelastic bias file " << inelasticBiasFile << std::endl;
-      return 0;
-    }
-    
-    std::cout << "Opened inelastic file: " << inelasticBiasFile << std::endl;
-    inelasticHist = (TH1F*)inelasticFile->Get(inelasticBiasName.c_str());
-    if( !inelasticHist ){
-      std::cout << "Error: Couldn't find hist " << inelasticBiasName << " in the inelastic file" << std::endl;
-      return 0;
-    }
+  G4ReweightFinalState * theFS = new G4ReweightFinalState( &FracsFile, ParMaker.GetFSHists() ); 
+  if( enablePiMinus ) theFS->SetPiMinus();
 
-    std::cout << "Got inelastic hist: " << inelasticBiasName << std::endl;
-    //////////////////////////////////
+  std::string XSecFileName = ps.get< std::string >( "XSec" );
+  TFile XSecFile( XSecFileName.c_str(), "OPEN" );
 
-
-    //Getting elastic bias info
-    //
-    elasticFile   = new TFile(elasticBiasFile.c_str());
-    if( !elasticFile->IsOpen() ){
-      std::cout << "Error: Couldn't open the elastic bias file " << elasticBiasFile << std::endl;
-      return 0;
-    }
-
-    std::cout << "Opened elastic file: " << elasticBiasFile << std::endl;
-    elasticHist = (TH1F*)elasticFile->Get(elasticBiasName.c_str());
-    if( !elasticHist ){
-      std::cout << "Error: Couldn't find hist " << elasticBiasName << " in the elastic file" << std::endl;
-      return 0;
-    }
-
-    std::cout << "Got elastic hist: " << elasticBiasName << std::endl;
-    //////////////////////////////////
-
-    tp->FillAndAnalyze(inelasticHist, elasticHist);
-    tp->CloseAndSaveOutput();
-    
-  }
-  else if(weightType == "func"){
-
-    std::cout << "Doing funced reweight" << std::endl;
-    std::cout << "Inelastic Bias: " << inelasticBiasFile << std::endl; 
-    //Getting inelastic bias info
-    //
-    G4ReweightInter * inelasticBias   = GetInter(inelasticBiasFile);
-    std::cout << "Got inelastic : " << std::endl;
-    for(size_t i = 0; i < inelasticBias->GetNPoints(); ++i){
-      std::cout << inelasticBias->GetPoint(i) << " " << inelasticBias->GetValue(i) << std::endl;
-    } 
-    //////////////////////////////////
-
-    std::cout << "Elastic Bias:   " << elasticBiasFile   << std::endl; 
-    //Getting elastic bias info
-    //
-    G4ReweightInter * elasticBias   = GetInter(elasticBiasFile);
-    std::cout << "Got elastic : " << std::endl;
-    for(size_t i = 0; i < elasticBias->GetNPoints(); ++i){
-      std::cout << elasticBias->GetPoint(i) << " " << elasticBias->GetValue(i) << std::endl;
-    }
-    //////////////////////////////////
-
-//    return 0;
-    tp->FillAndAnalyzeFunc(inelasticBias, elasticBias);
-    tp->CloseAndSaveOutput();
-    
-  }
-  */
-  //else if( weightType == "graph"){
-  //  std::cout << "Enabling Final State Reweighting With Graphs" << std::endl;
-  //  std::cout << "Using FinalStateFracsFile: " << FinalStateFracsFile << std::endl;
-
-  //  std::map< std::string, TGraph * > vars;
-  //  double dummyX = 0.;
-  //  double dummyY = 1.;
-  //  vars["abs"] = new TGraph(1, &dummyX, &dummyY); 
-  //  vars["cex"] = new TGraph(1, &dummyX, &dummyY); 
-  //  vars["dcex"] = new TGraph(1, &dummyX, &dummyY); 
-  //  vars["prod"] = new TGraph(1, &dummyX, &dummyY); 
-  //  double x[2] = {200., 300.};
-  //  double y[2] = {1.5, 1.5};
-  //  vars["inel"] = new TGraph(2., x, y);
-
-  //  std::cout << "Added the graphs" << std::endl;
-
-  //   
-  //  G4ReweightFinalState * theFS = new G4ReweightFinalState( new TFile(FinalStateFracsFile.c_str()), vars,/* 300., 200.,*/ false  ); 
-  //  if( enablePiMinus ) theFS->SetPiMinus();
-
-  //  tp->FillAndAnalyzeFS(theFS);
-  //  tp->CloseAndSaveOutput();
-
-  //  return 0;
-
-  //}
-
+  theFS->SetTotalGraph(&XSecFile);
+  tp->FillAndAnalyzeFS(theFS);
+  tp->CloseAndSaveOutput();
   tp->CloseInput();
 
   std::cout << "done" << std::endl;
@@ -191,99 +55,19 @@ int main(int argc, char ** argv){
 bool parseArgs(int argc, char ** argv){
   
   for(int i = 1; i < argc; ++i){
-    if( strcmp(argv[i], "--help") == 0){
-      std::cout << "Usage: ./G4Reweight -f inputFile -o outFile -i inelasticWeight -e elasticWeight" << std::endl;
+    if( strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 ){
+      std::cout << "Usage: ./G4Reweight -c config.fcl" << std::endl;
       return false;
     }
-    if( strcmp(argv[i], "-f") == 0){
-      fileName = argv[i + 1];
+    else if( strcmp(argv[i], "-c") == 0 ){
+      fcl_file = argv[i+1];
     }
-    else if( strcmp(argv[i], "-o") == 0){
-      outFileName = argv[i + 1];       
-    }
-
-    else if( strcmp(argv[i], "-i") == 0){
-      weight = atof(argv[i + 1]);
-    }
-    else if( strcmp(argv[i], "-e") == 0){
-      elastWeight = atof(argv[i + 1]); 
-    }
-
-    else if( strcmp(argv[i], "--iFile") == 0){
-      inelasticBiasFile = argv[i + 1];
-    }
-    else if( strcmp(argv[i], "--iName") == 0){
-      inelasticBiasName = argv[i + 1];
-    }
-
-    else if( strcmp(argv[i], "--eFile") == 0){
-      elasticBiasFile = argv[i + 1];
-    }
-    else if( strcmp(argv[i], "--eName") == 0){
-      elasticBiasName = argv[i + 1];
-    }
-
-    else if( strcmp(argv[i], "--type") == 0){
-      weightType = argv[i + 1];
-    }
-
-    else if( strcmp(argv[i], "--FS") == 0){
-      enableFS = atoi( argv[i + 1] );
-    }
-
-    else if( strcmp(argv[i], "--PiMinus") == 0){
-      enablePiMinus = atoi( argv[i + 1] );
-    }
-
-    else if( strcmp(argv[i], "--FSFracs") == 0){
-      FinalStateFracsFile = argv[i + 1];
-    }
-
-    else if( strcmp(argv[i], "--FSVars") == 0){
-      FinalStateVarsFile = argv[i + 1];
+    else if( strcmp(argv[i], "--PiM") == 0 ){
+      enablePiMinus = atoi( argv[i+1] );
     }
 
   }
   return true;
 }
 
-G4ReweightInter * GetInter(std::string fileName){
-  std::ifstream inputFile;  
-  inputFile.open(fileName);
 
-  std::string line;
-
-  if (inputFile.is_open()){
-
-    std::vector< std::pair< double, double > > result;
-
-    while( std::getline( inputFile, line) ){
-      std::string::iterator it;
-      std::string pos = "", val = "";
-      bool found = false;
-      for( it = line.begin(); it < line.end(); ++it){
-        if (*it == ',') found = true;
-        else{
-          if(!found) pos += *it;
-          else val += *it;
-        }
-      }
-      std::cout << pos << " " << val << std::endl;
-      result.push_back( std::make_pair(std::stod(pos), std::stod(val) ));
-      
-    }
-    inputFile.close();
-   
-    G4ReweightInter * theInter = new G4ReweightInter( result );
-    return theInter;
-  }
-  else{
-    std::cout << "Unable to open file" << std::endl;
-    std::cout << "Returning empty Interpolater. Will return biases of 1. for all momentum values" << std::endl;
-
-    G4ReweightInter * theInter = new G4ReweightInter( std::vector<std::pair<double, double> >() );
-    return theInter;
-  }
-
-  
-}

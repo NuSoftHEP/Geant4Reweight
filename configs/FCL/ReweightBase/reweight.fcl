@@ -1,0 +1,11 @@
+#include "reweight_parameters.fcl"
+
+
+OutputFile: "rw_try.root"
+InputFile:  "/dune/data2/users/calcuttj/GeantReweight/Fit/C/pt_nom_C_piplus_nom_0.root"
+Fracs:      "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
+XSec:       "/dune/app/users/calcuttj/geant/GeantReweight/PredictionBase-build/C_PiPlus_cross_section_out.root"
+
+ParameterSet: @local::TheParameters
+
+nThrows: 1 

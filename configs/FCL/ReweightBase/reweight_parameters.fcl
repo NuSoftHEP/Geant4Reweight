@@ -1,0 +1,62 @@
+BEGIN_PROLOG 
+
+TheParameters: [
+  { 
+    Cut:    "reac"
+    Dummy: false
+    Parameters: [
+      {
+        Name: "fReacLow"
+        Range: [10., 200.]
+        Nominal: 1.5 
+      },
+      {
+        Name: "fReacHigh"
+        Range: [700., 2005.]
+        Nominal: 1.0
+      }
+    ]
+  },
+  {
+    Cut:    "abs"
+    Dummy: true 
+    Parameters:  [
+      {
+        Name: "fAbs"
+        Range: [200.0, 700.00]        
+      }
+    ]
+  }, 
+
+  {
+    Cut:   "cex"
+    Dummy: true
+    Parameters:  [
+      {
+        Name: "fCex"
+        Range: [200.0, 700.00]        
+      }
+    ]
+  },
+
+  {
+    Cut:    "inel"
+    Dummy: true 
+    Parameters:  [
+      { 
+        Name: "fInel"
+        Range: [200.0, 700.00]        
+      }
+    ]
+  },
+
+  { Cut:    "prod"
+    Dummy:  true 
+  },
+
+  { Cut:    "dcex"
+    Dummy:  true 
+  }
+]
+
+END_PROLOG

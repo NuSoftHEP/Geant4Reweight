@@ -41,6 +41,8 @@ class G4ReweightTraj{
     int GetPDG()      {return PDG; };  
     int GetParID()    {return parID; };
 
+    std::string GetInelasticType() {return fInelastic;};
+
     double GetEnergy(){return Energy;}; 
     void SetEnergy( double e ){ Energy = e; };
 
@@ -65,12 +67,6 @@ class G4ReweightTraj{
 
     int GetNElastic();
     std::vector<double> GetElastDists();
-
-    std::vector< std::pair<double,int> > ThinSliceMethod(double);
-    std::vector< std::pair<double,int> > ThinSliceBetheBloch(double);
-    std::vector< std::pair<double,int> > ThinSliceBetheBlochInelastic(double);
-    std::vector< std::pair<double,int> > ThinSliceMethodInelastic(double);
-    double BetheBloch(double);
 
     void AddWeight( double w ){
        weights.push_back(w);

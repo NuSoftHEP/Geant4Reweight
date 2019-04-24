@@ -51,6 +51,13 @@ class G4ReweightTreeParser{
 
     bool skipEM = true;
 
+    std::vector< std::pair<double,int> > ThinSliceMethod(G4ReweightTraj*,double);
+    std::vector< std::pair<double,int> > ThinSliceBetheBloch(G4ReweightTraj*,double);
+    std::vector< std::pair<double,int> > ThinSliceBetheBlochInelastic(G4ReweightTraj*,double);
+    std::vector< std::pair<double,int> > ThinSliceMethodInelastic(G4ReweightTraj*,double);
+    double BetheBloch(double);
+
+
   private:
     std::string Inel;
 

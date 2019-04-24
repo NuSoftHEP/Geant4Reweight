@@ -12,11 +12,8 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-std::string fcl_file;
-
-bool enablePiMinus = false;
-
-bool parseArgs(int argc, char ** argv);
+//Defines parseArgs and the command line options
+#include "parse_reweight_args.hh"
 
 int main(int argc, char ** argv){
 
@@ -26,7 +23,14 @@ int main(int argc, char ** argv){
   fhicl::ParameterSet ps = fhicl::make_ParameterSet( fcl_file );
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
+  if( output_file_override  != "empty" ){
+    outFileName = output_file_override;
+  }
+
   std::string inFileName  = ps.get< std::string >( "InputFile" ); 
+  if( input_file_override  != "empty" ){
+    inFileName = input_file_override;
+  }
 
   std::string FracsFileName = ps.get< std::string >( "Fracs" );
   TFile FracsFile( FracsFileName.c_str(), "OPEN" );
@@ -52,22 +56,6 @@ int main(int argc, char ** argv){
   return 0;
 }
 
-bool parseArgs(int argc, char ** argv){
-  
-  for(int i = 1; i < argc; ++i){
-    if( strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 ){
-      std::cout << "Usage: ./G4Reweight -c config.fcl" << std::endl;
-      return false;
-    }
-    else if( strcmp(argv[i], "-c") == 0 ){
-      fcl_file = argv[i+1];
-    }
-    else if( strcmp(argv[i], "--PiM") == 0 ){
-      enablePiMinus = atoi( argv[i+1] );
-    }
 
-  }
-  return true;
-}
 
 

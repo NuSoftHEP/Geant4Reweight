@@ -10,11 +10,26 @@
 
 #include "TFile.h" 
 
+//Defines parseArgs and the command line options
+#include "parse_reweight_args.hh"
+
 int main(int argc, char ** argv){
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet( argv[1] );
+
+  if(!parseArgs(argc, argv)) 
+    return 0;
+
+  fhicl::ParameterSet ps = fhicl::make_ParameterSet( fcl_file );
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
+  if( output_file_override  != "empty" ){
+    outFileName = output_file_override;
+  }
+
   std::string inFileName  = ps.get< std::string >( "InputFile" ); 
+  if( input_file_override  != "empty" ){
+    inFileName = input_file_override;
+  }
+
   int nThrows = ps.get< int >( "nThrows" );
 
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(inFileName.c_str(), outFileName.c_str());

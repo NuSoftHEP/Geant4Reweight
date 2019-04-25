@@ -118,7 +118,12 @@
 \graphicspath{{figs/}}
 
 
-\lstset{backgroundcolor=\color{lightgray},breaklines=true}
+\lstset{
+  backgroundcolor=\color{lightgray},
+  breaklines=true,
+  basicstyle=\ttfamily,
+%  columns=fullflexible
+}
 
 
 \title{GeantReweight \\ 
@@ -248,6 +253,25 @@ From here, the total cross section variation, $c_{inel}$, is used to vary the no
 
 
 \section{Software}
+
+\subsection{Obtaining The Software}
+
+The source code can be retrieved from \href{https://github.com/calcuttj/GeantReweight}{this repository}.
+
+\subsection{Building The Software}
+
+The software is built using CMake\footnote{Minimum CMake version is 3.1}, and requires an installation of both ROOT and Geant4. The ROOT installation will be accessed if its setup file has been sourced\footnote{The environment variable \textbf{ROOTSYS} will be accessed by cmake.}. The Geant4 installation will be specified using the cmake option -DGeant4$\_$DIR. To build, make a build directory adjacent to the GeantReweight top directory (let's call it "GeantReweight-build"). An install directory will be created during the cmake stage at the user's choice of location (using cmake option -DCMAKE$\_$INSTALL$\_$PREFIX). For this example, it will be called GeantReweight-install. Enter the build directory and execute:
+\begin{lstlisting}
+cmake -DCMAKE_INSTALL_PREFIX=/full/path/to/GeantReweight-install -DUSE_FHICL=1 -DGeant4_DIR=/full/path/to/external/geant4-install/lib64/Geant4-<version>/ relative/path/to/GeantReweight/
+\end{lstlisting}
+
+If this is successful, the code can now be compiled using:
+\begin{lstlisting}
+make install -j<N cores>
+\end{lstlisting}
+
+\subsection{Software Overview}
+
 GeantReweight consists of several base packages:
 \begin{itemize}
 	\item \textbf{FitterBase} -- Handles the fitting of Geant's predictions for the total and exclusive cross sections to external data sets.
@@ -379,7 +403,7 @@ This class represents information taken at the level of a track within Geant and
 	\item Vector of weights (these are created by the class that handles reweighting).
 \end{itemize}
 
-\subsubsection{G4ReweightFinalState}
+\subsubsection{G4Reweighter}
 This class handles the reweighting. It is given a set of nominal exclusive and total inelastic cross sections, as well as variations to the individual exclusive channels. It then takes a \textbf{G4ReweightTraj} and computes a weight according to the scheme described in Sections \ref{subsec:inel_weights} and \ref{subsec:fs_rw}.
 
 \subsection{PredictionBase}\label{sub:PredictionBase}
@@ -465,20 +489,6 @@ The second argument is a comma-separated list of input files which should be giv
 \subsection{PropBase}
 This portion of the software is used to take the output from a Fit, then produce throws of the fit parameters to the resulting covariance matrix.  ... 
 
-\subsection{Building The Software}
-
-The source code can be retrieved from \href{https://github.com/calcuttj/GeantReweight}{this repository}.
-
-
-The software is built using CMake\footnote{Minimum CMake version is 3.1}, and requires an installation of both ROOT and Geant4. The ROOT installation will be accessed if its setup file has been sourced\footnote{The environment variable \textbf{ROOTSYS} will be accessed by cmake.}. The Geant4 installation will be specified using the cmake option -DGeant4$\_$DIR. To build, make a build directory adjacent to the GeantReweight top directory (let's call it "GeantReweight-build"). An install directory will be created during the cmake stage at the user's choice of location (using cmake option -DCMAKE$\_$INSTALL$\_$PREFIX). For this example, it will be called GeantReweight-install. Enter the build directory and execute:
-\begin{lstlisting}
-cmake -DCMAKE_INSTALL_PREFIX=/full/path/to/GeantReweight-install -DUSE_FHICL=1 -DGeant4_DIR=/full/path/to/external/geant4-install/lib64/Geant4-<version>/ relative/path/to/GeantReweight/
-\end{lstlisting}
-
-If this is successful, the code can now be compiled using:
-\begin{lstlisting}
-make install -j<N cores>
-\end{lstlisting}
 
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta. 

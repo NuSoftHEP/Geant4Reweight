@@ -191,12 +191,6 @@ G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSSc
 }
 
 G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, bool PiMinus){
-  TVectorD * m_vec = (TVectorD*)input->Get("Mass");
-  Mass = (*m_vec)(0);
-
-  TVectorD * d_vec = (TVectorD*)input->Get("Density");
-  Density = (*d_vec)(0);
-
   as_graphs = true;
   if( PiMinus ) SetPiMinus();
   
@@ -481,6 +475,14 @@ double G4Reweighter::GetWeightFromGraph( std::string theInt, double theMomentum 
 
 void G4Reweighter::SetTotalGraph( TFile * input ){
   totalGraph = (TGraph*)input->Get( "inel_momentum" );
+  TVectorD * m_vec = (TVectorD*)input->Get("Mass");
+  Mass = (*m_vec)(0);
+
+  TVectorD * d_vec = (TVectorD*)input->Get("Density");
+  Density = (*d_vec)(0);
+
+  delete d_vec;
+  delete m_vec;
 }
 
 

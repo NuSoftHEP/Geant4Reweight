@@ -41,6 +41,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
+#include "TVectorD.h"
 
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -242,6 +243,16 @@ int main(int argc, char * argv[]){
   el_KE.Write( "el_KE" );
   total_momentum.Write( "total_momentum" );
   total_KE.Write( "total_KE" );
+
+  TVectorD m_vec(1);
+  m_vec[0] = MaterialMass;
+  m_vec.Write("Mass");
+
+  TVectorD d_vec(1);
+  d_vec[0] = MaterialDensity;
+  d_vec.Write("Density");
+
+
   tree->Write();
   fout->Close();
 

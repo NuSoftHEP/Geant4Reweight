@@ -13,22 +13,23 @@ def mom_to_ke( grin ):
 f = TFile( sys.argv[1] )
 
 gROOT.SetBatch(1)
-grabs =  mom_to_ke( f.Get( "abs" ) )
-grcex =  mom_to_ke( f.Get( "cex" ) )
-grinel = mom_to_ke( f.Get( "inel" ) )
-grprod = mom_to_ke( f.Get( "prod" ) )
-grdcex = mom_to_ke( f.Get( "dcex" ) )
+grabs =  f.Get( "abs" ) 
+grcex =  f.Get( "cex" ) 
+grinel = f.Get( "inel" )
+grprod = f.Get( "prod" )
+grdcex = f.Get( "dcex" )
 
 
 
 
 grabs.SetMaximum(1.2)
 grabs.SetMinimum(0.)
-grabs.SetTitle("Cascade Results" + sys.argv[2] + ";Pion Kinetic Energy (MeV);Fraction")
-grabs.GetXaxis().SetTitleSize(.065)
-grabs.GetYaxis().SetTitleSize(.065)
-grabs.GetXaxis().SetTitleOffset(.7)
-grabs.GetYaxis().SetTitleOffset(.75)
+grabs.GetXaxis().SetRangeUser(0.,2000.)
+grabs.SetTitle(";Pion Momentum (MeV/C);Fraction")
+grabs.GetXaxis().SetTitleSize(.05)
+grabs.GetYaxis().SetTitleSize(.05)
+grabs.GetXaxis().SetTitleOffset(.9)
+grabs.GetYaxis().SetTitleOffset(.9)
 grabs.GetXaxis().SetLabelSize(.04)
 grabs.GetYaxis().SetLabelSize(.04)
 
@@ -61,5 +62,5 @@ leg.AddEntry( grprod, "Pion Production",  "lp")
 
 leg.Draw("same")
 
-c1.SaveAs( sys.argv[3] + ".pdf")
-c1.SaveAs( sys.argv[3] + ".png")
+c1.SaveAs( sys.argv[2] + ".pdf")
+c1.SaveAs( sys.argv[2] + ".png")

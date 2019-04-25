@@ -17,14 +17,14 @@ elif( sys.argv[2] == "KE" ):
   title = "Kinetic Energy (MeV)"
 
 
-grtotal.SetMaximum(1200.)
+grtotal.SetMaximum(500.)
 grtotal.SetMinimum(0.)
 grtotal.GetXaxis().SetRangeUser( 0., [grabs.GetX()[i] for i in range(0, grabs.GetN())][-1] )
-grtotal.SetTitle("Exclusive Cross Sections;Pion " + title + ";#sigma (mb)")
-grtotal.GetXaxis().SetTitleSize(.065)
-grtotal.GetYaxis().SetTitleSize(.065)
-grtotal.GetXaxis().SetTitleOffset(.7)
-grtotal.GetYaxis().SetTitleOffset(.75)
+grtotal.SetTitle(";Pion " + title + ";#sigma (mb)")
+grtotal.GetXaxis().SetTitleSize(.05)
+grtotal.GetYaxis().SetTitleSize(.05)
+grtotal.GetXaxis().SetTitleOffset(.9)
+grtotal.GetYaxis().SetTitleOffset(.9)
 grtotal.GetXaxis().SetLabelSize(.04)
 grtotal.GetYaxis().SetLabelSize(.04)
 

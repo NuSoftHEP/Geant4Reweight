@@ -476,7 +476,7 @@ Options:
 \end{lstlisting}
 \end{minipage}
 
-\subsubsection{An Important Note on G4PiCascade}
+\subsubsection{An Important Note on G4PiCascade}\label{note:G4PiCascade}
 As projectile momentum increases, the Bertini cascade takes longer to run on average due to the increased number of interactions and cascading particles within the cascade. Because of this, it is suggested to break up the momentum range and run multiple iterations of \textbf{G4PiCascade} in parallel, and then stitch the results together using the python script \textbf{stitch$\_$results.py}. This appends the TGraphs together and saves them in another ROOT file. To use this script, type:
 
 
@@ -488,6 +488,133 @@ python stitch_results.py OutputFile.root f1.root,f2.root,...
 The second argument is a comma-separated list of input files which should be given in increasing order of momentum range.
 \subsection{PropBase}
 This portion of the software is used to take the output from a Fit, then produce throws of the fit parameters to the resulting covariance matrix.  ... 
+
+\section{Usage Example}
+This section provides an example of how this software could be used within an analysis. It starts with a demonstration on how to produce Geant4's nominal predictions for $\pi^+$ cross sections with a Carbon target, then uses this prediction in a fit to carbon data. The output of the fit is then used in a context of error propagation, where the best-fit values of the parameters and their covariance matrix are used to produce parameter throws. These ensembles of thrown values are used to produce multiple reweightings of a simulation of pions in a volume of carbon to investigate the resulting variations in observables.
+
+Note: all FCL files will be shown in detail in Appendix \ref{app:Demonstration_FHICL}
+\subsubsection{Producing Predictions}
+The first step is to produce the macroscopic $\pi^+$ - C cross section prediction. This is done using 
+
+\begin{lstlisting}
+G4CrossSection -c cross_section.fcl 
+\end{lstlisting}
+
+This produces a file called ``C$\_$PiPlus$\_$cross$\_$section.root". In this file is the total inelastic cross section which will be combined with the cascade fractions to produce exclusive cross sections. The inelastic cross section is shown in Figure \ref{fig:carbon_inel}
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.75\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/carbon_inel}.pdf}
+	\end{subfigure}
+	\caption{$\pi^+$ -- Carbon Inelastic Cross Section}\label{fig:carbon_inel}
+\end{figure}	
+
+Next, the predictions for the average results of the Bertini Cascade for $\pi^+$ impinging on Carbon are produced. This is done using \textbf{G4PiCascade}. As noted in \ref{note:G4PiCascade}, the time to run the cascade increases with incoming momentum, so this step is done in parallel by running the following commands:
+
+\begin{lstlisting}
+G4PiCascade -c C_PiPlus_cascade.fcl
+\end{lstlisting}
+\begin{lstlisting}
+G4PiCascade -c C_PiPlus_cascade.fcl -o C_PiPlus_cascade_med.root --ND 49 --low 1010 --high 1500
+\end{lstlisting}
+\begin{lstlisting}
+G4PiCascade -c C_PiPlus_cascade.fcl -o C_PiPlus_cascade_high.root --ND 49 --low 1510 --high 2000
+\end{lstlisting}
+
+Each of these produce root files containing the fraction of times the cascade ends in specific final states, over the range given in the FHiCL file or arguments. These are then stitched together using the following command:
+
+\begin{lstlisting}
+python stitch_results.py C_PiPlus_cascade.root C_PiPlus_cascade_low.root,C_PiPlus_cascade_med.root,C_PiPlus_cascade_high.root
+\end{lstlisting}
+
+These are multiplied by the total inelastic cross section to determine the exclusive cross sections. The cascade results and resulting exclusive cross sections are shown in Figure \ref{fig:cascade_xsecs}.
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/frac}.pdf}
+	\end{subfigure}	
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
+	\end{subfigure}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections}\label{fig:cascade_xsecs}
+\end{figure}
+
+\subsection{Doing a Fit}
+Now that the predictions have been produced, they can be used in a fit to data. For this fit, 5 parameters were chosen. These are:
+
+\begin{center}\label{ref:parameters}
+  \begin{tabular}{| c | c | c |}
+  \hline
+  Name & Channel & Momentum Range  \\
+  \hline
+  \hline
+  fReacLow & Reactive & (10.,200.) \\ 
+  \hline
+  fReacHigh & Reactive & (700., 2000.) \\
+  \hline	
+  fAbs & Absorption & (200., 700.) \\
+  \hline  
+  fCex & Charge Exchange & (200., 700.) \\
+  \hline
+  fInel & Inel/Quasi-elastic & (200., 700.) \\
+  \hline
+  \end{tabular}
+\end{center}
+Note: The parameters in the Reactive channel vary the total inelastic cross section (all exclusive cross sections are scaled by the same amount), while the parameters for the other channels scale only their own cross section.
+
+The fit is performed by using the following command:
+\begin{lstlisting}
+Fitter -c C_fit.fcl
+\end{lstlisting}
+Again, the FHiCL files used for this are displayed in Appendix \ref{app:Demonstration_FHICL}, and the data is listed in \ref{app:Data_refs}.
+
+The resulting best-fit values of the parameters (with their $\pm 1 \sigma$ error bars), and the covariance matrix are shown in Figure \ref{fig:fit_results}. These are used to produce $\pm 1 \sigma$ bands on the predictions, as shown in Figure \ref{fig:variations}
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/pars}.pdf}
+	\end{subfigure}	
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/cov}.pdf}
+	\end{subfigure}
+	\caption{Left: Fit Parameter Best Fit Values and $\pm 1 \sigma$ error bars, Right: Covariance Matrix}\label{fig:fit_results}
+\end{figure}
+
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/reac}.pdf}
+	\end{subfigure}	
+	~
+	\begin{subfigure}[t!]{.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/abs}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/cex}.pdf}
+	\end{subfigure}
+		
+	\begin{subfigure}[t!]{.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/abscx}.pdf}
+	\end{subfigure}
+	~
+	\begin{subfigure}[t!]{.3\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/inel}.pdf}
+	\end{subfigure}
+	\caption{$\pm 1 \sigma$ error bands}\label{fig:variations}
+\end{figure}
 
 
 \section{Testing and Validation - Flat Variations}
@@ -1067,6 +1194,54 @@ material.fcl:
 \end{lstlisting}
 
 Both cross$\_$section.fcl and cascade.fcl can use material.fcl.
+
+\newpage
+
+\section{Example FHiCLs for Demonstration}\label{app:Demonstration_FHICL}
+
+\subsection{Prediction}
+
+C$\_$PiPlus$\_$cross$\_$section.fcl:
+\begin{lstlisting}
+  1 #include "material.fcl"
+  2 Type: 211
+  3 Range: [10., 8000.]
+  4 NDivisions: 7989
+  5 Verbose: "true"
+  6 Outfile: "C$\_$PiPlus$\_$cross$\_$section.root.root"
+  7 
+  8 Material: @local::C
+\end{lstlisting}
+
+C$\_$PiPlus$\_$cascade.fcl:
+\begin{lstlisting}
+  1 #include "material.fcl"
+  2 Type: 211
+  3 NCascades: 100000
+  4 Range: [10., 1000.]
+  5 NDivisions: 95
+  6 Outfile: "C$\_$PiPlus$\_$cascade$\_$low.root"
+  7 
+  8 Material: @local::C
+\end{lstlisting}
+
+material.fcl:
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 LAr: {
+  4   Name: "graphite"
+  5   Z:    12
+  6   Mass: 12.01
+  7   Density: 2.266
+  8 }
+  9 
+ 10 END_PROLOG
+\end{lstlisting}
+
+\section{References for Data Used in Fit}\label{app:Data_refs}
+a
+
 
 %\section{Interaction Probability Derivation}
 %the derivation for the probability of interaction given a cross section

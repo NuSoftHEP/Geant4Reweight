@@ -8,6 +8,8 @@
 #include "TFile.h"
 #include "Math/Minimizer.h"
 #include "TDirectory.h"
+
+#include "G4ReweightParameterMaker.hh"
 #include "FitParameter.hh"
 #include "G4ReweightFitter.hh"
 
@@ -51,6 +53,8 @@ class G4ReweightFitManager{
     TFile      * out;
     TDirectory * data_dir;
 
+    G4ReweightParameterMaker parMaker;
+
     std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
     std::map< std::string, std::string > mapSetsToFracs;
     std::map< std::string, std::string > mapSetsToNominal;
@@ -66,6 +70,7 @@ class G4ReweightFitManager{
 
     std::vector< std::string > thePars;
     std::vector< double > theVals;
+    std::vector< std::pair< std::string, double > > theParVals;
     std::vector< double > theScanStarts, theScanDeltas;
     std::vector< int > theScanSteps;
     

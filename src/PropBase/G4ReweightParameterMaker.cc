@@ -1,7 +1,7 @@
 #include "G4ReweightParameterMaker.hh"
 
 G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars ) :
-  FullParameterSet( pars ) {
+  FullParameterSet( pars ), nParameters(0) {
 
   BuildHistsFromPars();
 }
@@ -31,6 +31,9 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
         
       std::vector< fhicl::ParameterSet > theParameters = theSet.get< std::vector< fhicl::ParameterSet > >("Parameters");
       for( size_t j = 0; j < theParameters.size(); ++j ){
+
+        ++nParameters;
+
         fhicl::ParameterSet thePar = theParameters.at(j);
 
 
@@ -203,6 +206,15 @@ void G4ReweightParameterMaker::BuildHistsFromPars(){
 
     }   
   }
+}
+
+void G4ReweightParameterMaker::SetNewVals( const std::vector< std::pair< std::string, double > > & input ){
+  std::map< std::string, double > new_input;
+  for( auto i = input.begin(); i != input.end(); ++i ){
+    new_input[ i->first ] = i->second;
+  }
+
+  SetNewVals( new_input ); 
 }
 
 void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double > & input ){

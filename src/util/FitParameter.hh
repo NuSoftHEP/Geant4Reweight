@@ -9,5 +9,8 @@ struct FitParameter{
   double Value;
   bool Dummy;
   std::pair< double, double > Range;
+
+
+  //Add in stuff for the scan information
 };
 #endif

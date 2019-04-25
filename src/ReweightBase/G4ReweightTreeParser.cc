@@ -148,7 +148,6 @@ void G4ReweightTreeParser::GetInteractionType(int thePID){
 
 void G4ReweightTreeParser::FillAndAnalyzeFS(G4Reweighter * theFS){
   
-  std::cout << "Saving Variations from FinalState reweighter" << std::endl;
   fout->cd();
   
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;

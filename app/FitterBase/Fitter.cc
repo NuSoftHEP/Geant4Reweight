@@ -16,6 +16,9 @@ std::string set_prec(double);
 std::string fcl_file;
 std::string output_file_override = "empty"; 
 
+int scan_override = -1;
+int save_override = -1;
+
 bool parseArgs(int argc, char ** argv);
 
 int main(int argc, char ** argv){
@@ -24,6 +27,8 @@ int main(int argc, char ** argv){
 
   fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
   bool fSave    = ps.get< bool >( "Save", false );
+  if( save_override != -1 )
+    fSave = save_override;
 
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
@@ -52,6 +57,9 @@ int main(int argc, char ** argv){
   FitMan.MakeMinimizer( ps );
 
   bool fFitScan = ps.get< bool >( "FitScan", false );
+  if( scan_override != -1 )
+    fFitScan = scan_override;
+
   FitMan.RunFitAndSave(fFitScan);
   return 0;
 }
@@ -66,6 +74,8 @@ bool parseArgs(int argc, char ** argv){
       std::cout << std::endl;
       std::cout << "Options: " << std::endl;
       std::cout << "\t-o <output_file_override>.root" << std::endl;
+      std::cout << "\t--scan <override scan setting: 0 = no, 1 = yes>" << std::endl;
+      std::cout << "\t--save <override save setting: 0 = no, 1 = yes>" << std::endl;
 
       return false;
     }
@@ -79,6 +89,21 @@ bool parseArgs(int argc, char ** argv){
       output_file_override = argv[i+1];
     }
 
+    else if( strcmp( argv[i], "--scan" ) == 0 ){
+      scan_override = atoi( argv[i+1] );
+      if( scan_override > 1 || scan_override < 0 ){
+        std::cout << "Scan override value must be 0 or 1" << std::endl;
+        return false;
+      }
+    }
+
+    else if( strcmp( argv[i], "--save" ) == 0 ){
+      save_override = atoi( argv[i+1] );
+      if( save_override > 1 || save_override < 0 ){
+        std::cout << "Save override value must be 0 or 1" << std::endl;
+        return false;
+      }
+    }
   }
 
   if( !found_fcl_file ){

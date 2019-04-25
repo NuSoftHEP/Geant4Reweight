@@ -23,79 +23,12 @@ void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet >
 
   parMaker = G4ReweightParameterMaker( FitParSets );
 
-  ////Replace with ParameterMaker
-  /*
-  for( size_t i = 0; i < FitParSets.size(); ++i ){
-    fhicl::ParameterSet theSet = FitParSets.at(i);
-    std::string theCut = theSet.get< std::string >("Cut");
-
-    if( FullParameterSet.find( theCut ) == FullParameterSet.end() ){  
-      FullParameterSet[ theCut ] = std::vector< FitParameter  >();
-    }   
-
-    bool isDummy = theSet.get< bool >("Dummy");
-    if( isDummy ){
-      FitParameter dummyPar;
-      dummyPar.Name = "dummy";
-      dummyPar.Cut = theCut;
-      dummyPar.Value = 1.; 
-      dummyPar.Range = std::make_pair( 0., 0.);
-      dummyPar.Dummy = true;
-          
-      FullParameterSet[ theCut ].push_back( dummyPar );
-
-      //Remove
-      CutIsDummy[ theCut ] = true;
-    }   
-    else{ 
-      std::vector< fhicl::ParameterSet > theParameters = theSet.get< std::vector< fhicl::ParameterSet > >("Parameters");
-      for( size_t j = 0; j < theParameters.size(); ++j ){
-        fhicl::ParameterSet thePar = theParameters.at(j);
-
-
-        std::string theName = thePar.get< std::string >("Name");
-            
-        std::pair< double, double > theRange = thePar.get< std::pair< double, double > >("Range");
-
-        double nominal = thePar.get< double >("Nominal",1.);
-
-        FitParameter par;
-        par.Name = theName;
-        par.Cut = theCut;
-        par.Dummy = false;
-        par.Value = nominal; 
-        par.Range = theRange;
-        FullParameterSet[ theCut ].push_back( par );
-
-        //Need equivalent       
-        thePars.push_back( par.Name );
-        theVals.push_back( nominal );
-
-        double scan_start = thePar.get< double >("ScanStart", 1.);
-        int    nsteps =     thePar.get< int >("NScanSteps", 10);
-        double scan_delta = thePar.get< double >("ScanDelta", .1);
-
-        ///////Add into the parameters themselves
-        theScanStarts.push_back( scan_start );
-        theScanSteps.push_back( nsteps );
-        theScanDeltas.push_back( scan_delta );
-
-        --nDOF;//Remove 1 DOF for each non-dummy parameter
-        /////////////////////////////////////////
-      }   
-      CutIsDummy[ theCut ] = false;
-    }   
-  } 
-*/
-  
   nDOF -= parMaker.GetNParameters();
   theParVals = parMaker.GetParametersAsPairs();
+
   for( size_t i = 0; i < theParVals.size(); ++i ){ 
     std::string branch_name = theParVals[i].first;
   
-
- // for( size_t i = 0; i < thePars.size(); ++i ){//Replace with above
- //   std::string branch_name = thePars.at(i);//Replace with above
     parameter_values[ branch_name ] = 0.;
     fit_tree.Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );   
   }
@@ -136,9 +69,7 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
 }
 
 void G4ReweightFitManager::GetAllData(){
-//switch to auto
-  std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
-    itSet = mapSetsToFitters.begin();
+  auto itSet = mapSetsToFitters.begin();
   for( ; itSet != mapSetsToFitters.end(); ++itSet ){
 
     std::vector< G4ReweightFitter* > fitters = itSet->second;
@@ -157,28 +88,6 @@ void G4ReweightFitManager::DefineFCN(){
       [&](double const *coeffs) {
         
         std::string dir_name = "";
-        /*
-        int a = 0;
-        //Setting parameters////////////////////////////////////
-        for(size_t i = 0; i < thePars.size(); ++i){
-
-          //switch to auto
-          std::map< std::string, std::vector< FitParameter > >::iterator it;
-          for( it = FullParameterSet.begin(); it != FullParameterSet.end(); ++it ){
-            for( size_t j = 0; j < it->second.size(); ++j ){
-              if( it->second[j].Name == thePars[i] ){
-                it->second[j].Value = coeffs[a];
-                dir_name += thePars[i] + std::to_string( coeffs[a] );
-
-                parameter_values[ thePars[i] ] = coeffs[a];
-
-                ++a;
-              }
-            }
-          }   
-        }
-        */
-
         for(size_t i = 0; i < theParVals.size(); ++i){          
           theParVals[i].second = coeffs[i];
           dir_name += theParVals[i].first + std::to_string( coeffs[i] );
@@ -204,7 +113,6 @@ void G4ReweightFitManager::DefineFCN(){
   
         double chi2 = 0.;
 
-        //switch to auto
         auto itSet = mapSetsToFitters.begin();
     
         for( ; itSet != mapSetsToFitters.end(); ++itSet ){
@@ -217,7 +125,7 @@ void G4ReweightFitManager::DefineFCN(){
             if( fSave )
               theFitter->MakeFitDir( outdir );
 
-            theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet()/*FullParameterSet*/, fSave);
+            theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet(), fSave);
 
             //Combine
             double fit_chi2 = theFitter->DoFit(fSave);
@@ -233,18 +141,17 @@ void G4ReweightFitManager::DefineFCN(){
         return chi2;
       },
       theParVals.size()
-      //thePars.size()// 
     );
 }
 
-void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
+void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
   TMatrixD *cov = new TMatrixD( theParVals.size(), theParVals.size() );
   TH1D parsHist("parsHist", "", theParVals.size(), 0,theParVals.size());
   TH2D covHist("covHist", "", theParVals.size(), 0,theParVals.size(), theParVals.size(), 0,theParVals.size());
 
   std::cout << "Start: " << std::endl;
-  for( auto it = parMaker.GetParameterSet()/*FullParameterSet*/.begin(); it != parMaker.GetParameterSet()/*FullParameterSet*/.end(); ++it ){
+  for( auto it = parMaker.GetParameterSet().begin(); it != parMaker.GetParameterSet().end(); ++it ){
     std::cout << it->first << std::endl;
     for( size_t i = 0; i < it->second.size(); ++i ){
       std::cout << "\t" << it->second.at(i).Name << " " << it->second.at(i).Value << std::endl;
@@ -252,7 +159,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
   }
 
 
-  DefineFCN(/*fSave*/);
+  DefineFCN();
 
 
   if( !fFitScan ){
@@ -295,24 +202,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
       for( int sigma_it = 0; sigma_it < 4; ++sigma_it ){
         //Setting parameters
-        /*
-        for(size_t i = 0; i < theParVals.size(); ++i){
-
-          std::map< std::string, std::vector< FitParameter > >::iterator it;
-          for( it = parMaker.GetParameterSet().begin(); it != parMaker.GetParameterSet().end(); ++it ){
-            for( size_t j = 0; j < it->second.size(); ++j ){
-              if( it->second[j].Name == theParVals[i].first ){
-                if( sigma_it < 3 )
-                  it->second[j].Value = vals[i] + (sigma_it - 1)*errs[i];
-                else if( sigma_it == 3 )
-                   it->second[j].Value = 1.;               
-              }
-            }
-          }   
-        }
-        */
-
-
         for( size_t i = 0; i < theParVals.size(); ++i ){
           if( sigma_it < 3 )
             theParVals[i].second = vals[i] + (sigma_it - 1)*errs[i];
@@ -368,24 +257,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
      std::cout << theFactors.back() << std::endl;      
    }
-
-
-   /*
-   for( size_t i = 0; i < theScanSteps.size(); ++i )
-     total_steps *= theScanSteps[i];
-
-   std::cout << "Factors: " << std::endl;
-   std::vector< int > theFactors;
-   for( size_t i = 0; i < theScanSteps.size(); ++i ){
-     std::cout << i << " Steps: " << theScanSteps[i] << std::endl;
-     if( i == 0 )
-       theFactors.push_back( total_steps / theScanSteps[i] );
-     else
-       theFactors.push_back( theFactors[i - 1] / theScanSteps[i] );
-
-     std::cout << theFactors.back() << std::endl;
-   }
-   */
 
    std::cout << "Steps: " << std::endl;
    for( int z = 0; z < total_steps; ++z ){

@@ -9,10 +9,12 @@ TheParameters: [
         Name: "fReacLow"
         Range: [10., 200.]
         Nominal: 1.0 
+        NScanSteps: 1
       },
       {
         Name: "fReacHigh"
         Range: [700., 2005.]
+        ScanDelta: .2
       }
     ]
   },
@@ -23,6 +25,7 @@ TheParameters: [
       {
         Name: "fAbs"
         Range: [200.0, 700.00]        
+        ScanDelta: .3
       }
     ]
   }, 
@@ -34,6 +37,7 @@ TheParameters: [
       {
         Name: "fCex"
         Range: [200.0, 700.00]        
+        ScanDelta: .4
       }
     ]
   },
@@ -45,6 +49,7 @@ TheParameters: [
       { 
         Name: "fInel"
         Range: [200.0, 700.00]        
+        ScanDelta: .5
       }
     ]
   },

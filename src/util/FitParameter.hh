@@ -11,6 +11,8 @@ struct FitParameter{
   std::pair< double, double > Range;
 
 
-  //Add in stuff for the scan information
+  double ScanStart;
+  double ScanDelta;
+  int    ScanSteps;
 };
 #endif

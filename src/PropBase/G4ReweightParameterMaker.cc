@@ -49,6 +49,16 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
         par.Dummy = false;
         par.Value = nominal; 
         par.Range = theRange;
+
+        double scan_start = thePar.get< double >("ScanStart", 1.);
+        int    nsteps =     thePar.get< int >("NScanSteps", 2);
+        double scan_delta = thePar.get< double >("ScanDelta", .1);
+
+        par.ScanStart = scan_start;
+        par.ScanSteps = nsteps;
+        par.ScanDelta = scan_delta;
+
+        ///////Add into the parameters themselves
         FullParameterSet[ theCut ].push_back( par );
 
       }   

@@ -351,6 +351,26 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
    
    //Build the input to the FCN
    int total_steps = 1;
+
+   std::vector< std::pair< std::string, FitParameter > > active_pars = parMaker.GetActiveParametersAsPairs();
+   for( auto it = active_pars.begin(); it != active_pars.end(); ++it )
+     total_steps *= it->second.ScanSteps;
+   
+
+   std::cout << "Factors: " << std::endl;
+   std::vector< int > theFactors;
+   for( size_t i = 0; i < active_pars.size(); ++i ){
+     std::cout << i << " Steps: " << active_pars[i].second.ScanSteps << std::endl;
+     if( i == 0 )
+       theFactors.push_back( total_steps / active_pars[i].second.ScanSteps );
+     else 
+       theFactors.push_back( theFactors[i - 1] / active_pars[i].second.ScanSteps );
+
+     std::cout << theFactors.back() << std::endl;      
+   }
+
+
+   /*
    for( size_t i = 0; i < theScanSteps.size(); ++i )
      total_steps *= theScanSteps[i];
 
@@ -365,6 +385,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
 
      std::cout << theFactors.back() << std::endl;
    }
+   */
 
    std::cout << "Steps: " << std::endl;
    for( int z = 0; z < total_steps; ++z ){
@@ -379,7 +400,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan/*, bool fSave*/ ){
          val -= ( theFactors[j] * input[j] );
 
        input.push_back( val / theFactors[i] );
-       input_coeffs.push_back( theScanStarts[i] + ( input.back() * theScanDeltas[i] ) );
+       input_coeffs.push_back( active_pars[i].second.ScanStart + ( input.back() * active_pars[i].second.ScanDelta ) );
 
        std::cout << input.back() << " " << input_coeffs.back() << " ";
      }

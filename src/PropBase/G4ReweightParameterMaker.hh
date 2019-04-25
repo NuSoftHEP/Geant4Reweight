@@ -40,6 +40,50 @@ class G4ReweightParameterMaker{
       return results;
     };
 
+    std::map< std::string, double > GetActiveParameterValues(){
+
+     std::map< std::string, double > results;
+
+      for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
+        for( size_t i = 0; i < itPar->second.size(); ++i ){
+          if( !itPar->second.at(i).Dummy ){
+            results.insert( std::make_pair( itPar->second.at(i).Name, itPar->second.at(i).Value ) ); 
+          }
+        }       
+      }
+
+      return results;
+    };
+
+    std::map< std::string, FitParameter > GetActiveParameters(){
+
+     std::map< std::string, FitParameter > results;
+
+      for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
+        for( size_t i = 0; i < itPar->second.size(); ++i ){
+          if( !itPar->second.at(i).Dummy ){
+            results.insert( std::make_pair( itPar->second.at(i).Name, itPar->second.at(i) ) ); 
+          }
+        }       
+      }
+
+      return results;
+    };
+
+    std::vector< std::pair< std::string, FitParameter > > GetActiveParametersAsPairs(){
+
+      std::vector< std::pair< std::string, FitParameter > > results;
+
+      for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
+        for( size_t i = 0; i < itPar->second.size(); ++i ){
+          if( !itPar->second.at(i).Dummy ){
+            results.push_back( std::make_pair( itPar->second.at(i).Name, itPar->second.at(i) ) ); 
+          }
+        }       
+      }
+
+      return results;
+    };
     int GetNParameters(){ return nParameters; };
 
   protected:

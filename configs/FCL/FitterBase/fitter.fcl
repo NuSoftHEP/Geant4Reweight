@@ -7,7 +7,7 @@
 #include "Cu_experiments.fcl"
 #include "Pb_experiments.fcl"
 
-OutputFile: "alt_curveFitter_try.root"
+OutputFile: "fitter_out.root.root"
 #FitScan: true
 #Save: true
 

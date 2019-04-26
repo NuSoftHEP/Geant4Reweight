@@ -1239,6 +1239,149 @@ material.fcl:
  10 END_PROLOG
 \end{lstlisting}
 
+\subsection{Fitting}
+C$\_$fit.fcl:
+\begin{lstlisting}
+  1 #include "sets.fcl"
+  2 #include "parameters.fcl"
+  3 #include "C$\_$experiments.fcl"
+  4 
+  5 OutputFile: "C$\_$PiPlus$\_$fit.root"
+  6 FitScan: false
+  7 Save: false
+  8 
+  9 Sets: [
+ 10   @local::C$\_$PiPlus,
+ 11 ]
+ 12 
+ 13 Experiments: [
+ 14   @sequence::C$\_$experiments,
+ 15 ]
+ 16 
+ 17 ParameterSet: @local::TheParameters
+ 18 
+ 19 IncludeDUET: true
+ 20 DUETDataFile: "/path/to/DUET.root"
+ 21 
+ 22 MaxCalls: 500
+ 23 Tolerance: 1.e-5
+ 24 UpperLimit: 2.0
+ 25 LowerLimit: .5
+\end{lstlisting}
+
+sets.fcl:
+\begin{lstlisting}
+  1 BEGIN$\_$PROLOG
+  2 
+  3 C$\_$PiPlus: {
+  4 
+  5   Name: "C$\_$PiPlus"
+  6 
+  7 
+  8   File: "/path/to/C$\_$PiPlus$\_$cross$\_$section.root"
+  9 
+ 10 
+ 11   FSFile: "/path/to/C$\_$PiPlus$\_$cascade.root"
+ 12 }
+ 13 
+ 14 END$\_$PROLOG
+\end{lstlisting}
+
+parameters.fcl: see \ref{app:Fitter_FHiCL}
+
+C$\_$experiments.fcl: 
+\begin{lstlisting}
+  1 BEGIN_PROLOG
+  2 
+  3 C_experiments: [
+  4   { 
+  5     Name:    "Meirav_C_PiPlus"
+  6     Graphs:  [ 
+  7       ["reac", "C_xsec_reac_piplus"]
+  8     ]
+  9     
+ 10     Data:   "/path/to/Meirav.root"
+ 11 
+ 12     
+ 13     Type:   "C_PiPlus"
+ 14   },
+ 15 
+ 16   { 
+ 17     Name:   "Allarydyce_C_PiPlus"
+ 18     Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
+ 19     
+ 20     Data:   "/path/to/Allarydyce.root"
+ 21     
+ 22     Type:   "C_PiPlus"
+ 23   },
+ 24 
+ 25   { 
+ 26     Name:   "Saunders_C_PiPlus"
+ 27     Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
+ 28     
+ 29     Data:   "/path/to/Saunders.root"
+ 30     
+ 31     Type:   "C_PiPlus"
+ 32   },
+ 33 
+ 34   { 
+ 35     Name:   "Levenson_C_PiPlus"
+ 36     
+ 37     Graphs: [ ["inel", "C_xsec_inel_piplus"] ]
+ 38     
+ 39     Data:   "/path/to/Levenson.root"
+ 40 
+ 41     Type:   "C_PiPlus"
+ 42   },
+ 43 
+ 44   {
+ 45     Name:   "Jones_C_PiPlus"
+ 46     Graphs: [ ["inel", "C_xsec_inel_piplus"], ["cex", "C_xsec_cex_piplus"] ]
+ 47 
+ 48     Data:   "/path/to/Jones.root"
+ 49 
+ 50     Type:   "C_PiPlus"
+ 51   },
+ 52 
+ 53   {
+ 54     Name:   "Ashery_2173_C_PiPlus"
+ 55     Graphs: [ ["inel", "C_xsec_inel_piplus"], ["abscx", "C_xsec_abscx_piplus"] ]
+ 56 
+ 57     Data:   "/path/to/Ashery_2173.root"
+ 58 
+ 59     Type:   "C_PiPlus"
+ 60   },
+ 61 
+ 62   {
+ 63     Name:   "Ashery_946_C_PiPlus"
+ 64     Graphs: [ ["cex", "C_xsec_cex_piplus"] ]
+ 65 
+ 66     Data:   "/path/to/Ashery_946.root"
+ 67 
+ 68     Type:   "C_PiPlus"
+ 69   },
+ 70 
+ 71   {
+ 72     Name:   "Bellotti_C_PiPlus"
+ 73     Graphs: [ ["cex", "C_xsec_cex_piplus"], ["abs", "C_xsec_abs_piplus"]]
+ 74 
+ 75     Data:   "/path/to/Bellotti.root"
+ 76 
+ 77     Type:   "C_PiPlus"
+ 78   },
+ 79 
+ 80   {
+ 81     Name:   "Navon_C_PiPlus"
+ 82     Graphs: [ ["abscx", "C_xsec_abscx_piplus"]]
+ 83 
+ 84     Data:   "/path/to/Navon.root"
+ 85 
+ 86     Type:   "C_PiPlus"
+ 87   }
+ 88 ]
+ 89 
+ 90 END_PROLOG
+\end{lstlisting}
 \section{References for Data Used in Fit}\label{app:Data_refs}
 a
 

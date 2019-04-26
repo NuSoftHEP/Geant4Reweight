@@ -12,7 +12,21 @@
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 
-ThinDetector::ThinDetector() : G4VUserDetectorConstruction(){ }
+ThinDetector::ThinDetector() :
+  G4VUserDetectorConstruction(), 
+  MaterialName("liquidArgon"),
+  MaterialZ(18),
+  MaterialMass(39.95),
+  MaterialDensity(1.390)
+{}
+
+ThinDetector::ThinDetector( const fhicl::ParameterSet & pset ):
+  G4VUserDetectorConstruction(),
+  MaterialName( pset.get<std::string>("Name") ),
+  MaterialZ( pset.get<int>("Z") ),
+  MaterialMass( pset.get<double>("Mass") ),
+  MaterialDensity( pset.get<double>("Density") )
+{}
 
 ThinDetector::~ThinDetector() { }
 
@@ -21,17 +35,13 @@ G4VPhysicalVolume * ThinDetector::Construct(){
   G4NistManager * nist = G4NistManager::Instance();
 
   G4double radius = 1.5*m, height = 50.*m;
-  G4Material * air = nist->FindOrBuildMaterial("G4_AIR");
-  G4Material * water = nist->FindOrBuildMaterial("G4_WATER");
-  G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
-  G4bool checkOverlaps = true;
-
+  G4Material * material = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
 
   //Disk
   //
   G4Tubs * solidDisk = new G4Tubs("Disk", 0., radius, .5*cm, 0.*deg, 360.*deg);
-  G4LogicalVolume * logicDisk = new G4LogicalVolume(solidDisk, LAr, "Disk");
-  G4VPhysicalVolume * physDisk = new G4PVPlacement(0, G4ThreeVector(), logicDisk, "Disk", 0, false, 0, checkOverlaps);
+  G4LogicalVolume * logicDisk = new G4LogicalVolume(solidDisk, material, "Disk");
+  G4VPhysicalVolume * physDisk = new G4PVPlacement(0, G4ThreeVector(), logicDisk, "Disk", 0, false, 0, true);
   return physDisk;
 
 

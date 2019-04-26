@@ -12,10 +12,14 @@
 #include "TH1F.h"
 #include "TFile.h"
 
+#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/ParameterSet.h"
+
 char * n;
 
 std::string macFileName = "../G4Sim/run1.mac";
 std::string outFileName = "try.root";
+std::string material_fcl_file = "empty";
 
 bool ParseArgs(int argc, char* argv[]);
 
@@ -27,9 +31,16 @@ int main(int argc, char * argv[]){
 
   G4RunManager * runManager = new G4RunManager;
   
-  //Define and create detector volume  
-  runManager->SetUserInitialization(new G4SimDetectorConstruction);
+  if( material_fcl_file != "empty" ){
+    fhicl::ParameterSet pset = fhicl::make_ParameterSet( material_fcl_file ); 
+    fhicl::ParameterSet theMaterial = pset.get< fhicl::ParameterSet >("Material"); 
+    runManager->SetUserInitialization(new G4SimDetectorConstruction(theMaterial) );
+  }
+  else{
+    runManager->SetUserInitialization(new G4SimDetectorConstruction);
+  }
 
+  //Define and create detector volume  
   runManager->SetUserInitialization(new G4SimPhysicsList);
   
 
@@ -57,7 +68,7 @@ int main(int argc, char * argv[]){
 bool ParseArgs(int argc, char* argv[]){
 
   for(int i = 1; i < argc; ++i){
-    if( strcmp(argv[i], "--help") == 0){
+    if( strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0 ){
       std::cout << "Usage: -c macro file -o outfile" << std::endl;
       return false;
     }
@@ -66,6 +77,9 @@ bool ParseArgs(int argc, char* argv[]){
     }
     else if( strcmp(argv[i], "-o") == 0){
       outFileName = argv[i+1];
+    }
+    else if( strcmp(argv[i], "-m") == 0){
+      material_fcl_file = argv[i+1];
     }
 
   }

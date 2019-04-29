@@ -278,6 +278,7 @@ GeantReweight consists of several base packages:
 	\item \textbf{ReweightBase} -- Handles the reweighting of Geant simulation output
 	\item \textbf{PredictionBase} -- Produces root files that store the nominal exclusive and inclusive cross sections. These are used by FitterBase and ReweightBase. 
 	\item \textbf{PropBase} -- Handles producing throws using output from FitterBase.
+	\item \textbf{G4Sim} -- This is a simple, custom simulation package used for producing Geant4 simulation results.
 \end{itemize}
 
 \subsection{FitterBase}
@@ -487,7 +488,22 @@ python stitch_results.py OutputFile.root f1.root,f2.root,...
 \end{minipage}
 The second argument is a comma-separated list of input files which should be given in increasing order of momentum range.
 \subsection{PropBase}
-This portion of the software is used to take the output from a Fit, then produce throws of the fit parameters to the resulting covariance matrix.  ... 
+This portion of the software is used to take the output from a fit, then produce throws of the fit parameters to the resulting covariance matrix. This is handled by the class \textbf{G4ParameterMaker}. The class, \textbf{G4ParameterMaker}, is a utility class which takes in a set of FHiCL parameters to create cross section variations which can be used within the fit software and when reweighting.
+
+\subsubsection{G4ThrowManager}
+This class is used to create correlated sets of parameter throws according to the results of a fit. The set of thrown parameter values, $\overrightarrow{v}$, is equal to
+\begin{equation}
+\vec{v} = \vec{v}_0 + \textbf{L} \cdot \vec{r}
+\end{equation}
+where $\vec{v}_0$ is the best-fit values of the parameters, $\textbf{L}$ is the Cholesky decomposition of the fit's covariance matrix, and $\vec{r}$ is a set of Gaussian random numbers with a mean of 0 and variance of 1.
+ 
+\subsection{G4Sim}
+This portion of the software is used to produce a set of Geant4 simulation for internal testing. Two apps are provided: \textbf{G4Sim} and \textbf{G4Thin}. The tracking volume of \textbf{G4Sim} is a LArIAT-sized box\footnote{40cm x 47cm x 97cm}, while the volume in \textbf{G4Thin} is a .5cm tall cylinder used for thin-target simulations. The material is configured via FHiCL by providing a name for the material, the material's atomic number, its molar mass, and some density. The species, spatial distribution, energy spectrum, and number of incident particles is provided via normal Geant4 macros. The simulations can be run with the following command.
+
+\begin{lstlisting}
+G4Sim -c geant4_macro.mac -o output.root -m material.fcl
+\end{lstlisting}
+One can replace \textbf{G4Sim} in the command with \textbf{G4Thin} to run the thin-target simulation.
 
 \section{Usage Example}
 This section provides an example of how this software could be used within an analysis. It starts with a demonstration on how to produce Geant4's nominal predictions for $\pi^+$ cross sections with a Carbon target, then uses this prediction in a fit to carbon data. The output of the fit is then used in a context of error propagation, where the best-fit values of the parameters and their covariance matrix are used to produce parameter throws. These ensembles of thrown values are used to produce multiple reweightings of a simulation of pions in a volume of carbon to investigate the resulting variations in observables.
@@ -615,7 +631,34 @@ The resulting best-fit values of the parameters (with their $\pm 1 \sigma$ error
 	\end{subfigure}
 	\caption{$\pm 1 \sigma$ error bands}\label{fig:variations}
 \end{figure}
+\newpage
 
+\subsection{Propagating Errors}
+The results of the fit can be used to produce sets of cross section variations, which are then applied to simulated Geant4. Using the class \textbf{G4ThrowManager}, a set of correlated throws of the fit parameters are used to build cross section variations. These cross section variations are applied to simulated pion tracks to produce sets of weights. 
+
+For this example, a set of $\pi^+$ were simulated within a LArIAT sized\footnote{40cm x 47cm x 97cm} box of Carbon. The simulation results (stored in the root file C$\_$sim.root) were provided along with fit results to the reweighting \& parameter throwing application as follows:
+
+\begin{lstlisting}
+G4ThrowReweight -c throw_reweight.fcl
+\end{lstlisting}\footnote{See Appendix \ref{app:Demonstration_FHICL}}
+
+This produces a flat-tree file, where each entry in the tree represents a primary pion track. The branches include various observables, as well as a vector of weights resulting from the thrown parameters. These weights can be used to produce error bands on an observable of the simulation -- in this example: the length of pions undergoing an inelastic interaction. For each set of variations, the length of every interacting pion is binned with the weight corresponding to the thrown parameters. This produces histograms of the track length for each variation set. 
+
+The histograms are looped through, and the systematic uncertainty is produced for each bin $j$:
+\begin{equation}\label{eq:syst_uncertainty}
+\sigma_j = \sqrt{\frac{1}{N} \sum\limits_i^N (\nu_j - n_{ij})^2}
+\end{equation}
+where N is the number of histograms/throws, $\nu_j$ is the best fit value for bin $j$, and $n_{ij}$ is the value of bin $j$ in histogram $i$.
+
+Figure \ref{fig:error_prop} shows the results of this procedure.
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.55\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/len_throws}.pdf}
+	\end{subfigure}
+	\caption{Track length of interacting pions in a box of Carbon. Blue shows the nominal prediction, the red histograms are produced using 100 variations of the fit parameters, black is the best fit value of the parameters with error bars comprised of statistical and systematic uncertainty (see Equation \ref{eq:syst_uncertainty}).}\label{fig:error_prop}
+\end{figure}
 
 \section{Testing and Validation - Flat Variations}
 The first implemenation of the reweighting consisted of flat variations across all momenta. 
@@ -1382,6 +1425,24 @@ C$\_$experiments.fcl:
  89 
  90 END_PROLOG
 \end{lstlisting}
+\newpage
+throw$\_$reweight.fcl:
+\begin{lstlisting}
+  1 #include "parameters.fcl"                                                                                                        
+  2                                                                                                                                  
+  3                                                                                                                                  
+  4 OutputFile: "C_throw_rw.root"                                                                                                  
+  5 InputFile:  "C_sim.root"                                          
+  6 Fracs:      "C_PiPlus_cascade.root"                                                                                              
+  7 XSec:       "C_PiPlus_cross_section.root"                                                                                        
+  8 FitResults: "C_PiPlus_fit.root"                                                                                                  
+  9                                                                                                                                  
+ 10 ParameterSet: @local::TheParameters                                                                                              
+ 11                                                                                                                                  
+ 12 nThrows: 100  
+\end{lstlisting}
+\newpage
+
 \section{References for Data Used in Fit}\label{app:Data_refs}
 a
 

@@ -19,8 +19,17 @@ class G4ReweightThrowManager{
 
     bool Decomp();
     std::map< std::string, double > DoThrow(); 
+
+    std::map< std::string, double > GetBestFit(){
+      std::map< std::string, double > results;
+
+      for( size_t i = 0; i < BestFitVals.size(); ++i )
+        results[ ParNames[i] ] = BestFitVals[i];
+
+      return results;
+    }; 
   
-  protected:
+  private:
     TDecompChol Cholesky;
     TMatrixD *  CholMatrix;
     std::vector< double >  BestFitVals;

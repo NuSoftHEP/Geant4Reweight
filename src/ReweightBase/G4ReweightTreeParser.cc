@@ -291,9 +291,15 @@ void G4ReweightTreeParser::AnalyzeFS(G4Reweighter * theFS){
 void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XSecFile, G4ReweightParameterMaker & ParMaker, G4ReweightThrowManager & ThrowMan, size_t nThrows ){
 
   std::map< std::string, std::vector< double > > ThrowVals;
+
+  //Get the best fit values first
+  std::map< std::string, double > best_fit = ThrowMan.GetBestFit();
+  for( auto itVal = best_fit.begin(); itVal != best_fit.end(); ++itVal ){
+    ThrowVals[ itVal->first ].push_back( itVal->second );
+  }
+
   //Doing throws
   for( int i = 0; i < nThrows; ++i ){
-
     std::map< std::string, double > vals = ThrowMan.DoThrow();
     for( auto itVal = vals.begin(); itVal != vals.end(); ++itVal ){
       ThrowVals[ itVal->first ].push_back( itVal->second );
@@ -345,7 +351,8 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XS
 
 void G4ReweightTreeParser::AnalyzeFSThrows( G4Reweighter *theFS, G4ReweightParameterMaker & ParMaker, std::map< std::string, std::vector<double> > & ThrowVals, size_t nThrows){
 
-  for( size_t i = 0; i < nThrows; ++i ){
+  //+1 to include best fit values
+  for( size_t i = 0; i < (nThrows+1); ++i ){
     std::map< std::string, double > temp_throw;
     for( auto itPar = ThrowVals.begin(); itPar != ThrowVals.end(); ++itPar ){
       temp_throw[ itPar->first ] = itPar->second.at(i);

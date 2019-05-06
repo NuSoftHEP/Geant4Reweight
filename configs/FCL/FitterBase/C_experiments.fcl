@@ -37,19 +37,19 @@ C_experiments: [
   }, 
 
   {
-    Name:   "Allarydyce_C_PiPlus"
+    Name:   "Allardyce_C_PiPlus"
     Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
 
     Type:   "C_PiPlus"
   },
 
   {
-    Name:   "Allarydyce_C_PiMinus"
+    Name:   "Allardyce_C_PiMinus"
     Graphs: [ ["reac", "C_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
 
     Type:   "C_PiMinus"
   },

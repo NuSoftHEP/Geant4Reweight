@@ -2,19 +2,19 @@ BEGIN_PROLOG
 
 Pb_experiments: [  
   {
-    Name:   "Allarydyce_Pb_PiPlus"
+    Name:   "Allardyce_Pb_PiPlus"
     Graphs: [ ["reac", "Pb_xsec_reac_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
 
     Type:   "Pb_PiPlus"
   },
 
   {
-    Name:   "Allarydyce_Pb_PiMinus"
+    Name:   "Allardyce_Pb_PiMinus"
     Graphs: [ ["reac", "Pb_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allarydyce.root"
+    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
 
     Type:   "Pb_PiMinus"
   },

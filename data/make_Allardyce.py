@@ -1,7 +1,7 @@
 from ROOT import * 
 from array import array 
 
-f = TFile("Allarydyce.root", "RECREATE")
+f = TFile("Allardyce.root", "RECREATE")
 
 mom_full = [ 710., 840., 1000., 1360., 1580., 2000. ]
 

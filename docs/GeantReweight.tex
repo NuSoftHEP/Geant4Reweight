@@ -509,7 +509,7 @@ One can replace \textbf{G4Sim} in the command with \textbf{G4Thin} to run the th
 This section provides an example of how this software could be used within an analysis. It starts with a demonstration on how to produce Geant4's nominal predictions for $\pi^+$ cross sections with a Carbon target, then uses this prediction in a fit to carbon data. The output of the fit is then used in a context of error propagation, where the best-fit values of the parameters and their covariance matrix are used to produce parameter throws. These ensembles of thrown values are used to produce multiple reweightings of a simulation of pions in a volume of carbon to investigate the resulting variations in observables.
 
 Note: all FCL files will be shown in detail in Appendix \ref{app:Demonstration_FHICL}
-\subsubsection{Producing Predictions}
+\subsection{Producing Predictions}
 The first step is to produce the macroscopic $\pi^+$ - C cross section prediction. This is done using 
 
 \begin{lstlisting}
@@ -559,7 +559,7 @@ These are multiplied by the total inelastic cross section to determine the exclu
 	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections}\label{fig:cascade_xsecs}
 \end{figure}
 
-\subsection{Doing a Fit}
+\subsection{Doing a Fit}\label{ssec:Fit}
 Now that the predictions have been produced, they can be used in a fit to data. For this fit, 5 parameters were chosen. These are:
 
 \begin{center}\label{ref:parameters}
@@ -1251,7 +1251,7 @@ C$\_$PiPlus$\_$cross$\_$section.fcl:
   3 Range: [10., 8000.]
   4 NDivisions: 7989
   5 Verbose: "true"
-  6 Outfile: "C$\_$PiPlus$\_$cross$\_$section.root.root"
+  6 Outfile: "C_PiPlus_cross_section.root.root"
   7 
   8 Material: @local::C
 \end{lstlisting}
@@ -1263,7 +1263,7 @@ C$\_$PiPlus$\_$cascade.fcl:
   3 NCascades: 100000
   4 Range: [10., 1000.]
   5 NDivisions: 95
-  6 Outfile: "C$\_$PiPlus$\_$cascade$\_$low.root"
+  6 Outfile: "C_PiPlus_cascade_low.root"
   7 
   8 Material: @local::C
 \end{lstlisting}
@@ -1287,18 +1287,18 @@ C$\_$fit.fcl:
 \begin{lstlisting}
   1 #include "sets.fcl"
   2 #include "parameters.fcl"
-  3 #include "C$\_$experiments.fcl"
+  3 #include "C_experiments.fcl"
   4 
-  5 OutputFile: "C$\_$PiPlus$\_$fit.root"
+  5 OutputFile: "C_PiPlus_fit.root"
   6 FitScan: false
   7 Save: false
   8 
   9 Sets: [
- 10   @local::C$\_$PiPlus,
+ 10   @local::C_PiPlus,
  11 ]
  12 
  13 Experiments: [
- 14   @sequence::C$\_$experiments,
+ 14   @sequence::C_experiments,
  15 ]
  16 
  17 ParameterSet: @local::TheParameters
@@ -1314,20 +1314,20 @@ C$\_$fit.fcl:
 
 sets.fcl:
 \begin{lstlisting}
-  1 BEGIN$\_$PROLOG
+  1 BEGIN_PROLOG
   2 
-  3 C$\_$PiPlus: {
+  3 C_PiPlus: {
   4 
-  5   Name: "C$\_$PiPlus"
+  5   Name: "C_PiPlus"
   6 
   7 
-  8   File: "/path/to/C$\_$PiPlus$\_$cross$\_$section.root"
+  8   File: "/path/to/C_PiPlus_cross_section.root"
   9 
  10 
- 11   FSFile: "/path/to/C$\_$PiPlus$\_$cascade.root"
+ 11   FSFile: "/path/to/C_PiPlus_cascade.root"
  12 }
  13 
- 14 END$\_$PROLOG
+ 14 END_PROLOG
 \end{lstlisting}
 
 parameters.fcl: see \ref{app:Fitter_FHiCL}
@@ -1350,10 +1350,10 @@ C$\_$experiments.fcl:
  14   },
  15 
  16   { 
- 17     Name:   "Allarydyce_C_PiPlus"
+ 17     Name:   "Allardyce_C_PiPlus"
  18     Graphs: [ ["reac", "C_xsec_reac_piplus"] ]
  19     
- 20     Data:   "/path/to/Allarydyce.root"
+ 20     Data:   "/path/to/Allardyce.root"
  21     
  22     Type:   "C_PiPlus"
  23   },
@@ -1443,8 +1443,43 @@ throw$\_$reweight.fcl:
 \end{lstlisting}
 \newpage
 
-\section{References for Data Used in Fit}\label{app:Data_refs}
-a
+\section{Summary of Data Used in Fit}\label{app:Data_refs}
+The data used for the example fit in the demonstration (see section \ref{ssec:Fit}) is summarised in the following table. All data was taken from experiments measuring $\pi^+$ interacting on Carbon.
+\begin{table}[htpb]
+\begin{center}
+  \begin{tabular}{| c | c |}
+  \hline
+  Reference & Channel(s)\\  
+  \hline	
+  \hline
+  B. W. Allardyce \textit{et al.}\cite{Allardyce} & Reactive \\
+  \hline
+  D. Ashery \textit{et al.}\cite{Ashery_1} & Quasielastic, Absorption + Charge Exchange \\ 
+  \hline
+  D. Ashery \textit{et al.}\cite{Ashery_2} & Charge Exchange \\ 
+  \hline
+  E. Bellotti \textit{et al.}\cite{Bellotti_1} & Absorption \\ 
+  \hline
+  E. Bellotti \textit{et al.}\cite{Bellotti_2} & Charge Exchange \\ 
+  \hline  
+  C. J. Gelderloos \textit{et al.}\cite{Gelderloos} & Reactive \\
+  \hline  
+  M. K. Jones \textit{et al.}\cite{Jones} & Quasielastic, Charge Exchange \\ 
+  \hline
+  S. M. Levenson \textit{et al.}\cite{Levenson} & Quasielastic \\
+  \hline
+  O. Meirav \textit{et al.}\cite{Meirav} & Reactive \\
+  \hline
+  I. Navon \textit{et al.}\cite{Navon} & Absorption + Charge Exchange \\
+  \hline
+  E. S. Pinzon Guerra \textit{et al.}\cite{DUET} & Absorption, Charge Exchange \\
+  \hline
+  A. Saunders \textit{et al.}\cite{Saunders} & Reactive \\
+  \hline  
+  \end{tabular}
+\end{center}
+\caption{Data used in the demonstration fit}\label{tab:fit_data}
+\end{table}
 
 
 %\section{Interaction Probability Derivation}
@@ -1460,15 +1495,37 @@ a
 
 %\subfile{DUNE_appendix_eff_plots.tex}
 
-%\begin{thebibliography}{7}
+\begin{thebibliography}{12}
 
-%\bibitem{DUNE_CDR1}
-%The DUNE Collaboration
-%\textit{Long-Baseline Neutrino Facility (LBNF) and Deep Underground Neutrino Experiment (DUNE) Conceptual Design Report Volume 1: The LBNF and DUNE Projects}
-%arXiv:1601.05471v1
-%
-%
-%\end{thebibliography}
+\bibitem{Allardyce}
+B. W. Allardyce \textit{et al.}, Nuclear Physics A \textbf{209}, 1 (1973).
+\bibitem{Ashery_1}
+D. Ashery \textit{et al.}, Physical Review C \textbf{23}, 2173 (1981).
+\bibitem{Ashery_2}
+D. Ashery \textit{et al.}, Physical Review C \textbf{30}, 946 (1984).
+\bibitem{Bellotti_1}
+E. Bellotti, D. Cavalli, and C. Matteuzzi, Il Nuovo Cimento A (1965-1970) \textbf{18}, 75 (1973).
+\bibitem{Bellotti_2}
+E. Bellotti, S. Bonetti, D. Cavalli, and C. Matteuzzi, Il
+Nuovo Cimento A (1965-1970) \textbf{14}, 567 (1973).
+\bibitem{Gelderloos}
+C. J. Gelderloos \textit{et al.}, Physical Review C \textbf{62}, 024612
+(2000).
+\bibitem{Jones}
+M. K. Jones \textit{et al.}, Physical Review C \textbf{48}, 2800 (1993).
+\bibitem{Levenson}
+S. M. Levenson \textit{et al.}, Physical Review C \textbf{28}, 326 (1983).
+\bibitem{Meirav}
+O. Meirav, E. Friedman, R. R. Johnson, R. Olszewski,
+and P. Weber, Phys. Rev. C \textbf{40}, 843 (1989).
+\bibitem{Navon}
+I. Navon \textit{et al.}, Physical Review C \textbf{28}, 2548 (1983).
+\bibitem{DUET}
+E. S. Pinzon Guerra \textit{et al.} (DUET Collaboration), Phys.
+Rev. C \textbf{95}, 045203 (2017).
+\bibitem{Saunders}
+A. Saunders \textit{et al.}, Physical Review C \textbf{53}, 1745 (1996).
+\end{thebibliography}
 
 \end{document}
 

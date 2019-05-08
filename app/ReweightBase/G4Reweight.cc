@@ -38,20 +38,26 @@ int main(int argc, char ** argv){
   G4ReweightTreeParser * tp = new G4ReweightTreeParser(inFileName.c_str(), outFileName.c_str());
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
-  G4ReweightParameterMaker ParMaker( FitParSets );
 
-  G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists() ); 
-  if( enablePiMinus ) theReweighter->SetPiMinus();
+  try{
+    G4ReweightParameterMaker ParMaker( FitParSets );
 
-  std::string XSecFileName = ps.get< std::string >( "XSec" );
-  TFile XSecFile( XSecFileName.c_str(), "OPEN" );
+    G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists() ); 
+    if( enablePiMinus ) theReweighter->SetPiMinus();
 
-  theReweighter->SetTotalGraph(&XSecFile);
-  tp->FillAndAnalyzeFS(theReweighter);
-  tp->CloseAndSaveOutput();
-  tp->CloseInput();
+    std::string XSecFileName = ps.get< std::string >( "XSec" );
+    TFile XSecFile( XSecFileName.c_str(), "OPEN" );
 
-  std::cout << "done" << std::endl;
+    theReweighter->SetTotalGraph(&XSecFile);
+    tp->FillAndAnalyzeFS(theReweighter);
+    tp->CloseAndSaveOutput();
+    tp->CloseInput();
+
+    std::cout << "done" << std::endl;
+  }
+  catch( const std::exception &e ){
+    std::cout << "Caught exception" << std::endl;
+  }
 
   return 0;
 }

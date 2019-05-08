@@ -39,28 +39,34 @@ int main(int argc, char ** argv){
   G4ReweightFitManager FitMan( outFileName, fSave);
 
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
-  FitMan.MakeFitParameters( FitParSets );
+
+  try{ 
+    FitMan.MakeFitParameters( FitParSets );
+
+    ///Defining MC Sets
+    std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
+    FitMan.DefineMCSets( FCLSets );
+    ///////////////////////////////////////////
+
+    ///Defining experiments
+    FitMan.DefineExperiments( ps );
+    ///////////////////////////////////////////
 
 
-  ///Defining MC Sets
-  std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
-  FitMan.DefineMCSets( FCLSets );
-  ///////////////////////////////////////////
+    FitMan.GetAllData();
 
-  ///Defining experiments
-  FitMan.DefineExperiments( ps );
-  ///////////////////////////////////////////
+    FitMan.MakeMinimizer( ps );
 
+    bool fFitScan = ps.get< bool >( "FitScan", false );
+    if( scan_override != -1 )
+      fFitScan = scan_override;
 
-  FitMan.GetAllData();
-
-  FitMan.MakeMinimizer( ps );
-
-  bool fFitScan = ps.get< bool >( "FitScan", false );
-  if( scan_override != -1 )
-    fFitScan = scan_override;
-
-  FitMan.RunFitAndSave(fFitScan);
+    FitMan.RunFitAndSave(fFitScan);
+  }
+  catch( const std::exception &e ){
+    std::cout << "Caught exception " << std::endl;  
+  }
+  
   return 0;
 }
 

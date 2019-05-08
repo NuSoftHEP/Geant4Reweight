@@ -52,15 +52,20 @@ int main(int argc, char ** argv){
   //Input the ParameterSets 
   //Then create the paramater maker
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
-  G4ReweightParameterMaker ParMaker( FitParSets );
+  try{
+    G4ReweightParameterMaker ParMaker( FitParSets );
 
 
-  //Implement this in the tree parser   
-  //Will have to do the throws. Save them (maybe in a vector of vectors/maps?, map of vectors?).
-  //Then for each set of throws, create teh parameters (hists) and do the reweighting.
-  //Weights from these will need to be saved in a tree branch of a vector<double> 
-  tp->FillAndAnalyzeFSThrows( &FracsFile, &XSecFile, ParMaker, ThrowMan, nThrows );
-  tp->CloseAndSaveOutput();
+    //Implement this in the tree parser   
+    //Will have to do the throws. Save them (maybe in a vector of vectors/maps?, map of vectors?).
+    //Then for each set of throws, create teh parameters (hists) and do the reweighting.
+    //Weights from these will need to be saved in a tree branch of a vector<double> 
+    tp->FillAndAnalyzeFSThrows( &FracsFile, &XSecFile, ParMaker, ThrowMan, nThrows );
+    tp->CloseAndSaveOutput();
+  }
+  catch( const std::exception &e ){
+    std::cout << "Caught exception" << std::endl;
+  }
 
   return 0;
 }

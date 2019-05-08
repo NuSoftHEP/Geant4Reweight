@@ -8,6 +8,67 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
 
 G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets ){
 
+  std::vector< std::string > all_cuts = {"abs", "cex", "dcex", "prod", "inel", "reac"};
+
+  for( size_t i = 0; i < all_cuts.size(); ++i ){
+    FullParameterSet[ all_cuts[i] ] = std::vector< FitParameter >();
+  }
+
+  for( size_t i = 0; i < FitParSets.size(); ++i ){
+    fhicl::ParameterSet theSet = FitParSets.at(i);
+    std::string theCut = theSet.get< std::string >("Cut");
+
+    if( std::find( all_cuts.begin(), all_cuts.end(), theCut ) == all_cuts.end() ){
+      std::cout << "Error: found parameter with bad cut " << theCut << std::endl;
+      std::exception e;
+      throw e;        
+    }
+
+    ++nParameters;
+
+    std::string theName = theSet.get< std::string >("Name");
+            
+    std::pair< double, double > theRange = theSet.get< std::pair< double, double > >("Range");
+
+    double nominal = theSet.get< double >("Nominal",1.);
+
+    FitParameter par;
+    par.Name = theName;
+    par.Cut = theCut;
+    par.Dummy = false;
+    par.Value = nominal; 
+    par.Range = theRange;
+
+    double scan_start = theSet.get< double >("ScanStart", 1.);
+    int    nsteps =     theSet.get< int >("NScanSteps", 2);
+    double scan_delta = theSet.get< double >("ScanDelta", .1);
+
+    par.ScanStart = scan_start;
+    par.ScanSteps = nsteps;
+    par.ScanDelta = scan_delta;
+
+    ///////Add into the parameters themselves
+    FullParameterSet[ theCut ].push_back( par );
+
+  }
+
+  for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar){
+    if( !( itPar->second.size() ) ){
+      FitParameter dummyPar;
+
+      dummyPar.Name = "dummy";
+      dummyPar.Cut = itPar->first;
+      dummyPar.Value = 1.; 
+      dummyPar.Range = std::make_pair( 0., 0.);
+      dummyPar.Dummy = true;
+          
+      FullParameterSet[ itPar->first ].push_back( dummyPar );
+    }
+  }
+
+
+/*
+
   for( size_t i = 0; i < FitParSets.size(); ++i ){
     fhicl::ParameterSet theSet = FitParSets.at(i);
     std::string theCut = theSet.get< std::string >("Cut");
@@ -64,6 +125,8 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
       }   
     }   
   }
+
+*/
 
   BuildHistsFromPars();
 }

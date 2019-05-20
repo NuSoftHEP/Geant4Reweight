@@ -147,48 +147,54 @@
 \section{Motivation}
 Errors in neutrino energy estimation serve as large sources of systematic uncertainty in modern neutrino oscillation experiments such as the Deep Underground Neutrino Experiment (DUNE). This estimation relies on the reconstruction of particles, such as pions, produced at the macroscopic neutrino interaction vertex. As the pions travel through the DUNE detector, they possibly undergo secondary interactions within the detector. This allows for misreconstruction and thus errors in the neutrino energy estimation.  It is then crucial to understand the rate of these interactions - the pion interaction cross section - to account for this misreconstruction and misestimation. 
 
-Understanding these interactions on Argon will be important for DUNE, as Liquid Argon serves as its detection medium. Upcoming results from the LArIAT and ProtoDUNE experiments will increase our knowledge of these interactions on Argon, where there is currently limited data. We must also be able to estimate the uncertainty on model predictions used within neutrino detector simulations. The Geant4 software package provides this simulation, but currently has no way of providing an estimation of the uncertainty on its prediction\footnote{There is currently no way for users to easily vary the cross section model short of changing the hard-coded cross section tables by hand.}. I will provide a framework by which one can easily define a varied cross section model, and produce a varied prediction through reweighting. This will allow for varied simulation production without rerunning the simulation, thus saving computing resources and time.
+For DUNE, whose detection medium is Liquid Argon, it is important to understand uncertainties on these interactions with respect to data. Upcoming results from the LArIAT and ProtoDUNE experiments will increase our knowledge of these interactions on Argon, where there is currently limited data. We must also be able to estimate the uncertainty on model predictions used within neutrino detector simulations. The Geant4 software package provides this simulation, but currently has no way of providing an estimation of the uncertainty on its prediction\footnote{There is currently no way for users to easily vary the cross section model short of changing the hard-coded cross section tables by hand.}. This document describes a framework by which one can vary Geant4's pion-nucleus cross section predictions in order to fit to data (estimating uncertainties), reweight pions simulated by Geant4 to some variation of the cross section prediction, and to propagate the cross section uncertainties using the reweighting. 
 
 \section{Pion Interactions}
 As pions travel through the detector, they can undergo discrete interactions with the nuclei of the detector components. These interactions can largely be separated into elastic scattering, in which the nucleus is left in its ground state, and various reactive/inelastic scattering channels. These can be described by their final states as in Table \ref{tab:fates}. Additionally, in these reactive interaction channels, any number of nucleons (or none) could be knocked out of the nucleus. 
 
 \begin{table}
 \begin{center}
-  \begin{tabular}{| c | c |}
+  \begin{tabular}{| l | l |}
   \hline
-  Channel & Definition  \\  
+  \textbf{Channel} & \textbf{Definition}  \\  
   \hline	
-  Inelastic Scatter & 1 same-charge pion \& no other pions \\
-  \hline  
-  Absorption & No pions in final state \\
+  Inelastic Scatter & $\pi^{\pm} + N \rightarrow \pi'^{\pm} + N'$ \\
+  \hline 
+  Absorption & $\pi^{\pm} + N \rightarrow N'$ \\
   \hline
-  Single Charge Exchange & 1 neutral pion \& no other pions \\
+  Single Charge Exchange & $\pi^{\pm} + N \rightarrow \pi^{0} + N'$ \\
   \hline
-  Double Charge Exchange & 1 opposite-charge pion \& no other pions \\
+  Double Charge Exchange & $\pi^{\pm} + N \rightarrow \pi^{\mp} + N'$ \\
   \hline
-  Pion Production & $>$1 pions of any charge \\
+  Pion Production & $\pi^{\pm} + N \rightarrow n\pi + N'$ \\
   \hline
   \end{tabular}
 \end{center}
 \caption{Reactive Pion-Nucleus Interactions\label{tab:fates}}
 \end{table}
 
-\section{Geant4 Simulation Technique}
+\section{Geant4 Simulation}
 Before describing the reweighting process, it is important to understand the way Geant4 handles simulating particles within matter. A user defines the material content and shape of the tracking/detector region, the initial particles to be simulated within the detector, and the set of active physics processes that will be used within the simulation. 
 
-During the simulation, a particle takes a series of steps throughout the detector until it is either killed by some physics process (decaying, certain interactions) or if it leaves the volume. During each step, processes are invoked algorithmically. The processes that describe pion interactions - both Elastic and Inelastic - are chosen to occur based on their interaction cross sections. 
+During the simulation, a particle takes a series of steps throughout the detector until it is either removed from the simulation stack by some physics process (decaying, certain interactions) or by leaving the volume. During each step, processes are invoked algorithmically. The processes that describe pion interactions - both elastic and inelastic - are chosen to occur based on their interaction cross sections. Figure \ref{fig:xsecs} shows the $\pi^+ - $ Carbon inelastic and elastic cross sections.
+
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.75\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/xsecs}.pdf}
+	\end{subfigure}
+	\caption{$\pi^+$ -- Carbon Inelastic and Elastic Cross Sections. Extracted from Geant4 version 10.3.p03.}\label{fig:xsecs}
+\end{figure}	
+
+When an inelastic interaction occurs, Geant4 then invokes a specific model (as chosen by the user). In general, Geant4 models handle the specifics of the changes of particles (which are added or removed from the simulation stack), as well as changes in particle kinematics. The most widely-used model used for inelastic hadronic interactions is the Bertini Cascade. In this model, the hadron enters into a nucleus, and it takes a series of steps. At each step, it has a chance of interacting with nucleons. When it does, any resulting particles are added to the stack and allowed to further propagate through the medium. This cascading behavior goes on until all particles are either ejected from the nucleus or are absorbed. 
 
 \section{Weighting Scheme}
-From here, we can start moving toward a reweighting framework for pion interactions. We should keep in mind that reweighting is essentially \textit{determining the probability for the same thing to happen under a varied model}. 
-%This means we will change the following observables in the results of the simulation:
-%\begin{enumerate}
-%\item How many of each type of process occur\footnote{If we increase the Inelastic cross section, we should expect to see more of those interactions and less stopping or exiting pions.} 
-%\item The length traveled before the interactions occur\footnote{If we increase the Inelastic cross section, the pion track lengths should decrease, as inelastic interactions should occur "earlier."}
-%\end{enumerate}
+This section describes the way weights are assigned to simulated tracks. The weights are used when binning observables of the interaction in order to approximate the results of the simulation under some other model assumption.
 
-Weights will be assigned to an entire track, and according to whether Inelastic or Elastic scatters occur along a track. There will be some divergence in the treatment of Inelastic and Elastic weights due to the fact that Inelastic scatters kill the track\footnote{When an Inelastic interaction is chosen to occur, cascade routines are invoked within the simulation. The initial pion track is terminated. Then, depending on what exits the nucleus as a result of the cascade, a new set of hadrons is created and tracked throughout the macroscopic volume of the simulation.} while Elastic scatters do not. We first consider the treatment of reweighting the Inelastic scattering cross section.
+Weights will be assigned to an entire track\footnote{Each track receives separate weights from varying the inelastic and elastic cross sections. The same weights are applied to each step within the track.}, and according to whether inelastic or elastic scatters occur along a track. There will be some divergence in the treatment of inelastic and elastic weights due to the fact that inelastic scatters removes the track from the simulation stack\footnote{When an inelastic interaction is chosen to occur, the corresponding physics model is invoked as described above. The initial pion track is terminated. Then, depending on what exits the nucleus as a result of the cascade, a new set of hadrons is created and tracked throughout the macroscopic volume of the simulation.} while elastic scatters do not. 
 
-\subsection{Inelastic Ineraction 
+\subsection{Inelastic Interaction 
 Weights}\label{subsec:inel_weights}
 
 Consider a pion travelling through some material with an Inelastic interaction cross section $\sigma$. It has a probability of travelling some small distance, $\delta x$, without undergoing an interaction\footnote{Normally, the number density of the material is stated in this equation, but is baked into the cross section here. Thus, the cross sections discussed here will depend on the surrounding material.}:
@@ -226,31 +232,48 @@ For tracks that end in an Inelastic interaction, the last step will receive a fa
 \end{equation}
 Where the sums in the exponents now leave out the last step.
 
-%\subsection{Elastic Interaction Weights}
-%We now move on to discussing reweighting the Elastic scattering cross section. As mentioned before, the track is not terminated when Elastic scatters occur. This has two effects on the weigthing scheme:
-%\begin{enumerate}
-%\item The weight is calculated independently of Inelastic scatters
-%\item The track can have multiple Elastic scatters before termination, each with associated weighting factors. 
-%\end{enumerate}
-%
-%Because a track will never end in an Elastic scatter, the weight will always contain a term in the form of Equation \ref{eq:surv_weight}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
-%
-%In addition to that 'elastic-survival' factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight}.
-%
-%The resulting weight then takes the form of:
-%\begin{equation}\label{ref:elastFull}
-%W_{elast} = \Bigg( \prod \limits_{e} \frac{\sigma_{e}'}{\sigma_{e}} \frac{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i}')}{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i})} \Bigg)
-%\Bigg( \frac{\exp(-\sum \limits_j^{end} L_j \sigma_{j}')} {\exp(-\sum \limits_j^{end} L_j \sigma_{j})} \Bigg)
-%\end{equation}
-%Here, all $\sigma$ are the Elastic scattering cross section depending on surrounding material and pion momentum at the denoted step. The product in the first term runs over all of the Elastic scatters throughout the track. The sums in the first term run from either the first step in the track or the first step after each scatter $e$. The sums in the second term run from the step after the last elastic scatter to the end of the track. Essentially, the first term contains the contributions from all of the elastic scatters within the track, while the second term contains the contribution from the steps after the last elastic scatter.
+\subsection{Elastic Interaction Weights}
+As mentioned before, the track is not terminated when elastic scatters occur. This has two effects on the weigthing scheme:
+\begin{enumerate}
+\item The weight is calculated independently of inelastic scatters
+\item The track can have multiple elastic scatters before termination, each with associated weighting factors. 
+\end{enumerate}
+
+Because a track will never end in an elastic scatter\footnote{Elastic hadronic interactions only result in changes of kinematics but never a change in particles or a stopping of the hadron.}, the weight will always contain a term in the form of Equation \ref{eq:surv_weight}. If no elastic scatter occurs, the steps included in the sum span the entire track. For any other number of elastic scatters, those steps span to the end of the track from the step immediately after the last elastic scatter. This accounts for the fact that an elastic scatter did not occur in that range. 
+
+In addition to this factor, multiple weights are assigned from the start of the track to the first elastic scatter and then between any subsequent elastic scatters. These take a similar form to Equation \ref{eq:int_weight}.
+
+The resulting weight then takes the form of:
+\begin{equation}\label{ref:elastFull}
+W_{elast} = \Bigg( \prod \limits_{e} \frac{\sigma_{e}'}{\sigma_{e}} \frac{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i}')}{\exp(-\sum \limits_i^{e-1} L_i  \sigma_{i})} \Bigg)
+\Bigg( \frac{\exp(-\sum \limits_j^{end} L_j \sigma_{j}')} {\exp(-\sum \limits_j^{end} L_j \sigma_{j})} \Bigg)
+\end{equation}
+Here, all $\sigma$ are the elastic scattering cross section depending on surrounding material and pion momentum at the denoted step. The product in the first term runs over all of the elastic scatters throughout the track. The sums in the first term run from either the first step in the track or the first step after each scatter $e$. The sums in the second term run from the step after the last elastic scatter to the end of the track.
 
 \subsection{Reweighting Final States}\label{subsec:fs_rw}
-The exclusive channels\footnote{The definitions of these can be found in Table \ref{tab:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles\footnote{The final state of an inelastic scatter in Geant is determined by the results of a simulation of the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters.}. 
+The exclusive channels\footnote{The definitions of these can be found in Table \ref{tab:fates}} of inelastic scattering can also be reweighted. This is done by characterizing the final state of an inelastic scatter by the final state particles. As stated before, the final state of an inelastic scatter in Geant is determined by the results of a simulation of a model -- in this case, the Bertini Cascade model. Delving into the underlying parameters of this Cascade model is currently outside of the scope of this work. Instead, we opt for a post-hoc treatment of the Cascade, and use the fractional populations of final states as the variable parameters. The fractional populations are found by running the Cascade model multiple times and finding the average results. This is then multiplied by the inelastic cross section. An example of this is found in Figure \ref{fig:cascade_xsecs}.
 
-First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$. User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/frac}.pdf}
+	\end{subfigure}	
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
+	\end{subfigure}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03.}\label{fig:cascade_xsecs}
+\end{figure}
+First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$.  User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
 From here, the total cross section variation, $c_{inel}$, is used to vary the nominal simulation according to the technique described in Section \ref{subsec:inel_weights}. Events ending in a specific exclusive channel $i$ are given an additional weight $W_{i} = \frac{c_i}{c_{inel}}$. The presence of $c_{inel}$ in the denominator is due to the event already being weighted as an inelastic interaction. 
 
+\section{Uncertainty Estimation -- Fitting}
+For now, the inelastic interactions are only considered for uncertainty estimation. In order to do this, the total inelastic and exclusive cross sections must be varied and compared to data. There are no tunable parameters that vary the inelastic cross section or the results of the Cascade which are available to users. Because of this, the total inelastic and exclusive cross sections are varied by creating overlayed variations that change their normalizations. Currently, the parameters in the fit are flat variations over ranges of momenta.
+
+The results of the fit are the
 
 \section{Software}
 
@@ -310,9 +333,9 @@ A special version of the \textbf{G4ReweightFitter} class exists for data from th
 
 Here, $\sigma^{DUET}$ and $\sigma^{Geant}$ are the cross sections from the DUET measurement and the varied Geant prediction. $V_{ij}$ is the DUET correlation matrix.
 
-\subsubsection{G4ReweightCurveFitManager} 
+\subsubsection{G4ReweightFitManager} 
 
-The fit is managed by the \textbf{G4ReweightCurveFitManager} class. The user provides it a set of fit parameters which define the variations to be applied to the Geant predictions. It also defines the set of \textbf{G4ReweightFitter}s to be fit to nominal predictions. The manager calculates the number of degrees of freedom in the fit by using the GetNDOF method from \textbf{G4ReweightFitter}s\footnote{Note: for most of the experiments in the fit, the NDOF is 1 (each are treated as uncorrelated points in the fit). However, DUET provides 10 degrees of freedom (one for each correlated data point).}, summing this, and then subtracting the number of parameters defined for the fit. After defining the experiments to be fit, it creates an instance of a ROOT Minimizer. (MENTION THAT IT'S MIGRAD?) At this point, it either performs the fit with the Minimizer, or runs scans of the fit's $\chi^2$ depending on user input. If the fit is successful at finding a minimum, the manager also draws fit results. 
+The fit is managed by the \textbf{G4ReweightFitManager} class. The user provides it a set of fit parameters which define the variations to be applied to the Geant predictions. It also defines the set of \textbf{G4ReweightFitter}s to be fit to nominal predictions. The manager calculates the number of degrees of freedom in the fit by using the GetNDOF method from \textbf{G4ReweightFitter}s\footnote{Note: for most of the experiments in the fit, the NDOF is 1 (each are treated as uncorrelated points in the fit). However, DUET provides 10 degrees of freedom (one for each correlated data point).}, summing this, and then subtracting the number of parameters defined for the fit. After defining the experiments to be fit, it creates an instance of a ROOT Minimizer. (MENTION THAT IT'S MIGRAD?) At this point, it either performs the fit with the Minimizer, or runs scans of the fit's $\chi^2$ depending on user input. If the fit is successful at finding a minimum, the manager also draws fit results. 
 
 \subsubsection{Fitter Output}
 
@@ -459,7 +482,7 @@ The \textbf{G4PiCascade} invokes the Bertini cascade a number of times across a 
 Similar to \textbf{G4CrossSection}, this is configurable with FHiCL and optional command line arguments to override the FHiCL options. It shares the same FHiCL parameters as \textbf{G4CrossSection} with an additional parameter (NCascades) that determines the number of cascades done at each point in momentum space. 
 
 An example FHiCL file can be found in Appendix \ref{app:Prediction_FHICL}.
-\newpage
+
 \subsubsection{How To Run G4PiCascade}
 The usage for this program is: 
 
@@ -544,20 +567,8 @@ Each of these produce root files containing the fraction of times the cascade en
 python stitch_results.py C_PiPlus_cascade.root C_PiPlus_cascade_low.root,C_PiPlus_cascade_med.root,C_PiPlus_cascade_high.root
 \end{lstlisting}
 
-These are multiplied by the total inelastic cross section to determine the exclusive cross sections. The cascade results and resulting exclusive cross sections are shown in Figure \ref{fig:cascade_xsecs}.
-\begin{figure}[htpb]
-	\centering
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/frac}.pdf}
-	\end{subfigure}	
-	~
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
-	\end{subfigure}
-	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections}\label{fig:cascade_xsecs}
-\end{figure}
+These are multiplied by the total inelastic cross section to determine the exclusive cross sections. The cascade results and resulting exclusive cross 
+sections are shown in Figure \ref{fig:cascade_xsecs}.
 
 \subsection{Doing a Fit}\label{ssec:Fit}
 Now that the predictions have been produced, they can be used in a fit to data. For this fit, 5 parameters were chosen. These are:

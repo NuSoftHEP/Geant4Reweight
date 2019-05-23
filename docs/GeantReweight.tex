@@ -158,7 +158,7 @@ As pions travel through the detector, they can undergo discrete interactions wit
   \hline
   \textbf{Channel} & \textbf{Definition}  \\  
   \hline	
-  Inelastic Scatter & $\pi^{\pm} + N \rightarrow \pi'^{\pm} + N'$ \\
+  Inelastic/Quasielastic & $\pi^{\pm} + N \rightarrow \pi'^{\pm} + N'$ \\
   \hline 
   Absorption & $\pi^{\pm} + N \rightarrow N'$ \\
   \hline
@@ -184,7 +184,7 @@ During the simulation, a particle takes a series of steps throughout the detecto
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/xsecs}.pdf}
 	\end{subfigure}
-	\caption{$\pi^+$ -- Carbon Inelastic and Elastic Cross Sections. Extracted from Geant4 version 10.3.p03.}\label{fig:xsecs}
+	\caption{$\pi^+$ -- Carbon Inelastic and Elastic Cross Sections. Extracted from Geant4 version 10.3.p03d}\label{fig:xsecs}
 \end{figure}	
 
 When an inelastic interaction occurs, Geant4 then invokes a specific model (as chosen by the user). In general, Geant4 models handle the specifics of the changes of particles (which are added or removed from the simulation stack), as well as changes in particle kinematics. The most widely-used model used for inelastic hadronic interactions is the Bertini Cascade. In this model, the hadron enters into a nucleus, and it takes a series of steps. At each step, it has a chance of interacting with nucleons. When it does, any resulting particles are added to the stack and allowed to further propagate through the medium. This cascading behavior goes on until all particles are either ejected from the nucleus or are absorbed. 
@@ -198,14 +198,19 @@ Weights will be assigned to an entire track\footnote{Each track receives separat
 Weights}\label{subsec:inel_weights}
 
 Consider a pion travelling through some material with an Inelastic interaction cross section $\sigma$. It has a probability of travelling some small distance, $\delta x$, without undergoing an interaction\footnote{Normally, the number density of the material is stated in this equation, but is baked into the cross section here. Thus, the cross sections discussed here will depend on the surrounding material.}:
+%\begin{equation}\label{eq:Psurv}
+%P_{Surv} = e^{- \sigma \delta x} \simeq (1 - \sigma \delta x)
+%\end{equation}
 \begin{equation}\label{eq:Psurv}
-P_{Surv} = e^{- \sigma \delta x} \simeq (1 - \sigma \delta x)
+P_{Surv} = e^{- \sigma \delta x}
 \end{equation}
 Accordingly, it has a chance for interacting along that distance:
+%\begin{equation}\label{eq:Pint}
+%P_{Int} = \sigma \delta x
+%\end{equation}
 \begin{equation}\label{eq:Pint}
-P_{Int} = \sigma \delta x
+P_{Int} = 1 - e^{- \sigma \delta x}
 \end{equation}
-
 Within Geant4, the pion takes a series steps before the track is terminated. This termination will occur in the following cases:
 \begin{enumerate}
 \item The pion undergoes an Inelastic interaction
@@ -216,21 +221,22 @@ Within Geant4, the pion takes a series steps before the track is terminated. Thi
 In the context of reweighting the Inelastic cross section, everything but the top case will be considered a surviving track.
 Each step will occur with a probability of the form of Equation \ref{eq:Psurv}, giving the following as the total probability for the pion to travel along the entire track without engaging in an Inelastic interaction:
 \begin{equation}
-P_{Track} =  e^{- \sum \limits_{i} \sigma_i L_i}
+P_{Track} =  e^{- \sum \limits_{i = 1}^{N} \sigma_i L_i}
 \end{equation} 
-where $\sigma_i$\footnote{Note that the cross section depends on the pion momentum and the surrounding material at each step. The subscript $i$ reflects this.} and $L_i$ are the Inelastic cross section and the length of the step taken for a given step $i$, and the sum in the exponential is over the set of steps throughout the track.
+where $\sigma_i$\footnote{Note that the cross section depends on the pion momentum and the surrounding material at each step. The subscript $i$ reflects this.} and $L_i$ are the Inelastic cross section and the length of the step taken for a given step $i$, and the sum in the exponential is over the $N$ steps of the track.
 
 Thus, for a varied cross section model, a track which does not undergo an Inelastic interaction receives the following weight:
 \begin{equation}\label{eq:surv_weight}
-  W_{surv} = \frac{e^{- \sum \limits_{i} \sigma'_i L_i}}{e^{- \sum \limits_{i} \sigma_i L_i}}
+  W_{surv} = \frac{e^{- \sum \limits_{i=1}^{N} \sigma'_i L_i}}{e^{- \sum \limits_{i=1}^{N} \sigma_i L_i}}
 \end{equation}
 Here, $\sigma'_i$ represents the varied set of Inelastic cross sections depending on the surrounding material and pion momentum at each step.
 
-For tracks that end in an Inelastic interaction, the last step will receive a factor of the form of Equation \ref{eq:Pint}. Thus, the track will receive the following weight: 
+For tracks that end in an Inelastic interaction, the last step $N$ will receive a factor of the form of Equation \ref{eq:Pint}. Thus, the track will receive the following weight: 
 \begin{equation}\label{eq:int_weight}
-  W_{int} = \frac{\sigma'_{last}}{\sigma_{last}} \frac{e^{- \sum \limits_{i} \sigma'_i L_i}}{e^{- \sum \limits_{i} \sigma_i L_i}}
+  W_{int} = \Bigg( \frac{1 - e^{-\sigma'_{N}L_N}}{1 - e^{-\sigma_{N}L_N}} \Bigg) 
+\Bigg( \frac{e^{- \sum \limits_{i=1}^{N-1} \sigma'_i L_i}}{e^{- \sum \limits_{i=1}^{N-1} \sigma_i L_i}} \Bigg)
 \end{equation}
-Where the sums in the exponents now leave out the last step.
+Where the sums in second term leaves out the last step $N$. 
 
 \subsection{Elastic Interaction Weights}
 As mentioned before, the track is not terminated when elastic scatters occur. This has two effects on the weigthing scheme:
@@ -264,16 +270,16 @@ The exclusive channels\footnote{The definitions of these can be found in Table \
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
 	\end{subfigure}
-	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03.}\label{fig:cascade_xsecs}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03d}\label{fig:cascade_xsecs}
 \end{figure}
 First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$.  User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
 From here, the total cross section variation, $c_{inel}$, is used to vary the nominal simulation according to the technique described in Section \ref{subsec:inel_weights}. Events ending in a specific exclusive channel $i$ are given an additional weight $W_{i} = \frac{c_i}{c_{inel}}$. The presence of $c_{inel}$ in the denominator is due to the event already being weighted as an inelastic interaction. 
 
 \section{Uncertainty Estimation -- Fitting}
-For now, the inelastic interactions are only considered for uncertainty estimation. In order to do this, the total inelastic and exclusive cross sections must be varied and compared to data. There are no tunable parameters that vary the inelastic cross section or the results of the Cascade which are available to users. Because of this, the total inelastic and exclusive cross sections are varied by creating overlayed variations that change their normalizations. Currently, the parameters in the fit are flat variations over ranges of momenta.
+For now, the inelastic interactions are only considered for uncertainty estimation. The uncertainty is estimated by separately varying the total inelastic and exclusive cross sections and fitting these to data. There are no tunable parameters that vary the inelastic cross section or the results of the Cascade which are available to users. Because of this, the total inelastic and exclusive cross sections are varied by creating overlayed variations that change their normalizations. Currently, the parameters in the fit are flat variations over ranges of momenta.
 
-The results of the fit are the
+The results of the fit are the best fit values of the parameters defining the variations for specific ranges of momenta, and the associated covariance matrix. These results allow users to effectively change the results of some Geant4 simulation to match the best fit, as well as providing information to propagate the error on the cross sections\footnote{This can be done by producing correlated throws of the fit parameters, and is demonstrated in Section \ref{ssec:prop_demo}}.
 
 \section{Software}
 
@@ -374,14 +380,10 @@ The Fitter is configured via FHiCL(CITE). The following is a list of options tha
 	\end{itemize}
 	\item ParameterSets -- A list of FHiCL parameter sets defining the fit parameters. These have the structure of:
 	\begin{itemize}
+		\item Name -- Parameter name.		
 		\item Cut -- Which exclusive channel will this be applied to (reac, abs, cex, inel, prod, dcex).
-		\item Dummy -- Set to true if you no variation should be applied directly to this channel.
-		\item Parameters -- A list of fit parameters that will apply to this channel. These have the following form:
-		\begin{itemize}
-			\item Name -- Parameter name.
-			\item Range -- What momentum values this encompasses.
-			\item Nominal -- Starting value of the fit for this parameter. 
-		\end{itemize}
+		\item Range -- What momentum values this encompasses.
+		\item Nominal -- Starting value of the fit for this parameter. 
     \end{itemize}	 
     
     \item IncludeDUET -- Tells the manager to create and include an instance of\textbf{DUETFitter}.
@@ -528,8 +530,8 @@ G4Sim -c geant4_macro.mac -o output.root -m material.fcl
 \end{lstlisting}
 One can replace \textbf{G4Sim} in the command with \textbf{G4Thin} to run the thin-target simulation.
 
-\section{Usage Example}
-This section provides an example of how this software could be used within an analysis. It starts with a demonstration on how to produce Geant4's nominal predictions for $\pi^+$ cross sections with a Carbon target, then uses this prediction in a fit to carbon data. The output of the fit is then used in a context of error propagation, where the best-fit values of the parameters and their covariance matrix are used to produce parameter throws. These ensembles of thrown values are used to produce multiple reweightings of a simulation of pions in a volume of carbon to investigate the resulting variations in observables.
+\section{Usage Example}\label{sec:Demo}
+This section provides an example of how this software could be used within an analysis. It starts with a demonstration on how to produce Geant4's nominal predictions for $\pi^+$ cross sections with a Carbon target, then uses this prediction in a fit to carbon data. The output of the fit is then used to propagate the uncertainties to some simulation observable, where the best-fit values of the parameters and their covariance matrix are used to produce parameter throws. These ensembles of thrown values are used to produce multiple reweightings of a simulation of pions in a volume of carbon to investigate the resulting variations in observables.
 
 Note: all FCL files will be shown in detail in Appendix \ref{app:Demonstration_FHICL}
 \subsection{Producing Predictions}
@@ -548,6 +550,20 @@ This produces a file called ``C$\_$PiPlus$\_$cross$\_$section.root". In this fil
 	\end{subfigure}
 	\caption{$\pi^+$ -- Carbon Inelastic Cross Section}\label{fig:carbon_inel}
 \end{figure}	
+
+\begin{figure}[htpb]
+	\centering
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/frac}.pdf}
+	\end{subfigure}	
+	~
+	\begin{subfigure}[t!]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
+	\end{subfigure}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03d}\label{fig:cascade_xsecs_2}
+\end{figure}
 
 Next, the predictions for the average results of the Bertini Cascade for $\pi^+$ impinging on Carbon are produced. This is done using \textbf{G4PiCascade}. As noted in \ref{note:G4PiCascade}, the time to run the cascade increases with incoming momentum, so this step is done in parallel by running the following commands:
 
@@ -568,7 +584,7 @@ python stitch_results.py C_PiPlus_cascade.root C_PiPlus_cascade_low.root,C_PiPlu
 \end{lstlisting}
 
 These are multiplied by the total inelastic cross section to determine the exclusive cross sections. The cascade results and resulting exclusive cross 
-sections are shown in Figure \ref{fig:cascade_xsecs}.
+sections are shown in Figure \ref{fig:cascade_xsecs_2}.
 
 \subsection{Doing a Fit}\label{ssec:Fit}
 Now that the predictions have been produced, they can be used in a fit to data. For this fit, 5 parameters were chosen. These are:
@@ -644,7 +660,7 @@ The resulting best-fit values of the parameters (with their $\pm 1 \sigma$ error
 \end{figure}
 \newpage
 
-\subsection{Propagating Errors}
+\subsection{Propagating Errors}\label{ssec:prop_demo}
 The results of the fit can be used to produce sets of cross section variations, which are then applied to simulated Geant4. Using the class \textbf{G4ThrowManager}, a set of correlated throws of the fit parameters are used to build cross section variations. These cross section variations are applied to simulated pion tracks to produce sets of weights. 
 
 For this example, a set of $\pi^+$ were simulated within a LArIAT sized\footnote{40cm x 47cm x 97cm} box of Carbon. The simulation results (stored in the root file C$\_$sim.root) were provided along with fit results to the reweighting \& parameter throwing application as follows:
@@ -664,107 +680,153 @@ where N is the number of histograms/throws, $\nu_j$ is the best fit value for bi
 Figure \ref{fig:error_prop} shows the results of this procedure.
 \begin{figure}[htpb]
 	\centering
-	\begin{subfigure}[t!]{.55\textwidth}
+	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/len_throws}.pdf}
 	\end{subfigure}
 	\caption{Track length of interacting pions in a box of Carbon. Blue shows the nominal prediction, the red histograms are produced using 100 variations of the fit parameters, black is the best fit value of the parameters with error bars comprised of statistical and systematic uncertainty (see Equation \ref{eq:syst_uncertainty}).}\label{fig:error_prop}
 \end{figure}
 
-\section{Testing and Validation - Flat Variations}
-The first implemenation of the reweighting consisted of flat variations across all momenta. 
+\section{Testing and Validation - Thin Target Scattering}
 
+\subsection{Flat Variations}
+%A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. %This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction processes on Ar in the 0.2 - 2.0 GeV energy range through combined information from ionization free charge and scintillation light}. 
+%This was checked against Geant4 validation conducted by a previous summer student\footnote{Isaac Harris - Geant4 Liquid Argon Validations}.
+%The thin target was a disk of .5cm in thickness and 1.5m in radius. Monoenergetic beams\footnote{{50, 100, 150, 200, 250, 300, 400, 500, 600, 700, and 800} MeV } of 1E6 pions were sent toward the target and tracked through the volume. 
+%
+%The number of elastic scatters and the final fate (i.e. Inelastic Scatter, Decay, Transportation\footnote{Leaving the tracking volume}) of each pion was recorded to determine if an interaction occured. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the reactive cross section at each energy: 
+%
+%\begin{equation}\label{ref:reactive_xsec}
+%\sigma_{reac} = \frac{N_{inel}}{N_{inc}}\frac{1}{Nx}
+%\end{equation}
+%Additionally, the total cross section was determined by including the rate of elastic scattering:
+%\begin{equation}\label{ref:total_xsec}
+%\sigma_{total} = \frac{N_{scat}}{N_{inc}}\frac{1}{Nx}
+%\end{equation}
+%Here, $N_{scat}$ is defined as the number of pions that had any amount of elastic scatters within the volume or whose final fate was an inelastic scatter. 
+%
+%The simulation was ran with both the nominal inelastic and elastic scattering cross sections, as well as with 3 sets of variations consisting of scaling the inelastic and elastic cross sections separately. These sets are detailed in Table \ref{ref:variations}. 
+%
+%\begin{center}\label{ref:variations}
+%  \begin{tabular}{| c | c  c |}
+%  \hline
+%  Set & Inelastic Scale & Elastic Scale  \\
+%  \hline
+%  1 & 1.5 & 1. \\ 
+%  \hline
+%  2 & 1.  & 1.5 \\
+%  \hline	
+%  3 & 1.5 & 1.5 \\
+%  \hline  
+%  \end{tabular}
+%\end{center}
+%
+%Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal cross sections to the varied and weighted samples from Table \ref{ref:variations}.
+%
+%
+%\begin{figure}[htpb]
+%	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1}.pdf}
+%	\end{subfigure}
+%	~
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1}.pdf}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1}.pdf}
+%	\end{subfigure}
+%\caption{Inelastic Scale: 1.5, Elastic Scale: 1}\label{fig:thin_1.5_1}
+%\end{figure}
+%
+%\begin{figure}[htpb]
+%	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1_elast1.5}.pdf}
+%	\end{subfigure}
+%	~
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1_elast1.5}.pdf}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1_elast1.5}.pdf}
+%	\end{subfigure}
+%\caption{Inelastic Scale: 1, Elastic Scale: 1.5}\label{fig:thin_1_1.5}
+%\end{figure}
+%
+%\begin{figure}[htpb]
+%	\centering
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1.5}.pdf}
+%	\end{subfigure}
+%	~
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1.5}.pdf}
+%	\end{subfigure}
+%	
+%	\begin{subfigure}[t!]{.45\textwidth}
+%		\centering
+%		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1.5}.pdf}
+%	\end{subfigure}
+%\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}\label{fig:thin_1.5_1.5}
+%\end{figure}
 
-\subsection{Thin Target Scattering}
-A simulation of pions scattering off a thin target of Liquid Argon was used to extract the pion-Argon scattering cross section. %This was motivated by a master's thesis written by a student on the LArIAT experiment\footnote{Irene Nutini - Study of charged particles interaction processes on Ar in the 0.2 - 2.0 GeV energy range through combined information from ionization free charge and scintillation light}. 
-This was checked against Geant4 validation conducted by a previous summer student\footnote{Isaac Harris - Geant4 Liquid Argon Validations}.
-The thin target was a disk of .5cm in thickness and 1.5m in radius. Monoenergetic beams\footnote{{50, 100, 150, 200, 250, 300, 400, 500, 600, 700, and 800} MeV } of 1E6 pions were sent toward the target and tracked through the volume. 
-
-The number of elastic scatters and the final fate (i.e. Inelastic Scatter, Decay, Transportation\footnote{Leaving the tracking volume}) of each pion was recorded to determine if an interaction occured. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the reactive cross section at each energy: 
+A simulation of pions scattering off a thin target of Carbon was used to extract the pion-Carbon inelastic scattering cross section. 
+This was checked against Geant4's predictions for the cross section as extracted by the \textbf{G4CrossSection} program.
+The thin target was a disk of .5cm in thickness and 1.5m in radius. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the total inelastic cross section: 
 
 \begin{equation}\label{ref:reactive_xsec}
 \sigma_{reac} = \frac{N_{inel}}{N_{inc}}\frac{1}{Nx}
 \end{equation}
-Additionally, the total cross section was determined by including the rate of elastic scattering:
-\begin{equation}\label{ref:total_xsec}
-\sigma_{total} = \frac{N_{scat}}{N_{inc}}\frac{1}{Nx}
-\end{equation}
-Here, $N_{scat}$ is defined as the number of pions that had any amount of elastic scatters within the volume or whose final fate was an inelastic scatter. 
+Here, $N$ is the number density of the material, and $x$ is the thickness of the target (.5 cm).
 
-The simulation was ran with both the nominal inelastic and elastic scattering cross sections, as well as with 3 sets of variations consisting of scaling the inelastic and elastic cross sections separately. These sets are detailed in Table \ref{ref:variations}. 
-
-\begin{center}\label{ref:variations}
-  \begin{tabular}{| c | c  c |}
-  \hline
-  Set & Inelastic Scale & Elastic Scale  \\
-  \hline
-  1 & 1.5 & 1. \\ 
-  \hline
-  2 & 1.  & 1.5 \\
-  \hline	
-  3 & 1.5 & 1.5 \\
-  \hline  
-  \end{tabular}
-\end{center}
-
-Figures \ref{fig:thin_1.5_1} through \ref{fig:thin_1.5_1.5} compare the nominal cross sections to the varied and weighted samples from Table \ref{ref:variations}.
+A flat variation (a scaling factor of 1.5) to the inelastic cross section was applied to Geant4, and was compared to a reweighting of the nominal simulation. Figure \ref{fig:flat_validation} shows this comparison.
 
 
 \begin{figure}[htpb]
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1}.pdf}
-	\end{subfigure}
+		\includegraphics[width=\textwidth]{{/home/jake/Validation/xsec_flat}.pdf}
+	\end{subfigure}	
 	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/Validation/ratio_flat}.pdf}
 	\end{subfigure}
-	
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1}.pdf}
-	\end{subfigure}
-\caption{Inelastic Scale: 1.5, Elastic Scale: 1}\label{fig:thin_1.5_1}
+	\caption{Left: The $\pi^+ -$ C inelastic cross section extracted from a thin target simulation.``Weighted" refers to a reweighting applied to the nominal simulation. Right: Ratio comparing reweighting of Geant4 to varying ``by-hand."}\label{fig:flat_validation}
 \end{figure}
 
-\begin{figure}[htpb]
-	\centering
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1_elast1.5}.pdf}
-	\end{subfigure}
-	~
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1_elast1.5}.pdf}
-	\end{subfigure}
-	
-	\begin{subfigure}[t!]{.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1_elast1.5}.pdf}
-	\end{subfigure}
-\caption{Inelastic Scale: 1, Elastic Scale: 1.5}\label{fig:thin_1_1.5}
-\end{figure}
+\subsection{Binned Variations}
+Similarly, multiple variations across the momentum range were tested. The comparison between the nominal, varied, and weighted simulation are shown in \ref{fig:binned_validation}, along with the variation used for this study.
 
 \begin{figure}[htpb]
 	\centering
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/reactive_thin_xsec_inel1.5_elast1.5}.pdf}
-	\end{subfigure}
+		\includegraphics[width=\textwidth]{{/home/jake/Validation/xsec_binned}.pdf}
+	\end{subfigure}	
 	~
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/total_thin_xsec_inel1.5_elast1.5}.pdf}
+		\includegraphics[width=\textwidth]{{/home/jake/Validation/ratio_binned}.pdf}
 	\end{subfigure}
 	
 	\begin{subfigure}[t!]{.45\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{{/home/jake/comp_pdfs/ratio_inel1.5_elast1.5}.pdf}
-	\end{subfigure}
-\caption{Inelastic Scale: 1.5, Elastic Scale: 1.5}\label{fig:thin_1.5_1.5}
+		\includegraphics[width=\textwidth]{{/home/jake/Validation/binned_variation}.pdf}
+	\end{subfigure}	
+	\caption{Left: The $\pi^+ -$ C inelastic cross section extracted from a thin target simulation.``Weighted" refers to a reweighting applied to the nominal simulation. Right: Ratio comparing reweighting of Geant4 to varying ``by-hand." Bottom: The variations applied to the simulation.}\label{fig:binned_validation}
 \end{figure}
 \newpage
 
@@ -1143,66 +1205,39 @@ parameters.fcl:
 \begin{lstlisting}
   1 BEGIN_PROLOG
   2 
-  3 TheParameters: [
-  4   { 
-  5     Cut:    "reac"
-  6     Dummy: false
-  7     Parameters: [
-  8       {
-  9         Name: "fReacLow"
- 10         Range: [10., 200.]
- 11         Nominal: 1.0
- 12       },
- 13       {
- 14         Name: "fReacHigh"
- 15         Range: [700., 2005.]
- 16       }
- 17     ]
- 18   },
- 19   { 
- 20     Cut:    "abs"
- 21     Dummy: false 
- 22     Parameters:  [
- 23       {
- 24         Name: "fAbs"
- 25         Range: [200.0, 700.00]
- 26       }
- 27     ]
- 28   },
- 29 
- 30   { 
- 31     Cut:   "cex"
- 32     Dummy: false 
- 33     Parameters:  [
- 34       { 
- 35         Name: "fCex"
- 36         Range: [200.0, 700.00]
- 37       }
- 38     ]
- 39   },
- 40 
- 41   {
- 42     Cut:    "inel"
- 43     Dummy: false
- 44     Parameters:  [
- 45       {
- 46         Name: "fInel"
- 47         Range: [200.0, 700.00]
- 48       }
- 49     ]
- 50   },
- 51 
- 52   { Cut:    "prod"
- 53     Dummy:  true
- 54   },
- 55 
- 56   { Cut:    "dcex"
- 57     Dummy:  true
- 58   }
- 59 ]
- 60 
- 61 END_PROLOG
-
+  3 TheParameters: [                          
+  4   {                                       
+  5     Name:       "fReacLow"                
+  6     Cut:        "reac"                    
+  7     Range:      [10., 200.]               
+  8     Nominal:    1.0                       
+  9   },                                      
+ 10   {                                       
+ 11     Name:       "fReacLow"                
+ 12     Cut:        "reac"                    
+ 13     Name:       "fReacHigh"               
+ 14     Range:      [700., 2005.]             
+ 15   },                                      
+ 16                                           
+ 17   {                                       
+ 18     Cut:        "abs"                     
+ 19     Name:       "fAbs"                    
+ 20     Range:      [200.0, 700.00]           
+ 21   },                                      
+ 22                                           
+ 23   {                                       
+ 24     Cut:        "cex"                     
+ 25     Name:       "fCex"                    
+ 26     Range:      [200.0, 700.00]           
+ 27   },                                      
+ 28                                           
+ 29   {                                       
+ 30     Cut:        "inel"                    
+ 31     Name:       "fInel"                   
+ 32     Range:      [200.0, 700.00]           
+ 33   }
+ 35 }
+ 36 END_PROLOG
 \end{lstlisting}
 
 \newpage
@@ -1283,7 +1318,7 @@ material.fcl:
 \begin{lstlisting}
   1 BEGIN_PROLOG
   2 
-  3 LAr: {
+  3 C: {
   4   Name: "graphite"
   5   Z:    12
   6   Mass: 12.01

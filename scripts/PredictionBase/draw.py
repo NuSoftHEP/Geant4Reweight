@@ -53,14 +53,35 @@ grinel.Draw("same")
 grdcex.Draw("same")
 grprod.Draw("same")
 
-leg = TLegend(.6,.6,.85,.85)
-leg.AddEntry( grabs,  "Absorption",  "lp")
-leg.AddEntry( grinel, "Inelastic/Quasi-Elastic",  "lp")
-leg.AddEntry( grcex,  "Charge Exchange",  "lp")
-leg.AddEntry( grdcex, "Double Charge Exchange",  "lp")
-leg.AddEntry( grprod, "Pion Production",  "lp")
-
-leg.Draw("same")
+#leg = TLegend(.6,.6,.85,.85)
+#leg.AddEntry( grabs,  "Absorption",  "lp")
+#leg.AddEntry( grinel, "Inelastic/Quasi-Elastic",  "lp")
+#leg.AddEntry( grcex,  "Charge Exchange",  "lp")
+#leg.AddEntry( grdcex, "Double Charge Exchange",  "lp")
+#leg.AddEntry( grprod, "Pion Production",  "lp")
+#
+#leg.Draw("same")
 
 c1.SaveAs( sys.argv[2] + ".pdf")
 c1.SaveAs( sys.argv[2] + ".png")
+
+tpt = TPaveText( .15, .15, .95, .87, "brNDC")
+
+texts = ["Absorption",
+         "Inelastic/Quasi-elastic",
+         "Charge Exchange",
+         "Double Charge Exchange",
+         "Pion Production"]
+text_colors = [ 13, 2, 4, 8, 46 ]
+for t,c in zip( texts, text_colors ):
+  text = tpt.AddText( t )
+  text.SetTextColor( c )
+
+tpt.SetTextSize(.06)
+tpt.SetFillColor(0)
+tpt.SetBorderSize(0)
+c2 = TCanvas("c2","c2",500,400)
+tpt.Draw()
+gPad.SetLeftMargin( gPad.GetRightMargin() )
+c2.SaveAs( sys.argv[2] + "_leg.pdf" )
+

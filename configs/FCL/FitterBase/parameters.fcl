@@ -2,39 +2,39 @@ BEGIN_PROLOG
 
 TheParameters: [
   { 
-    Name: "fReacLow"
-    Cut:   "reac"
-    Range: [10., 200.]
-    Nominal: 1.0 
+    Name:       "fReacLow"
+    Cut:        "reac"
+    Range:      [10., 200.]
+    Nominal:    1.0 
     NScanSteps: 1
   },
   { 
-    Name: "fReacLow"
-    Cut:   "reac"
-    Name: "fReacHigh"
-    Range: [700., 2005.]
-    ScanDelta: .2
+    Name:       "fReacLow"
+    Cut:        "reac"
+    Name:       "fReacHigh"
+    Range:      [700., 2005.]
+    ScanDelta:  .2
   },
 
   {
-    Cut:    "abs"
-    Name: "fAbs"
-    Range: [200.0, 700.00]        
-    ScanDelta: .3
+    Cut:        "abs"
+    Name:       "fAbs"
+    Range:      [200.0, 700.00]        
+    ScanDelta:  .3
   }, 
 
   {
-    Cut:   "cex"
-    Name: "fCex"
-    Range: [200.0, 700.00]        
-    ScanDelta: .4
+    Cut:        "cex"
+    Name:       "fCex"
+    Range:      [200.0, 700.00]        
+    ScanDelta:  .4
   },
 
   {
-    Cut:    "inel"
-    Name: "fInel"
-    Range: [200.0, 700.00]        
-    ScanDelta: .5
+    Cut:        "inel"
+    Name:       "fInel"
+    Range:      [200.0, 700.00]        
+    ScanDelta:  .5
   }
 ]
 

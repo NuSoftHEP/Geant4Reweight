@@ -1,7 +1,3 @@
-#include "G4PiNuclearCrossSection.hh"
-#include "G4BGGPionElasticXS.hh"
-#include "G4HadronElasticDataSet.hh"
-#include "G4CrossSectionDataSetRegistry.hh"
 #include "G4CrossSectionDataStore.hh"
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
@@ -9,29 +5,17 @@
 #include "G4ParticleDefinition.hh"
 #include "G4DynamicParticle.hh"
 #include "G4ThreeVector.hh"
-#include "G4Track.hh"
-#include "G4Step.hh"
-#include "G4StepPoint.hh"
 #include "G4Material.hh"
-#include "G4Nucleus.hh"
 #include "G4SystemOfUnits.hh"
-#include "G4CascadeInterface.hh"
-#include "G4HadProjectile.hh"
-#include "G4HadFinalState.hh"
-#include "G4ParticleTable.hh"
 #include "G4ProcessManager.hh"
 #include "G4VProcess.hh"
 #include "G4RunManager.hh"
-#include "G4PiCascadeDetectorConstruction.hh"
-#include "G4PiCascadePhysicsList.hh"
-#include "G4HadronicException.hh"
 #include "G4HadronInelasticProcess.hh"
 #include "G4HadronElasticProcess.hh"
 #include "G4String.hh"
-#include "G4ForceCondition.hh"
-#include "G4Element.hh"
-#include "G4ElementTable.hh"
 
+#include "G4PiCascadeDetectorConstruction.hh"
+#include "G4PiCascadePhysicsList.hh"
 
 #include <utility>
 #include <iostream>
@@ -57,6 +41,8 @@ std::string output_file_override = "empty";
 int ndiv_override = 0;
 int type_override = -999;
 
+int verbose_override = -1;
+
 bool parseArgs(int argc, char* argv[]);
 
 int main(int argc, char * argv[]){
@@ -64,20 +50,31 @@ int main(int argc, char * argv[]){
   if( !parseArgs(argc, argv) ) 
     return 0;
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
+  fhicl::ParameterSet pset = fhicl::make_ParameterSet(fcl_file);
 
   //FHICL parameters here
-  int type      = ps.get< int >("Type");
+  int type      = pset.get< int >("Type");
   if( type_override != -999 )
     type = type_override;
 
-  bool verbose  = ps.get< bool >("Verbose");
+  bool verbose  = pset.get< bool >("Verbose");
+  if( verbose_override != -1 ){
+  
+    if( verbose_override == 0 || verbose_override == 1 ){
+      verbose = verbose_override;
+    }
+    else{ 
+      std::cout << "Warning: Verbose override is " << verbose_override << std::endl;
+      std::cout << "Using fcl value " << verbose << std::endl;
+    }
 
-  std::pair< double, double > range = ps.get< std::pair< double, double > >("Range");
+  }
+
+  std::pair< double, double > range = pset.get< std::pair< double, double > >("Range");
   if( range_override) 
     range = std::make_pair(range_low_override, range_high_override);
 
-  int nDivisions = ps.get< int >("NDivisions");
+  int nDivisions = pset.get< int >("NDivisions");
   if( ndiv_override > 0 ) 
     nDivisions = ndiv_override;
 
@@ -92,7 +89,7 @@ int main(int argc, char * argv[]){
   double delta = ( range.second - range.first ) / nDivisions;
 
   //Root Output here
-  std::string outFileName = ps.get< std::string >("Outfile");
+  std::string outFileName = pset.get< std::string >("Outfile");
    if( output_file_override  != "empty" ){
     outFileName = output_file_override;
   }
@@ -147,7 +144,7 @@ int main(int argc, char * argv[]){
 
 
   //Material
-  fhicl::ParameterSet MaterialParameters = ps.get< fhicl::ParameterSet >("Material");
+  fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
   int MaterialZ = MaterialParameters.get< int >( "Z" );
   double MaterialMass = MaterialParameters.get< double >( "Mass" );
@@ -172,8 +169,8 @@ int main(int argc, char * argv[]){
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  G4HadronElasticProcess   * elastic_proc;
-  G4HadronInelasticProcess * inelastic_proc;
+  G4HadronElasticProcess   * elastic_proc = 0x0;
+  G4HadronInelasticProcess * inelastic_proc = 0x0;
 
   for( int i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
@@ -189,14 +186,16 @@ int main(int argc, char * argv[]){
     }
   }
 
-  G4CrossSectionDataStore *theElastStore, *theInelastStore;
-  if( elastic_proc ){
-    theElastStore = elastic_proc->GetCrossSectionDataStore();
-  }
-  if( inelastic_proc ){
-    theInelastStore = inelastic_proc->GetCrossSectionDataStore();
+  if ( !elastic_proc || !inelastic_proc ){
+    std::cout << "Fatal Error: could not get the processes" << std::endl;
+    return 0;
   }
 
+  G4CrossSectionDataStore *theElastStore   = elastic_proc->GetCrossSectionDataStore();
+  G4CrossSectionDataStore *theInelastStore = inelastic_proc->GetCrossSectionDataStore();
+
+  std::cout << std::endl << "Got the Cross Section Tables" << std::endl;
+  std::cout << "Generating Cross Sections" << std::endl;
 
   //Getting the values
   double theMomentum = range.first;
@@ -306,6 +305,10 @@ bool parseArgs(int argc, char ** argv){
 
     else if( strcmp( argv[i], "-t" ) == 0 ){
       type_override = atoi( argv[i+1] );
+    }
+
+    else if( strcmp( argv[i], "-v" ) == 0 ){
+      verbose_override = atoi( argv[i+1] );
     }
   }
 

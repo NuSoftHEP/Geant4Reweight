@@ -1,4 +1,3 @@
-#include "G4CascadeInterface.hh"
 #include "G4HadronInelasticProcess.hh"
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
@@ -9,20 +8,14 @@
 #include "G4Step.hh"
 #include "G4StepPoint.hh"
 #include "G4Material.hh"
-#include "G4Nucleus.hh"
 #include "G4SystemOfUnits.hh"
-#include "G4CascadeInterface.hh"
-#include "G4HadProjectile.hh"
-#include "G4HadFinalState.hh"
-#include "G4ParticleTable.hh"
 #include "G4ProcessVector.hh"
 #include "G4ProcessManager.hh"
 #include "G4RunManager.hh"
-#include "G4PiCascadeDetectorConstruction.hh"
-#include "G4PiCascadePhysicsList.hh"
-#include "G4HadronicException.hh"
 #include "G4VParticleChange.hh"
 
+#include "G4PiCascadeDetectorConstruction.hh"
+#include "G4PiCascadePhysicsList.hh"
 
 #include <utility>
 #include <iostream>
@@ -56,24 +49,24 @@ int main(int argc, char * argv[]){
   if( !parseArgs(argc, argv) ) 
     return 0;
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
+  fhicl::ParameterSet pset = fhicl::make_ParameterSet(fcl_file);
 
-  int nCascades = ps.get< int >("NCascades");
+  size_t nCascades = pset.get< size_t >("NCascades");
   if( ncasc_override > 0 ) 
     nCascades = ncasc_override;
 
-  int type      = ps.get< int >("Type");
+  int type      = pset.get< int >("Type");
   if( type_override != -999 )
     type = type_override;
     
 
   
-  std::pair< double, double > range = ps.get< std::pair< double, double > >("Range");
+  std::pair< double, double > range = pset.get< std::pair< double, double > >("Range");
   if( range_override) 
     range = std::make_pair(range_low_override, range_high_override);
 
 
-  int nDivisions = ps.get< int >("NDivisions");
+  size_t nDivisions = pset.get< size_t >("NDivisions");
   if( ndiv_override > 0 ) 
     nDivisions = ndiv_override;
 
@@ -94,7 +87,7 @@ int main(int argc, char * argv[]){
     momenta.push_back( range.first + i * step );
   }
 
-  std::string outFileName = ps.get< std::string >("Outfile");
+  std::string outFileName = pset.get< std::string >("Outfile");
    if( output_file_override  != "empty" ){
     outFileName = output_file_override;
   }
@@ -141,7 +134,7 @@ int main(int argc, char * argv[]){
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  G4HadronInelasticProcess * inelastic_proc;
+  G4HadronInelasticProcess * inelastic_proc = 0x0;
 
   for( int i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
@@ -155,17 +148,13 @@ int main(int argc, char * argv[]){
 
   if( !inelastic_proc ) return 0;
 
-  fhicl::ParameterSet MaterialParameters = ps.get< fhicl::ParameterSet >("Material");
+  fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
   int MaterialZ = MaterialParameters.get< int >( "Z" );
   double MaterialMass = MaterialParameters.get< double >( "Mass" );
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
   G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
-  G4Nucleus * theNucleus = new G4Nucleus( theMaterial );
 
-
-//  G4CascadeInterface * theCascade = new G4CascadeInterface( "BertiniCascade" );
-  
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
 
@@ -189,23 +178,11 @@ int main(int argc, char * argv[]){
       nPiPlus = 0; 
       nPiMinus = 0;
       momentum = dynamic_part->GetTotalMomentum();
-      //G4HadFinalState * theFS;
-      G4VParticleChange * thePC; 
-      thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
-      //try{
-      //  //theFS = theCascade->ApplyYourself( *dynamic_part, *theNucleus );
-      //}
-      //catch( G4HadronicException aR ){
-      //  std::cout << "Something went wrong" <<  std::endl;
-      //}
-//      std::cout << "Secondaries: " << theFS->GetNumberOfSecondaries() << std::endl;
+      G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
 
-      //size_t nSecondaries = theFS->GetNumberOfSecondaries();
       size_t nSecondaries = thePC->GetNumberOfSecondaries();
       for( size_t i = 0; i < nSecondaries; ++i ){
-        //auto part = theFS->GetSecondary(i)->GetParticle();
         auto part = thePC->GetSecondary(i)->GetDynamicParticle();
-      //  std::cout << i << " " << part->GetPDGcode() << " " << part->GetTotalMomentum() << std::endl;
 
         switch( part->GetPDGcode() ){
           case( 211 ):
@@ -222,12 +199,8 @@ int main(int argc, char * argv[]){
       thePC->SetVerboseLevel(0);
       thePC->Initialize(*theTrack);
 
-      //std::cout << "nPiPlus: " << nPiPlus << std::endl;
-      //std::cout << "nPiMinus: " << nPiMinus << std::endl;
-      //std::cout << "nPi0: " << nPi0 << std::endl;
       tree->Fill();
 
-//      std::cout << std::endl;
     }
   }
   fout->cd();
@@ -260,8 +233,8 @@ int main(int argc, char * argv[]){
   int nbins = int(range.second) + 1;
   std::string binning = "(" + std::to_string(nbins) + ",0," + std::to_string(range.second + 1.) + ")";
 
-  std::string draw = "momentum>>total" + binning;
-  tree->Draw( draw.c_str(), "", "goff" );
+  std::string draw_total = "momentum>>total" + binning;
+  tree->Draw( draw_total.c_str(), "", "goff" );
   TH1F * total = (TH1F*)gDirectory->Get("total");
   std::vector< int > bins;
   for( int i = 1; i <= total->GetNbinsX(); ++i ){
@@ -271,8 +244,7 @@ int main(int argc, char * argv[]){
     }
   }
 
-  std::map< std::string, std::string >::iterator itCut = cuts.begin();
-  for( itCut; itCut != cuts.end(); ++itCut ){
+  for( auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut ){
     std::cout << itCut->first << std::endl;
     std::string name = "h" + itCut->first;
     std::string draw = "momentum>>" + name + binning;
@@ -284,7 +256,7 @@ int main(int argc, char * argv[]){
 
     std::vector< double > xs,ys;
     
-    for( int i = 0; i < bins.size(); ++i ){
+    for( size_t i = 0; i < bins.size(); ++i ){
       xs.push_back( bins.at(i) );
       ys.push_back( hist->GetBinContent(bins.at(i)) );
     }

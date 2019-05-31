@@ -271,7 +271,7 @@ The exclusive channels\footnote{The definitions of these can be found in Table \
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
 	\end{subfigure}
-	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03d}\label{fig:cascade_xsecs}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03}\label{fig:cascade_xsecs}
 \end{figure}
 First, we determine the nominal values for the exclusive cross sections ($\sigma_{i}$ for a specific final state). These will sum to a value equal to the total inelastic cross section $\sigma_{inel} = \sum\limits_{i}\sigma_{i}$.  User-defined variations are used to create a set of varied exclusive cross sections $\sigma_{i}'$ and a varied total cross section $\sigma_{inel}'$. In effect, the exclusive and total cross section have associated variation factors as such: $c_{inel}\sigma_{inel}  = \sum\limits_{i} c_{i} \sigma_{i}$. 
 
@@ -314,7 +314,7 @@ This produces a file called ``C$\_$PiPlus$\_$cross$\_$section.root". In this fil
 		\centering
 		\includegraphics[width=\textwidth]{{/home/jake/Demonstration/exclusive}.pdf}
 	\end{subfigure}
-	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03d}\label{fig:cascade_xsecs_2}
+	\caption{Left: $\pi^+$ -- Carbon Cascade Results, Right: Exclusive Cross Sections. Extracted from Geant4 version 10.3.p03}\label{fig:cascade_xsecs_2}
 \end{figure}
 
 Next, the predictions for the average results of the Bertini Cascade for $\pi^+$ impinging on Carbon are produced. This is done using \textbf{G4PiCascade}. As noted in \ref{note:G4PiCascade}, the time to run the cascade increases with incoming momentum, so this step is done in parallel by running the following commands:
@@ -691,7 +691,7 @@ G4Sim -c geant4_macro.mac -o output.root -m material.fcl
 One can replace \textbf{G4Sim} in the command with \textbf{G4Thin} to run the thin-target simulation.
 
 \section{Testing and Validation - Thin Target Scattering}
-A simulation of pions scattering off a thin target of Carbon was used to extract the pion-Carbon inelastic scattering cross section. 
+A simulation of pions scattering off a thin target of Carbon -- created using Geant4 version 10.3.p03 -- was used to extract the pion-Carbon inelastic scattering cross section. 
 This was checked against Geant4's predictions for the cross section as extracted by the \textbf{G4CrossSection} program.
 The thin target was a disk of .5cm in thickness and 1.5m in radius. The rate of inelastic scatters ($N_{inel}$)and the number of incident pions ($N_{inc}$) were used to determine the total inelastic cross section: 
 
@@ -742,7 +742,7 @@ Similarly, multiple variations across the momentum range were tested. The compar
 %\newpage
 
 \section{Testing and Validation - Scattering in a Volume}
-In addition to simulated scattering off a thin target, pions were simulated within a LArIAT-sized\footnote{40cm x 47cm x 90cm} volume of Carbon. Variations were applied to the Geant4 cross section by-hand and through reweighting. The effects on various observables -- such as the length of the pion tracks and the rate of events ending in an inelastic scatter -- were compared between varying and reweighting.
+In addition to simulated scattering off a thin target, pions were simulated within a LArIAT-sized\footnote{40cm x 47cm x 90cm} volume of Carbon -- again using Geant4 version 10.3.p03. Variations were applied to the Geant4 cross section by-hand and through reweighting. The effects on various observables -- such as the length of the pion tracks and the rate of events ending in an inelastic scatter -- were compared between varying and reweighting.
 
 
 \subsection{Flat Variations}

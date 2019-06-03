@@ -29,7 +29,15 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS RIO Net)
 
 ###############################  fhiclcpp  #####################################
-include(${CMAKE_SOURCE_DIR}/cmake/fhiclcppSetup.cmake)
+if(DEFINED USE_FHICL AND USE_FHICL)
+  include(${CMAKE_SOURCE_DIR}/cmake/fhiclcppSetup.cmake)
+  set(FHICL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include) 
+else()
+  set(FHICL_INCLUDE_DIR $ENV{FHICLCPP_INC})
+  set(CETLIB_EXCEPT_INCLUDE_DIR $ENV{CETLIB_EXCEPT_INC})
+  set(CETLIB_INCLUDE_DIR $ENV{CETLIB_INC})
+  file(GLOB FHICLCPP_LIBS $ENV{FHICLCPP_LIB}/*.so)
+endif()
 
 
 

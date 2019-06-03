@@ -32,7 +32,8 @@ int main(int argc, char * argv[]){
   G4RunManager * runManager = new G4RunManager;
   
   if( material_fcl_file != "empty" ){
-    fhicl::ParameterSet pset = fhicl::make_ParameterSet( material_fcl_file ); 
+    fhicl::ParameterSet pset;
+    fhicl::make_ParameterSet( material_fcl_file, pset ); 
     fhicl::ParameterSet theMaterial = pset.get< fhicl::ParameterSet >("Material"); 
     runManager->SetUserInitialization(new G4SimDetectorConstruction(theMaterial) );
   }

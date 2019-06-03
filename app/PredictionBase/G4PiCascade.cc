@@ -49,7 +49,8 @@ int main(int argc, char * argv[]){
   if( !parseArgs(argc, argv) ) 
     return 0;
 
-  fhicl::ParameterSet pset = fhicl::make_ParameterSet(fcl_file);
+  fhicl::ParameterSet pset;
+  fhicl::make_ParameterSet(fcl_file, pset);
 
   size_t nCascades = pset.get< size_t >("NCascades");
   if( ncasc_override > 0 ) 

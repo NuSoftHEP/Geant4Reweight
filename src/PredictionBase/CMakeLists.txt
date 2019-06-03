@@ -11,7 +11,7 @@ include_directories(${ROOT_INCLUDE_DIRS})
 include_directories(${INCDIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS PredictionBaseLib DESTINATION lib)
+include_directories(${FHICL_INCLUDE_DIR})
 
 target_link_libraries(PredictionBaseLib ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 

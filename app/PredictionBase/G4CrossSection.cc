@@ -50,7 +50,8 @@ int main(int argc, char * argv[]){
   if( !parseArgs(argc, argv) ) 
     return 0;
 
-  fhicl::ParameterSet pset = fhicl::make_ParameterSet(fcl_file);
+  fhicl::ParameterSet pset;
+  fhicl::make_ParameterSet(fcl_file, pset);
 
   //FHICL parameters here
   int type      = pset.get< int >("Type");

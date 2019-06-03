@@ -12,7 +12,8 @@
 
 int main( int argc, char ** argv ){
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(argv[1]);
+  fhicl::ParameterSet ps; 
+  fhicl::make_ParameterSet(argv[1], ps);
   std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
   G4ReweightParameterMaker parMaker(  FitParSets );

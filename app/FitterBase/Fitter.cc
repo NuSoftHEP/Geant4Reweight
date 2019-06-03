@@ -25,7 +25,8 @@ int main(int argc, char ** argv){
 
   if( !parseArgs(argc, argv) ) return 0;
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet(fcl_file);
+  fhicl::ParameterSet ps;
+  fhicl::make_ParameterSet(fcl_file, ps);
   bool fSave    = ps.get< bool >( "Save", false );
   if( save_override != -1 )
     fSave = save_override;

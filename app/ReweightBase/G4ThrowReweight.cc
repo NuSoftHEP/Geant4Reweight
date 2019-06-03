@@ -18,7 +18,8 @@ int main(int argc, char ** argv){
   if(!parseArgs(argc, argv)) 
     return 0;
 
-  fhicl::ParameterSet ps = fhicl::make_ParameterSet( fcl_file );
+  fhicl::ParameterSet ps;
+  fhicl::make_ParameterSet( fcl_file, ps );
 
   std::string outFileName = ps.get< std::string >( "OutputFile" );
   if( output_file_override  != "empty" ){

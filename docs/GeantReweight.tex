@@ -451,7 +451,7 @@ The source code can be retrieved from \href{https://github.com/calcuttj/GeantRew
 
 The software is built using CMake\footnote{Minimum CMake version is 3.1}, and requires an installation of both ROOT and Geant4. The ROOT installation will be accessed if its setup file has been sourced\footnote{The environment variable \textbf{ROOTSYS} will be accessed by cmake.}. The Geant4 installation will be specified using the cmake option -DGeant4$\_$DIR. To build, make a build directory adjacent to the GeantReweight top directory (let's call it "GeantReweight-build"). An install directory will be created during the cmake stage at the user's choice of location (using cmake option -DCMAKE$\_$INSTALL$\_$PREFIX). For this example, it will be called GeantReweight-install. Enter the build directory and execute:
 \begin{lstlisting}
-cmake -DCMAKE_INSTALL_PREFIX=/full/path/to/GeantReweight-install -DUSE_FHICL=1 -DGeant4_DIR=/full/path/to/external/geant4-install/lib64/Geant4-<version>/ relative/path/to/GeantReweight/
+cmake -DCMAKE_INSTALL_PREFIX=/full/path/to/GeantReweight-install -DGeant4_DIR=/full/path/to/external/geant4-install/lib64/Geant4-<version>/ relative/path/to/GeantReweight/
 \end{lstlisting}
 
 If this is successful, the code can now be compiled using:

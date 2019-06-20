@@ -37,6 +37,9 @@ else()
   set(CETLIB_EXCEPT_INCLUDE_DIR $ENV{CETLIB_EXCEPT_INC})
   set(CETLIB_INCLUDE_DIR $ENV{CETLIB_INC})
   file(GLOB FHICLCPP_LIBS $ENV{FHICLCPP_LIB}/*.so)
+
+  #add_compile_definitions(FNAL_FHICL)
+  add_definitions(-DFNAL_FHICL)
 endif()
 
 

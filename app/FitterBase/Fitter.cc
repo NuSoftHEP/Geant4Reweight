@@ -11,6 +11,10 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#ifdef FNAL_FHICL
+#include "cetlib/filepath_maker.h"
+#endif
+
 std::string set_prec(double);
 
 std::string fcl_file;
@@ -25,40 +29,61 @@ int main(int argc, char ** argv){
 
   if( !parseArgs(argc, argv) ) return 0;
 
-  fhicl::ParameterSet ps;
-  fhicl::make_ParameterSet(fcl_file, ps);
-  bool fSave    = ps.get< bool >( "Save", false );
+  fhicl::ParameterSet pset;
+
+  #ifdef FNAL_FHICL
+    // Configuration file lookup policy.
+    char const* fhicl_env = getenv("FHICL_FILE_PATH");
+    std::string search_path;
+
+    if (fhicl_env == nullptr) {
+      std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
+      search_path = ".";
+    }
+    else {
+      search_path = std::string{fhicl_env};
+    }
+
+    cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
+
+    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+
+  #else
+    pset = fhicl::make_ParameterSet(fcl_file);
+  #endif
+
+  bool fSave    = pset.get< bool >( "Save", false );
   if( save_override != -1 )
     fSave = save_override;
 
 
-  std::string outFileName = ps.get< std::string >( "OutputFile" );
+  std::string outFileName = pset.get< std::string >( "OutputFile" );
   if( output_file_override  != "empty" ){
     outFileName = output_file_override;
   }
 
   G4ReweightFitManager FitMan( outFileName, fSave);
 
-  std::vector< fhicl::ParameterSet > FitParSets = ps.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
+  std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
   try{ 
     FitMan.MakeFitParameters( FitParSets );
 
     ///Defining MC Sets
-    std::vector< fhicl::ParameterSet > FCLSets = ps.get< std::vector< fhicl::ParameterSet > >("Sets");
+    std::vector< fhicl::ParameterSet > FCLSets = pset.get< std::vector< fhicl::ParameterSet > >("Sets");
     FitMan.DefineMCSets( FCLSets );
     ///////////////////////////////////////////
 
     ///Defining experiments
-    FitMan.DefineExperiments( ps );
+    FitMan.DefineExperiments( pset );
     ///////////////////////////////////////////
 
 
     FitMan.GetAllData();
 
-    FitMan.MakeMinimizer( ps );
+    FitMan.MakeMinimizer( pset );
 
-    bool fFitScan = ps.get< bool >( "FitScan", false );
+    bool fFitScan = pset.get< bool >( "FitScan", false );
     if( scan_override != -1 )
       fFitScan = scan_override;
 

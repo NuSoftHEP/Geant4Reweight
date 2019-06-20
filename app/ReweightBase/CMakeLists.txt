@@ -1,6 +1,7 @@
 SET(REWEIGHT_APPS
   G4Reweight
   G4ThrowReweight
+  FlatTreeProcessor
 )
 
 if(DEFINED USE_FHICL AND USE_FHICL)

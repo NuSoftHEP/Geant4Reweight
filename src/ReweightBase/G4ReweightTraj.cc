@@ -11,7 +11,10 @@ trackID(tid), PDG(pdg), parID(parid), eventNum(eventnum), stepRange(range){
     fInelastic = "pi+Inelastic";
   }
   else if( PDG == -211 ){
-     fInelastic = "pi-Inelastic";  
+    fInelastic = "pi-Inelastic";  
+  }
+  else if( PDG == 2212 ){
+    fInelastic = "protonInelastic";
   }
 
 }

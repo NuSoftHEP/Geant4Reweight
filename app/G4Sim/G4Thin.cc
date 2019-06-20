@@ -15,6 +15,10 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#ifdef FNAL_FHICL
+#include "cetlib/filepath_maker.h"
+#endif
+
 char * n;
 
 std::string macFileName = "../G4Sim/run1.mac";
@@ -33,7 +37,28 @@ int main(int argc, char * argv[]){
   
   if( material_fcl_file != "empty" ){
     fhicl::ParameterSet pset;
-    fhicl::make_ParameterSet( material_fcl_file, pset ); 
+
+    #ifdef FNAL_FHICL
+      // Configuration file lookup policy.
+      char const* fhicl_env = getenv("FHICL_FILE_PATH");
+      std::string search_path;
+
+      if (fhicl_env == nullptr) {
+        std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
+        search_path = ".";
+      }
+      else {
+        search_path = std::string{fhicl_env};
+      }
+
+      cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
+
+      fhicl::make_ParameterSet(material_fcl_file, lookupPolicy, pset);
+
+    #else
+      pset = fhicl::make_ParameterSet(material_fcl_file);
+    #endif
+
     fhicl::ParameterSet theMaterial = pset.get< fhicl::ParameterSet >("Material"); 
     runManager->SetUserInitialization(new ThinDetector(theMaterial) );
   }

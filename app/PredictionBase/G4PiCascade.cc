@@ -30,6 +30,10 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#ifdef FNAL_FHICL
+#include "cetlib/filepath_maker.h"
+#endif
+
 std::string fcl_file;
 
 bool range_override = false;
@@ -50,7 +54,26 @@ int main(int argc, char * argv[]){
     return 0;
 
   fhicl::ParameterSet pset;
-  fhicl::make_ParameterSet(fcl_file, pset);
+  #ifdef FNAL_FHICL
+    // Configuration file lookup policy.
+    char const* fhicl_env = getenv("FHICL_FILE_PATH");
+    std::string search_path;
+
+    if (fhicl_env == nullptr) {
+      std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
+      search_path = ".";
+    }
+    else {
+      search_path = std::string{fhicl_env};
+    }
+
+    cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
+
+    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+
+  #else
+    fhicl::ParameterSet pset;
+  #endif
 
   size_t nCascades = pset.get< size_t >("NCascades");
   if( ncasc_override > 0 ) 

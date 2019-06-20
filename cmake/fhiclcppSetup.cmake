@@ -3,8 +3,8 @@ if(DEFINED USE_FHICL AND USE_FHICL)
   ExternalProject_Add(fhiclcpp-simple
     PREFIX "${PROJECT_BINARY_DIR}/Ext"
     GIT_REPOSITORY https://github.com/luketpickering/fhiclcpp-simple.git
-    GIT_TAG stable
-    UPDATE_DISCONNECTED 1
+#    GIT_TAG stable
+    UPDATE_DISCONNECTED 0
     CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}

@@ -104,6 +104,9 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   int output_event;
   double weight;
   double track_length;
+  int PDG;
+  std::string final_proc;
+  double init_momentum;
   //////////////////
 
 
@@ -129,46 +132,68 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   outputTree.Branch( "event",        &output_event );
   outputTree.Branch( "weight",       &weight );
   outputTree.Branch( "track_length", &track_length );
+  outputTree.Branch( "PDG", &PDG );
+  outputTree.Branch( "final_proc", &final_proc );
+  outputTree.Branch( "init_momentum", &init_momentum );
+
 
   for( size_t i = 0; i < inputTree->GetEntries(); ++i ){
     inputTree->GetEvent(i);
+    PDG = input_PDG;
+    final_proc = *input_EndProcess;
+
+    double mass;
+    if( PDG == 211 ) mass = 139.57;
+    else if( PDG == 2212 ) mass = 938.28;
 
     //Make a G4ReweightTraj -- This is the reweightable object
     G4ReweightTraj theTraj(input_ID, input_PDG, 0, input_event, std::make_pair(0,0));
 
     //Create its set of G4ReweightSteps and add them to the Traj
     std::vector< G4ReweightStep* > allSteps;
-    for( size_t i = 1; i < input_PX->size(); ++i ){
+
+    size_t nSteps = input_PX->size();
+    if( nSteps < 2 ) continue;
+
+    for( size_t j = 1; j < nSteps; ++j ){
 
       std::string proc = "default";
-      if( i == input_PX->size() - 1 )
+      if( j == input_PX->size() - 1 )
         proc = *input_EndProcess; 
       
       double len = sqrt(
-        std::pow( ( input_X->at(i-1) - input_X->at(i) ), 2 )  + 
-        std::pow( ( input_Y->at(i-1) - input_Y->at(i) ), 2 )  + 
-        std::pow( ( input_Z->at(i-1) - input_Z->at(i) ), 2 )   
+        std::pow( ( input_X->at(j-1) - input_X->at(j) ), 2 )  + 
+        std::pow( ( input_Y->at(j-1) - input_Y->at(j) ), 2 )  + 
+        std::pow( ( input_Z->at(j-1) - input_Z->at(j) ), 2 )   
       );
 
       double preStepP[3] = { 
-        input_PX->at(i-1),
-        input_PY->at(i-1),
-        input_PZ->at(i-1)
+        input_PX->at(j-1)*1.e3,
+        input_PY->at(j-1)*1.e3,
+        input_PZ->at(j-1)*1.e3
       };
 
       double postStepP[3] = { 
-        input_PX->at(i),
-        input_PY->at(i),
-        input_PZ->at(i)
+        input_PX->at(j)*1.e3,
+        input_PY->at(j)*1.e3,
+        input_PZ->at(j)*1.e3
       };
+
+      if( j == 1 ){
+        theTraj.SetEnergy( sqrt( preStepP[0]*preStepP[0] + preStepP[1]*preStepP[1] + preStepP[2]*preStepP[2] + mass*mass ) );
+      }              
 
       G4ReweightStep * theStep = new G4ReweightStep( input_ID, input_PDG, 0, input_event, preStepP, postStepP, len, proc ); 
       theTraj.AddStep( theStep );
     }
+    if( !(i % 1000) ) std::cout << "Entry: " << i << std::endl;
 
     //Get the weight from the G4ReweightTraj
     weight = theReweighter.GetWeight( &theTraj );
     track_length = theTraj.GetTotalLength();
+
+    init_momentum = sqrt( theTraj.GetEnergy()*theTraj.GetEnergy() - mass*mass );
+    
     output_event = input_event;
 
     outputTree.Fill();

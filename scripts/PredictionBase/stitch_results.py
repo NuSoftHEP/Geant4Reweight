@@ -4,7 +4,10 @@ from array import array
 
 fout = TFile(sys.argv[1], "RECREATE")
 
-files = sys.argv[2].split(",")
+files = sys.argv[2:]
+
+print "Files:"
+for f in files: print f
 
 trees = []
 

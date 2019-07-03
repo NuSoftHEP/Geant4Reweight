@@ -72,7 +72,7 @@ int main(int argc, char * argv[]){
     fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
   #else
-    fhicl::ParameterSet pset;
+    pset = fhicl::make_ParameterSet(fcl_file);
   #endif
 
   size_t nCascades = pset.get< size_t >("NCascades");

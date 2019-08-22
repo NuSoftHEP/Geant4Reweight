@@ -107,6 +107,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   int PDG;
   std::string final_proc;
   double init_momentum;
+  double final_momentum;
   //////////////////
 
 
@@ -135,6 +136,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   outputTree.Branch( "PDG", &PDG );
   outputTree.Branch( "final_proc", &final_proc );
   outputTree.Branch( "init_momentum", &init_momentum );
+  outputTree.Branch( "final_momentum", &final_momentum );
 
 
   for( size_t i = 0; i < inputTree->GetEntries(); ++i ){
@@ -193,6 +195,11 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
     track_length = theTraj.GetTotalLength();
 
     init_momentum = sqrt( theTraj.GetEnergy()*theTraj.GetEnergy() - mass*mass );
+    final_momentum = sqrt( 
+        std::pow( theTraj.GetStep( theTraj.GetNSteps() - 1 )->GetPreStepPx(), 2 ) + 
+        std::pow( theTraj.GetStep( theTraj.GetNSteps() - 1 )->GetPreStepPy(), 2 ) + 
+        std::pow( theTraj.GetStep( theTraj.GetNSteps() - 1 )->GetPreStepPz(), 2 ) 
+    );
     
     output_event = input_event;
 

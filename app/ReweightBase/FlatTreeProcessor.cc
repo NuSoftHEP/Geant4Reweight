@@ -21,6 +21,8 @@
 #include "parse_reweight_args.hh"
 
 void ProcessFlatTree(std::string &inFileName, std::string &outFileName, G4Reweighter &theReweighter );
+std::vector< std::pair<double, int> > ThinSliceBetheBloch(G4ReweightTraj * theTraj, double res);
+double BetheBloch(double);
 
 int main(int argc, char ** argv){
 
@@ -108,6 +110,8 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   std::string final_proc;
   double init_momentum;
   double final_momentum;
+  std::vector< double > energies;
+  std::vector< int > sliceInts;
   //////////////////
 
 
@@ -137,6 +141,8 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   outputTree.Branch( "final_proc", &final_proc );
   outputTree.Branch( "init_momentum", &init_momentum );
   outputTree.Branch( "final_momentum", &final_momentum );
+  outputTree.Branch( "energies", &energies );
+  outputTree.Branch( "sliceInts", &sliceInts );
 
 
   for( size_t i = 0; i < inputTree->GetEntries(); ++i ){
@@ -162,11 +168,16 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
       std::string proc = "default";
       if( j == input_PX->size() - 1 )
         proc = *input_EndProcess; 
-      
+
+
+      double deltaX = ( input_X->at(j) - input_X->at(j-1) );
+      double deltaY = ( input_Y->at(j) - input_Y->at(j-1) );
+      double deltaZ = ( input_Z->at(j) - input_Z->at(j-1) );
+
       double len = sqrt(
-        std::pow( ( input_X->at(j-1) - input_X->at(j) ), 2 )  + 
-        std::pow( ( input_Y->at(j-1) - input_Y->at(j) ), 2 )  + 
-        std::pow( ( input_Z->at(j-1) - input_Z->at(j) ), 2 )   
+        std::pow( deltaX, 2 )  + 
+        std::pow( deltaY, 2 )  + 
+        std::pow( deltaZ, 2 )   
       );
 
       double preStepP[3] = { 
@@ -186,6 +197,10 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
       }              
 
       G4ReweightStep * theStep = new G4ReweightStep( input_ID, input_PDG, 0, input_event, preStepP, postStepP, len, proc ); 
+      theStep->SetDeltaX( deltaX );
+      theStep->SetDeltaY( deltaY );
+      theStep->SetDeltaZ( deltaZ );
+
       theTraj.AddStep( theStep );
     }
     if( !(i % 1000) ) std::cout << "Entry: " << i << std::endl;
@@ -203,10 +218,152 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
     
     output_event = input_event;
 
+    std::vector< std::pair< double, int > > thin_slice = ThinSliceBetheBloch( &theTraj, .5 );
+
+    energies.clear();
+    sliceInts.clear();
+    for( size_t j = 0; j < thin_slice.size(); ++j ){
+      energies.push_back( thin_slice[j].first );
+      sliceInts.push_back( thin_slice[j].second );
+    }
+
+
     outputTree.Fill();
   }
   
   outputFile.cd();
   outputTree.Write();
   outputFile.Close();
+}
+
+std::vector< std::pair<double, int> > ThinSliceBetheBloch(G4ReweightTraj * theTraj, double res){
+
+  std::vector< std::pair<double, int> > result;
+  
+  //First slice position
+  double sliceEdge = res;
+  double lastPos = 0.;
+  double nextPos = 0.;
+  double px,py,pz; 
+  int interactInSlice = 0;
+
+  //Get total distance traveled in z
+  double totalDeltaZ = 0.;
+  double disp = 0.;
+  double oldDisp = 0.;
+  int crossedSlices = 0; 
+
+  int currentSlice = 0;
+  int oldSlice = 0;
+
+  double sliceEnergy = theTraj->GetEnergy();
+  size_t nSteps = theTraj->GetNSteps();
+  for(size_t is = 0; is < nSteps; ++is){
+    auto theStep = theTraj->GetStep(is);
+
+    disp += theStep->GetStepLength();
+    currentSlice = floor(disp/res);
+    
+    std::string theProc = theStep->GetStepChosenProc(); 
+    
+    //Check to see if in a new slice and it's not the end
+    if( oldSlice != currentSlice && is < nSteps - 1){ 
+
+
+      //Save Interaction info of the prev slice
+      //and reset
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+      interactInSlice = 0;
+
+      //Update the energy
+      sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+      if( sliceEnergy - 139.57 < 0.){
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        sliceEnergy = 0.0001;
+      }    
+      //If it's more than 1 slice, add in non-interacting slices
+      for(int ic = 1; ic < abs( oldSlice - currentSlice ); ++ic){
+        //std::cout << ic << std::endl;
+
+        result.push_back( std::make_pair(sliceEnergy, 0) );
+
+        //Update the energy again
+        sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+        if( sliceEnergy - 139.57 < 0.){
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          sliceEnergy = 0.0001;
+        }
+      }      
+      
+      if( ( theProc == "pi+Inelastic") ) interactInSlice = 1;      
+    }
+    //It's crossed a slice and it's the last step. Save both info
+    else if( oldSlice != currentSlice && is == nSteps - 1 ){
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+      interactInSlice = 0;
+      
+      //Update the energy
+      sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+      if( sliceEnergy - 139.57 < 0.){
+        //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+        //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+        sliceEnergy = 0.0001;
+      }
+      //If it's more than 1 slice, add in non-interacting slices
+      for(int ic = 1; ic < abs( oldSlice - currentSlice ); ++ic){
+        //std::cout << ic << std::endl;
+
+        result.push_back( std::make_pair(sliceEnergy, 0) );
+
+        //Update the energy again
+        sliceEnergy = sliceEnergy - res*BetheBloch(sliceEnergy);
+        if( sliceEnergy - 139.57 < 0.){
+          //std::cout << "Warning! Negative energy " << sliceEnergy - 139.57 << std::endl;
+          //std::cout << "Crossed " << oldSlice - currentSlice << std::endl;
+          sliceEnergy = 0.0001;
+        }
+      }
+      
+      //Save the last slice
+      if( (theProc == "pi+Inelastic") ) interactInSlice = 1;
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+    }
+    //It's the end, so just save this last info
+    else if( oldSlice == currentSlice && is == nSteps - 1 ){
+      if( (theProc == "pi+Inelastic") ) interactInSlice = 1;
+      result.push_back( std::make_pair(sliceEnergy, interactInSlice) );
+    }
+    //Same slice, not the end. Check for interactions
+    else{
+      if( (theProc == "pi+Inelastic") ) interactInSlice = 1;
+    }
+
+    //Update oldslice
+    oldSlice = currentSlice;
+  }
+
+  return result;
+}
+
+double BetheBloch(double energy){
+  
+  //Need to make this configurable? Or delete...
+  double K = .307075;   
+  double rho = 1.390; 
+  double Z = 18;
+  double A = 40;
+  double I = 188E-6;
+  double mass = 139.57;
+  double me = .511;
+  //Need to make sure this is total energy, not KE
+  double gamma = energy/mass;
+  double beta = sqrt( 1. - (1. / (gamma*gamma)) );  double Tmax = 2 * me * beta*beta * gamma*gamma;
+
+  double first = K * (Z/A) * rho / (beta*beta);
+  double second = .5 * log(Tmax*Tmax/(I*I)) - beta*beta;
+
+  double dEdX = first*second;
+  return dEdX;  
 }

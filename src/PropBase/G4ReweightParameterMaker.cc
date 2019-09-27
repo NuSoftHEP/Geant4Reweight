@@ -18,13 +18,13 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     fhicl::ParameterSet theSet = FitParSets.at(i);
     std::string theCut = theSet.get< std::string >("Cut");
 
-    if( std::find( all_cuts.begin(), all_cuts.end(), theCut ) == all_cuts.end() ){
+    if( theCut != "elast" && std::find( all_cuts.begin(), all_cuts.end(), theCut ) == all_cuts.end() ){
       std::cout << "Error: found parameter with bad cut " << theCut << std::endl;
       std::exception e;
       throw e;        
     }
 
-    ++nParameters;
+    if( theCut != "elast" ) ++nParameters;
 
     std::string theName = theSet.get< std::string >("Name");
             
@@ -48,7 +48,11 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     par.ScanDelta = scan_delta;
 
     ///////Add into the parameters themselves
-    FullParameterSet[ theCut ].push_back( par );
+    if( theCut == "elast" ){
+      ElasticParameterSet.push_back( par );
+    }
+    else
+      FullParameterSet[ theCut ].push_back( par );
 
   }
 
@@ -67,73 +71,58 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
   }
 
 
-/*
-
-  for( size_t i = 0; i < FitParSets.size(); ++i ){
-    fhicl::ParameterSet theSet = FitParSets.at(i);
-    std::string theCut = theSet.get< std::string >("Cut");
-
-    if( FullParameterSet.find( theCut ) == FullParameterSet.end() ){  
-      FullParameterSet[ theCut ] = std::vector< FitParameter  >();
-    }   
-
-    bool isDummy = theSet.get< bool >("Dummy");
-    if( isDummy ){
-      FitParameter dummyPar;
-      dummyPar.Name = "dummy";
-      dummyPar.Cut = theCut;
-      dummyPar.Value = 1.; 
-      dummyPar.Range = std::make_pair( 0., 0.);
-      dummyPar.Dummy = true;
-          
-      FullParameterSet[ theCut ].push_back( dummyPar );
-    }   
-    else{ 
-        
-      std::vector< fhicl::ParameterSet > theParameters = theSet.get< std::vector< fhicl::ParameterSet > >("Parameters");
-      for( size_t j = 0; j < theParameters.size(); ++j ){
-
-        ++nParameters;
-
-        fhicl::ParameterSet thePar = theParameters.at(j);
+  BuildHistsFromPars();
+  BuildElasticHist();
+}
 
 
-        std::string theName = thePar.get< std::string >("Name");
-            
-        std::pair< double, double > theRange = thePar.get< std::pair< double, double > >("Range");
+void G4ReweightParameterMaker::BuildElasticHist(){
 
-        double nominal = thePar.get< double >("Nominal",1.);
+  std::vector< double > varX, varY; 
 
-        FitParameter par;
-        par.Name = theName;
-        par.Cut = theCut;
-        par.Dummy = false;
-        par.Value = nominal; 
-        par.Range = theRange;
+  for( size_t i = 0; i < ElasticParameterSet.size(); ++i ){
+    double value = ElasticParameterSet[i].Value;
+    std::pair< double, double > range = ElasticParameterSet[i].Range;
 
-        double scan_start = thePar.get< double >("ScanStart", 1.);
-        int    nsteps =     thePar.get< int >("NScanSteps", 2);
-        double scan_delta = thePar.get< double >("ScanDelta", .1);
+    bool addDummyBin = false;
+    if( varX.size() ){
+      //If the end of last bin == start of this bin
+      //don't need to add a dummy
+      if( varX.back() < range.first ){
+        varX.push_back( range.first );
+        addDummyBin = true;
+      }
+    }
+    else
+      varX.push_back(range.first);
+    
+    varX.push_back( range.second );
 
-        par.ScanStart = scan_start;
-        par.ScanSteps = nsteps;
-        par.ScanDelta = scan_delta;
-
-        ///////Add into the parameters themselves
-        FullParameterSet[ theCut ].push_back( par );
-
-      }   
-    }   
+    if( addDummyBin )
+      varY.push_back( 1. );
+    varY.push_back( value );
   }
 
-*/
+  if( varX.size() ){
+    ElasticHist = new TH1D( "varElast","", varX.size()-1, &varX[0]);
+    for( size_t i = 0; i < varY.size(); ++i ){
+      ElasticHist->SetBinContent(i+1, varY[i]);
+    }
+  }
+  else{
+   ElasticHist = new TH1D( "varElast", "", 1, 0, 0 );
+   ElasticHist->SetBinContent( 1, 1. );
+  }
+  //Set under/overflow
+  ElasticHist->SetBinContent( 0, 1. );
+  ElasticHist->SetBinContent( ElasticHist->GetNbinsX()+1, 1. );
 
-  BuildHistsFromPars();
 }
+
 
 void G4ReweightParameterMaker::BuildHistsFromPars(){
 
-  std::map< std::string, std::vector< FitParameter > >::iterator itPar;
+  //std::map< std::string, std::vector< FitParameter > >::iterator itPar;
   std::map< std::string, bool > CutIsDummy;
   for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
     std::string name = itPar->first;  

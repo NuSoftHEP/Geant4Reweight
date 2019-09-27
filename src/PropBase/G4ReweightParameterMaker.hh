@@ -21,7 +21,9 @@ class G4ReweightParameterMaker{
     void SetNewVals( const std::map< std::string, double > & input );
     void SetParamVals( const std::map< std::string, double > & input );
     void BuildHistsFromPars();
+    void BuildElasticHist();
     const std::map< std::string, TH1D* > & GetFSHists() const { return FSHists; };
+    TH1D * GetElasticHist(){ return ElasticHist; };
 
     const std::map< std::string, std::vector< FitParameter > > & GetParameterSet() const { return FullParameterSet; };
 
@@ -91,6 +93,9 @@ class G4ReweightParameterMaker{
     std::map< std::string, TH1D* > FSHists;
     TH1D * dummyHist;
     std::map< std::string, std::vector< FitParameter > > FullParameterSet;
+    std::vector< FitParameter > ElasticParameterSet;
+
+    TH1D* ElasticHist;
 
     int nParameters;
 };

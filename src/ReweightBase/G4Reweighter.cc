@@ -190,7 +190,10 @@ G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSSc
   //fout->Close();
 }
 
-G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, bool PiMinus){
+G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool PiMinus) : 
+  elasticBias( inputElasticBiasHist )
+{
+
   as_graphs = true;
   if( PiMinus ) SetPiMinus();
   
@@ -475,6 +478,9 @@ double G4Reweighter::GetWeightFromGraph( std::string theInt, double theMomentum 
 
 void G4Reweighter::SetTotalGraph( TFile * input ){
   totalGraph = (TGraph*)input->Get( "inel_momentum" );
+
+  elasticGraph = (TGraph*)input->Get( "el_momentum" );
+
   TVectorD * m_vec = (TVectorD*)input->Get("Mass");
   Mass = (*m_vec)(0);
 
@@ -500,9 +506,27 @@ double G4Reweighter::GetBiasedMFP( double theMom ){
   return  GetNominalMFP( theMom ) / b;
 }
 
+double G4Reweighter::GetNominalElasticMFP( double theMom ){
+  double xsec = elasticGraph->Eval( theMom );
+  return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
+}
+
+
+double G4Reweighter::GetBiasedElasticMFP( double theMom ){
+  double b = 1.;
+  if( as_graphs ){
+    b = elasticBias->GetBinContent(
+      elasticBias->FindBin( theMom ) 
+    );
+  }
+
+  return GetNominalElasticMFP( theMom ) / b;
+}
+
 double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
 
-  double total, bias_total;
+  double total = 0.;
+  double bias_total = 0.;
 
   size_t nsteps = theTraj->GetNSteps();
   if( theTraj->GetFinalProc() == fInelastic )
@@ -577,6 +601,30 @@ double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
     weight *= exclusive_factor;
   }
   return weight;
+}
+
+double G4Reweighter::GetElasticWeight( G4ReweightTraj * theTraj ){
+  double total = 0.;
+  double bias_total = 0.;
+  double elastic_weight = 1.;
+
+  for(size_t is = 0; is < theTraj->GetNSteps(); ++is){   
+
+    auto theStep = theTraj->GetStep(is);
+    double theMom = theStep->GetFullPreStepP();
+
+    if( theStep->GetStepChosenProc() == "hadElastic" ){
+      elastic_weight *= elasticBias->GetBinContent( elasticBias->FindBin( theMom ) );
+    }
+    else{
+      total += ( theStep->GetStepLength() / GetNominalElasticMFP(theMom) );
+      bias_total += ( theStep->GetStepLength() / GetBiasedElasticMFP( theMom ) );
+    }
+  }      
+
+  elastic_weight *= exp( total - bias_total );
+
+  return elastic_weight;
 }
 
 TH1D * G4Reweighter::GetExclusiveVariation( std::string theInt ){

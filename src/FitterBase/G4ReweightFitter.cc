@@ -193,7 +193,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
 
-  theReweighter = new G4Reweighter(&FracFile, FSHists, false);
+  theReweighter = new G4Reweighter(&FracFile, FSHists/*, false*/);
 
   
   TGraph * total_var = theReweighter->GetTotalVariationGraph();

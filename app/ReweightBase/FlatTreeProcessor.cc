@@ -69,7 +69,7 @@ int main(int argc, char ** argv){
   try{
     G4ReweightParameterMaker ParMaker( FitParSets );
 
-    G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists() ); 
+    G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists(), ParMaker.GetElasticHist() ); 
     if( enablePiMinus ) theReweighter->SetPiMinus();
 
     std::string XSecFileName = pset.get< std::string >( "XSec" );
@@ -99,12 +99,13 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   std::vector< double > * input_PX = new std::vector< double >();
   std::vector< double > * input_PY = new std::vector< double >();
   std::vector< double > * input_PZ = new std::vector< double >();
+  std::vector< int > * elastic_indices = new std::vector< int >();
   int input_ID, input_PDG;
   std::string *input_EndProcess = new std::string();
 
   //Output variables
   int output_event;
-  double weight;
+  double weight, elastic_weight;
   double track_length;
   int PDG;
   std::string final_proc;
@@ -112,6 +113,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   double final_momentum;
   std::vector< double > energies;
   std::vector< int > sliceInts;
+  int nElasticScatters;
   //////////////////
 
 
@@ -129,6 +131,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   inputTree->SetBranchAddress( "true_beam_PDG", &input_PDG );
   inputTree->SetBranchAddress( "true_beam_ID",  &input_ID );
   inputTree->SetBranchAddress( "true_beam_EndProcess", &input_EndProcess );
+  inputTree->SetBranchAddress( "elastic_indices", &elastic_indices );
 
 
   //Create output
@@ -136,6 +139,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   TTree outputTree = TTree( "output", "" );
   outputTree.Branch( "event",        &output_event );
   outputTree.Branch( "weight",       &weight );
+  outputTree.Branch( "elastic_weight",       &elastic_weight );
   outputTree.Branch( "track_length", &track_length );
   outputTree.Branch( "PDG", &PDG );
   outputTree.Branch( "final_proc", &final_proc );
@@ -143,6 +147,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   outputTree.Branch( "final_momentum", &final_momentum );
   outputTree.Branch( "energies", &energies );
   outputTree.Branch( "sliceInts", &sliceInts );
+  outputTree.Branch( "nElasticScatters", &nElasticScatters );
 
 
   for( size_t i = 0; i < inputTree->GetEntries(); ++i ){
@@ -163,11 +168,19 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
     size_t nSteps = input_PX->size();
     if( nSteps < 2 ) continue;
 
+    nElasticScatters = elastic_indices->size();
+
     for( size_t j = 1; j < nSteps; ++j ){
+      
+      if( j == input_PX->size() - 1 && std::find( elastic_indices->begin(), elastic_indices->end(), j ) != elastic_indices->end() )
+        std::cout << "Warning: last step and elastic process" << std::endl;
 
       std::string proc = "default";
       if( j == input_PX->size() - 1 )
         proc = *input_EndProcess; 
+      else if( std::find( elastic_indices->begin(), elastic_indices->end(), j ) != elastic_indices->end() )
+        proc = "hadElastic";
+        
 
 
       double deltaX = ( input_X->at(j) - input_X->at(j-1) );
@@ -207,6 +220,7 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
 
     //Get the weight from the G4ReweightTraj
     weight = theReweighter.GetWeight( &theTraj );
+    elastic_weight = theReweighter.GetElasticWeight( &theTraj );
     track_length = theTraj.GetTotalLength();
 
     init_momentum = sqrt( theTraj.GetEnergy()*theTraj.GetEnergy() - mass*mass );

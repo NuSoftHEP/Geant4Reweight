@@ -24,15 +24,18 @@ class G4Reweighter{
     
     G4Reweighter(){};
     G4Reweighter(TFile *, std::map< std::string, TGraph*> &,/* double, double,*/ bool PiMinus = false);    
-    G4Reweighter(TFile *, const std::map< std::string, TH1D*> &, bool PiMinus = false);    
+    G4Reweighter(TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool PiMinus = false);    
     ~G4Reweighter();
 
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );
 
     double GetWeight( G4ReweightTraj * );
+    double GetElasticWeight( G4ReweightTraj * );
     double GetNominalMFP( double );
     double GetBiasedMFP( double );
+    double GetNominalElasticMFP( double );
+    double GetBiasedElasticMFP( double );
 
     void SetTotalGraph( TFile * );
 
@@ -84,6 +87,9 @@ class G4Reweighter{
     TGraph * totalVariationGraph;
 
     TGraph * totalGraph;
+    TGraph * elasticGraph;
+
+    TH1D * elasticBias;
 
     double Maximum;
     double Minimum;

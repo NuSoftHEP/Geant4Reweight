@@ -308,8 +308,8 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double >
       double end   = thePars[i].Range.second;
       
       for( int j = 1; j <= excHist->GetNbinsX(); ++j ){
-        double bin_low = excHist->GetBinLowEdge(j);
-        double bin_high = excHist->GetBinLowEdge(j+1);
+        //double bin_low = excHist->GetBinLowEdge(j);
+        //double bin_high = excHist->GetBinLowEdge(j+1);
 
         if( ( start <= excHist->GetBinLowEdge(j) ) && ( end >= excHist->GetBinLowEdge(j+1) ) ){
           excHist->SetBinContent(j, thePars[i].Value);
@@ -335,8 +335,8 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double >
 
           TH1D * excHist = itHist->second; 
           for( int j = 1; j <= excHist->GetNbinsX(); ++j ){
-            double bin_low = excHist->GetBinLowEdge(j);
-            double bin_high = excHist->GetBinLowEdge(j+1);
+            //double bin_low = excHist->GetBinLowEdge(j);
+            //double bin_high = excHist->GetBinLowEdge(j+1);
             
             if( ( reac_start <= excHist->GetBinLowEdge(j) ) && ( reac_end >= excHist->GetBinLowEdge(j+1) ) ){
               double exc_val = excHist->GetBinContent(j);

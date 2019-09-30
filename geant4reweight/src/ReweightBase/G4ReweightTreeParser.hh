@@ -5,8 +5,8 @@
 #include "G4ReweightTraj.hh"
 #include "G4Reweighter.hh"
 
-#include "G4ReweightParameterMaker.hh"
-#include "G4ReweightThrowManager.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
 
 //#include "G4RunManager.hh"
 

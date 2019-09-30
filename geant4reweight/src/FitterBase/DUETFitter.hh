@@ -15,7 +15,6 @@
 #include "TFile.h"
 #include "TTree.h"
 
-#include "G4ReweightTreeParser.hh"
 
 class DUETFitter : public G4ReweightFitter { 
   public:

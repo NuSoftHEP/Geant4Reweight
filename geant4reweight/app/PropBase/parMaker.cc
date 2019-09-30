@@ -1,6 +1,6 @@
-#include "G4ReweightParameterMaker.hh"
-#include "G4ReweightThrowManager.hh"
-#include "FitParameter.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
+#include "geant4reweight/src/util/FitParameter.hh"
 
 #include "TFile.h"
 
@@ -10,15 +10,15 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-#ifdef FNAL_FHICL
+//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-#endif
+//#endif
 
 int main( int argc, char ** argv ){
 
   fhicl::ParameterSet pset; 
 
-  #ifdef FNAL_FHICL
+  //#ifdef FNAL_FHICL
     // Configuration file lookup policy.
     char const* fhicl_env = getenv("FHICL_FILE_PATH");
     std::string search_path;
@@ -35,9 +35,9 @@ int main( int argc, char ** argv ){
 
     fhicl::make_ParameterSet(argv[1], lookupPolicy, pset);
 
-  #else
-    pset = fhicl::make_ParameterSet(argv[1]);
-  #endif
+//  #else
+//    pset = fhicl::make_ParameterSet(argv[1]);
+//  #endif
 
   std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 

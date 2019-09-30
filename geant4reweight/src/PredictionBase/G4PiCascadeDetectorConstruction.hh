@@ -1,7 +1,7 @@
 #ifndef G4PiCascadeDetectorConstruction_h
 #define G4PiCascadeDetectorConstruction_h 1
 
-#include "G4VUserDetectorConstruction.hh"
+#include "Geant4/G4VUserDetectorConstruction.hh"
 
 class G4VPhysicalVolume;
 class G4LogicalVolume;

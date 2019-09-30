@@ -7,7 +7,7 @@ DUETFitter::DUETFitter(TFile * output_file, std::string data_file) {
   fExperimentName = "DUET_C_PiPlus";
   fDataFileName = data_file; 
   nDOF = 10;
-}; 
+} 
 
 void DUETFitter::SaveData(TDirectory * data_dir){
   data_dir->cd();

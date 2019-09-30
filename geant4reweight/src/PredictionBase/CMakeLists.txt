@@ -1,18 +1,47 @@
-file(GLOB sources *.cc)
-add_library(PredictionBaseLib
-  ${sources}
+#file(GLOB sources *.cc)
+#add_library(PredictionBaseLib
+#  ${sources}
+#)
+#
+#include(${Geant4_USE_FILE})
+#
+#message(${ROOT_INCLUDE_DIRS})
+#include_directories(${ROOT_INCLUDE_DIRS})
+#
+#include_directories(${INCDIRS})
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+#
+#include_directories(${FHICL_INCLUDE_DIR})
+#
+#target_link_libraries(PredictionBaseLib ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+#
+#SET(MODULETargets ${MODULETargets};PredictionBaseLib PARENT_SCOPE)
+
+art_make_library( LIBRARY_NAME PredictionBaseLib 
+  SOURCE 
+    G4PiCascadeDetectorConstruction.cc
+    G4PiCascadePhysicsList.cc
+  LIBRARIES
+    ${ART_FRAMEWORK_CORE}
+    ${ART_FRAMEWORK_PRINCIPAL}
+    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    ${ART_FRAMEWORK_SERVICES_BASIC}
+    canvas
+    ${MF_MESSAGELOGGER}
+    ${FHICLCPP}
+    cetlib cetlib_except
+    clhep
+    ${G4EVENT}
+    ${G4INTERCOMS}
+    ${G4INTERFACES}
+    ${G4RUN}
+    ${G4TRACKING}
+    ${G4MATERIALS}
+    ${G4GEOMETRY}
+    ${G4GLOBAL}
+    ${G4PERSISTENCY}
+    ${G4PHYSICSLISTS}
+    ${ROOT_BASIC_LIB_LIST}
 )
-
-include(${Geant4_USE_FILE})
-
-message(${ROOT_INCLUDE_DIRS})
-include_directories(${ROOT_INCLUDE_DIRS})
-
-include_directories(${INCDIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-include_directories(${FHICL_INCLUDE_DIR})
-
-target_link_libraries(PredictionBaseLib ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
-
-SET(MODULETargets ${MODULETargets};PredictionBaseLib PARENT_SCOPE)
+install_headers()
+install_source()

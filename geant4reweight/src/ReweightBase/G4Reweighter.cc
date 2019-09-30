@@ -96,7 +96,7 @@ G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSSc
   for( size_t i = 0; i < theInts.size(); ++i ){
     TGraph * theVar = theVariations.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
+    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
       double binCenter   = theGraph->GetX()[bin];
@@ -289,7 +289,7 @@ G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &
   for( size_t i = 0; i < theInts.size(); ++i ){
     TH1D * theVar = FSScales.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
+    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
       double point   = theGraph->GetX()[bin];
@@ -396,7 +396,7 @@ void G4Reweighter::SetNewHists(const std::map< std::string, TH1D* > &FSScales){
   for( size_t i = 0; i < theInts.size(); ++i ){
     TH1D * theVar = FSScales.at( theInts.at(i) );
     TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( size_t bin = 0; bin < theGraph->GetN(); ++bin ){
+    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
       
       double Content = theGraph->GetY()[bin];
       double point   = theGraph->GetX()[bin];
@@ -654,11 +654,15 @@ G4Reweighter::~G4Reweighter(){
     if( exclusiveVariationGraphs.find( theInts.at(i) ) != exclusiveVariationGraphs.end() )
       delete exclusiveVariationGraphs.at( theInts.at(i) );
 
-    if( oldGraphs.find( theInts.at(i) ) != oldGraphs.end() )
+    if( oldGraphs.find( theInts.at(i) ) != oldGraphs.end() ){
+      std::cout << theInts.at(i) << " " << oldGraphs.at( theInts.at(i) ) << std::endl;
       delete oldGraphs.at( theInts.at(i) );
+    }
 
-    if( newGraphs.find( theInts.at(i) ) != newGraphs.end() )
+    if( newGraphs.find( theInts.at(i) ) != newGraphs.end() ){
+      std::cout << theInts.at(i) << " " << newGraphs.at( theInts.at(i) ) << std::endl;
       delete newGraphs.at( theInts.at(i) );
+    }
   } 
 
 }

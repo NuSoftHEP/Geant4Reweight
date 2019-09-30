@@ -35,9 +35,9 @@ class G4ReweightStep{
     double GetDeltaY(){ return deltaY; };
     double GetDeltaZ(){ return deltaZ; };
 
-    double SetDeltaX( double dX ){ deltaX = dX; };
-    double SetDeltaY( double dY ){ deltaY = dY; };
-    double SetDeltaZ( double dZ ){ deltaZ = dZ; };
+    void SetDeltaX( double dX ){ deltaX = dX; };
+    void SetDeltaY( double dY ){ deltaY = dY; };
+    void SetDeltaZ( double dZ ){ deltaZ = dZ; };
 
     double GetStepLength(){ return stepLength; };
 

@@ -297,8 +297,8 @@ double G4ReweightFitter::DoFit(bool fSave){
   double x;
 
   //Go through each cut defined for the experiment
-  std::map< std::string, TGraphErrors * >::iterator itXSec = Data_xsec_graphs.begin();
-  for( itXSec; itXSec != Data_xsec_graphs.end(); ++itXSec ){
+  //std::map< std::string, TGraphErrors * >::iterator itXSec = Data_xsec_graphs.begin();
+  for( auto itXSec = Data_xsec_graphs.begin(); itXSec != Data_xsec_graphs.end(); ++itXSec ){
     std::string name = itXSec->first;
 
     TGraph * MC_xsec = MC_xsec_graphs.at(name);

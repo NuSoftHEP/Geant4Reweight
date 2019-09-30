@@ -1,10 +1,10 @@
 #include "G4PiCascadePhysicsList.hh"
 
-#include "G4DecayPhysics.hh"
-#include "G4RadioactiveDecayPhysics.hh"
-#include "G4EmStandardPhysics.hh"
-#include "G4HadronPhysicsFTFP_BERT.hh"
-#include "G4HadronElasticPhysics.hh"
+#include "Geant4/G4DecayPhysics.hh"
+#include "Geant4/G4RadioactiveDecayPhysics.hh"
+#include "Geant4/G4EmStandardPhysics.hh"
+#include "Geant4/G4HadronPhysicsFTFP_BERT.hh"
+#include "Geant4/G4HadronElasticPhysics.hh"
 
 
 G4PiCascadePhysicsList::G4PiCascadePhysicsList() : G4VModularPhysicsList(){
@@ -16,13 +16,13 @@ G4PiCascadePhysicsList::G4PiCascadePhysicsList() : G4VModularPhysicsList(){
 
   RegisterPhysics( new G4HadronPhysicsFTFP_BERT() );
   RegisterPhysics( new G4HadronElasticPhysics() );
-  G4cout << "Finished Physics" << G4endl;
+  std::cout << "Finished Physics" << std::endl;
 }
 
 G4PiCascadePhysicsList::~G4PiCascadePhysicsList(){}
 
 void G4PiCascadePhysicsList::SetCuts(){
-  G4cout << "Set Cuts" << G4endl; 
+  std::cout << "Set Cuts" << std::endl; 
   G4VUserPhysicsList::SetCuts();
 }
 

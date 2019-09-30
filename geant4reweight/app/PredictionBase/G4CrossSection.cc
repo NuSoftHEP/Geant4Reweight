@@ -1,21 +1,21 @@
-#include "G4CrossSectionDataStore.hh"
-#include "G4PionPlus.hh"
-#include "G4PionMinus.hh"
-#include "G4Proton.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4DynamicParticle.hh"
-#include "G4ThreeVector.hh"
-#include "G4Material.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4ProcessManager.hh"
-#include "G4VProcess.hh"
-#include "G4RunManager.hh"
-#include "G4HadronInelasticProcess.hh"
-#include "G4HadronElasticProcess.hh"
-#include "G4String.hh"
+#include "Geant4/G4CrossSectionDataStore.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4DynamicParticle.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4VProcess.hh"
+#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4String.hh"
 
-#include "G4PiCascadeDetectorConstruction.hh"
-#include "G4PiCascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4PiCascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4PiCascadePhysicsList.hh"
 
 #include <utility>
 #include <iostream>
@@ -30,9 +30,9 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-#ifdef FNAL_FHICL
+//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-#endif
+//#endif
 
 std::string fcl_file;
 
@@ -56,7 +56,7 @@ int main(int argc, char * argv[]){
 
   fhicl::ParameterSet pset;
 
-  #ifdef FNAL_FHICL
+  //#ifdef FNAL_FHICL
     // Configuration file lookup policy.
     char const* fhicl_env = getenv("FHICL_FILE_PATH");
     std::string search_path;
@@ -73,9 +73,9 @@ int main(int argc, char * argv[]){
 
     fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
-  #else
-    pset = fhicl::make_ParameterSet(fcl_file);
-  #endif
+  //#else
+  //  pset = fhicl::make_ParameterSet(fcl_file);
+  //#endif
 
 
 

@@ -4,18 +4,18 @@
 #include "TFile.h"
 #include "TH1F.h"
 
-#include "G4ReweightTraj.hh"
-#include "G4ReweightStep.hh"
-#include "G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
 
-#include "G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-#ifdef FNAL_FHICL
+//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-#endif
+//#endif
 
 //Defines parseArgs and the command line options
 #include "parse_reweight_args.hh"
@@ -30,7 +30,7 @@ int main(int argc, char ** argv){
     return 0;
 
   fhicl::ParameterSet pset;
-  #ifdef FNAL_FHICL
+  //#ifdef FNAL_FHICL
     // Configuration file lookup policy.
     char const* fhicl_env = getenv("FHICL_FILE_PATH");
     std::string search_path;
@@ -47,9 +47,9 @@ int main(int argc, char ** argv){
 
     fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
-  #else
-    pset = fhicl::make_ParameterSet(fcl_file);
-  #endif
+//  #else
+//    pset = fhicl::make_ParameterSet(fcl_file);
+//  #endif
 
   std::string outFileName = pset.get< std::string >( "OutputFile" );
   if( output_file_override  != "empty" ){
@@ -150,12 +150,12 @@ void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Rewei
   outputTree.Branch( "nElasticScatters", &nElasticScatters );
 
 
-  for( size_t i = 0; i < inputTree->GetEntries(); ++i ){
+  for( int i = 0; i < inputTree->GetEntries(); ++i ){
     inputTree->GetEvent(i);
     PDG = input_PDG;
     final_proc = *input_EndProcess;
 
-    double mass;
+    double mass = 0.;
     if( PDG == 211 ) mass = 139.57;
     else if( PDG == 2212 ) mass = 938.28;
 
@@ -255,17 +255,17 @@ std::vector< std::pair<double, int> > ThinSliceBetheBloch(G4ReweightTraj * theTr
   std::vector< std::pair<double, int> > result;
   
   //First slice position
-  double sliceEdge = res;
-  double lastPos = 0.;
-  double nextPos = 0.;
-  double px,py,pz; 
+//  double sliceEdge = res;
+//  double lastPos = 0.;
+//  double nextPos = 0.;
+//  double px,py,pz; 
   int interactInSlice = 0;
 
   //Get total distance traveled in z
-  double totalDeltaZ = 0.;
+//  double totalDeltaZ = 0.;
   double disp = 0.;
-  double oldDisp = 0.;
-  int crossedSlices = 0; 
+//  double oldDisp = 0.;
+//  int crossedSlices = 0; 
 
   int currentSlice = 0;
   int oldSlice = 0;

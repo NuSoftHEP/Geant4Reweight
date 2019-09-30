@@ -45,6 +45,9 @@ find_ups_product( nutools )
 find_ups_product( art )
 find_ups_product( cetbuildtools ) # LIBRARY_OUTPUT_DIRECTORY, etc.
 
+#new
+find_ups_geant4( )
+
 # macros for dictionary and simple_plugin
 include(ArtDictionary)
 include(ArtMake)
@@ -54,13 +57,12 @@ include(BuildPlugins)
 
 # ADD SOURCE CODE SUBDIRECTORIES HERE
 add_subdirectory(geant4reweight)
-
 # tests
 add_subdirectory(test)
-
 # ups - table and config files
 # must be AFTER all other subdirectories
 add_subdirectory(ups)
 
 # packaging utility - must be last
 include(UseCPack)
+

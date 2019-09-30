@@ -100,7 +100,7 @@ void G4ReweightFitManager::DefineFCN(){
         //////////////////////////////////////////////////////
 
         //Saving Extra Information////////////////////////////
-        TDirectory * outdir;
+        TDirectory * outdir = 0x0;
         if( fSave ){
           if( !out->Get( dir_name.c_str() ) ){
             outdir = out->mkdir( dir_name.c_str() );

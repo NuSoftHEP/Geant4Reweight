@@ -14,8 +14,8 @@
 #include <map>
 #include <string>
 
-#include "G4Reweighter.hh"
-#include "FitParameter.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+#include "geant4reweight/src/util/FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 

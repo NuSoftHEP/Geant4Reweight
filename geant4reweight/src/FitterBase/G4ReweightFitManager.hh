@@ -9,8 +9,8 @@
 #include "Math/Minimizer.h"
 #include "TDirectory.h"
 
-#include "G4ReweightParameterMaker.hh"
-#include "FitParameter.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/util/FitParameter.hh"
 #include "G4ReweightFitter.hh"
 
 #include <iostream>

@@ -65,7 +65,7 @@ class G4ReweightTraj{
     double GetTotalLength();
 
 
-    int GetNElastic();
+    size_t GetNElastic();
     std::vector<double> GetElastDists();
 
     void AddWeight( double w ){

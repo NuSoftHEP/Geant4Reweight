@@ -1,5 +1,5 @@
-#include "G4ReweightFitManager.hh"
-#include "FitParameter.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/src/util/FitParameter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"
@@ -11,9 +11,9 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-#ifdef FNAL_FHICL
+//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-#endif
+//#endif
 
 std::string set_prec(double);
 
@@ -31,7 +31,7 @@ int main(int argc, char ** argv){
 
   fhicl::ParameterSet pset;
 
-  #ifdef FNAL_FHICL
+  //#ifdef FNAL_FHICL
     // Configuration file lookup policy.
     char const* fhicl_env = getenv("FHICL_FILE_PATH");
     std::string search_path;
@@ -48,9 +48,9 @@ int main(int argc, char ** argv){
 
     fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
-  #else
-    pset = fhicl::make_ParameterSet(fcl_file);
-  #endif
+  //#else
+  //  pset = fhicl::make_ParameterSet(fcl_file);
+  //#endif
 
   bool fSave    = pset.get< bool >( "Save", false );
   if( save_override != -1 )

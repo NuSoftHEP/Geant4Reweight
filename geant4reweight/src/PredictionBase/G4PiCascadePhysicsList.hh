@@ -1,8 +1,8 @@
 #ifndef G4PiCascadePhysicsList_h
 #define G4PiCascadePhysicsList_h 1
 
-#include "G4VUserPhysicsList.hh"
-#include "G4VModularPhysicsList.hh"
+#include "Geant4/G4VUserPhysicsList.hh"
+#include "Geant4/G4VModularPhysicsList.hh"
 
 class G4PiCascadePhysicsList : public G4VModularPhysicsList
 {

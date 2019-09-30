@@ -6,7 +6,7 @@
 #include <algorithm>
 
 G4ReweightTraj::G4ReweightTraj(int tid, int pdg, int parid, int eventnum, std::pair<int,int> range) :
-trackID(tid), PDG(pdg), parID(parid), eventNum(eventnum), stepRange(range){
+trackID(tid), eventNum(eventnum), PDG(pdg), parID(parid), stepRange(range){
   if( PDG == 211 ){ 
     fInelastic = "pi+Inelastic";
   }
@@ -126,8 +126,8 @@ double G4ReweightTraj::GetTotalLength(){
   return total;
 }
 
-int G4ReweightTraj::GetNElastic(){
-  int total = 0;
+size_t G4ReweightTraj::GetNElastic(){
+  size_t total = 0;
 
   for(size_t is = 0; is < GetNSteps(); ++is){
     auto theStep = GetStep(is);

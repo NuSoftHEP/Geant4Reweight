@@ -32,6 +32,8 @@ art_make_library( LIBRARY_NAME ReweightBaseLib
     G4ReweightStep.cc
     G4ReweightTraj.cc
     G4Reweighter.cc
+    G4PiPlusReweighter.cc
+    G4PiMinusReweighter.cc
     #G4ReweightTreeParser.cc
   LIBRARIES
     ${ART_FRAMEWORK_CORE}

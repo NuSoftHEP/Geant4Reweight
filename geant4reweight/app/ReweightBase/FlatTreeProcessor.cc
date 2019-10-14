@@ -6,7 +6,7 @@
 
 #include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
 #include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
-#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
 
 #include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 
@@ -20,7 +20,7 @@
 //Defines parseArgs and the command line options
 #include "parse_reweight_args.hh"
 
-void ProcessFlatTree(std::string &inFileName, std::string &outFileName, G4Reweighter &theReweighter );
+void ProcessFlatTree(std::string &inFileName, std::string &outFileName, G4PiPlusReweighter &theReweighter );
 std::vector< std::pair<double, int> > ThinSliceBetheBloch(G4ReweightTraj * theTraj, double res);
 double BetheBloch(double);
 
@@ -69,8 +69,8 @@ int main(int argc, char ** argv){
   try{
     G4ReweightParameterMaker ParMaker( FitParSets );
 
-    G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists(), ParMaker.GetElasticHist() ); 
-    if( enablePiMinus ) theReweighter->SetPiMinus();
+    G4PiPlusReweighter * theReweighter = new G4PiPlusReweighter( &FracsFile, ParMaker.GetFSHists(), ParMaker.GetElasticHist() ); 
+    //if( enablePiMinus ) theReweighter->SetPiMinus();
 
     std::string XSecFileName = pset.get< std::string >( "XSec" );
     TFile XSecFile( XSecFileName.c_str(), "OPEN" );
@@ -89,7 +89,7 @@ int main(int argc, char ** argv){
   return 0;
 }
 
-void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4Reweighter &theReweighter ){
+void ProcessFlatTree( std::string &inFileName, std::string &outFileName, G4PiPlusReweighter &theReweighter ){
   
   //Input variables
   int input_event;

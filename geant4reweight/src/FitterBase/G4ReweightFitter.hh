@@ -14,7 +14,8 @@
 #include <map>
 #include <string>
 
-#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+//#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
 #include "geant4reweight/src/util/FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
@@ -68,7 +69,7 @@ class G4ReweightFitter{
       return stream_in.str();
     };
 
-    G4Reweighter * theReweighter;
+    G4PiPlusReweighter * theReweighter;
     TGraph * dummyGraph;
     TH1D * dummyHist;
     TGraph * total_inel;

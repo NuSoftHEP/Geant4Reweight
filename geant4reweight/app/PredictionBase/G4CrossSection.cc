@@ -56,26 +56,22 @@ int main(int argc, char * argv[]){
 
   fhicl::ParameterSet pset;
 
-  //#ifdef FNAL_FHICL
-    // Configuration file lookup policy.
-    char const* fhicl_env = getenv("FHICL_FILE_PATH");
-    std::string search_path;
+  // Configuration file lookup policy.
+  char const* fhicl_env = getenv("FHICL_FILE_PATH");
+  std::string search_path;
 
-    if (fhicl_env == nullptr) {
-      std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
-      search_path = ".";
-    }
-    else {
-      search_path = std::string{fhicl_env};
-    }
+  if (fhicl_env == nullptr) {
+    std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
+    search_path = ".";
+  }
+  else {
+    search_path = std::string{fhicl_env};
+  }
 
-    cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
+  cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
-  //#else
-  //  pset = fhicl::make_ParameterSet(fcl_file);
-  //#endif
 
 
 

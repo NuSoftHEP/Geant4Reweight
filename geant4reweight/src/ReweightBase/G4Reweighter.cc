@@ -379,168 +379,6 @@ G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &
    
   SetBaseHists( FSScales );
 
-/*
-  std::vector< double > newPoints;
-
-  //fout->cd();
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    int nBins = theVar->GetNbinsX();
-    for( int j = 1; j <= nBins; ++j ){
-      double ptX = theVar->GetBinLowEdge(j);
-      if( ptX == 0. ) continue;
-
-      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX - .001 );
-      }
-      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX + .001 );
-      }
-    }
-
-    //Add last upper bin edge
-    double ptX = theVar->GetBinLowEdge( nBins ); 
-    ptX += theVar->GetBinWidth( nBins );
-
-    if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX - .001 );
-    }
-    if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX + .001 );
-    }
-  }
-
-
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    for( size_t j = 0; j < newPoints.size(); ++j ){
-      
-      double new_x = newPoints.at(j);
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-
-        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
-        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
-
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-
-        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-
-        continue;
-      }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){ 
-        continue;
-      }
-      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k] 
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-
-    }
-  }
-
-
-  
-  //fout->cd();
-
-  //Now go through and vary the exclusive channels  
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
-      
-      double Content = theGraph->GetY()[bin];
-      double point   = theGraph->GetX()[bin];
-      double theScale    = theVar->GetBinContent( theVar->FindBin( point ) ); 
-      
-      //Check if >/< max/min of var graph
-      if( ( point < theVar->GetBinLowEdge(1)) 
-      ||  ( point > ( theVar->GetBinLowEdge( theVar->GetNbinsX() ) + theVar->GetBinWidth( theVar->GetNbinsX() ) ) ) ){
-        theGraph->SetPoint( bin, point, Content );
-      }
-      else{
-        theGraph->SetPoint( bin, point, theScale * Content ); 
-      }
-    }
-    //theGraph->Write();
-
-    //Save the varied and nominal
-    //theHist->Write();
-    //oldHists.at( theInts.at(i) )->Write();
-  }
-
-  //Form the total cross sections from 
-  //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
-  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-  for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs( newTotal,   newGraphs[ theInts.at(i) ] );
-  }
-  //oldTotal->Write("oldTotal");
-  //newTotal->Write("newTotal");
-
-  //Save the Totals
-  //oldTotal->Write();
-  //newTotal->Write();
-
-  //Need to make this smarter when going through the bins.
-  //What if there's an empty bin?
-// for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
-//
-//    if( oldTotal->GetBinContent( bin ) == 0. ){
-//      oldTotal->SetBinContent( bin, 1. );
-//    }
-//
-//    if( ( newTotal->GetBinCenter( bin ) < Minimum ) 
-//    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
-//      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
-//    }
-//  }
-
-
-  //Form the variation from the new and old totals 
-  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
-  //totalVariationGraph->Write("totalVar");
-
-  //Now go back through the varied exclusive channels
-  //and compute the final scale
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
-
-    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-
-    DivideGraphs( exclusiveVariation, totalVariationGraph );
-    //exclusiveVariation->Write();
-
-    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation; 
-
-    std::string name = theInts.at(i);
-    std::string new_name = "new_" + name;
-    //exclusiveVariation->Write((name + "Var").c_str());
-
-    //Delete the pointers here
-//    delete newHists.at( theInts.at(i) );
-//    delete oldHists.at( theInts.at(i) );
-//    gDirectory->Delete(name.c_str());
-//    gDirectory->Delete(new_name.c_str());
-  }
-
-  //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-//
-//  gDirectory->Delete("oldTotal");
-//  gDirectory->Delete("newTotal");
-
-  //fout->Close();
-  */
 }
 
 void G4Reweighter::SetNewHists(const std::map< std::string, TH1D* > &FSScales){
@@ -762,14 +600,14 @@ double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
     if( cut == "" ){ std::cout << "Error. Invalid cut" << std::endl; return 1.;}
 
     TGraph * theGraph = GetExclusiveVariationGraph( cut ); 
+    if( !theGraph ){
+      double exclusive_factor = 1;
+      if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] )
+        exclusive_factor = theGraph->Eval( theMom );
+      
+      weight *= exclusive_factor;
+    }
 
-
-    double exclusive_factor = 1;
-
-    if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] )
-      exclusive_factor = theGraph->Eval( theMom );
-
-    weight *= exclusive_factor;
   }
   return weight;
 }
@@ -799,13 +637,19 @@ double G4Reweighter::GetElasticWeight( G4ReweightTraj * theTraj ){
 }
 
 TH1D * G4Reweighter::GetExclusiveVariation( std::string theInt ){
-  //Add in check
+  if( ( !exclusiveVariations.size() ) ||
+      ( exclusiveVariations.find( theInt ) == exclusiveVariations.end() ) ){
+    return 0x0;    
+  }
   
   return exclusiveVariations.at( theInt ); 
 }
 
 TGraph * G4Reweighter::GetExclusiveVariationGraph( std::string theInt ){
-  //Add in check
+  if( ( !exclusiveVariationGraphs.size() ) ||
+      ( exclusiveVariationGraphs.find( theInt ) == exclusiveVariationGraphs.end() ) ){
+    return 0x0;    
+  }
   
   return exclusiveVariationGraphs.at( theInt ); 
 }

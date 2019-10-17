@@ -21,7 +21,7 @@ std::string G4PiMinusReweighter::GetInteractionSubtype( G4ReweightTraj & theTraj
       return "inel"; 
     }
 
-    return "default";
+    return "";
 }
 
 G4PiMinusReweighter::~G4PiMinusReweighter(){}

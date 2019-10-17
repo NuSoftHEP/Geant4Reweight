@@ -21,7 +21,7 @@ std::string G4PiPlusReweighter::GetInteractionSubtype( G4ReweightTraj & theTraj 
       return "dcex";
     }
 
-    return "default";
+    return "";
 }
 
 G4PiPlusReweighter::~G4PiPlusReweighter(){}

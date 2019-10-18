@@ -9,11 +9,10 @@
 #include "TVectorD.h"
 
 
-G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSScales, /*double max, double min, */bool PiMinus) 
+G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSScales/*double max, double min, */) 
 /*: Maximum(max), Minimum(min)*/{
 
   as_graphs = true;
-  if( PiMinus ) SetPiMinus();
   
   std::map< std::string, TGraph* > theVariations;
   //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
@@ -353,12 +352,11 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
   //fout->Close();
 }
 
-G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool PiMinus) : 
+G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist) : 
   elasticBias( inputElasticBiasHist )
 {
 
   as_graphs = true;
-  if( PiMinus ) SetPiMinus();
   
   //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
   for( auto it = theInts.begin(); it != theInts.end(); ++it ){
@@ -561,43 +559,11 @@ double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
     weight *= ( 1 - exp(lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
     weight *= ( 1. / ( 1 - exp( lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
 
-/*
-    int nPi0     = theTraj->HasChild(111).size();  
-    int nPiPlus  = theTraj->HasChild(211).size();
-    int nPiMinus = theTraj->HasChild(-211).size();
-    */
-
     std::string cut = GetInteractionSubtype(*theTraj);
-    /*
-    if( (nPi0 + nPiPlus + nPiMinus) == 0){
-      cut = "abs";
+    if( cut == "" ){ 
+      std::cout << "Error. Invalid cut" << std::endl; 
+      return 1.;
     }
-    else if( (nPiPlus + nPiMinus) == 0 && nPi0 == 1 ){
-      cut = "cex";
-    }
-    else if( (nPiPlus + nPiMinus + nPi0) > 1 ){
-      cut = "prod";
-    }
-    else{
-      if( theTraj->GetPDG() == 211 ){
-        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
-          cut = "inel";
-        }
-        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
-          cut = "dcex"; 
-        }
-      }
-      else if( theTraj->GetPDG() == -211 ){
-        if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
-          cut = "dcex";
-        }
-        else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
-          cut = "inel"; 
-        }
-      }
-    }
-    */
-    if( cut == "" ){ std::cout << "Error. Invalid cut" << std::endl; return 1.;}
 
     TGraph * theGraph = GetExclusiveVariationGraph( cut ); 
     if( !theGraph ){

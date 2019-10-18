@@ -23,8 +23,8 @@ class G4Reweighter{
   public:
     
     G4Reweighter(){};
-    G4Reweighter(TFile *, std::map< std::string, TGraph*> &, bool PiMinus = false);    
-    G4Reweighter(TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool PiMinus = false);    
+    G4Reweighter(TFile *, std::map< std::string, TGraph*> &);    
+    G4Reweighter(TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);    
     virtual ~G4Reweighter();
 
     double GetWeight( std::string, double );
@@ -57,10 +57,6 @@ class G4Reweighter{
     void AddGraphs(TGraph*, TGraph*);
     void DivideGraphs(TGraph*, TGraph*);
     bool AsGraph(){return as_graphs; };
-
-    void SetPiMinus(){
-      fInelastic = "pi-Inelastic";
-    };
 
   protected:
     

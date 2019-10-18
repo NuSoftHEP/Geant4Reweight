@@ -6,6 +6,7 @@ art_make_library( LIBRARY_NAME ReweightBaseLib
     G4PiPlusReweighter.cc
     G4PiMinusReweighter.cc
     G4ProtonReweighter.cc
+    G4ReweighterFactory.cc
   LIBRARIES
     ${ART_FRAMEWORK_CORE}
     ${ART_FRAMEWORK_PRINCIPAL}

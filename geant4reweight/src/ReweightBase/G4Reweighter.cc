@@ -9,18 +9,20 @@
 #include "TVectorD.h"
 
 
-G4Reweighter::G4Reweighter(TFile * input, std::map< std::string, TGraph* > &FSScales/*double max, double min, */) 
+G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales/*double max, double min, */) 
 /*: Maximum(max), Minimum(min)*/{
 
   as_graphs = true;
   
+  SetTotalGraph( totalInput );
+
   std::map< std::string, TGraph* > theVariations;
   //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
   for( auto it = theInts.begin(); it != theInts.end(); ++it ){
     std::string name = *it;
 
 
-    TGraph * theGraph = (TGraph*)input->Get(name.c_str());
+    TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
     //theHist->Write();
 
     //Load the Hists
@@ -352,7 +354,7 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
   //fout->Close();
 }
 
-G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist) : 
+G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist) : 
   elasticBias( inputElasticBiasHist )
 {
 
@@ -363,7 +365,7 @@ G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &
     std::string name = *it;
 
 
-    TGraph * theGraph = (TGraph*)input->Get(name.c_str());
+    TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
     //theHist->Write();
 
     //Load the Hists
@@ -376,6 +378,7 @@ G4Reweighter::G4Reweighter(TFile * input, const std::map< std::string, TH1D* > &
 
    
   SetBaseHists( FSScales );
+  SetTotalGraph( totalInput );
 
 }
 

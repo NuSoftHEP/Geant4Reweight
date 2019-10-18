@@ -44,8 +44,6 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   TFile TotalXSecFile(TotalXSecFileName.c_str(), "OPEN");
 
-  total_inel = (TGraph*)TotalXSecFile.Get("inel_momentum");
-
   std::map< std::string, TH1D* > FSHists;
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
   std::map< std::string, bool > CutIsDummy;
@@ -193,7 +191,8 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
 
-  theReweighter = new G4PiPlusReweighter(&FracFile, FSHists/*, false*/);
+  theReweighter = new G4PiPlusReweighter(&TotalXSecFile, &FracFile, FSHists/*, false*/);
+  total_inel = theReweighter->GetTotalGraph();
 
   
   TGraph * total_var = theReweighter->GetTotalVariationGraph();

@@ -16,7 +16,7 @@ class G4ReweighterFactory{
 
   public:
    
-    G4Reweighter * BuildReweighter( int PDG, TFile * input, const std::map< std::string, TH1D*> & FSScales, TH1D * inputElasticBiasHist=0x0 );
+    G4Reweighter * BuildReweighter( int PDG, TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D*> & FSScales, TH1D * inputElasticBiasHist=0x0 );
     
 };
 

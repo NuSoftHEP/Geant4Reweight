@@ -66,13 +66,11 @@ int main(int argc, char ** argv){
   try{
     G4ReweightParameterMaker ParMaker( FitParSets );
 
-    G4Reweighter * theReweighter = new G4Reweighter( &FracsFile, ParMaker.GetFSHists() ); 
-    if( enablePiMinus ) theReweighter->SetPiMinus();
-
     std::string XSecFileName = pset.get< std::string >( "XSec" );
     TFile XSecFile( XSecFileName.c_str(), "OPEN" );
 
-    theReweighter->SetTotalGraph(&XSecFile);
+    G4Reweighter * theReweighter = new G4Reweighter( &XSecFile, &FracsFile, ParMaker.GetFSHists() ); 
+
     tp->FillAndAnalyzeFS(theReweighter);
     tp->CloseAndSaveOutput();
     tp->CloseInput();

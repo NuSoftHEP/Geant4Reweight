@@ -30,26 +30,22 @@ int main(int argc, char ** argv){
     return 0;
 
   fhicl::ParameterSet pset;
-  //#ifdef FNAL_FHICL
-    // Configuration file lookup policy.
-    char const* fhicl_env = getenv("FHICL_FILE_PATH");
-    std::string search_path;
+  // Configuration file lookup policy.
+  char const* fhicl_env = getenv("FHICL_FILE_PATH");
+  std::string search_path;
 
-    if (fhicl_env == nullptr) {
-      std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
-      search_path = ".";
-    }
-    else {
-      search_path = std::string{fhicl_env};
-    }
+  if (fhicl_env == nullptr) {
+    std::cerr << "Expected environment variable FHICL_FILE_PATH is missing or empty: using \".\"\n";
+    search_path = ".";
+  }
+  else {
+    search_path = std::string{fhicl_env};
+  }
 
-    cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
+  cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
-//  #else
-//    pset = fhicl::make_ParameterSet(fcl_file);
-//  #endif
 
   std::string outFileName = pset.get< std::string >( "OutputFile" );
   if( output_file_override  != "empty" ){
@@ -69,14 +65,10 @@ int main(int argc, char ** argv){
   try{
     G4ReweightParameterMaker ParMaker( FitParSets );
 
-    G4PiPlusReweighter * theReweighter = new G4PiPlusReweighter( &FracsFile, ParMaker.GetFSHists(), ParMaker.GetElasticHist() ); 
-    //if( enablePiMinus ) theReweighter->SetPiMinus();
-
     std::string XSecFileName = pset.get< std::string >( "XSec" );
     TFile XSecFile( XSecFileName.c_str(), "OPEN" );
 
-    theReweighter->SetTotalGraph(&XSecFile);
-
+    G4PiPlusReweighter * theReweighter = new G4PiPlusReweighter( &XSecFile, &FracsFile, ParMaker.GetFSHists(), ParMaker.GetElasticHist() ); 
   
     ProcessFlatTree(inFileName, outFileName, *theReweighter);
 

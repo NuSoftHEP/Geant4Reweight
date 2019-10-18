@@ -306,8 +306,7 @@ void G4ReweightTreeParser::FillAndAnalyzeFSThrows( TFile * FracsFile, TFile * XS
     }
   }
 
-  G4Reweighter theFS = G4Reweighter(FracsFile, ParMaker.GetFSHists() );
-  theFS.SetTotalGraph(XSecFile);
+  G4Reweighter theFS = G4Reweighter(XSecFile, FracsFile, ParMaker.GetFSHists() );
   
   std::cout << "Filling Collection of " << track->GetEntries() << " tracks" << std::endl;
   if(skipEM){ std::cout << "NOTE: Skipping EM activity" << std::endl;}

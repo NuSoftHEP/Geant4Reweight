@@ -14,8 +14,8 @@
 #include "Geant4/G4HadronElasticProcess.hh"
 #include "Geant4/G4String.hh"
 
-#include "geant4reweight/src/PredictionBase/G4PiCascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4PiCascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
 #include <utility>
 #include <iostream>
@@ -128,8 +128,8 @@ int main(int argc, char * argv[]){
 
   //Initializing
   G4RunManager * rm = new G4RunManager();
-  rm->SetUserInitialization(new G4PiCascadeDetectorConstruction);
-  rm->SetUserInitialization(new G4PiCascadePhysicsList);
+  rm->SetUserInitialization(new G4CascadeDetectorConstruction);
+  rm->SetUserInitialization(new G4CascadePhysicsList);
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();

@@ -1,4 +1,4 @@
-#include "G4PiCascadePhysicsList.hh"
+#include "G4CascadePhysicsList.hh"
 
 #include "Geant4/G4DecayPhysics.hh"
 #include "Geant4/G4RadioactiveDecayPhysics.hh"
@@ -7,7 +7,7 @@
 #include "Geant4/G4HadronElasticPhysics.hh"
 
 
-G4PiCascadePhysicsList::G4PiCascadePhysicsList() : G4VModularPhysicsList(){
+G4CascadePhysicsList::G4CascadePhysicsList() : G4VModularPhysicsList(){
   SetVerboseLevel(5);
 
   RegisterPhysics( new G4DecayPhysics );
@@ -19,9 +19,9 @@ G4PiCascadePhysicsList::G4PiCascadePhysicsList() : G4VModularPhysicsList(){
   std::cout << "Finished Physics" << std::endl;
 }
 
-G4PiCascadePhysicsList::~G4PiCascadePhysicsList(){}
+G4CascadePhysicsList::~G4CascadePhysicsList(){}
 
-void G4PiCascadePhysicsList::SetCuts(){
+void G4CascadePhysicsList::SetCuts(){
   std::cout << "Set Cuts" << std::endl; 
   G4VUserPhysicsList::SetCuts();
 }

@@ -15,8 +15,8 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4VParticleChange.hh"
 
-#include "geant4reweight/src/PredictionBase/G4PiCascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4PiCascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
 #include <utility>
 #include <iostream>
@@ -320,7 +320,7 @@ bool parseArgs(int argc, char ** argv){
 
   for( int i = 1; i < argc; ++i ){
     if( ( strcmp( argv[i], "--help" )  == 0 ) || ( strcmp( argv[i], "-h" ) == 0 ) ){
-      std::cout << "Usage: ./G4PiCascade -c <cascade_config>.fcl [options]" << std::endl;
+      std::cout << "Usage: ./G4Cascade -c <cascade_config>.fcl [options]" << std::endl;
       std::cout << std::endl;
       std::cout << "Options: " << std::endl;
       std::cout << "\t-o <output_file_override>.root" << std::endl;
@@ -384,8 +384,8 @@ bool parseArgs(int argc, char ** argv){
 }
 
 void initRunMan( G4RunManager * rm ){
-  rm->SetUserInitialization(new G4PiCascadeDetectorConstruction);
-  rm->SetUserInitialization(new G4PiCascadePhysicsList);
+  rm->SetUserInitialization(new G4CascadeDetectorConstruction);
+  rm->SetUserInitialization(new G4CascadePhysicsList);
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();

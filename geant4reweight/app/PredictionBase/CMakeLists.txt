@@ -1,6 +1,6 @@
 SET(PREDICTION_APPS
   G4CrossSection
-  G4PiCascade
+  G4Cascade
 )
 #
 #if(DEFINED USE_FHICL AND USE_FHICL)

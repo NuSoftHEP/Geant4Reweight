@@ -1,4 +1,4 @@
-#include "G4PiCascadeDetectorConstruction.hh"
+#include "G4CascadeDetectorConstruction.hh"
 
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4NistManager.hh"
@@ -12,11 +12,11 @@
 #include "Geant4/G4PVPlacement.hh"
 #include "Geant4/G4SystemOfUnits.hh"
 
-G4PiCascadeDetectorConstruction::G4PiCascadeDetectorConstruction() : G4VUserDetectorConstruction(){ }
+G4CascadeDetectorConstruction::G4CascadeDetectorConstruction() : G4VUserDetectorConstruction(){ }
 
-G4PiCascadeDetectorConstruction::~G4PiCascadeDetectorConstruction() { }
+G4CascadeDetectorConstruction::~G4CascadeDetectorConstruction() { }
 
-G4VPhysicalVolume * G4PiCascadeDetectorConstruction::Construct(){
+G4VPhysicalVolume * G4CascadeDetectorConstruction::Construct(){
   std::cout << "Constructing" << std::endl;  
   G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
   G4bool checkOverlaps = true;

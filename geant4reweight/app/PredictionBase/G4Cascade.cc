@@ -109,7 +109,7 @@ TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * the
 bool parseArgs(int argc, char* argv[]);
 void initRunMan( G4RunManager * rm );
 void makeFCLParameterSet( fhicl::ParameterSet & pset);
-void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefinition * part_def, std::string inel_name );
+G4HadronInelasticProcess * getInelasticProc( /*G4HadronInelasticProcess * inelastic_proc, */G4ParticleDefinition * part_def, std::string inel_name );
 
 
 int main(int argc, char * argv[]){
@@ -197,14 +197,22 @@ int main(int argc, char * argv[]){
 
     default:
       std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+      fout->cd();
+      fout->Close();
+      delete rm;
       return 0;
       
   }
 
-  G4HadronInelasticProcess * inelastic_proc = 0x0;
-  getInelasticProc( inelastic_proc, part_def, inel_name );
+  //G4HadronInelasticProcess * inelastic_proc = 0x0;
+  G4HadronInelasticProcess * inelastic_proc = getInelasticProc( /*inelastic_proc, */part_def, inel_name );
 
-  if( !inelastic_proc ) return 0;
+  std::cout << "inelastic_proc: " << inelastic_proc << std::endl;
+
+  if( !inelastic_proc ){
+    delete rm;
+    return 0;
+  }
 
   G4Material * theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialZ, theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
 
@@ -410,7 +418,7 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
   fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 }
 
-void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefinition * part_def, std::string inel_name ){
+/*void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefinition * part_def, std::string inel_name ){
 
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
@@ -425,6 +433,26 @@ void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefi
     }
   }
 }
+*/
+
+
+G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, std::string inel_name ){
+
+  G4ProcessManager * pm = part_def->GetProcessManager();
+  G4ProcessVector  * pv = pm->GetProcessList();
+  
+  for( int i = 0; i < pv->size(); ++i ){
+    G4VProcess * proc = (*pv)(i);
+    std::string theName = proc->GetProcessName();
+    std::cout <<  theName << std::endl;
+    if( theName == inel_name ){
+      std::cout << "Found inelastic" << std::endl;
+      return (G4HadronInelasticProcess*)proc;
+    }
+  }
+  return 0x0;
+}
+
 
 CascadeConfig configure(fhicl::ParameterSet & pset){
   CascadeConfig theConfig;

@@ -52,7 +52,10 @@ foreach(appname ${PREDICTION_APPS})
       ${G4INTERCOMS}
       ${G4INTERFACES}
       ${G4RUN}
+      ${G4TRACK}
       ${G4TRACKING}
+      ${G4PARTICLES}
+      ${G4PROCESSES}
       ${G4MATERIALS}
       ${G4GEOMETRY}
       ${G4GLOBAL}

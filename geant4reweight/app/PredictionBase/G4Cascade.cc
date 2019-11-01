@@ -107,7 +107,7 @@ std::vector< double > fillMomenta(CascadeConfig theConfig);
 TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * theMaterial );
 
 bool parseArgs(int argc, char* argv[]);
-void initRunMan( G4RunManager * rm );
+void initRunMan( G4RunManager & rm );
 void makeFCLParameterSet( fhicl::ParameterSet & pset);
 G4HadronInelasticProcess * getInelasticProc( /*G4HadronInelasticProcess * inelastic_proc, */G4ParticleDefinition * part_def, std::string inel_name );
 
@@ -152,8 +152,7 @@ int main(int argc, char * argv[]){
   tree->Branch( "momentum", &momentum );
 
   //Initializing
-
-  G4RunManager * rm = new G4RunManager();
+  G4RunManager rm;
   initRunMan( rm );
   ////
 
@@ -188,7 +187,7 @@ int main(int argc, char * argv[]){
       fout->cd();
       total_gr.Write( "total" );
       fout->Close();
-      delete rm;
+      //delete rm;
       return 1;
     
       //Returns before this, but... eh
@@ -199,7 +198,7 @@ int main(int argc, char * argv[]){
       std::cout << "Please specify either 211, -211, or 2212" << std::endl;
       fout->cd();
       fout->Close();
-      delete rm;
+      //delete rm;
       return 0;
       
   }
@@ -210,7 +209,7 @@ int main(int argc, char * argv[]){
   std::cout << "inelastic_proc: " << inelastic_proc << std::endl;
 
   if( !inelastic_proc ){
-    delete rm;
+    //delete rm;
     return 0;
   }
 
@@ -314,7 +313,7 @@ int main(int argc, char * argv[]){
 
 
   fout->Close();
-  delete rm;
+  //delete rm;
 
   return 0;
 }
@@ -391,13 +390,13 @@ bool parseArgs(int argc, char ** argv){
   return true;
 }
 
-void initRunMan( G4RunManager * rm ){
-  rm->SetUserInitialization(new G4CascadeDetectorConstruction);
-  rm->SetUserInitialization(new G4CascadePhysicsList);
-  rm->Initialize();
-  rm->ConfirmBeamOnCondition();
-  rm->ConstructScoringWorlds();
-  rm->RunInitialization();
+void initRunMan( G4RunManager & rm ){
+  rm.SetUserInitialization(new G4CascadeDetectorConstruction);
+  rm.SetUserInitialization(new G4CascadePhysicsList);
+  rm.Initialize();
+  rm.ConfirmBeamOnCondition();
+  rm.ConstructScoringWorlds();
+  rm.RunInitialization();
 }
 
 void makeFCLParameterSet( fhicl::ParameterSet & pset){

@@ -14,18 +14,21 @@
 #include <map>
 #include "TTree.h"
 
-#include <iostream> 
+#include <iostream>
 
 class G4ReweightTraj;
 //class G4ReweightStep;
 
 class G4Reweighter{
   public:
-    
+
     G4Reweighter(){};
-    G4Reweighter(TFile *, TFile *, std::map< std::string, TGraph*> &);    
-    G4Reweighter(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);    
+    G4Reweighter(TFile *, TFile *, std::map< std::string, TGraph*> &);
+    G4Reweighter(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);
     virtual ~G4Reweighter();
+
+    void Initialize(TFile *, TFile *, std::map< std::string, TGraph*> &);
+    void Initialize(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);
 
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );
@@ -43,6 +46,7 @@ class G4Reweighter{
     void SetTotalGraph( TFile * );
 
     void SetNewHists( const std::map< std::string, TH1D* > &FSScales );
+    void SetNewElasticHists(TH1D * inputElasticBiasHist);
     void SetBaseHists( const std::map< std::string, TH1D* > &FSScales );
 
     TH1D * GetTotalVariation(){ return totalVariation; };
@@ -61,13 +65,13 @@ class G4Reweighter{
     TGraph * GetTotalGraph(){ return totalGraph; };
 
   protected:
-    
+
     bool as_graphs = false;
 
-    std::map< std::string, TH1D* > exclusiveVariations; 
+    std::map< std::string, TH1D* > exclusiveVariations;
     TH1D * totalVariation;
 
-    std::map< std::string, TGraph* > exclusiveVariationGraphs; 
+    std::map< std::string, TGraph* > exclusiveVariationGraphs;
     TGraph * totalVariationGraph;
 
     TGraph * totalGraph;
@@ -78,9 +82,9 @@ class G4Reweighter{
     double Maximum;
     double Minimum;
 
-    std::string fInelastic = "pi+Inelastic";
-  
-    std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
+    // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
+    std::string fInelastic;
+    std::vector< std::string > theInts;
 
     std::map< std::string, TH1D* > oldHists;
     std::map< std::string, TH1D* > newHists;

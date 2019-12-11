@@ -39,7 +39,7 @@ end_product_list
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 qualifier      larsoft     notes
-e17:debug      - 
+#e17:debug      - 
 e17:prof       -
 end_qualifier_list
 

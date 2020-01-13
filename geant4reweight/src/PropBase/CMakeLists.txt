@@ -1,22 +1,22 @@
-if(USEART)
-  art_make_library( LIBRARY_NAME PropBaseLib 
-    SOURCE 
-      G4ReweightParameterMaker.cc
-      G4ReweightThrowManager.cc
-    LIBRARIES
-      ${ART_FRAMEWORK_CORE}
-      ${ART_FRAMEWORK_PRINCIPAL}
-      ${ART_FRAMEWORK_SERVICES_REGISTRY}
-      ${ART_FRAMEWORK_SERVICES_BASIC}
-      canvas
-      ${MF_MESSAGELOGGER}
-      ${FHICLCPP}
-      cetlib cetlib_except
-      ${ROOT_BASIC_LIB_LIST}
-  )
-  install_headers()
-  install_source()
-else()
+#if(USEART)
+#  art_make_library( LIBRARY_NAME PropBaseLib 
+#    SOURCE 
+#      G4ReweightParameterMaker.cc
+#      G4ReweightThrowManager.cc
+#    LIBRARIES
+#      ${ART_FRAMEWORK_CORE}
+#      ${ART_FRAMEWORK_PRINCIPAL}
+#      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+#      ${ART_FRAMEWORK_SERVICES_BASIC}
+#      canvas
+#      ${MF_MESSAGELOGGER}
+#      ${FHICLCPP}
+#      cetlib cetlib_except
+#      ${ROOT_BASIC_LIB_LIST}
+#  )
+#  install_headers()
+#  install_source()
+#else()
   file(GLOB sources *.cc)
   add_library(PropBaseLib
     ${sources}
@@ -46,4 +46,4 @@ else()
   SET(MODULETargets ${MODULETargets};PropBaseLib PARENT_SCOPE)
 
 
-endif()
+#endif()

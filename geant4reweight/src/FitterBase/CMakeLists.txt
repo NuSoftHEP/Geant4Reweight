@@ -1,25 +1,25 @@
-if(USEART)
-  art_make_library( LIBRARY_NAME FitterBaseLib 
-    SOURCE 
-      G4ReweightFitter.cc
-      DUETFitter.cc
-      G4ReweightFitManager.cc
-    LIBRARIES
-      ${ART_FRAMEWORK_CORE}
-      ${ART_FRAMEWORK_PRINCIPAL}
-      ${ART_FRAMEWORK_SERVICES_REGISTRY}
-      ${ART_FRAMEWORK_SERVICES_BASIC}
-      canvas
-      ${MF_MESSAGELOGGER}
-      ${FHICLCPP}
-      cetlib cetlib_except
-      ${ROOT_BASIC_LIB_LIST}
-      PropBaseLib
-      ReweightBaseLib
-  )
-  install_headers()
-  install_source()
-else()
+#if(USEART)
+#  art_make_library( LIBRARY_NAME FitterBaseLib 
+#    SOURCE 
+#      G4ReweightFitter.cc
+#      DUETFitter.cc
+#      G4ReweightFitManager.cc
+#    LIBRARIES
+#      ${ART_FRAMEWORK_CORE}
+#      ${ART_FRAMEWORK_PRINCIPAL}
+#      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+#      ${ART_FRAMEWORK_SERVICES_BASIC}
+#      canvas
+#      ${MF_MESSAGELOGGER}
+#      ${FHICLCPP}
+#      cetlib cetlib_except
+#      ${ROOT_BASIC_LIB_LIST}
+#      PropBaseLib
+#      ReweightBaseLib
+#  )
+#  install_headers()
+#  install_source()
+#else()
   #file(GLOB sources *.cc)
   file(GLOB sources G4ReweightFitter.cc DUETFitter.cc G4ReweightFitManager.cc)
   add_library(FitterBaseLib
@@ -50,4 +50,4 @@ else()
   target_link_libraries(FitterBaseLib PropBaseLib ReweightBaseLib)
   
   SET(MODULETargets ${MODULETargets};FitterBaseLib PARENT_SCOPE)
-endif()
+#endif()

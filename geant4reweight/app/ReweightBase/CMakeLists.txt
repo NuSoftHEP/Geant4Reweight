@@ -4,27 +4,27 @@ SET(REWEIGHT_APPS
   FlatTreeProcessor
 )
 
-if(USEART)
-  foreach(appname ${REWEIGHT_APPS})
-    art_make_exec( NAME ${appname} 
-      SOURCE 
-        ${appname}.cc
-      LIBRARIES
-        ${ART_FRAMEWORK_CORE}
-        ${ART_FRAMEWORK_PRINCIPAL}
-        ${ART_FRAMEWORK_SERVICES_REGISTRY}
-        ${ART_FRAMEWORK_SERVICES_BASIC}
-        canvas
-        ${MF_MESSAGELOGGER}
-        ${FHICLCPP}
-        cetlib cetlib_except
-        ${ROOT_BASIC_LIB_LIST}
-        ReweightBaseLib
-        PropBaseLib    
-    )
-  
-  endforeach()
-else()
+#if(USEART)
+#  foreach(appname ${REWEIGHT_APPS})
+#    art_make_exec( NAME ${appname} 
+#      SOURCE 
+#        ${appname}.cc
+#      LIBRARIES
+#        ${ART_FRAMEWORK_CORE}
+#        ${ART_FRAMEWORK_PRINCIPAL}
+#        ${ART_FRAMEWORK_SERVICES_REGISTRY}
+#        ${ART_FRAMEWORK_SERVICES_BASIC}
+#        canvas
+#        ${MF_MESSAGELOGGER}
+#        ${FHICLCPP}
+#        cetlib cetlib_except
+#        ${ROOT_BASIC_LIB_LIST}
+#        ReweightBaseLib
+#        PropBaseLib    
+#    )
+#  
+#  endforeach()
+#else()
   include_directories(${CETLIB_EXCEPT_INCLUDE_DIR})
   include_directories(${CETLIB_INCLUDE_DIR})
   
@@ -44,4 +44,4 @@ else()
   
     install(TARGETS ${appname} DESTINATION bin)
   endforeach()
-endif()
+#endif()

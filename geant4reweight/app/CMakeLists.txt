@@ -1,4 +1,4 @@
-set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
+#set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} ) #Get rid of this 
 
 #add_subdirectory(G4Sim)
 add_subdirectory(PredictionBase)

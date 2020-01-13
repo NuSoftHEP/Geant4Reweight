@@ -108,19 +108,32 @@ project(geant4reweight)
   
   #new
   find_ups_product(clhep)
+  cet_find_library( CLHEP NAMES CLHEP PATHS $ENV{CLHEP_LIB_DIR} NO_DEFAULT_PATH)
+  if( NOT CLHEP )
+    message( FATAL_ERROR "CLHEP library not found" )
+  endif()
+  message("CLHEP? " ${CLHEP} )
+
+  cet_find_library( CETBUILD_EXCEPT NAMES cetlib_except PATHS $ENV{CETLIB_EXCEPT_LIB} )
+  message("CETBUILD_EXCEPT? " ${CETBUILD_EXCEPT} )
+  cet_find_library( CETBUILD NAMES cetlib PATHS $ENV{CETLIB_LIB} )
+  message("CETBUILD? " ${CETBUILD} )
+
   find_ups_geant4( )
+  find_ups_root()
+  find_ups_product( fhiclcpp)
 
-  find_library( CETLIB NAMES cetlib PATHS $ENV{CETLIB_LIB} ) 
-  find_library( CETLIB_EXCEPT NAMES cetlib_except PATHS $ENV{CETLIB_EXCEPT_LIB} ) 
-  find_library( CLHEP NAMES CLHEP PATHS $ENV{CLHEP_LIB_DIR} ) 
+  #find_library( CETLIB NAMES cetlib PATHS $ENV{CETLIB_LIB} ) 
+  #find_library( CETLIB_EXCEPT NAMES cetlib_except PATHS $ENV{CETLIB_EXCEPT_LIB} ) 
+  #find_library( CLHEP NAMES CLHEP PATHS $ENV{CLHEP_LIB_DIR} ) 
 
-  list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-  find_package(ROOT REQUIRED COMPONENTS RIO Net)
+  #list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+  #find_package(ROOT REQUIRED COMPONENTS RIO Net)
 
-  set(FHICL_INCLUDE_DIR $ENV{FHICLCPP_INC})
-  set(CETLIB_EXCEPT_INCLUDE_DIR $ENV{CETLIB_EXCEPT_INC})
-  set(CETLIB_INCLUDE_DIR $ENV{CETLIB_INC})
-  file(GLOB FHICLCPP_LIBS $ENV{FHICLCPP_LIB}/*.so)
+  #set(FHICL_INCLUDE_DIR $ENV{FHICLCPP_INC})
+  #set(CETLIB_EXCEPT_INCLUDE_DIR $ENV{CETLIB_EXCEPT_INC})
+  #set(CETLIB_INCLUDE_DIR $ENV{CETLIB_INC})
+  #file(GLOB FHICLCPP_LIBS $ENV{FHICLCPP_LIB}/*.so)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)

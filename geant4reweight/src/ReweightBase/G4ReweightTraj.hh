@@ -77,6 +77,8 @@ class G4ReweightTraj{
         std::cout << "Error: out of weights vector range" << std::endl;
         return -1;
       }
+      
+      return weights[i];
     };
 
     const std::vector< double > & GetWeights() const{

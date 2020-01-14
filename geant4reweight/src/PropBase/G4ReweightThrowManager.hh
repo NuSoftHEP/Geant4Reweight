@@ -31,7 +31,7 @@ class G4ReweightThrowManager{
   
   private:
     TDecompChol Cholesky;
-    TMatrixD *  CholMatrix;
+    //TMatrixD *  CholMatrix; // unused
     std::vector< double >  BestFitVals;
     std::vector< std::string >  ParNames;
     bool DecompSuccess;

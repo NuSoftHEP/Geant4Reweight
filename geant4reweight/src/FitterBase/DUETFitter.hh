@@ -20,7 +20,7 @@ class DUETFitter : public G4ReweightFitter {
   public:
   
     DUETFitter( TFile * output, std::string data_file );
-    virtual void   LoadData();
+    virtual void   LoadData() override;
     void SaveData( TDirectory * ) override;
     double DoFit(bool fSave=true) override;
 

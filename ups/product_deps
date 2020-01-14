@@ -41,6 +41,7 @@ end_product_list
 qualifier      larsoft     notes
 #e17:debug      - 
 e17:prof       -
+e19:prof       -
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

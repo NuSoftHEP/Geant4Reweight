@@ -156,11 +156,11 @@ int main(int argc, char * argv[]){
   initRunMan( rm );
   ////
 
-  G4PionPlus  * piplus;
-  G4PionMinus * piminus;
-  G4Proton    * proton;
-  G4ParticleDefinition * part_def;
-  std::string inel_name;
+  G4PionPlus  * piplus = 0x0;
+  G4PionMinus * piminus = 0x0;
+  G4Proton    * proton = 0x0;
+  G4ParticleDefinition * part_def = 0x0;
+  std::string inel_name = 0x0;
   switch( theConfig.type ){
     case 211:
       std::cout << "Chose PiPlus" << std::endl;

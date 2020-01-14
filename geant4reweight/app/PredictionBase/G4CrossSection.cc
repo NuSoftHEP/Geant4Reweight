@@ -136,10 +136,10 @@ int main(int argc, char * argv[]){
   rm->RunInitialization();
   /////
 
-  G4PionPlus  * piplus;
-  G4PionMinus * piminus;
-  G4Proton * proton;
-  G4ParticleDefinition * part_def;
+  G4PionPlus  * piplus = 0x0;
+  G4PionMinus * piminus = 0x0;
+  G4Proton * proton = 0x0;
+  G4ParticleDefinition * part_def = 0x0;
   G4String inel_name;
   if( type == 211 ){
     std::cout << "Chose PiPlus" << std::endl;

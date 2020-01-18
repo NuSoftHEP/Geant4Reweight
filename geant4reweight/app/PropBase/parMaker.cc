@@ -1,6 +1,6 @@
 #include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 #include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
-#include "geant4reweight/src/util/FitParameter.hh"
+#include "geant4reweight/src/FitterBase/FitParameter.hh"
 
 #include "TFile.h"
 

@@ -1,5 +1,5 @@
 #include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
-#include "geant4reweight/src/util/FitParameter.hh"
+#include "geant4reweight/src/FitterBase/FitParameter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"

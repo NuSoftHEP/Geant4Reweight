@@ -8,7 +8,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "geant4reweight/src/util/FitParameter.hh"
+#include "geant4reweight/src/FitterBase/FitParameter.hh"
 
 
 class G4ReweightParameterMaker{

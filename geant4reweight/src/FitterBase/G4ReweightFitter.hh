@@ -16,7 +16,7 @@
 
 //#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
 #include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
-#include "geant4reweight/src/util/FitParameter.hh"
+#include "geant4reweight/src/FitterBase/FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 

@@ -143,24 +143,32 @@ int main(int argc, char * argv[]){
   d_vec[0] = theConfig.MaterialDensity;
   d_vec.Write("Density");
 
+  std::cout << "Got mass & density" << std::endl;
+
   TTree * tree = new TTree("tree","");  
-  int nPi0 = 0, nPiPlus = 0, nPiMinus = 0;
+  int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
   tree->Branch( "nPi0", &nPi0 );
   tree->Branch( "nPiPlus", &nPiPlus );
   tree->Branch( "nPiMinus", &nPiMinus );
+  tree->Branch( "nProton", &nProton );
+  tree->Branch( "nNeutron", &nNeutron );
   tree->Branch( "momentum", &momentum );
 
+  std::cout << "Initializing" << std::endl;
   //Initializing
   G4RunManager rm;
   initRunMan( rm );
   ////
 
+  std::cout << "Initialized" << std::endl;
+
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
   G4Proton    * proton = 0x0;
+  G4Neutron   * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
-  std::string inel_name = 0x0;
+  std::string inel_name = "";
   switch( theConfig.type ){
     case 211:
       std::cout << "Chose PiPlus" << std::endl;
@@ -180,6 +188,7 @@ int main(int argc, char * argv[]){
       part_def = proton->Definition();
       inel_name = "protonInelastic";
 
+/*
       //Default for now
       ++momenta.back(); 
       std::vector< double > total_ys(momenta.size(), 1.);
@@ -189,13 +198,35 @@ int main(int argc, char * argv[]){
       fout->Close();
       //delete rm;
       return 1;
-    
+*/    
       //Returns before this, but... eh
       break;
     }
 
+    case 2112:
+    {
+      std::cout << "Chose Neutron" << std::endl;
+      part_def = neutron->Definition();
+      inel_name = "neutronInelastic";
+/*
+      //Default for now
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+*/    
+      //Returns before this, but... eh
+      break;
+      
+    }
+    
+
     default:
-      std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+      std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
       fout->cd();
       fout->Close();
       //delete rm;
@@ -232,6 +263,8 @@ int main(int argc, char * argv[]){
       nPi0 = 0; 
       nPiPlus = 0; 
       nPiMinus = 0;
+      nProton = 0;
+      nNeutron = 0;
       momentum = dynamic_part->GetTotalMomentum();
       G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
 
@@ -246,6 +279,10 @@ int main(int argc, char * argv[]){
             ++nPiMinus; break;
           case( 111 ):
             ++nPi0; break;          
+          case( 2212 ):
+            ++nProton; break;
+          case( 2112 ):
+            ++nNeutron; break;
           default:
             break;
         }
@@ -264,16 +301,29 @@ int main(int argc, char * argv[]){
  
   std::map< std::string, std::string > cuts;
   //Define cuts and make graphs out of the results
-  cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
-  cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
-  cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+  //
+  //
+  //These can be made FHiCL-able 
   if( theConfig.type == 211 ){
+    cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
+    cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
+    cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
   }
-  if( theConfig.type == -211 ){
+  else if( theConfig.type == -211 ){
+    cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
+    cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
+    cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
+  }
+  if( theConfig.type == 2212 || theConfig.type == 2112 ){
+    cuts["0n0p"] = "nProton == 0 && nNeutron == 0";
+    cuts["1n0p"] = "nProton == 0 && nNeutron == 1";
+    cuts["0n1p"] = "nProton == 1 && nNeutron == 0";
+    cuts["1n1p"] = "nProton == 1 && nNeutron == 1";
+    cuts["Other"] = "nProton > 1 || nNeutron > 1";
   }
 
   int nbins = int(theConfig.range.second) + 1;

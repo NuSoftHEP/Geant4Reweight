@@ -138,7 +138,8 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
-  G4Proton * proton = 0x0;
+  G4Proton  * proton = 0x0;
+  G4Neutron * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
   G4String inel_name;
   if( type == 211 ){
@@ -155,6 +156,11 @@ int main(int argc, char * argv[]){
     std::cout << "Chose Proton" << std::endl;
     part_def = proton->Definition();
     inel_name = "protonInelastic";
+  }
+  else if( type == 2112 ){
+    std::cout << "Chose Neutron" << std::endl;
+    part_def = neutron->Definition();
+    inel_name = "neutronInelastic";
   }
   else{
     std::cout << "Please specify either 211, -211, or 2212" << std::endl;

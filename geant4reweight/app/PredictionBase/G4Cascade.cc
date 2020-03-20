@@ -52,8 +52,8 @@ struct CascadeConfig{
 
   CascadeConfig(){};
   CascadeConfig( fhicl::ParameterSet & pset ){
-    nCascades = pset.get< size_t >("NCascades");
-    if( ncasc_override > 0 ) 
+    nCascades = pset.get<size_t>("NCascades");
+    if (ncasc_override > 0) 
       nCascades = ncasc_override;
 
     type      = pset.get< int >("Type");

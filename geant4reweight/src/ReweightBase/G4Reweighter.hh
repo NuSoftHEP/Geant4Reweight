@@ -28,7 +28,7 @@ class G4Reweighter{
     virtual ~G4Reweighter();
 
     void Initialize(TFile *, TFile *, std::map< std::string, TGraph*> &);
-    void Initialize(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);
+    void Initialize(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool fix=false);
 
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );

@@ -130,7 +130,6 @@ void G4ReweightParameterMaker::BuildElasticHist(){
 
 void G4ReweightParameterMaker::BuildHistsFromPars(){
 
-  //std::map< std::string, std::vector< FitParameter > >::iterator itPar;
   std::map< std::string, bool > CutIsDummy;
   for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar ){
     std::string name = itPar->first;
@@ -161,7 +160,7 @@ void G4ReweightParameterMaker::BuildHistsFromPars(){
         vars.push_back( std::make_pair( range.second, value ) );
 
         bool addDummyBin = false;
-        if( varX.size() ){
+        if (varX.size()){
           //If the end of last bin == start of this bin
           //don't need to add a dummy
           if( varX.back() < range.first ){
@@ -169,12 +168,12 @@ void G4ReweightParameterMaker::BuildHistsFromPars(){
             addDummyBin = true;
           }
         }
-        else
+        else{
           varX.push_back(range.first);
-
+        }
         varX.push_back( range.second );
 
-        if( addDummyBin )
+        if (addDummyBin)
           varY.push_back( 1. );
         varY.push_back( value );
       }

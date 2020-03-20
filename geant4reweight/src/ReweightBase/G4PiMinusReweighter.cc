@@ -6,10 +6,10 @@ G4PiMinusReweighter::G4PiMinusReweighter(TFile * totalInput, TFile * FSInput, st
   Initialize(totalInput, FSInput, FSScales);
 }
 
-G4PiMinusReweighter::G4PiMinusReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist){
+G4PiMinusReweighter::G4PiMinusReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix){
   fInelastic = "pi-Inelastic";
   theInts = {"inel", "cex", "abs", "dcex", "prod"};
-  Initialize(totalInput,FSInput,FSScales,inputElasticBiasHist);
+  Initialize(totalInput,FSInput,FSScales,inputElasticBiasHist, fix);
 }
 
 std::string G4PiMinusReweighter::GetInteractionSubtype( G4ReweightTraj & theTraj ){

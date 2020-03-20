@@ -281,14 +281,31 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
   //the nominal and varied exlcusive channels
   TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
   TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-  for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs( newTotal,   newGraphs[ theInts.at(i) ] );
+  for (size_t i = 1; i < theInts.size(); ++i) {
+    AddGraphs(oldTotal, oldGraphs[theInts.at(i)]);
+    AddGraphs(newTotal, newGraphs[theInts.at(i)]);
   }
 
   //Form the variation from the new and old totals
   totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
   DivideGraphs(totalVariationGraph, oldTotal);
+
+  if (fix_total) {
+    for (size_t i = 0; i < theInts.size(); ++i) {
+      DivideGraphs(newGraphs[theInts[i]], totalVariationGraph);
+    }
+
+    delete newTotal;
+
+    TGraph * newTotal = (TGraph*)newGraphs[theInts[0]]->Clone("newTotal_fixed");
+    for (size_t i = 1; i < theInts.size(); ++i) {
+      AddGraphs(newTotal, newGraphs[theInts[i]]);
+    }
+
+    delete totalVariationGraph;
+    totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation_fixed");
+    DivideGraphs(totalVariationGraph, oldTotal);
+  }
 
   //Now go back through the varied exclusive channels
   //and compute the final scale
@@ -296,8 +313,12 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
     TGraph * exclusiveVariation = (TGraph*)newGraphs.at(theInts.at(i))->Clone(
         (theInts.at(i) + "Variation").c_str());
 
-    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-    DivideGraphs( exclusiveVariation, totalVariationGraph );
+    DivideGraphs(exclusiveVariation, oldGraphs[theInts[i]]);
+
+    if (!fix_total) {
+      DivideGraphs(exclusiveVariation, totalVariationGraph);
+    }
+
     exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
   }
 
@@ -306,14 +327,16 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
   delete oldTotal;
 }
 
-G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix) : fix_total(fix)
+G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix)/*: fix_total(fix)*/
 {
-  Initialize(totalInput, FSInput, FSScales, inputElasticBiasHist);
+  Initialize(totalInput, FSInput, FSScales, inputElasticBiasHist, fix);
 }
 
-void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist)
+void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix)
 {
+
   as_graphs = true;
+  fix_total = fix;
 
   //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
   for( auto it = theInts.begin(); it != theInts.end(); ++it ){

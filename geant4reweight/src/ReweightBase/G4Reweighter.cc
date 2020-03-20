@@ -195,7 +195,6 @@ void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, std::map< std
 void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales ){
   std::vector< double > newPoints;
 
-  //fout->cd();
   for( size_t i = 0; i < theInts.size(); ++i ){
     TH1D * theVar = FSScales.at( theInts.at(i) );
     int nBins = theVar->GetNbinsX();
@@ -257,10 +256,6 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
     }
   }
 
-
-
-  //fout->cd();
-
   //Now go through and vary the exclusive channels
   for( size_t i = 0; i < theInts.size(); ++i ){
     TH1D * theVar = FSScales.at( theInts.at(i) );
@@ -280,11 +275,6 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
         theGraph->SetPoint( bin, point, theScale * Content );
       }
     }
-    //theGraph->Write();
-
-    //Save the varied and nominal
-    //theHist->Write();
-    //oldHists.at( theInts.at(i) )->Write();
   }
 
   //Form the total cross sections from
@@ -295,68 +285,28 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
     AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
     AddGraphs( newTotal,   newGraphs[ theInts.at(i) ] );
   }
-  //oldTotal->Write("oldTotal");
-  //newTotal->Write("newTotal");
-
-  //Save the Totals
-  //oldTotal->Write();
-  //newTotal->Write();
-
-  //Need to make this smarter when going through the bins.
-  //What if there's an empty bin?
-/*
-  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
-
-    if( oldTotal->GetBinContent( bin ) == 0. ){
-      oldTotal->SetBinContent( bin, 1. );
-    }
-
-    if( ( newTotal->GetBinCenter( bin ) < Minimum )
-    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
-      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
-    }
-  }
-*/
 
   //Form the variation from the new and old totals
   totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
   DivideGraphs(totalVariationGraph, oldTotal);
-  //totalVariationGraph->Write("totalVar");
 
   //Now go back through the varied exclusive channels
   //and compute the final scale
   for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
+    TGraph * exclusiveVariation = (TGraph*)newGraphs.at(theInts.at(i))->Clone(
+        (theInts.at(i) + "Variation").c_str());
 
     DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-
     DivideGraphs( exclusiveVariation, totalVariationGraph );
-    //exclusiveVariation->Write();
-
     exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
-
-    std::string name = theInts.at(i);
-    std::string new_name = "new_" + name;
-    //exclusiveVariation->Write((name + "Var").c_str());
-
-    //Delete the pointers here
-//    delete newHists.at( theInts.at(i) );
-//    delete oldHists.at( theInts.at(i) );
-//    gDirectory->Delete(name.c_str());
-//    gDirectory->Delete(new_name.c_str());
   }
 
   //Now go through and clear from memory all of the pointers
   delete newTotal;
   delete oldTotal;
-//
-//  gDirectory->Delete("oldTotal");
-//  gDirectory->Delete("newTotal");
-
-  //fout->Close();
 }
 
-G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist)
+G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix) : fix_total(fix)
 {
   Initialize(totalInput, FSInput, FSScales, inputElasticBiasHist);
 }

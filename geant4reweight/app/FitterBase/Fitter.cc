@@ -52,7 +52,7 @@ int main(int argc, char ** argv){
   //  pset = fhicl::make_ParameterSet(fcl_file);
   //#endif
 
-  bool fSave    = pset.get< bool >( "Save", false );
+  bool fSave = pset.get< bool >( "Save", false );
   if( save_override != -1 )
     fSave = save_override;
 

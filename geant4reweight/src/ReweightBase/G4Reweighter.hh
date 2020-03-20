@@ -24,7 +24,7 @@ class G4Reweighter{
 
     G4Reweighter(){};
     G4Reweighter(TFile *, TFile *, std::map< std::string, TGraph*> &);
-    G4Reweighter(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0);
+    G4Reweighter(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool fix=false);
     virtual ~G4Reweighter();
 
     void Initialize(TFile *, TFile *, std::map< std::string, TGraph*> &);
@@ -67,6 +67,7 @@ class G4Reweighter{
   protected:
 
     bool as_graphs = false;
+    bool fix_total = false;
 
     std::map< std::string, TH1D* > exclusiveVariations;
     TH1D * totalVariation;

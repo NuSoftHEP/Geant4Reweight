@@ -338,19 +338,14 @@ void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, const std::ma
   as_graphs = true;
   fix_total = fix;
 
-  //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
   for( auto it = theInts.begin(); it != theInts.end(); ++it ){
     std::string name = *it;
 
     TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
-    //theHist->Write();
-    //Load the Hists
+
     newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
     oldGraphs[ name ] = (TGraph*)theGraph->Clone();
-    //fout->cd();
-    //oldGraphs[ name ]->Write( ("old_" + name).c_str());
   }
-  //delete fout;
 
   SetBaseHists( FSScales );
   SetTotalGraph( totalInput );

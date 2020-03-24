@@ -8,10 +8,12 @@
       G4PiMinusReweighter.cc
       G4ProtonReweighter.cc
       G4ReweighterFactory.cc
+      G4MultiReweighter.cc
     LIBRARIES
       ${FHICLCPP}
       ${CETLIB} ${CETLIB_EXCEPT}
       ${ROOT_BASIC_LIB_LIST}
+      PropBaseLib
   )
   install_headers()
   install_source()

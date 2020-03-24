@@ -479,6 +479,7 @@ double G4Reweighter::GetBiasedMFP( double theMom ){
   if( as_graphs ){
     b = totalVariationGraph->Eval( theMom );
   }
+  std::cout << "Mom: " << theMom << " Bias: " << b << std::endl;
 
   return  GetNominalMFP( theMom ) / b;
 }
@@ -529,14 +530,17 @@ double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
 
 
   double weight = exp( total - bias_total );
+  std::cout << "F1: " << weight;
 
   if( theTraj->GetFinalProc() == fInelastic ){
 
     auto lastStep = theTraj->GetStep( theTraj->GetNSteps() - 1 );
     double theMom = lastStep->GetFullPreStepP();
 
-    weight *= ( 1 - exp(lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
-    weight *= ( 1. / ( 1 - exp( lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
+    weight *= ( 1 - exp(-1. * lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
+    std::cout << " F2: " << ( 1 - exp(-1. * lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
+    weight *= ( 1. / ( 1 - exp( -1. * lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
+    std::cout << " F3: " << ( 1 - exp( -1. * lastStep->GetStepLength() / GetNominalMFP( theMom ) ) );
 
     std::string cut = GetInteractionSubtype(*theTraj);
     if( cut == "" ){
@@ -550,7 +554,12 @@ double G4Reweighter::GetWeight( G4ReweightTraj * theTraj ){
       if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] )
         exclusive_factor = theGraph->Eval( theMom );
 
+      std::cout << " F4: " << exclusive_factor << std::endl;
+
       weight *= exclusive_factor;
+    }
+    else{
+      std::cout << std::endl;
     }
 
   }

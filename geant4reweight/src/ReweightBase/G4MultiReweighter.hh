@@ -1,0 +1,66 @@
+#ifndef G4MultiReweighter_hh
+#define G4MultiReweighter_hh
+
+#include "TFile.h"
+#include "TDecompChol.h"
+#include "TRandom3.h"
+
+#include "G4Reweighter.hh"
+#include "G4ReweightTraj.hh"
+#include "G4ReweighterFactory.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+#include "fhiclcpp/ParameterSet.h"
+
+class G4MultiReweighter{
+ public:
+  G4MultiReweighter(int pdg, TFile & totalXSecFile,
+                    TFile & fracsFile,
+                    const std::vector<fhicl::ParameterSet> & parSet,
+                    TFile & fitResults, size_t nThrows = 100,
+                    int seed = 0);
+
+  G4MultiReweighter(int pdg, TFile & totalXSecFile,
+                    TFile & fracsFile,
+                    const std::vector<fhicl::ParameterSet> & parSet,
+                    size_t nThrows = 100, int seed = 0);
+
+  
+  double GetWeightFromNominal(G4ReweightTraj & traj);
+
+  double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow);
+  std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj);
+
+  std::pair<double, double> GetPlusMinusSigmaParWeight(G4ReweightTraj & traj,
+                                                       size_t iPar);
+
+  double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow);
+  std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj);
+
+  bool CheckDecompSuccess() {return decompSuccess;};
+ 
+ private:
+
+  void GenerateThrows();
+
+  G4ReweighterFactory factory;
+  G4ReweightParameterMaker parMaker;
+  G4Reweighter * reweighter; 
+  size_t numberOfThrows;
+  TRandom3 rng;
+
+  bool decompSuccess;
+  TDecompChol choleskyMatrix;    
+
+  //std::map<std::string, std::vector<double>> paramRandVals;
+  //std::map<std::string, double> paramNominalVals;
+  //std::map<std::string, size_t> paramIndicies;
+
+  std::vector<std::vector<double>> paramRandomVals;
+  std::vector<double> paramNominalVals;
+  std::vector<std::string> paramNames;
+  std::vector<double> paramSigmas;
+
+  std::map<std::string,double> paramVals;
+};
+
+#endif

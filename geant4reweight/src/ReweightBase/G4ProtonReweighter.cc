@@ -13,8 +13,9 @@ G4ProtonReweighter::G4ProtonReweighter(TFile * totalInput, TFile * FSInput, cons
   Initialize(totalInput,FSInput,FSScales,inputElasticBiasHist, fix);
 }
 
-std::string G4ProtonReweighter::GetInteractionSubtype( G4ReweightTraj & theTraj ){
-    return "total";
+std::string G4ProtonReweighter::GetInteractionSubtype(
+    const G4ReweightTraj & theTraj) {
+  return "total";
 }
 
 G4ProtonReweighter::~G4ProtonReweighter(){}

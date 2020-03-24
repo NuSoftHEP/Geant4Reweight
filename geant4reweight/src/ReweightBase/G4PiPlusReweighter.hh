@@ -9,7 +9,7 @@ class G4PiPlusReweighter : public G4Reweighter {
     G4PiPlusReweighter(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales);
     G4PiPlusReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist=0x0, bool fix=false);
     virtual ~G4PiPlusReweighter();
-    std::string GetInteractionSubtype( G4ReweightTraj & ) override;
+    std::string GetInteractionSubtype(const G4ReweightTraj &) override;
 };
 
 #endif

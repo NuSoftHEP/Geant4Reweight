@@ -36,10 +36,10 @@ class G4ReweightTraj{
     G4ReweightTraj(int,int,int,int,std::pair<int,int>);
     ~G4ReweightTraj();
     
-    int GetTrackID()  {return trackID; };
-    int GetEventNum() {return eventNum; };
-    int GetPDG()      {return PDG; };  
-    int GetParID()    {return parID; };
+    int GetTrackID()  const {return trackID; };
+    int GetEventNum() const {return eventNum; };
+    int GetPDG()      const {return PDG; };  
+    int GetParID()    const {return parID; };
 
     std::string GetInelasticType() {return fInelastic;};
 
@@ -51,16 +51,16 @@ class G4ReweightTraj{
     std::pair<int,int> GetStepRange(){return stepRange;};
 
     void AddStep(G4ReweightStep *); 
-    size_t GetNSteps();
-    G4ReweightStep * GetStep(size_t is);
+    size_t GetNSteps() const;
+    G4ReweightStep * GetStep (size_t is) const;
   
     bool SetParent(G4ReweightTraj *);
     bool AddChild(G4ReweightTraj *);
-    size_t GetNChilds();
-    G4ReweightTraj * GetChild(size_t);
-    std::vector<G4ReweightTraj*> HasChild(int); 
+    size_t GetNChilds() const;
+    G4ReweightTraj * GetChild(size_t) const;
+    std::vector<G4ReweightTraj*> HasChild(int) const; 
 
-    std::string GetFinalProc();
+    std::string GetFinalProc() const;
     
     double GetTotalLength();
 
@@ -68,6 +68,7 @@ class G4ReweightTraj{
     size_t GetNElastic();
     std::vector<double> GetElastDists();
 
+/*
     void AddWeight( double w ){
        weights.push_back(w);
     };
@@ -84,8 +85,7 @@ class G4ReweightTraj{
     const std::vector< double > & GetWeights() const{
       return weights;
     };
-
-  protected:
+*/
 
   private:
     std::vector<G4ReweightStep *> steps;

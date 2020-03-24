@@ -16,6 +16,9 @@ trackID(tid), eventNum(eventnum), PDG(pdg), parID(parid), stepRange(range){
   else if( PDG == 2212 ){
     fInelastic = "protonInelastic";
   }
+  else if(PDG == 2112){
+    fInelastic = "neutronInelastic";
+  }
 
 }
 
@@ -33,11 +36,11 @@ void G4ReweightTraj::AddStep(G4ReweightStep * inputStep){
   steps.push_back(inputStep);
 }
 
-size_t G4ReweightTraj::GetNSteps(){
+size_t G4ReweightTraj::GetNSteps() const {
   return steps.size();
 }
 
-G4ReweightStep * G4ReweightTraj::GetStep(size_t is){
+G4ReweightStep * G4ReweightTraj::GetStep(size_t is) const {
   size_t NSteps = GetNSteps();
   
   if ( NSteps == 0 ){
@@ -91,11 +94,11 @@ bool G4ReweightTraj::AddChild(G4ReweightTraj * childTraj){
 
 }
 
-size_t G4ReweightTraj::GetNChilds(){
+size_t G4ReweightTraj::GetNChilds() const {
   return children.size();
 }
 
-G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic){
+G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic) const {
   size_t NChilds = GetNChilds();
   if(NChilds == 0){
     std::cout << "Has no childs" << std::endl;
@@ -112,11 +115,11 @@ G4ReweightTraj * G4ReweightTraj::GetChild(size_t ic){
 
 }
 
-std::string G4ReweightTraj::GetFinalProc(){
+std::string G4ReweightTraj::GetFinalProc() const {
   return steps.back()->GetStepChosenProc();
 }
 
-double G4ReweightTraj::GetTotalLength(){
+double G4ReweightTraj::GetTotalLength() {
   double total = 0.;
 
   for(size_t is = 0; is < GetNSteps(); ++is){
@@ -156,7 +159,7 @@ std::vector<double> G4ReweightTraj::GetElastDists(){
 }
 
 
-std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPDG){
+std::vector<G4ReweightTraj*> G4ReweightTraj::HasChild(int childPDG) const {
   std::vector<G4ReweightTraj*> childTrajs; 
   for(size_t ic = 0; ic < GetNChilds(); ++ic){
     if( GetChild(ic)->GetPDG() == childPDG){

@@ -519,12 +519,8 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
     double theMom = theStep->GetFullPreStepP();
 
-    //Convert xsec to MFP
-    //Note: taking away the factor of 10. used in conversion
-    //
     total += ( theStep->GetStepLength() / GetNominalMFP(theMom) );
     bias_total += ( theStep->GetStepLength() / GetBiasedMFP( theMom ) );
-
   }
 
 
@@ -556,7 +552,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   return weight;
 }
 
-double G4Reweighter::GetElasticWeight( G4ReweightTraj * theTraj ){
+double G4Reweighter::GetElasticWeight( const G4ReweightTraj * theTraj ){
   double total = 0.;
   double bias_total = 0.;
   double elastic_weight = 1.;

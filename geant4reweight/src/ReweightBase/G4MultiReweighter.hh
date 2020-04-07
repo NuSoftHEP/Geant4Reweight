@@ -32,11 +32,25 @@ class G4MultiReweighter{
 
   std::pair<double, double> GetPlusMinusSigmaParWeight(G4ReweightTraj & traj,
                                                        size_t iPar);
+  //std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();
 
   double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow);
   std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj);
 
   bool CheckDecompSuccess() {return decompSuccess;};
+
+  /*
+  std::map<std::string, double> GetNominalVar();
+
+  std::map<std::string, double> Get1DVar(size_t iThrow);
+  std::map<std::string, std::vector<double>> GetAll1DVars();
+
+  std::map<std::string, double> GetCorrelatedVar(size_t iThrow);
+  std::map<std::string, std::vector<double>> GetAllCorrelatedVars();
+
+  std::pair<double, double> GetPlusMinusSigmaParVar(size_t iPar);
+  std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaVars();
+  */
  
  private:
 

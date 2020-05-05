@@ -81,7 +81,8 @@ struct CascadeConfig{
       outFileName = output_file_override;
     }
 
-    fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
+    fhicl::ParameterSet MaterialParameters =
+        pset.get<fhicl::ParameterSet>("Material");
     MaterialName = MaterialParameters.get< std::string >( "Name" );
     MaterialZ = MaterialParameters.get< int >( "Z" );
     MaterialMass = MaterialParameters.get< double >( "Mass" );
@@ -111,13 +112,17 @@ struct TrackStepPart{
 
 CascadeConfig configure(fhicl::ParameterSet & pset);
 std::vector< double > fillMomenta(CascadeConfig theConfig);
-TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * theMaterial, G4SteppingManager & sm);
+TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def,
+                               G4Material * theMaterial,
+                               G4SteppingManager & sm);
 
 bool parseArgs(int argc, char* argv[]);
 void initRunMan( G4RunManager & rm );
 void makeFCLParameterSet( fhicl::ParameterSet & pset);
-G4HadronInelasticProcess * getInelasticProc( /*G4HadronInelasticProcess * inelastic_proc, */G4ParticleDefinition * part_def, std::string inel_name );
-G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::string el_name);
+G4HadronInelasticProcess * getInelasticProc(G4ParticleDefinition * part_def,
+                                            std::string inel_name );
+G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def,
+                                        std::string el_name);
 void CheckAllProcs(G4ParticleDefinition * part_def);
 
 
@@ -155,22 +160,26 @@ int main(int argc, char * argv[]){
   std::cout << "Got mass & density" << std::endl;
 
   TTree * tree = new TTree("tree","");  
-  int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
-  double momentum;
-  tree->Branch( "nPi0", &nPi0 );
-  tree->Branch( "nPiPlus", &nPiPlus );
-  tree->Branch( "nPiMinus", &nPiMinus );
-  tree->Branch( "nProton", &nProton );
-  tree->Branch( "nNeutron", &nNeutron );
-  tree->Branch( "momentum", &momentum );
+  double initialMomentumX, finalMomentumX;
+  double initialMomentumY, finalMomentumY;
+  double initialMomentumZ, finalMomentumZ;
+  double initialKE, finalKE;
+  double cosTheta;
+  tree->Branch("initialMomentumX", &initialMomentumX);
+  tree->Branch("initialMomentumY", &initialMomentumY);
+  tree->Branch("initialMomentumZ", &initialMomentumZ);
+  tree->Branch("finalMomentumX", &finalMomentumX);
+  tree->Branch("finalMomentumY", &finalMomentumY);
+  tree->Branch("finalMomentumZ", &finalMomentumZ);
+  tree->Branch("initialKE", &initialKE);
+  tree->Branch("finalKE", &finalKE);
+  tree->Branch("cosTheta", &cosTheta);
 
   std::cout << "Initializing" << std::endl;
   //Initializing
   G4RunManager rm;
-  initRunMan( rm );
-  
+  initRunMan(rm);
   G4SteppingManager sm;
-  //asdf
   ////
 
   std::cout << "Initialized" << std::endl;
@@ -238,7 +247,8 @@ int main(int argc, char * argv[]){
     
 
     default:
-      std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
+      std::cout << "Please specify either 211, -211, 2112, or 2212" <<
+                   std::endl;
       fout->cd();
       fout->Close();
       //delete rm;
@@ -246,83 +256,77 @@ int main(int argc, char * argv[]){
       
   }
 
-  //G4HadronInelasticProcess * inelastic_proc = 0x0;
-  CheckAllProcs(part_def);
-  G4HadronElasticProcess * elastic_proc = getElasticProc(part_def, "hadElastic");
+  //CheckAllProcs(part_def);
+  G4HadronElasticProcess * elastic_proc = getElasticProc(part_def,
+                                                         "hadElastic");
   if (!elastic_proc) {
     std::cout << "Could not find elastic process" << std::endl;
     return 0;
   }
 
-  std::cout << "Elastic: " << elastic_proc << std::endl;
-  elastic_proc->SetVerboseLevel(10);
-  elastic_proc->ProcessDescription(std::cout);
-
-  G4Material * theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialZ, theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  G4Material * theMaterial = new G4Material(
+      theConfig.MaterialName, theConfig.MaterialZ,
+      theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
 
   auto track_par = initTrackAndPart(part_def, theMaterial, sm);
   G4Track * theTrack = track_par.theTrack;
   G4Step * theStep   = track_par.theStep;
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
 
-  for( size_t iM = 0; iM < momenta.size(); ++iM ){
+  for (size_t iM = 0; iM < momenta.size(); ++iM){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
     double theMomentum = momenta[iM]; 
-    double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
+    double KE = sqrt(theMomentum*theMomentum +
+                     part_def->GetPDGMass()*part_def->GetPDGMass()) -
+                part_def->GetPDGMass();
 
-    std::cout << "init ke: " << KE << std::endl; 
+    //std::cout << "init ke: " << KE << std::endl; 
 
-    dynamic_part->SetKineticEnergy( KE );
+    initialKE = KE;
+    for (size_t iC = 0; iC < theConfig.nCascades; ++iC){
+      dynamic_part->SetKineticEnergy(KE);
+      double momentum = dynamic_part->GetTotalMomentum();
+      //std::cout << "Momentum: " << momentum << std::endl;
 
-    for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
+      if (!(iC % 1000))
+        std::cout << "\tCall: " << iC << std::endl;
 
-      if( !(iC % 1000) ) std::cout << "\tCascade: " << iC << std::endl;
+      //std::cout << "Old x: " << theTrack->GetMomentumDirection().x() << std::endl;
+      //std::cout << "Old y: " << theTrack->GetMomentumDirection().y() << std::endl;
+      //std::cout << "Old z: " << theTrack->GetMomentumDirection().z() << std::endl;
 
-      nPi0 = 0; 
-      nPiPlus = 0; 
-      nPiMinus = 0;
-      nProton = 0;
-      nNeutron = 0;
-      momentum = dynamic_part->GetTotalMomentum();
+      double initDirX = theTrack->GetMomentumDirection().x();
+      double initDirY = theTrack->GetMomentumDirection().y();
+      double initDirZ = theTrack->GetMomentumDirection().z();
 
-      std::cout << "Old x: " << theTrack->GetMomentumDirection().x() << std::endl;
-      std::cout << "Old y: " << theTrack->GetMomentumDirection().y() << std::endl;
-      std::cout << "Old z: " << theTrack->GetMomentumDirection().z() << std::endl;
+      initialMomentumX = momentum*initDirX;
+      initialMomentumY = momentum*initDirY;
+      initialMomentumZ = momentum*initDirZ;
 
-      G4ParticleChange * thePC = (G4ParticleChange*)elastic_proc->PostStepDoIt( *theTrack, *theStep );
+      G4ParticleChange * thePC =
+          (G4ParticleChange*)elastic_proc->PostStepDoIt(*theTrack, *theStep);
 
-      std::cout << "New x: " << theTrack->GetMomentumDirection().x() << std::endl;
-      std::cout << "New y: " << theTrack->GetMomentumDirection().y() << std::endl;
-      std::cout << "New z: " << theTrack->GetMomentumDirection().z() << std::endl;
+      //std::cout << "New2 x: " << thePC->GetMomentumDirection()->x() << std::endl;
+      //std::cout << "New2 y: " << thePC->GetMomentumDirection()->y() << std::endl;
+      //std::cout << "New2 z: " << thePC->GetMomentumDirection()->z() << std::endl;
 
-      std::cout << "New2 x: " << thePC->GetMomentumDirection()->x() << std::endl;
-      std::cout << "New2 y: " << thePC->GetMomentumDirection()->y() << std::endl;
-      std::cout << "New2 z: " << thePC->GetMomentumDirection()->z() << std::endl;
+      double finalDirX = thePC->GetMomentumDirection()->x();
+      double finalDirY = thePC->GetMomentumDirection()->y();
+      double finalDirZ = thePC->GetMomentumDirection()->z();
+      finalKE = thePC->GetEnergy();
 
-      std::cout << "New energy: " << thePC->GetEnergy() << std::endl;
+      //std::cout << "Mass: " << thePC->GetMass() << std::endl;
+      double finalEnergy = finalKE + thePC->GetMass();
+      double finalMomentum = sqrt(finalEnergy*finalEnergy -
+                                  thePC->GetMass()*thePC->GetMass());
+      finalMomentumX = finalMomentum*finalDirX;
+      finalMomentumY = finalMomentum*finalDirY;
+      finalMomentumZ = finalMomentum*finalDirZ;
 
+      cosTheta = initDirX*finalDirX + initDirY*finalDirY + initDirZ*finalDirZ;
 
-      size_t nSecondaries = thePC->GetNumberOfSecondaries();
-      std::cout << "Secondaries: " << nSecondaries << std::endl;
-      for( size_t i = 0; i < nSecondaries; ++i ){
-        auto part = thePC->GetSecondary(i)->GetDynamicParticle();
+      //std::cout << "New energy: " << thePC->GetEnergy() << std::endl;
 
-        switch( part->GetPDGcode() ){
-          case( 211 ):
-            ++nPiPlus; break;
-          case( -211 ):
-            ++nPiMinus; break;
-          case( 111 ):
-            ++nPi0; break;          
-          case( 2212 ):
-            ++nProton; break;
-          case( 2112 ):
-            ++nNeutron; break;
-          default:
-            break;
-        }
-      }
-      
       thePC->SetVerboseLevel(0);
       thePC->Initialize(*theTrack);
 
@@ -334,34 +338,7 @@ int main(int argc, char * argv[]){
   fout->cd();
   tree->Write();
  
-  std::map< std::string, std::string > cuts;
-  //Define cuts and make graphs out of the results
-  //
-  //
-  //These can be made FHiCL-able 
-  if( theConfig.type == 211 ){
-    cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
-    //cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
-    cuts["prod"] = " (nPiPlus + nPiMinus) > 1";
-    cuts["cex"] = "nPi0 > 0 && nPiPlus == 0 && nPiMinus == 0";
-    cuts["inel"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
-    cuts["dcex"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
-  }
-  else if( theConfig.type == -211 ){
-    cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
-    cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
-    cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
-    cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
-    cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
-  }
-  if( theConfig.type == 2212 || theConfig.type == 2112 ){
-    cuts["0n0p"] = "nProton == 0 && nNeutron == 0";
-    cuts["1n0p"] = "nProton == 0 && nNeutron == 1";
-    cuts["0n1p"] = "nProton == 1 && nNeutron == 0";
-    cuts["1n1p"] = "nProton == 1 && nNeutron == 1";
-    cuts["Other"] = "nProton > 1 || nNeutron > 1";
-  }
-
+  /*
   int nbins = int(theConfig.range.second) + 1;
   std::string binning = "(" + std::to_string(nbins) + ",0," + std::to_string(theConfig.range.second + 1.) + ")";
 
@@ -375,32 +352,9 @@ int main(int argc, char * argv[]){
       std::cout << i << std::endl;
     }
   }
-
-  for( auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut ){
-    std::cout << itCut->first << std::endl;
-    std::string name = "h" + itCut->first;
-    std::string draw = "momentum>>" + name + binning;
-    std::cout << "Draw: " << draw << std::endl;
-
-    tree->Draw( draw.c_str(), itCut->second.c_str(), "goff" ); 
-    TH1F * hist = (TH1F*)gDirectory->Get( name.c_str() );
-    hist->Divide( total );
-
-    std::vector< double > xs,ys;
-    
-    for( size_t i = 0; i < bins.size(); ++i ){
-      xs.push_back( bins.at(i) );
-      ys.push_back( hist->GetBinContent(bins.at(i)) );
-    }
-    TGraph gr(xs.size(), &xs[0], &ys[0]);
-    gr.Write( itCut->first.c_str() );
-
-  }
-
+  */
 
   fout->Close();
-  //delete rm;
-
   return 0;
 }
 
@@ -504,7 +458,8 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
 }
 
 
-G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::string el_name) {
+G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def,
+                                        std::string el_name) {
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   for( int i = 0; i < pv->size(); ++i ){
@@ -514,7 +469,7 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::st
     if (theName == el_name) {
     std::cout << "Found elastic" << std::endl;
       //return (G4HadronElasticProcess*)proc;
-      return dynamic_cast<G4HadronElasticProcess *>(proc);
+      return (G4HadronElasticProcess *)proc;
     }
   }
   return 0x0;

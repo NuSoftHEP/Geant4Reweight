@@ -6,9 +6,10 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
   BuildHistsFromPars();
 }
 
-G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, bool doProton ){
+G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, int pdg/*bool doProton*/ ){
 
   std::vector< std::string > all_cuts;
+  /*
   if( !doProton ){
     std::cout << "Not doing proton" << std::endl;
     all_cuts= {"abs", "cex", "dcex", "prod", "inel", "reac"};
@@ -16,6 +17,24 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
   else{
     std::cout << "Doing proton" << std::endl;
     all_cuts = {"total","reac"};
+  }
+  */
+  switch (pdg) {
+    case 211: {
+      all_cuts = {"abs", "cex", "dcex", "prod", "inel", "reac"};
+      break;
+    }
+    case -211: {
+      all_cuts = {"abs", "cex", "dcex", "prod", "inel", "reac"};
+      break;
+    }
+    case 2212: {
+      all_cuts = {"total", "reac"};
+      break;
+    }
+    default: {
+      break;
+    }
   }
 
   for( size_t i = 0; i < all_cuts.size(); ++i ){

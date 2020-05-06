@@ -16,7 +16,7 @@ class G4ReweightParameterMaker{
   public:
     G4ReweightParameterMaker(){};
     G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars );
-    G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, bool doProton=false );
+    G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, int pdg = 211/*bool doProton=false*/ );
     void SetNewVals( const std::vector< std::pair< std::string, double > > & input );
     void SetNewVals( const std::map< std::string, double > & input );
     void SetParamVals( const std::map< std::string, double > & input );

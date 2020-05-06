@@ -7,7 +7,7 @@ G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & totalXSecFile, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet, TFile & fitResults,
     size_t nThrows, int seed)
-    : parMaker(parSet),
+    : parMaker(parSet, pdg),
       reweighter(factory.BuildReweighter(pdg, &totalXSecFile, &fracsFile,
                                          parMaker.GetFSHists())),
       numberOfThrows(nThrows),
@@ -44,7 +44,7 @@ G4MultiReweighter::G4MultiReweighter(
 G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & totalXSecFile, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet, size_t nThrows, int seed)
-    : parMaker(parSet),
+    : parMaker(parSet, pdg),
       reweighter(factory.BuildReweighter(pdg, &totalXSecFile, &fracsFile,
                                          parMaker.GetFSHists())),
       numberOfThrows(nThrows),

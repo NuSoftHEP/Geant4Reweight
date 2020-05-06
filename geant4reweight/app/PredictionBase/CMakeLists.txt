@@ -1,6 +1,7 @@
 SET(PREDICTION_APPS
   G4CrossSection
   G4Cascade
+  G4Elastic
 )
 
 

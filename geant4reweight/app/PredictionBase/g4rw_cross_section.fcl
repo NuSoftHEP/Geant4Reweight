@@ -1,0 +1,8 @@
+#include "material.fcl"
+Type: 211
+Range: [10., 8000.]
+NDivisions: 7989
+Verbose: "true"
+Outfile: "cross_section_out.root"
+
+Material: @local::LAr

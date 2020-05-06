@@ -32,6 +32,8 @@ SET(PREDICTION_APPS
     )
   
   endforeach()
+
+install_fhicl()
 #else()
 #  include_directories(${CETLIB_EXCEPT_INCLUDE_DIR})
 #  include_directories(${CETLIB_INCLUDE_DIR})

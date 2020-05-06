@@ -1,0 +1,52 @@
+BEGIN_PROLOG
+
+LAr: {
+  Name: "liquidArgon"
+  Z:    18
+  Mass: 39.95
+  Density: 1.390
+}
+
+C: {
+  Name: "graphite"
+  Z:   6
+  Mass: 12.01
+  Density: 2.266 
+}
+
+O: {
+  Name: "oxygen"
+  Z: 8
+  Mass: 16.
+  Density: 1.141
+}
+
+Al: {
+  Name: "aluminum"
+  Z: 13
+  Mass: 26.98
+  Density: 2.699
+}
+
+Fe: {
+  Name: "iron"
+  Z: 26
+  Mass: 55.85
+  Density: 7.874
+}
+
+Cu: {
+  Name: "copper"
+  Z: 29
+  Mass: 63.55
+  Density: 8.960
+}
+
+Pb: {
+  Name: "lead" 
+  Z: 82
+  Mass: 207.2
+  Density: 11.35
+}
+
+END_PROLOG

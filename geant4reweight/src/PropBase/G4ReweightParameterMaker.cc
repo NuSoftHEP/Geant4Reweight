@@ -30,8 +30,15 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     }
     case 2212: {
       all_cuts = {"total", "reac"};
+      //all_cuts = {"0n0p", "1n0p", "0n1p", "1n1p", "Other", "reac"};
       break;
     }
+    /*
+    case 2112: {
+      //all_cuts = {"0n0p", "1n0p", "0n1p", "1n1p", "Other", "reac"};
+      break;
+    }
+    */
     default: {
       break;
     }

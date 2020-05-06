@@ -462,7 +462,8 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def,
                                         std::string el_name) {
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
-  for( int i = 0; i < pv->size(); ++i ){
+  //for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < (size_t)pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;
@@ -481,7 +482,8 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  for( int i = 0; i < pv->size(); ++i ){
+  //for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < (size_t)pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;
@@ -497,7 +499,8 @@ void CheckAllProcs(G4ParticleDefinition * part_def) {
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  for (int i = 0; i < pv->size(); ++i) {
+  //for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < (size_t)pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;

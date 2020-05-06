@@ -201,7 +201,8 @@ int main(int argc, char * argv[]){
   G4HadronElasticProcess   * elastic_proc = 0x0;
   G4HadronInelasticProcess * inelastic_proc = 0x0;
 
-  for( int i = 0; i < pv->size(); ++i ){
+  //for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < (size_t)pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;

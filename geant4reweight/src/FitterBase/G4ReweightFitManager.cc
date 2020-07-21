@@ -8,491 +8,716 @@
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TROOT.h"
+#include "TRandom.h"
+
+
 
 G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save) : 
-  fit_tree("FitTree", ""),
-  fSave( do_save )
+	fit_tree("FitTree", ""),
+	fSave( do_save )
 {
-  out = new TFile( fOutFileName.c_str(), "RECREATE" );
-  data_dir = out->mkdir( "Data" );
-  nDOF = 0;
-  fit_tree.Branch( "Chi2", &tree_chi2 );
+	out = new TFile( fOutFileName.c_str(), "RECREATE" );
+	data_dir = out->mkdir( "Data" );
+	nDOF = 0;
+	fit_tree.Branch( "Chi2", &tree_chi2 );
 }
 
 void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
 
-  parMaker = G4ReweightParameterMaker( FitParSets );
+	parMaker = G4ReweightParameterMaker( FitParSets );
 
-  nDOF -= parMaker.GetNParameters();
-  theParVals = parMaker.GetParametersAsPairs();
+	nDOF -= parMaker.GetNParameters();
+	theParVals = parMaker.GetParametersAsPairs();
 
-  for( size_t i = 0; i < theParVals.size(); ++i ){ 
-    std::string branch_name = theParVals[i].first;
-  
-    parameter_values[ branch_name ] = 0.;
-    fit_tree.Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );   
-  }
+	for(std::string::size_type i=0;i<parMaker.GetElasticParameterSet().size();i++){
+
+		theElastParVals.push_back(std::pair(parMaker.GetElasticParameterSet().at(i).Name,parMaker.GetElasticParameterSet().at(i).Value));
+
+	}
+
+
+
+	for( size_t i = 0; i < theParVals.size(); ++i ){ 
+		std::string branch_name = theParVals[i].first;
+		parameter_values[ branch_name ] = 0.;
+		fit_tree.Branch( branch_name.c_str(), &parameter_values.at( branch_name ), (branch_name + "/D").c_str() );   
+
+	}
+
+	//get elastic parameter set as well
+	for(size_t i = 0;i< theElastParVals.size(); ++i){
+		std::string branch_name = theElastParVals[i].first;
+		parameter_values[ branch_name ] = 0.;
+		fit_tree.Branch( branch_name.c_str() , &parameter_values.at( branch_name ) , (branch_name + "/D").c_str() );
+
+
+	}
+
+
+
+
+
 
 }
 
 void G4ReweightFitManager::DefineMCSets( std::vector< fhicl::ParameterSet > &MCSets ){
 
-  for( size_t i = 0; i < MCSets.size(); ++i ){
-    std::string theSet = MCSets[i].get< std::string >("Name");
-    sets.push_back( theSet );
-    mapSetsToFracs[ theSet ] = MCSets[i].get< std::string >( "FSFile" );
-    mapSetsToNominal[ theSet ] = MCSets[i].get< std::string >( "File" );
-  }
+	for( size_t i = 0; i < MCSets.size(); ++i ){
+		std::string theSet = MCSets[i].get< std::string >("Name");
+		sets.push_back( theSet );
+		mapSetsToFracs[ theSet ] = MCSets[i].get< std::string >( "FSFile" );
+		mapSetsToNominal[ theSet ] = MCSets[i].get< std::string >( "File" );
+	}
 
 }
 
 void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
-  std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
-  std::cout << "Getting Experiments: "  << exps.size() << std::endl;
-  for(size_t i = 0; i < exps.size(); ++i){
-    std::cout << std::endl;
+	std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
+	
+for(size_t i = 0; i < exps.size(); ++i){
 
-    if( IsSetActive( exps.at(i).get<std::string >( "Type" ) ) ){
-      G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i));
-      mapSetsToFitters[ exp->GetType() ].push_back( exp );
-    }
-  }
+		if( IsSetActive( exps.at(i).get<std::string >( "Type" ) ) ){
+			G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i) , pdg);
 
-  if( IsSetActive( "C_PiPlus" ) ){
-    bool includeDUET = ps.get< bool >("IncludeDUET");
-    std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
-    DUETFitter * df = new DUETFitter(out, DUET_data);
-    if( includeDUET ){
-      mapSetsToFitters["C_PiPlus"].push_back( df );
-    }
-  }
+			mapSetsToFitters[ exp->GetType() ].push_back( exp );
+		}
+	}
+
+	if( IsSetActive( "C_PiPlus" ) ){
+		bool includeDUET = ps.get< bool >("IncludeDUET");
+		std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
+		DUETFitter * df = new DUETFitter(out, DUET_data);
+		if( includeDUET ){
+			mapSetsToFitters["C_PiPlus"].push_back( df );
+		}
+	}
+
+	std::cout << "Done Getting Experiments" << std::endl;
 }
 
 void G4ReweightFitManager::GetAllData(){
-  auto itSet = mapSetsToFitters.begin();
-  for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+	auto itSet = mapSetsToFitters.begin();
+	for( ; itSet != mapSetsToFitters.end(); ++itSet ){
 
-    std::vector< G4ReweightFitter* > fitters = itSet->second;
-    for( size_t i = 0; i < fitters.size(); ++i ){
-      fitters[i]->LoadData();
-      fitters[i]->SaveData(data_dir);
-      nDOF += fitters[i]->GetNDOF();
-      allFitters.push_back( fitters[i] );
-    }
-  }
+		std::vector< G4ReweightFitter* > fitters = itSet->second;
+		for( size_t i = 0; i < fitters.size(); ++i ){
+			fitters[i]->LoadData();
+			fitters[i]->SaveData(data_dir);
+			nDOF += fitters[i]->GetNDOF();
+			allFitters.push_back( fitters[i] );
+		}
+	}
 
 }
+
 
 void G4ReweightFitManager::DefineFCN(){
-  theFCN = ROOT::Math::Functor(
-      [&](double const *coeffs) {
-        
-        std::string dir_name = "";
-        for(size_t i = 0; i < theParVals.size(); ++i){          
-          theParVals[i].second = coeffs[i];
-          dir_name += theParVals[i].first + std::to_string( coeffs[i] );
 
-          parameter_values[ theParVals[i].first ] = coeffs[i];
-        }
+	theFCN = ROOT::Math::Functor(
+			[&](double const *coeffs) {
 
-        parMaker.SetNewVals( theParVals );
+			//if you use reac as a parameter, change this to true (this then gets used when deciding how many fit
+			//params you have when computing the ndof
+				bool use_reac=false;
 
-        //////////////////////////////////////////////////////
+				//TODO: This is hard coded in for now, should setup a way to determine what the 
+				//data types are from the params
+				std::string cuts[9] = {"total","elast","reac","abscx","cex","inel","dcex","abs","prod"};
 
-        //Saving Extra Information////////////////////////////
-        TDirectory * outdir = 0x0;
-        if( fSave ){
-          if( !out->Get( dir_name.c_str() ) ){
-            outdir = out->mkdir( dir_name.c_str() );
-          }
-          else{
-            outdir = (TDirectory*)out->Get( dir_name.c_str() );
-          }
-        }
-        //////////////////////////////////////////////////////
-  
-        double chi2 = 0.;
+				std::string dir_name = "";
+				for(size_t i = 0; i < theParVals.size(); ++i){          
 
-        auto itSet = mapSetsToFitters.begin();
-    
-        for( ; itSet != mapSetsToFitters.end(); ++itSet ){
-          for( size_t i = 0; i < itSet->second.size(); ++i ){
-            auto theFitter = itSet->second.at(i); 
-    
-            std::string NominalFile = mapSetsToNominal[ itSet->first ];
-            std::string FracsFile = mapSetsToFracs[ itSet->first ];
-    
-            if( fSave )
-              theFitter->MakeFitDir( outdir );
+					theParVals[i].second = coeffs[i];
+					dir_name += theParVals[i].first + std::to_string( coeffs[i] );
 
-            theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet(), fSave);
+					parameter_values[ theParVals[i].first ] = coeffs[i];
+					if(theParVals[i].first == "fReac") use_reac=true;
+				}
 
-            //Combine
-            double fit_chi2 = theFitter->DoFit(fSave);
-            chi2 += fit_chi2;
-    
-            theFitter->FinishUp();
-    
-          }
-        }	
-	
-        tree_chi2 = chi2;
-        fit_tree.Fill();
-        return chi2;
-      },
-      theParVals.size()
-    );
+				//just set these to 1 for the time being
+				for(size_t i=0;i< theElastParVals.size(); ++i){
+
+					theElastParVals[i].second = coeffs[i+theParVals.size()];
+					parameter_values[ theElastParVals[i].first] = coeffs[i+theParVals.size() ];
+					dir_name += theElastParVals[i].first + std::to_string( coeffs[i+theParVals.size()] );
+
+				}
+
+
+				if(theElastParVals.size())
+					parMaker.SetNewValsWithElast( theParVals , theElastParVals);
+				else
+					parMaker.SetNewVals( theParVals) ;
+
+				//////////////////////////////////////////////////////
+
+				//Saving Extra Information//////////////////////////
+				TDirectory * outdir = 0x0;
+				if( fSave ){
+					if( !out->Get( dir_name.c_str() ) ){
+						outdir = out->mkdir( dir_name.c_str() );
+					}
+					else{
+						outdir = (TDirectory*)out->Get( dir_name.c_str() );
+					}
+				}
+				//////////////////////////////////////////////////////
+
+
+				double chi2 = 0.;
+
+				auto itSet = mapSetsToFitters.begin();
+
+				double n=0;
+
+				std::vector<int> sets_per_target;	
+
+
+				//TODO make a more sensible data structure for this (make a struct)
+				std::vector<std::pair<std::string , std::pair<int,double> > > cuts_and_n_and_chi2;
+
+				//fill this vector with dummy parameters
+				for(int i_dt=0;i_dt<9;i_dt++){
+
+					//cuts_and_n_and_chi2.first - > Name of process
+					//cuts_and_n_and_chi2.second.first -> num of data points for that process
+					//cuts_and_n_and_chi2.second.second -> chi2 from that process
+
+					cuts_and_n_and_chi2.push_back(std::make_pair(cuts[i_dt].c_str(),std::make_pair(0,0.0)));
+
+				}
+
+
+
+				for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+
+					for( size_t i = 0; i < itSet->second.size(); ++i ){
+						auto theFitter = itSet->second.at(i); 
+
+						std::string NominalFile = mapSetsToNominal[ itSet->first ];
+						std::string FracsFile = mapSetsToFracs[ itSet->first ];
+
+						if( fSave )
+							theFitter->MakeFitDir( outdir );
+
+
+						//				        theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);	
+
+						theFitter->GetMCFromCurvesWithCovariance( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);
+
+
+
+
+						theFitter->DoFitModified(fSave);
+
+						//go through all of the data types and get the total n and total chi2 for each, store in the vector cuts_and_n_and_chi2	
+						for(int i_dt=0;i_dt<9;i_dt++){
+
+
+							//retirive the number of data points for this process and the chi2 the contribute
+							std::pair<int,double>n_and_chi2 = theFitter->GetNDataPointsAndChi2(cuts[i_dt].c_str());
+
+							cuts_and_n_and_chi2[i_dt].second.first += n_and_chi2.first;	
+							cuts_and_n_and_chi2[i_dt].second.second += n_and_chi2.second;
+
+						}
+
+
+						theFitter->FinishUp();
+
+					}
+
+
+				}
+
+				int p=0; //num of model parameters process i_dt is senstive to
+
+				for(int i_dt=0;i_dt<9;i_dt++){
+
+					switch(i_dt){
+						case 0: 
+
+							p = theElastParVals.size() + theParVals.size(); //total, use all of the parameters
+							break;
+						case 1:
+							p = theElastParVals.size(); //elastic, use all of the elastic parameters num of elast params
+							break;
+						case 2: 
+							p = theParVals.size(); //reac, use all the inelastic parameters
+							break;
+						case 3:
+							if(!use_reac)				
+								p = 2; //abscx - 2 parameters
+							else
+								p = theParVals.size(); //abscx but setting all reac using a single parameter
+							break;
+						default: 
+							p = 1; //everything else is 1 parameter
+
+
+					}
+
+				
+					//make sure you don't divide by zero!
+					if(cuts_and_n_and_chi2[i_dt].second.first - p >0){ 
+
+							chi2 +=  cuts_and_n_and_chi2[i_dt].second.second/(cuts_and_n_and_chi2[i_dt].second.first-p); 
+							n++;						
+					}
+
+				}
+
+				tree_chi2 = chi2/n;
+				fit_tree.Fill();
+				return chi2/n;		
+			},
+		theParVals.size()+theElastParVals.size()
+			);
 }
+
+void G4ReweightFitManager::SaveFitTree(){
+
+	out->cd();
+	fit_tree.Write();
+	out->Close();
+}
+
 
 void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
-  TMatrixD *cov = new TMatrixD( theParVals.size(), theParVals.size() );
-  TH1D parsHist("parsHist", "", theParVals.size(), 0,theParVals.size());
-  TH2D covHist("covHist", "", theParVals.size(), 0,theParVals.size(), theParVals.size(), 0,theParVals.size());
-
-  std::cout << "Start: " << std::endl;
-  for( auto it = parMaker.GetParameterSet().begin(); it != parMaker.GetParameterSet().end(); ++it ){
-    std::cout << it->first << std::endl;
-    for( size_t i = 0; i < it->second.size(); ++i ){
-      std::cout << "\t" << it->second.at(i).Name << " " << it->second.at(i).Value << std::endl;
-    }
-  }
-
-
-  DefineFCN();
-
-
-  if( !fFitScan ){
-    std::cout << "Doing minimizing" << std::endl;
-
-    fMinimizer->SetFunction( theFCN );
-    int fitstatus = fMinimizer->Minimize();
-
-
-
-    std::cout << "fitstatus: " << fitstatus << std::endl;
-    if( !fitstatus ){
-      std::cout << "Failed to find minimum: " << std::endl;
-    }
-    else{
-      std::vector< double > vals, errs;
-      std::cout << "Found minimum: " << std::endl;    
-      for( size_t i = 0; i < theParVals.size(); ++i ){
-        std::cout << theParVals[i].first << " " << fMinimizer->X()[i] << std::endl;
-
-        vals.push_back( fMinimizer->X()[i] );
-        errs.push_back( sqrt( fMinimizer->CovMatrix(i,i) ) );
-
-        parsHist.SetBinContent( i+1, vals.back() );
-        parsHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
-        parsHist.SetBinError( i+1, errs.back() );
-
-        covHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
-        covHist.GetYaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
-
-
-        for( size_t j = 0; j < theParVals.size(); ++j ){
-          (*cov)(i,j) = fMinimizer->CovMatrix(i,j);
-          covHist.SetBinContent(i+1, j+1, fMinimizer->CovMatrix(i,j));
-        }
-      }
-
-
-      std::string dir_names[4] = {"MinusSigma", "BestFit", "PlusSigma", "Nominal"};
-
-      for( int sigma_it = 0; sigma_it < 4; ++sigma_it ){
-        //Setting parameters
-        for( size_t i = 0; i < theParVals.size(); ++i ){
-          if( sigma_it < 3 )
-            theParVals[i].second = vals[i] + (sigma_it - 1)*errs[i];
-          else if( sigma_it == 3 )
-             theParVals[i].second = 1.;               
-        }
-        
-        parMaker.SetNewVals( theParVals ); 
-
-        TDirectory * outdir = out->mkdir( dir_names[sigma_it].c_str() );
-
-        std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
-          itSet = mapSetsToFitters.begin();
-        
-        for( ; itSet != mapSetsToFitters.end(); ++itSet ){
-          for( size_t i = 0; i < itSet->second.size(); ++i ){
-            auto theFitter = itSet->second.at(i); 
-        
-            std::string NominalFile = mapSetsToNominal[ itSet->first ];
-            std::string FracsFile = mapSetsToFracs[ itSet->first ];
-        
-            theFitter->MakeFitDir( outdir );
-            theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet(), true);
-        
-            theFitter->FinishUp();
-        
-          }
-        }	
-      }
-
-      DrawFitResults();
-    }
-  }
-  else{
-   std::cout << "Doing scan" << std::endl;
-   
-   //Build the input to the FCN
-   int total_steps = 1;
-
-   std::vector< std::pair< std::string, FitParameter > > active_pars = parMaker.GetActiveParametersAsPairs();
-   for( auto it = active_pars.begin(); it != active_pars.end(); ++it )
-     total_steps *= it->second.ScanSteps;
-   
-
-   std::cout << "Factors: " << std::endl;
-   std::vector< int > theFactors;
-   for( size_t i = 0; i < active_pars.size(); ++i ){
-     std::cout << i << " Steps: " << active_pars[i].second.ScanSteps << std::endl;
-     if( i == 0 )
-       theFactors.push_back( total_steps / active_pars[i].second.ScanSteps );
-     else 
-       theFactors.push_back( theFactors[i - 1] / active_pars[i].second.ScanSteps );
-
-     std::cout << theFactors.back() << std::endl;      
-   }
-
-   std::cout << "Steps: " << std::endl;
-   for( int z = 0; z < total_steps; ++z ){
-     
-     std::vector< int > input; 
-     std::vector< double > input_coeffs;
-     for( size_t i = 0; i < theFactors.size(); ++i ){
-      
-       int val = z;
-       
-       for( size_t j = 0; j < i; ++j )
-         val -= ( theFactors[j] * input[j] );
-
-       input.push_back( val / theFactors[i] );
-       input_coeffs.push_back( active_pars[i].second.ScanStart + ( input.back() * active_pars[i].second.ScanDelta ) );
-
-       std::cout << input.back() << " " << input_coeffs.back() << " ";
-     }
-     std::cout << std::endl;
-
-     std::cout << "FCN output: " << z << " " << theFCN(&input_coeffs[0]) << std::endl; 
-   }
-
-  }
-
-  
-  out->cd();
-  fit_tree.Write();
-  cov->Write( "FitCovariance" );
-  covHist.Write( "FitCovHist" );
-  parsHist.Write();
-  out->Close();
-  std::cout << "Done" << std::endl;
- 
-  
-}
-
-void G4ReweightFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
-  fMinimizer = std::unique_ptr<ROOT::Math::Minimizer>
-    ( ROOT::Math::Factory::CreateMinimizer( "Minuit2", "Migrad" ) );
-  
-  //Configure
-  fMinimizer->SetMaxFunctionCalls( ps.get< int >("MaxCalls") );
-  fMinimizer->SetTolerance( ps.get< double >("Tolerance") );
-  double LowerLimit = ps.get< double >("LowerLimit");
-  double UpperLimit = ps.get< double >("UpperLimit");
-  
-  for( size_t i = 0; i < theParVals.size(); ++i ){
-    fMinimizer->SetVariable( i, theParVals[i].first.c_str(), theParVals[i].second, 0.1 );
-    fMinimizer->SetVariableLimits( i, LowerLimit, UpperLimit );
-  }
-
-}
-
-void G4ReweightFitManager::DrawFitResults(){
-
-  std::vector< std::string > types;
-  for( auto itSets = mapSetsToFitters.begin(); itSets != mapSetsToFitters.end(); ++itSets ){
-    types.push_back( itSets->first );
-  }
-
-  std::map< std::string, std::string > titles = {
-    {"reac", "Reactive"},
-    {"inel", "Quasi-Elastic"},
-    {"abs", "Absorption"},
-    {"cex", "Charge Exchange"},
-    {"abscx", "Abs + CEx"}
-  };
-
-  gROOT->SetBatch(1);
-
-  TDirectory * fitdir = (TDirectory*)out->mkdir("Fit"); 
-  fitdir->cd();
-
-  for( auto itType = types.begin(); itType != types.end(); ++itType ){
-    
-    TDirectory * typedir = (TDirectory*)fitdir->mkdir( (*itType).c_str() );
-    typedir->cd();
-    
-    std::vector< std::string > all_cuts, dirs;
-
-    std::map< std::string, std::vector< TGraphErrors * > > all_data;
-
-    TList * data_keys = data_dir->GetListOfKeys();
-    for( int i = 0; i < data_keys->GetSize(); ++i ){
-
-      std::string data_name = data_keys->At(i)->GetName();
-      if( data_name.find( *itType ) == std::string::npos ) continue;
-      TDirectory * sub_dir = (TDirectory*)data_dir->Get( data_name.c_str() );
-      
-      TList * exp_keys = sub_dir->GetListOfKeys();
-      std::vector< std::string > data_graph_names;
-
-      for( int j = 0; j < exp_keys->GetSize(); ++j ){
-        std::string key_name = exp_keys->At(j)->GetName();
-
-        //Excluding Covariance from DUET
-        if( key_name.find( "cov" ) != std::string::npos )
-          continue;
-
-        all_data[ key_name ].push_back( (TGraphErrors*)sub_dir->Get( key_name.c_str() ) );
-
-        bool found = false;
-        for( size_t k = 0; k < all_cuts.size(); ++k ){
-          if( all_cuts[k] == key_name ){
-            found = true;
-            break;
-          }
-        }
-
-        if( !found ){
-          all_cuts.push_back( key_name );
-          dirs.push_back( data_name );
-        }
-      }
-       
-    }
-
-    for( size_t i = 0; i < all_cuts.size(); ++i ){
-      std::string cut_name = all_cuts[i];
-     
-      double max = 0.;     
-      std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
-      for( size_t j = 0; j < data_vec.size(); ++j ){
-
-        TGraphErrors * data_gr = data_vec[j];
-        data_gr->SetMarkerColor(1);
-        data_gr->SetMarkerStyle(20);
-        
-        for( int k = 0; k < data_gr->GetN(); ++k ){
-          double val = data_gr->GetY()[k] + data_gr->GetEY()[k];
-          if( val > max) max = val;
-        }
-      }
-
-      //PlusSigma
-      std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;
-      TGraph * plus_sigma  = (TGraph*)out->Get( plus_name.c_str() );
-
-      double old_x = plus_sigma->GetX()[0];
-      double old_y = plus_sigma->GetY()[0];
-      plus_sigma->InsertPointBefore(1, old_x, old_y);
-      plus_sigma->SetPoint(0, old_x-.001, 0.);
-
-      old_x = plus_sigma->GetX()[ plus_sigma->GetN() - 1 ];
-      old_y = plus_sigma->GetY()[ plus_sigma->GetN() - 1 ];
-      plus_sigma->InsertPointBefore( (plus_sigma->GetN() - 1), old_x, old_y );
-      plus_sigma->SetPoint( (plus_sigma->GetN() - 1), old_x+.001, 0. );
-
-      for( int j = 0; j < plus_sigma->GetN(); ++j ){
-        if( plus_sigma->GetY()[j] > max ) max = plus_sigma->GetY()[j];
-      }
-
-      ////////////
-
-      //Nominal
-      std::string nominal_name = "Nominal/" + dirs[i] + "/" + cut_name;
-      TGraph * nominal = (TGraph*)out->Get( nominal_name.c_str() );
-      for( int j = 0; j < nominal->GetN(); ++j ){
-        if( nominal->GetY()[j] > max ) max = nominal->GetY()[j];
-      }
-      ///////////
-
-
-
-      //MinusSigma
-      std::string minus_name = "MinusSigma/" + dirs[i] + "/" + cut_name;
-      TGraph * minus_sigma  = (TGraph*)out->Get( minus_name.c_str() );
-
-      old_x = minus_sigma->GetX()[0];
-      old_y = minus_sigma->GetY()[0];
-      minus_sigma->InsertPointBefore(1, old_x, old_y);
-      minus_sigma->SetPoint(0, old_x-.001, 0.);
-
-      old_x = minus_sigma->GetX()[ minus_sigma->GetN() - 1 ];
-      old_y = minus_sigma->GetY()[ minus_sigma->GetN() - 1 ];
-      minus_sigma->InsertPointBefore( (minus_sigma->GetN() - 1), old_x, old_y );
-      minus_sigma->SetPoint( (minus_sigma->GetN() - 1), old_x+.001, 0. );
-      ////////////
-
-
-
-      TCanvas c1("c1","c1", 500, 400);
-
-      c1.SetTickx(1);
-      c1.SetTicky(1);
-      c1.SetBottomMargin( c1.GetBottomMargin() * 1.1 );
-      c1.SetLeftMargin( c1.GetLeftMargin() * 1.1 );
-
-      plus_sigma->SetFillColor(2);
-      plus_sigma->SetMaximum( 1.2 * max );
-      plus_sigma->SetMinimum(0.);
-      std::string title = titles[cut_name] + ";Pion Momentum (MeV/c);#sigma (mb)";
-      plus_sigma->SetTitle( title.c_str() ); 
-      plus_sigma->GetXaxis()->SetTitleSize(.06);
-      plus_sigma->GetXaxis()->SetTitleOffset(.75);
-      plus_sigma->GetYaxis()->SetTitleSize(.06);
-      plus_sigma->GetYaxis()->SetTitleOffset(.75);
-      plus_sigma->GetXaxis()->SetLabelSize(.04);
-      plus_sigma->GetYaxis()->SetLabelSize(.04);
-
-      minus_sigma->SetFillColor(0);
-
-      plus_sigma->Draw("AF");
-      minus_sigma->Draw("F same");
-
-      //BestFit
-      std::string best_fit_name = "BestFit/" + dirs[i] + "/" + cut_name;
-      TGraph * best_fit = (TGraph*)out->Get( best_fit_name.c_str() );
-      best_fit->SetLineStyle(10);
-      best_fit->SetLineColor(1);
-      best_fit->Draw("same");
-
-      nominal->SetLineStyle(10);
-      nominal->SetLineColor(4);
-      nominal->Draw("same");
-
-      for( size_t j = 0; j < data_vec.size(); ++j ){
-        data_vec[j]->Draw( "P same" );
-      }
-
-      gPad->RedrawAxis();
-
-      typedir->cd();
-      c1.Write( cut_name.c_str() );
-
-    }
-  }
-
-  TVectorD theChi2(3);
-  theChi2[0] = fMinimizer->MinValue();
-  theChi2[1] = nDOF;
-  theChi2[2] = fMinimizer->MinValue() / nDOF;
-  std::cout << "Minimum Chi-squared: " << fMinimizer->MinValue() << std::endl;
-
-  out->cd("Fit");
-  theChi2.Write( "Chi2" );
-
-}
+	TMatrixD *cov = new TMatrixD( theParVals.size() + theElastParVals.size(), theParVals.size() + theElastParVals.size() );
+
+	TH1D parsHist("parsHist", "", theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size());
+
+	TH2D covHist("covHist", "", theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size(), theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size());
+
+	for( auto it = parMaker.GetParameterSet().begin(); it != parMaker.GetParameterSet().end(); ++it ){
+		std::cout << it->first << std::endl;
+		for( size_t i = 0; i < it->second.size(); ++i ){
+			std::cout << "\t" << it->second.at(i).Name << " " << it->second.at(i).Value << std::endl;
+		}
+	}
+
+	//Added by C Thorpe  print elastic params
+	auto elastParam = parMaker.GetElasticParameterSet();
+	for(std::string::size_type i=0;i<elastParam.size();i++){
+		std::cout << elastParam.at(i).Cut << std::endl;
+		std::cout << "\t" <<  elastParam.at(i).Name << " " << elastParam.at(i).Value <<   std::endl;
+	}
+
+
+	//OutlierScan();
+	DefineFCN();
+
+	if( !fFitScan ){
+
+		std::cout << "Doing minimizing" << std::endl;
+
+		fMinimizer->SetFunction( theFCN );
+
+		std::cout << "function set" << std::endl;
+
+		int fitstatus = fMinimizer->Minimize();
+
+		std::cout << fMinimizer->MinValue() << std::endl;
+
+		std::cout << "fitstatus: " << fitstatus << std::endl;
+	
+		if(!fitstatus){
+			std::cout << "Failed to find minimum: " << std::endl;
+		}
+		else{
+			std::vector< double > vals, errs;
+			std::cout << "Found minimum: " << std::endl;    
+
+
+
+			for( size_t i = 0; i < theParVals.size() + theElastParVals.size(); ++i ){
+
+
+				if(i < theParVals.size())
+					std::cout << theParVals[i].first << " " << fMinimizer->X()[i] << std::endl;
+				else
+					std::cout << theElastParVals[i - theParVals.size() ].first << " " << fMinimizer->X()[i] << std::endl;
+
+
+				vals.push_back( fMinimizer->X()[i] );
+				errs.push_back( sqrt( fMinimizer->CovMatrix(i,i) ) );
+
+				parsHist.SetBinContent( i+1, vals.back() );
+
+				if(i < theParVals.size())    parsHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
+				else parsHist.GetXaxis()->SetBinLabel(i+1 ,   theElastParVals[i-theParVals.size()].first.c_str() );
+
+				parsHist.SetBinError( i+1, errs.back() );
+
+				if(i < theParVals.size())
+					covHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
+				else
+					covHist.GetXaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
+
+
+
+				if(i < theParVals.size())
+					covHist.GetYaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
+				else
+					covHist.GetYaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
+
+
+				for( size_t j = 0; j < theParVals.size() + theElastParVals.size(); ++j ){
+					(*cov)(i,j) = fMinimizer->CovMatrix(i,j);
+
+
+					covHist.SetBinContent(i+1, j+1, fMinimizer->CovMatrix(i,j));
+				}
+			}
+
+
+
+			std::string dir_names[4] = {"MinusSigma", "BestFit", "PlusSigma", "Nominal"};
+
+			for( int sigma_it = 0; sigma_it < 4; ++sigma_it ){
+				//Setting parameters
+				for( size_t i = 0; i < theParVals.size() + theElastParVals.size(); ++i ){
+					int j = i - theParVals.size();          
+					//C Thorpe: Setting of min max curves now handled by separate method that uses covariance matrix
+					//Set params to their central values here, pm 1 sigma added later
+					if( sigma_it < 3 ){
+						if(i<theParVals.size()) 
+							theParVals[i].second = vals[i];
+						else{
+							theElastParVals[j].second = vals[i];
+						}
+
+					}         
+					else if( sigma_it == 3 ){
+						if(i < theParVals.size())     
+							theParVals[i].second = 1.;               
+						else
+							theElastParVals[j].second = 1.;
+					}        
+				}
+
+
+				if(theElastParVals.size())  
+					parMaker.SetNewValsWithElast( theParVals , theElastParVals ); 
+				else
+					parMaker.SetNewVals( theParVals );
+
+
+				TDirectory * outdir = out->mkdir( dir_names[sigma_it].c_str() );
+
+				std::map< std::string, std::vector< G4ReweightFitter* > >::iterator
+					itSet = mapSetsToFitters.begin();
+
+				for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+					for( size_t i = 0; i < itSet->second.size(); ++i ){
+						auto theFitter = itSet->second.at(i); 
+
+						std::string NominalFile = mapSetsToNominal[ itSet->first ];
+						std::string FracsFile = mapSetsToFracs[ itSet->first ];
+
+						theFitter->MakeFitDir( outdir );
+
+		
+						std::string position;
+						//C Thorpe: this tells GetMCFromCurvesWithCovariance if you want +/- sigma or central val 
+						if(sigma_it == 0) position = "down";
+						else if(sigma_it == 2) position = "up";
+						else position = "CV";	
+
+						theFitter->GetMCFromCurvesWithCovariance(NominalFile,FracsFile,parMaker.GetParameterSet() , parMaker.GetElasticParameterSet(),true, cov , position); 					
+
+
+						theFitter->FinishUp();
+
+					}
+				}	
+			}
+			DrawFitResults();
+		}
+		}
+		else{
+			std::cout << "Doing scan" << std::endl;
+
+			//Build the input to the FCN
+			int total_steps = 1;
+
+			std::vector< std::pair< std::string, FitParameter > > active_pars = parMaker.GetActiveParametersAsPairs();
+			for( auto it = active_pars.begin(); it != active_pars.end(); ++it )
+				total_steps *= it->second.ScanSteps;
+
+
+			std::cout << "Factors: " << std::endl;
+			std::vector< int > theFactors;
+			for( size_t i = 0; i < active_pars.size(); ++i ){
+				std::cout << i << " Steps: " << active_pars[i].second.ScanSteps << std::endl;
+				if( i == 0 )
+					theFactors.push_back( total_steps / active_pars[i].second.ScanSteps );
+				else 
+					theFactors.push_back( theFactors[i - 1] / active_pars[i].second.ScanSteps );
+
+				std::cout << theFactors.back() << std::endl;      
+			}
+
+			std::cout << "Steps: " << std::endl;
+			for( int z = 0; z < total_steps; ++z ){
+
+				std::vector< int > input; 
+				std::vector< double > input_coeffs;
+				for( size_t i = 0; i < theFactors.size(); ++i ){
+
+					int val = z;
+
+					for( size_t j = 0; j < i; ++j )
+						val -= ( theFactors[j] * input[j] );
+
+					input.push_back( val / theFactors[i] );
+					input_coeffs.push_back( active_pars[i].second.ScanStart + ( input.back() * active_pars[i].second.ScanDelta ) );
+
+					std::cout << input.back() << " " << input_coeffs.back() << " ";
+				}
+				std::cout << std::endl;
+
+				std::cout << "FCN output: " << z << " " << theFCN(&input_coeffs[0]) << std::endl; 
+			}
+
+		}
+
+
+		out->cd();
+		fit_tree.Write();
+		cov->Write( "FitCovariance" );
+		covHist.Write( "FitCovHist" );
+		parsHist.Write();
+		out->Close();
+		std::cout << "Done" << std::endl;
+
+
+	}
+
+	void G4ReweightFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
+		fMinimizer = std::unique_ptr<ROOT::Math::Minimizer>
+			( ROOT::Math::Factory::CreateMinimizer( "Minuit2", "Migrad" ) );
+
+
+		//Configure
+		fMinimizer->SetMaxFunctionCalls( ps.get< int >("MaxCalls") );
+		fMinimizer->SetTolerance( ps.get< double >("Tolerance") );
+		double LowerLimit = ps.get< double >("LowerLimit");
+		double UpperLimit = ps.get< double >("UpperLimit");
+
+
+
+		for( size_t i = 0; i < theParVals.size(); ++i ){
+			fMinimizer->SetVariable( i, theParVals[i].first.c_str(), theParVals[i].second, 0.01 );
+			fMinimizer->SetVariableLimits( i, LowerLimit, UpperLimit );
+		}
+
+		for(size_t i=0;i< theElastParVals.size(); ++i){
+			fMinimizer->SetVariable( i + theParVals.size(), theElastParVals[i].first.c_str() , theElastParVals[i].second , 0.01);
+			fMinimizer->SetVariableLimits( i + theParVals.size() , LowerLimit , UpperLimit );
+
+		}
+
+
+	}
+
+	void G4ReweightFitManager::DrawFitResults(){
+
+		std::vector< std::string > types;	
+		for( auto itSets = mapSetsToFitters.begin(); itSets != mapSetsToFitters.end(); ++itSets ){
+
+			types.push_back( itSets->first );
+		}
+
+		std::map< std::string, std::string > titles = {
+			{"reac", "Reactive"},
+			{"inel", "Quasi-Elastic"},
+			{"abs", "Absorption"},
+			{"cex", "Charge Exchange"},
+			{"abscx", "Abs + CEx"},
+			{"total","Total"},	
+			{"elast","Elastic"}
+		};
+
+		gROOT->SetBatch(1);
+
+		TDirectory * fitdir = (TDirectory*)out->mkdir("Fit"); 
+		fitdir->cd();
+
+		for( auto itType = types.begin(); itType != types.end(); ++itType ){
+			
+			TDirectory * typedir = (TDirectory*)fitdir->mkdir( (*itType).c_str() );
+			typedir->cd();
+
+			std::vector< std::string > all_cuts, dirs;
+
+			std::map< std::string, std::vector< TGraphErrors * > > all_data;
+
+			TList * data_keys = data_dir->GetListOfKeys();
+			for( int i = 0; i < data_keys->GetSize(); ++i ){
+
+				std::string data_name = data_keys->At(i)->GetName();
+				//			std::cout << "data_name: " << data_name << std::endl;
+				if( data_name.find( *itType ) == std::string::npos ) continue;
+				TDirectory * sub_dir = (TDirectory*)data_dir->Get( data_name.c_str() );
+
+				TList * exp_keys = sub_dir->GetListOfKeys();
+				std::vector< std::string > data_graph_names;
+				for( int j = 0; j < exp_keys->GetSize(); ++j ){
+					std::string key_name = exp_keys->At(j)->GetName();
+					//				std::cout << "key_name: " << key_name << std::endl;
+					//Excluding Covariance from DUET
+					if( key_name.find( "cov" ) != std::string::npos )
+						continue;
+
+					all_data[ key_name ].push_back( (TGraphErrors*)sub_dir->Get( key_name.c_str() ) );
+
+					bool found = false;
+					for( size_t k = 0; k < all_cuts.size(); ++k ){
+						if( all_cuts[k] == key_name ){
+							found = true;
+							break;
+						}
+					}
+
+					if( !found ){
+						all_cuts.push_back( key_name );
+						dirs.push_back( data_name );
+					}
+				}
+
+			}
+
+
+			for( size_t i = 0; i < all_cuts.size(); ++i ){
+				std::string cut_name = all_cuts[i];
+				double max = 0.;     
+				std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
+				for( size_t j = 0; j < data_vec.size(); ++j ){
+
+					TGraphErrors * data_gr = data_vec[j];
+					data_gr->SetMarkerColor(1);
+					data_gr->SetMarkerStyle(20);
+					for( int k = 0; k < data_gr->GetN(); ++k ){
+						double val;
+						val = data_gr->GetY()[k] + data_gr->GetEY()[k];
+						if( val > max) max = val;
+					}
+				}
+
+
+				//PlusSigma
+				std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;
+				//std::cout << plus_name << std::endl;
+				TGraph * plus_sigma  = (TGraph*)out->Get( plus_name.c_str() );
+
+				double old_x = plus_sigma->GetX()[0];
+				double old_y = plus_sigma->GetY()[0];
+				plus_sigma->InsertPointBefore(1, old_x, old_y);
+				plus_sigma->SetPoint(0, old_x-.001, 0.);
+
+				old_x = plus_sigma->GetX()[ plus_sigma->GetN() - 1 ];
+				old_y = plus_sigma->GetY()[ plus_sigma->GetN() - 1 ];
+				plus_sigma->InsertPointBefore( (plus_sigma->GetN() - 1), old_x, old_y );
+				plus_sigma->SetPoint( (plus_sigma->GetN() - 1), old_x+.001, 0. );
+
+				for( int j = 0; j < plus_sigma->GetN(); ++j ){
+					if( plus_sigma->GetY()[j] > max ) max = plus_sigma->GetY()[j];
+				}
+
+				////////////
+				//	std::cout << "Making nominal" << std::endl;
+				//Nominal
+				std::string nominal_name = "Nominal/" + dirs[i] + "/" + cut_name;
+				//	std::cout << nominal_name << std::endl;
+				TGraph * nominal = (TGraph*)out->Get( nominal_name.c_str() );
+				for( int j = 0; j < nominal->GetN(); ++j ){
+					if( nominal->GetY()[j] > max ) max = nominal->GetY()[j];
+				}
+				///////////
+
+
+				//	std::cout << "Making minus sigma" << std::endl;
+				//MinusSigma
+				std::string minus_name = "MinusSigma/" + dirs[i] + "/" + cut_name;
+				//	std::cout << minus_name << std::endl;
+				TGraph * minus_sigma  = (TGraph*)out->Get( minus_name.c_str() );
+
+				old_x = minus_sigma->GetX()[0];
+				old_y = minus_sigma->GetY()[0];
+				minus_sigma->InsertPointBefore(1, old_x, old_y);
+				minus_sigma->SetPoint(0, old_x-.001, 0.);
+
+				old_x = minus_sigma->GetX()[ minus_sigma->GetN() - 1 ];
+				old_y = minus_sigma->GetY()[ minus_sigma->GetN() - 1 ];
+				minus_sigma->InsertPointBefore( (minus_sigma->GetN() - 1), old_x, old_y );
+				minus_sigma->SetPoint( (minus_sigma->GetN() - 1), old_x+.001, 0. );
+				////////////
+
+
+
+				TCanvas c1("c1","c1", 500, 400);
+
+				c1.SetTickx(1);
+				c1.SetTicky(1);
+				c1.SetBottomMargin( c1.GetBottomMargin() * 1.1 );
+				c1.SetLeftMargin( c1.GetLeftMargin() * 1.1 );
+
+				plus_sigma->SetFillColor(2);
+				plus_sigma->SetMaximum( 1.2 * max );
+				plus_sigma->SetMinimum(0.);
+				std::string title = titles[cut_name] + ";Pion Momentum (MeV/c);#sigma (mb)";
+				plus_sigma->SetTitle( title.c_str() ); 
+				plus_sigma->GetXaxis()->SetTitleSize(.06);
+				plus_sigma->GetXaxis()->SetTitleOffset(.75);
+				plus_sigma->GetYaxis()->SetTitleSize(.06);
+				plus_sigma->GetYaxis()->SetTitleOffset(.75);
+				plus_sigma->GetXaxis()->SetLabelSize(.04);
+				plus_sigma->GetYaxis()->SetLabelSize(.04);
+
+				minus_sigma->SetFillColor(0);
+
+				plus_sigma->Draw("AF");
+				minus_sigma->Draw("F same");
+
+				//	std::cout << "Making best fit" << std::endl;
+				//BestFit
+				std::string best_fit_name = "BestFit/" + dirs[i] + "/" + cut_name;
+				//	std::cout << best_fit_name << std::endl;
+				TGraph * best_fit = (TGraph*)out->Get( best_fit_name.c_str() );
+				best_fit->SetLineStyle(10);
+				best_fit->SetLineColor(1);
+				best_fit->Draw("same");
+
+				nominal->SetLineStyle(10);
+				nominal->SetLineColor(4);
+				nominal->Draw("same");
+
+				for( size_t j = 0; j < data_vec.size(); ++j ){
+					data_vec[j]->Draw( "P same" );
+				}
+
+				gPad->RedrawAxis();
+
+				typedir->cd();
+				c1.Write( cut_name.c_str() );
+
+			}
+		}
+
+
+		TVectorD theChi2(3);
+		theChi2[0] = fMinimizer->MinValue();
+		theChi2[1] = nDOF;
+		theChi2[2] = fMinimizer->MinValue() / nDOF;
+		std::cout << "Minimum Chi-squared: " << fMinimizer->MinValue() << std::endl;
+
+		out->cd("Fit");
+		theChi2.Write( "Chi2" );
+
+	}
+
+
+

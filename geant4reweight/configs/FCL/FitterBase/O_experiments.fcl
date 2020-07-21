@@ -2,13 +2,39 @@ BEGIN_PROLOG
 
 O_experiments: [
 
+
+{
+Name: "Caroll_O_PiPlus"
+Graphs: [ ["total" , "O_xsec_total_piplus" ] ]
+
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Caroll_piP.root"
+
+Type: "O_PiPlus"
+
+
+} ,
+
+
+{
+Name: "Clough_O_PiMinus"
+Graphs: [ ["total" , "O_xsec_total_piminus" ] ]
+
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Clough_piM.root"
+
+Type: "O_PiMinus"
+
+
+} ,
+
+
+
   {
     Name:    "Meirav_O_PiMinus"
     Graphs:  [
       ["reac", "O_xsec_reac_piminus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Meirav.root"
 
     Type:   "O_PiMinus"
   }, 
@@ -19,7 +45,7 @@ O_experiments: [
       ["reac", "O_xsec_reac_piplus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Meirav.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Meirav.root"
 
     Type:   "O_PiPlus"
   },
@@ -30,7 +56,7 @@ O_experiments: [
       ["inel", "O_xsec_inel_piplus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ingram.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ingram.root"
 
     Type:   "O_PiPlus"
   },
@@ -41,7 +67,7 @@ O_experiments: [
       ["cex", "O_xsec_cex_piplus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Bowles.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Bowles.root"
 
     Type:   "O_PiPlus"
   },
@@ -52,7 +78,7 @@ O_experiments: [
       ["cex", "O_xsec_cex_piplus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_946.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_946.root"
 
     Type:   "O_PiPlus"
   },
@@ -63,7 +89,7 @@ O_experiments: [
       ["cex", "O_xsec_cex_piminus"]
     ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_946.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_946.root"
 
     Type:   "O_PiMinus"
   }

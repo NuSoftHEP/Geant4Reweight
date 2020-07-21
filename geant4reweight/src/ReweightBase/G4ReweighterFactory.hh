@@ -5,6 +5,7 @@
 #include "G4ProtonReweighter.hh"
 #include "G4PiPlusReweighter.hh"
 #include "G4PiMinusReweighter.hh"
+#include "G4NeutronReweighter.hh"
 
 #include "TFile.h"
 #include <map>

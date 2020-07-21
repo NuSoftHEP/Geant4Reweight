@@ -17,6 +17,15 @@
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
+//physics models needed for muons
+#include "Geant4/G4EmCalculator.hh"
+
+#include "Geant4/G4MuIonisation.hh"
+#include "Geant4/G4MuBremsstrahlung.hh"
+#include "Geant4/G4MuPairProduction.hh"
+//#include "Geant4/G4MuNuclearInteraction.hh"
+
+
 #include <utility>
 #include <iostream>
 #include <fstream>
@@ -119,12 +128,14 @@ int main(int argc, char * argv[]){
 
   TFile * fout = new TFile( outFileName.c_str(), "RECREATE");
   TTree * tree = new TTree("tree","");  
-  double inelastic_xsec, elastic_xsec;  
+  double inelastic_xsec, elastic_xsec,abs_xsec;  
   double momentum, kinetic_energy;
   tree->Branch( "momentum", &momentum );
   tree->Branch( "kinetic_energy", &kinetic_energy );
   tree->Branch( "inelastic_xsec", &inelastic_xsec );
   tree->Branch( "elastic_xsec", &elastic_xsec );
+
+
 
   //Initializing
   G4RunManager * rm = new G4RunManager();
@@ -136,11 +147,13 @@ int main(int argc, char * argv[]){
   rm->RunInitialization();
   /////
 
-  G4PionPlus  * piplus;
-  G4PionMinus * piminus;
-  G4Proton * proton;
-  G4ParticleDefinition * part_def;
+  G4PionPlus  * piplus = 0x0;
+  G4PionMinus * piminus = 0x0;
+  G4Proton  * proton = 0x0;
+  G4Neutron * neutron = 0x0;
+  G4ParticleDefinition * part_def = 0x0;
   G4String inel_name;
+  G4String abs_name="";
   if( type == 211 ){
     std::cout << "Chose PiPlus" << std::endl;
     part_def = piplus->Definition();
@@ -156,8 +169,14 @@ int main(int argc, char * argv[]){
     part_def = proton->Definition();
     inel_name = "protonInelastic";
   }
+  else if( type == 2112 ){
+    std::cout << "Chose Neutron" << std::endl;
+    part_def = neutron->Definition();
+    inel_name = "neutronInelastic";
+    abs_name = "nCapture";  
+}
   else{
-    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+    std::cout << "Please specify either 211, -211, 2212 or 2112" << std::endl;
     return 0;
   }
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
@@ -185,7 +204,7 @@ int main(int argc, char * argv[]){
   ///////////
 
   
-  std::vector< double > total_xsecs, elastic_xsecs, inelastic_xsecs, momenta, kinetic_energies;
+  std::vector< double > total_xsecs, elastic_xsecs, inelastic_xsecs, abs_xsecs,momenta, kinetic_energies;
 
 
   //Getting the cross sections from the processes
@@ -194,6 +213,12 @@ int main(int argc, char * argv[]){
   
   G4HadronElasticProcess   * elastic_proc = 0x0;
   G4HadronInelasticProcess * inelastic_proc = 0x0;
+
+//neutron capture
+G4HadronInelasticProcess * neutron_abs = 0x0;
+
+std::cout <<"inel_name=   " <<  inel_name << std::endl;
+
 
   for( int i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
@@ -207,7 +232,13 @@ int main(int argc, char * argv[]){
       std::cout << "Found inelastic" << std::endl;
       inelastic_proc = (G4HadronInelasticProcess*)proc;
     }
-  }
+//if neutron, search for neutron capture cross section
+  else if(theName == abs_name && type == 2112){
+std::cout << "Found neutron capture" << std::endl;
+neutron_abs = (G4HadronInelasticProcess*)proc;
+
+}
+}
 
   if ( !elastic_proc || !inelastic_proc ){
     std::cout << "Fatal Error: could not get the processes" << std::endl;
@@ -216,6 +247,12 @@ int main(int argc, char * argv[]){
 
   G4CrossSectionDataStore *theElastStore   = elastic_proc->GetCrossSectionDataStore();
   G4CrossSectionDataStore *theInelastStore = inelastic_proc->GetCrossSectionDataStore();
+
+G4CrossSectionDataStore * theAbsStore=0x0;
+
+if(type == 2112)
+theAbsStore = neutron_abs->GetCrossSectionDataStore();
+
 
   std::cout << std::endl << "Got the Cross Section Tables" << std::endl;
   std::cout << "Generating Cross Sections" << std::endl;
@@ -233,16 +270,29 @@ int main(int argc, char * argv[]){
     inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
     elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
+if(type == 2112){
+abs_xsec = theAbsStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
+//inelastic_xsec += abs_xsec;
+}
+else
+abs_xsec = 0;
+
+
+
+
     tree->Fill();
     if( verbose && !( n % 100) ){
       std::cout << "Inelastic XSec at " << KE << " MeV " <<  inelastic_xsec << std::endl;
       std::cout << "Elastic XSec at " << KE << " MeV " <<  elastic_xsec << std::endl;
+      std::cout << "nCapture XSec at " << KE << " MeV " << abs_xsec << std::endl;
       std::cout << std::endl;
     }
 
     inelastic_xsecs.push_back( inelastic_xsec );
     elastic_xsecs.push_back( elastic_xsec );
-    total_xsecs.push_back( elastic_xsec + inelastic_xsec );
+    abs_xsecs.push_back( abs_xsec );
+    //total cross section now includes neutron capture component (zero for anything that isn't a neutron!)
+    total_xsecs.push_back( elastic_xsec + inelastic_xsec + abs_xsec);
     momenta.push_back( momentum );
     kinetic_energies.push_back( kinetic_energy );
 
@@ -255,14 +305,25 @@ int main(int argc, char * argv[]){
   TGraph inel_KE( kinetic_energies.size(), &kinetic_energies[0], &inelastic_xsecs[0] );
   TGraph el_momentum( momenta.size(), &momenta[0], &elastic_xsecs[0] );
   TGraph el_KE( kinetic_energies.size(), &kinetic_energies[0], &elastic_xsecs[0] );
+  TGraph abs_momentum( momenta.size(), &momenta[0], &abs_xsecs[0] );
+TGraph abs_KE( kinetic_energies.size(), &kinetic_energies[0], &abs_xsecs[0] );
+
+
+
   TGraph total_momentum( momenta.size(), &momenta[0], &total_xsecs[0] );
   TGraph total_KE( kinetic_energies.size(), &kinetic_energies[0], &total_xsecs[0] );
+
+
+
 
   fout->cd();
   inel_momentum.Write( "inel_momentum" );
   inel_KE.Write( "inel_KE" );
   el_momentum.Write( "el_momentum" );
   el_KE.Write( "el_KE" );
+  abs_momentum.Write("n_capture_momentum");
+ abs_KE.Write("n_capture_KE");
+
   total_momentum.Write( "total_momentum" );
   total_KE.Write( "total_KE" );
 

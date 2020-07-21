@@ -6,7 +6,7 @@ Cu_experiments: [
     Name:   "Gelderloos_Cu_PiMinus"
     Graphs: [ ["reac", "Cu_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Gelderloos.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Gelderloos.root"
 
     Type:   "Cu_PiMinus"
   },
@@ -15,7 +15,7 @@ Cu_experiments: [
     Name:   "Nakai_Cu_PiPlus"
     Graphs: [ ["abs", "Cu_xsec_abs_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Nakai.root"
 
     Type:   "Cu_PiPlus"
   },
@@ -24,7 +24,7 @@ Cu_experiments: [
     Name:   "Nakai_Cu_PiMinus"
     Graphs: [ ["abs", "Cu_xsec_abs_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Nakai.root"
 
     Type:   "Cu_PiMinus"
   }

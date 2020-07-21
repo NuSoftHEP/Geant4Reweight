@@ -2,6 +2,7 @@ art_make_library( LIBRARY_NAME PredictionBaseLib
   SOURCE 
     G4CascadeDetectorConstruction.cc
     G4CascadePhysicsList.cc
+    G4MyPhysicsList.cc
   LIBRARIES
     ${ART_FRAMEWORK_CORE}
     ${ART_FRAMEWORK_PRINCIPAL}

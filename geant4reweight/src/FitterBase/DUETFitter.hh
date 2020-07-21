@@ -25,6 +25,9 @@ class DUETFitter : public G4ReweightFitter {
     double DoFit(bool fSave=true) override;
 
 
+    virtual void DoFitModified(bool fSave=true);
+
+
   private:
     TMatrixD * DUET_cov_matrix;
     TMatrixD * DUET_cov_inv;

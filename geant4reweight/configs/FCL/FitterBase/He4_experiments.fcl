@@ -1,0 +1,75 @@
+BEGIN_PROLOG
+
+He4_experiments: [  
+
+#add some total xsec data too
+
+{
+Name: "Falomkin2_He4_PiPlus"
+Graphs: [ ["dcex" , "He4_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Falomkin2_piP.root"
+
+Type: "He4_PiPlus"
+
+TotalMix: 1
+
+},
+
+{
+Name: "Falomkin_He4_PiPlus"
+Graphs: [ ["dcex" , "He4_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Falomkin_piP.root"
+
+Type: "He4_PiPlus"
+
+TotalMix: 1
+
+},
+{
+Name: "Falomkin_He4_PiPlus"
+Graphs: [ ["dcex" , "He4_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Falomkin_piP.root"
+
+Type: "He4_PiPlus"
+
+TotalMix: 1
+
+},
+
+{
+Name: "Grater_He4_PiPlus"
+Graphs: [ ["dcex" , "He4_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Grater_piP.root"
+
+Type: "He4_PiPlus"
+
+TotalMix: 1
+
+},
+
+{
+Name: "Kinney_He4_PiPlus"
+Graphs: [ ["dcex" , "He4_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Kinney.root"
+
+Type: "He4_PiPlus"
+
+TotalMix: 1
+
+},
+
+{
+Name: "Kinney_He4_PiMinus"
+Graphs: [  ["dcex" , "He4_xsec_dcex_piminus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Kinney.root"
+
+Type: "He4_PiMinus"
+
+TotalMix: 1
+
+}
+
+
+]
+
+END_PROLOG

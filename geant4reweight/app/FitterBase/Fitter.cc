@@ -62,7 +62,9 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
-  G4ReweightFitManager FitMan( outFileName, fSave);
+  G4ReweightFitManager FitMan( outFileName, fSave );
+
+
 
   std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
@@ -72,25 +74,31 @@ int main(int argc, char ** argv){
     ///Defining MC Sets
     std::vector< fhicl::ParameterSet > FCLSets = pset.get< std::vector< fhicl::ParameterSet > >("Sets");
     FitMan.DefineMCSets( FCLSets );
+
     ///////////////////////////////////////////
 
     ///Defining experiments
     FitMan.DefineExperiments( pset );
+std::cout << "Experiments defined" << std::endl;
     ///////////////////////////////////////////
+
+    FitMan.MakeMinimizer( pset );
 
 
     FitMan.GetAllData();
-
-    FitMan.MakeMinimizer( pset );
 
     bool fFitScan = pset.get< bool >( "FitScan", false );
     if( scan_override != -1 )
       fFitScan = scan_override;
 
+std::cout << "Preparing to run fit" << std::endl;
     FitMan.RunFitAndSave(fFitScan);
+
+std::cout << "Fit is run" << std::endl;
   }
   catch( const std::exception &e ){
-    std::cout << "Caught exception " << std::endl;  
+    	
+	std::cout << "Caught exception " << std::endl;  
   }
   
   return 0;

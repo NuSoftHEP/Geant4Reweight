@@ -100,3 +100,83 @@ double DUETFitter::DoFit(bool fSave){
   }
   return Chi2;
 }
+
+
+
+
+
+void DUETFitter::DoFitModified(bool fSave){
+
+cuts_and_ns_and_chi2.clear();
+
+
+
+ double Chi2 = 0.;
+
+  double Data_val_i, Data_val_j, MC_val_i, MC_val_j, cov_val;
+  double x;
+  
+  int NPoints = Data_xsec_graphs["cex"]->GetN() + Data_xsec_graphs["abs"]->GetN();
+
+
+
+  for( int i = 0; i < NPoints; ++i ){
+     
+    
+    if( i < 5 ){
+      Data_xsec_graphs["cex"]->GetPoint(i, x, Data_val_i);
+      MC_val_i = MC_xsec_graphs["cex"]->Eval( x );
+    }
+    else{
+      Data_xsec_graphs["abs"]->GetPoint(i - 5, x, Data_val_i);
+      MC_val_i = MC_xsec_graphs["abs"]->Eval(x);
+    }
+
+
+    for( int j = 0; j < NPoints; ++j ){
+   
+      if( j < 5 ){
+        Data_xsec_graphs["cex"]->GetPoint(j, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["cex"]->Eval(x);
+      }
+      else{
+        Data_xsec_graphs["abs"]->GetPoint(j - 5, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["abs"]->Eval(x);
+      }
+
+      cov_val = DUET_cov_inv[0][i][j];
+
+      double partial_chi2 = ( MC_val_i - Data_val_i ) * cov_val * ( MC_val_j - Data_val_j );
+      Chi2 += partial_chi2; 
+    }
+  }
+
+  if( fSave ){
+    std::string name = "abs";
+    SaveExpChi2( Chi2, name );
+    name = "cex";
+    SaveExpChi2( Chi2, name );
+  }
+
+
+std::cout << "DUET CHi2:  " << Chi2 << std::endl;
+
+std::pair<int,double> p_cex = std::make_pair(5,Chi2/2);
+std::pair<int,double> p_abs = std::make_pair(NPoints-5,Chi2/2);
+cuts_and_ns_and_chi2.push_back(std::make_pair("cex",p_cex));
+cuts_and_ns_and_chi2.push_back(std::make_pair("abs",p_abs));
+
+
+
+
+//  return Chi2;
+}
+
+
+
+
+
+
+
+
+

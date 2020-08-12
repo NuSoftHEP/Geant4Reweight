@@ -540,15 +540,27 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
     }
 
     TGraph * theGraph = GetExclusiveVariationGraph( cut );
-    if( !theGraph ){
+    std::cout << "Getting " << cut << std::endl;
+    if( theGraph ){
+      std::cout << "Got " << theGraph << std::endl;
       double exclusive_factor = 1;
-      if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] )
+      if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] ) {
         exclusive_factor = theGraph->Eval( theMom );
+        std::cout << "factor: " << exclusive_factor << std::endl;
+      }
 
       weight *= exclusive_factor;
     }
 
   }
+
+  //Correction
+  auto lastStep = theTraj->GetStep(theTraj->GetNSteps() - 1);
+  double theMom = lastStep->GetFullPreStepP();
+  double b = GetNominalMFP(theMom) / GetBiasedMFP(theMom);
+  std::cout << "Bias: " << b << std::endl;
+  weight /= (exp(-.58*(b - 1.)));
+
   return weight;
 }
 

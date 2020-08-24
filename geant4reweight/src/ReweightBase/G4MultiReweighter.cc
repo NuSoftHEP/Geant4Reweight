@@ -27,6 +27,7 @@ G4MultiReweighter::G4MultiReweighter(
     paramNominalVals.push_back(parsHist->GetBinContent(i));
     paramSigmas.push_back(parsHist->GetBinError(i));
     paramRandomVals.push_back(std::vector<double>()); 
+    paramVals[paramNames.back()] = paramNominalVals.back();
 
     //Check that this exists in the parameter set defined by the fcl,
     //Throw an exception if not
@@ -58,6 +59,7 @@ G4MultiReweighter::G4MultiReweighter(
     paramNominalVals.push_back(parSet[i].get<double>("Nominal"));
     paramSigmas.push_back(parSet[i].get<double>("Sigma"));
     paramRandomVals.push_back(std::vector<double>()); 
+    paramVals[paramNames.back()] = paramNominalVals.back();
   }
 
   GenerateThrows();
@@ -225,4 +227,46 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
                       reweighter->GetElasticWeight(&traj));
 
   return {plus_weight, minus_weight};
+}
+
+bool G4MultiReweighter::SetParameterValue(size_t iPar, double value) {
+  if (iPar+1 > paramNames.size()) {
+    std::cerr << "Requested parameter index out of bounds" << std::endl;
+    return false;
+  } 
+
+  //std::cout << "Setting parameter value for " << iPar << " " <<
+  //             paramNames[iPar] << std::endl;
+
+  paramVals[paramNames[iPar]] = value;
+  //std::cout << "Set value" << std::endl;
+  parMaker.SetNewVals(paramVals);
+  //Give the variables to the parameter maker 
+  //and use these for the reweighter
+  parMaker.SetNewVals(paramVals);
+  reweighter->SetNewHists(parMaker.GetFSHists());
+  reweighter->SetNewElasticHists(parMaker.GetElasticHist());
+  //std::cout << "Set" << std::endl;
+
+  return true;
+}
+
+bool G4MultiReweighter::SetAllParameterValues(std::vector<double> values) {
+  if (values.size() != paramNames.size()) {
+    std::cerr << "Input value vector differs from number of parameters" <<
+                 std::endl;
+    return false;
+  }
+
+  for (size_t i = 0; i < values.size(); ++i) {
+    bool set_value = SetParameterValue(i, values[i]);
+    if (!set_value) {
+      return false;
+    }
+  }
+  return true;
+}
+
+double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj) {
+  return (reweighter->GetWeight(&traj)*reweighter->GetElasticWeight(&traj));
 }

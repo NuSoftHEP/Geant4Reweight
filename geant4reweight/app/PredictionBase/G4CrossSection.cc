@@ -13,9 +13,17 @@
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
 #include "Geant4/G4String.hh"
+#include "Geant4/G4hIonisation.hh"
+#include "Geant4/G4hPairProduction.hh"
+#include "Geant4/G4hBremsstrahlung.hh"
+#include "Geant4/G4CoulombScattering.hh"
+#include "Geant4/G4Box.hh"
+#include "Geant4/G4LogicalVolume.hh"
+#include "Geant4/G4PVPlacement.hh"
 
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
 
 #include <utility>
 #include <iostream>
@@ -128,12 +136,29 @@ int main(int argc, char * argv[]){
 
   //Initializing
   G4RunManager * rm = new G4RunManager();
-  rm->SetUserInitialization(new G4CascadeDetectorConstruction);
+
+  //World
+  //
+  fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
+  std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
+  int MaterialZ = MaterialParameters.get< int >( "Z" );
+  double MaterialMass = MaterialParameters.get< double >( "Mass" );
+  double MaterialDensity = MaterialParameters.get< double >( "Density" );
+  G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  //G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
+  G4Box * solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
+  G4LogicalVolume * logicWorld = new G4LogicalVolume(solidWorld, theMaterial, "World");
+  G4VPhysicalVolume * physWorld = new G4PVPlacement(
+      0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
+
+  rm->SetUserInitialization(new G4CascadeDetectorConstruction(physWorld));
   rm->SetUserInitialization(new G4CascadePhysicsList);
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();
   rm->RunInitialization();
+  std::cout << "LogVol " << physWorld->GetLogicalVolume() << std::endl;
+  std::cout << "MCC: " << physWorld->GetLogicalVolume()->GetMaterialCutsCouple() << std::endl;
   /////
 
   G4PionPlus  * piplus = 0x0;
@@ -170,9 +195,24 @@ int main(int argc, char * argv[]){
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
 
 
+  std::cout << "testing" << std::endl;
+  /*
+  G4Track * tempTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  G4Step * tempStep = new G4Step();
+  G4StepPoint * tempPoint = new G4StepPoint();
+  tempPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
+  tempPoint->SetMaterialCutsCouple(physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
+  tempStep->SetPreStepPoint( tempPoint );
+  tempTrack->SetStep( tempStep );
+  std::cout << "ind: " << std::endl;
+  std::cout << tempTrack->GetMaterialCutsCouple() << std::endl;
+  std::cout << "Done" << std::endl;
+  */
+
 
 
   //Material
+  /*
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
   int MaterialZ = MaterialParameters.get< int >( "Z" );
@@ -186,13 +226,28 @@ int main(int argc, char * argv[]){
     std::cout << "Fatal: exiting the application because NElements != 1" << std::endl;
     return 0;
   }
+  */
   auto theElement = (*theMaterial->GetElementVector())[0];
   std::cout << theElement->GetName() << " " << theElement->GetSymbol() << " " << theElement->GetZ() << " " << theElement->GetN() << std::endl;
   ///////////
 
-  
-  std::vector< double > total_xsecs, elastic_xsecs, inelastic_xsecs, momenta, kinetic_energies;
+  G4Track * theTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  G4Step * theStep = new G4Step();
+  G4StepPoint * thePoint = new G4StepPoint();
+  //thePoint->SetMaterial( theMaterial );
+  thePoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
+  thePoint->SetMaterialCutsCouple(physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
+  theStep->SetPreStepPoint( thePoint );
+  theTrack->SetStep( theStep );
+  std::cout << "ind: " << std::endl;
+  std::cout << theTrack->GetMaterialCutsCouple() << std::endl;
+  std::cout << "Done" << std::endl;
 
+  G4DecayHook decay_hook;
+  
+  std::vector<double> total_xsecs, elastic_xsecs, inelastic_xsecs, momenta,
+                      kinetic_energies, decay_mfps/*, ioni_mfps, brems_mfps,
+                      pairprod_mfps, coul_mfps*/;
 
   //Getting the cross sections from the processes
   G4ProcessManager * pm = part_def->GetProcessManager();
@@ -240,9 +295,59 @@ int main(int argc, char * argv[]){
     inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
     elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
+
+    /*
+    for( size_t i = 0; i < (size_t)pv->size(); ++i ){
+      G4VProcess * proc = (*pv)(i);
+      std::string theName = proc->GetProcessName();
+      //std::cout <<  theName << std::endl;
+      if (theName == "hIoni") { 
+        G4hIonisation * ioni = (G4hIonisation*)proc;
+        ioni_mfps.push_back(ioni->MeanFreePath(*theTrack));
+        //if (ioni->MeanFreePath(*theTrack) != DBL_MAX) {
+        //  std::cout << theName << std::endl;
+        //  std::cout << ioni->MeanFreePath(*theTrack) << std::endl;
+        //}
+        //std::cout << (ioni->MeanFreePath(*theTrack) == DBL_MAX) << std::endl;
+      }
+      else if (theName == "hBrems") {
+        G4hBremsstrahlung * ioni = (G4hBremsstrahlung*)proc;
+        brems_mfps.push_back(ioni->MeanFreePath(*theTrack));
+        //if (ioni->MeanFreePath(*theTrack) != DBL_MAX) {
+        //  std::cout << theName << std::endl;
+        //  std::cout << ioni->MeanFreePath(*theTrack) << std::endl;
+        //}
+        //std::cout << (ioni->MeanFreePath(*theTrack) == DBL_MAX) << std::endl;
+      }
+      else if (theName == "hPairProd") {
+        G4hPairProduction * ioni = (G4hPairProduction*)proc;
+        pairprod_mfps.push_back(ioni->MeanFreePath(*theTrack));
+        //if (ioni->MeanFreePath(*theTrack) != DBL_MAX) {
+        //  std::cout << theName << std::endl;
+        //  std::cout << ioni->MeanFreePath(*theTrack) << std::endl;
+        //}
+        //std::cout << (ioni->MeanFreePath(*theTrack) == DBL_MAX) << std::endl;
+      }
+      else if (theName == "CoulombScat") {
+        //std::cout << theName << std::endl;
+        G4CoulombScattering * coul = (G4CoulombScattering*)proc;
+        coul_mfps.push_back(coul->MeanFreePath(*theTrack));
+        //if (coul->MeanFreePath(*theTrack) != DBL_MAX) {
+        //  std::cout << theName << std::endl;
+        //  std::cout << "MFP: " << coul->MeanFreePath(*theTrack) << std::endl;
+        //}
+        //std::cout << coul->GetCurrentModel() << std::endl;
+        //std::cout << coul->LambdaTable() << std::endl;
+        //std::cout << coul->LambdaTablePrim() << std::endl;
+      }
+    }
+    */
+    
+
     tree->Fill();
     if( verbose && !( n % 100) ){
       std::cout << "Inelastic XSec at " << KE << " MeV " <<  inelastic_xsec << std::endl;
+      std::cout << "MFP: " << inelastic_proc->GetMeanFreePath(*theTrack, 0., 0x0) << std::endl;
       std::cout << "Elastic XSec at " << KE << " MeV " <<  elastic_xsec << std::endl;
       std::cout << std::endl;
     }
@@ -252,6 +357,7 @@ int main(int argc, char * argv[]){
     total_xsecs.push_back( elastic_xsec + inelastic_xsec );
     momenta.push_back( momentum );
     kinetic_energies.push_back( kinetic_energy );
+    decay_mfps.push_back(decay_hook.GetMFP(*theTrack));
 
     theMomentum += delta;
     n++;
@@ -264,6 +370,16 @@ int main(int argc, char * argv[]){
   TGraph el_KE( kinetic_energies.size(), &kinetic_energies[0], &elastic_xsecs[0] );
   TGraph total_momentum( momenta.size(), &momenta[0], &total_xsecs[0] );
   TGraph total_KE( kinetic_energies.size(), &kinetic_energies[0], &total_xsecs[0] );
+  TGraph decay_mfp_momentum(momenta.size(), &momenta[0], &decay_mfps[0]);
+  TGraph decay_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &decay_mfps[0]);
+  //TGraph ioni_mfp_momentum(momenta.size(), &momenta[0], &ioni_mfps[0]);
+  //TGraph ioni_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &ioni_mfps[0]);
+  //TGraph brems_mfp_momentum(momenta.size(), &momenta[0], &brems_mfps[0]);
+  //TGraph brems_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &brems_mfps[0]);
+  //TGraph pairprod_mfp_momentum(momenta.size(), &momenta[0], &pairprod_mfps[0]);
+  //TGraph pairprod_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &pairprod_mfps[0]);
+  //TGraph coul_mfp_momentum(momenta.size(), &momenta[0], &coul_mfps[0]);
+  //TGraph coul_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &coul_mfps[0]);
 
   fout->cd();
   inel_momentum.Write( "inel_momentum" );
@@ -272,6 +388,16 @@ int main(int argc, char * argv[]){
   el_KE.Write( "el_KE" );
   total_momentum.Write( "total_momentum" );
   total_KE.Write( "total_KE" );
+  decay_mfp_momentum.Write("decay_mfp_momentum");
+  decay_mfp_KE.Write("decay_mfp_KE");
+  //ioni_mfp_momentum.Write("ioni_mfp_momentum");
+  //ioni_mfp_KE.Write("ioni_mfp_KE");
+  //brems_mfp_momentum.Write("brems_mfp_momentum");
+  //brems_mfp_KE.Write("brems_mfp_KE");
+  //pairprod_mfp_momentum.Write("pairprod_mfp_momentum");
+  //pairprod_mfp_KE.Write("pairprod_mfp_KE");
+  //coul_mfp_momentum.Write("coul_mfp_momentum");
+  //coul_mfp_KE.Write("coul_mfp_KE");
 
   TVectorD m_vec(1);
   m_vec[0] = MaterialMass;

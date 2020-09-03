@@ -3,6 +3,7 @@
     SOURCE 
       G4CascadeDetectorConstruction.cc
       G4CascadePhysicsList.cc
+      G4DecayHook.cc
     LIBRARIES
       ${FHICLCPP}
       #cetlib cetlib_except

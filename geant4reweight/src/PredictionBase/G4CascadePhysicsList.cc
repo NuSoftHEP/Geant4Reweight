@@ -8,7 +8,7 @@
 
 
 G4CascadePhysicsList::G4CascadePhysicsList() : G4VModularPhysicsList(){
-  SetVerboseLevel(5);
+  SetVerboseLevel(0);
 
   RegisterPhysics( new G4DecayPhysics );
   RegisterPhysics( new G4RadioactiveDecayPhysics );

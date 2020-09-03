@@ -458,6 +458,8 @@ void G4Reweighter::SetTotalGraph( TFile * input ){
 
   elasticGraph = (TGraph*)input->Get( "el_momentum" );
 
+  decayGraph = (TGraph*)input->Get("decay_mfp_momentum");
+
   TVectorD * m_vec = (TVectorD*)input->Get("Mass");
   Mass = (*m_vec)(0);
 
@@ -469,6 +471,9 @@ void G4Reweighter::SetTotalGraph( TFile * input ){
 }
 
 
+double G4Reweighter::GetDecayMFP(double p) {
+  return decayGraph->Eval(p);
+}
 double G4Reweighter::GetNominalMFP( double theMom ){
   double xsec = totalGraph->Eval( theMom );
   return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
@@ -509,9 +514,12 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   double total = 0.;
   double bias_total = 0.;
 
+  double weight = 1.;
+
   size_t nsteps = theTraj->GetNSteps();
   if( theTraj->GetFinalProc() == fInelastic )
     --nsteps;
+
 
   for(size_t is = 0; is < nsteps; ++is){
 
@@ -519,20 +527,38 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
     double theMom = theStep->GetFullPreStepP();
 
-    total += ( theStep->GetStepLength() / GetNominalMFP(theMom) );
-    bias_total += ( theStep->GetStepLength() / GetBiasedMFP( theMom ) );
+    //total += ( theStep->GetStepLength() / GetNominalMFP(theMom) );
+    //bias_total += ( theStep->GetStepLength() / GetBiasedMFP( theMom ) );
+    total += theStep->GetStepLength() * ((1. / GetNominalMFP(theMom)) +
+                                         (1. / GetDecayMFP(theMom)));
+    bias_total += theStep->GetStepLength() * ((1. / GetBiasedMFP(theMom)) +
+                                              (1. / GetDecayMFP(theMom)));
   }
 
 
-  double weight = exp( total - bias_total );
+  //double weight = exp( total - bias_total );
+  weight *= exp(total - bias_total);
 
-  if( theTraj->GetFinalProc() == fInelastic ){
+  if( theTraj->GetFinalProc() == fInelastic ) {
 
     auto lastStep = theTraj->GetStep( theTraj->GetNSteps() - 1 );
     double theMom = lastStep->GetFullPreStepP();
+   
+    double bias_val = lastStep->GetStepLength() *
+                      ((1. / GetBiasedMFP(theMom)) +
+                       (1. / GetDecayMFP(theMom)));
+    double val = lastStep->GetStepLength() *
+                 ((1. / GetNominalMFP(theMom)) +
+                  (1. / GetDecayMFP(theMom)));
+    weight *= (1. - exp(-1.*bias_val));
+    weight /= (1. - exp(-1.*val));
 
-    weight *= ( 1 - exp(-1. * lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
-    weight *= ( 1. / ( 1 - exp( -1. * lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
+    weight *= (1./GetBiasedMFP(theMom)) / ((1./GetBiasedMFP(theMom) +
+                                           (1./GetDecayMFP(theMom))));
+    weight /= (1./GetNominalMFP(theMom)) / ((1./GetNominalMFP(theMom) +
+                                            (1./GetDecayMFP(theMom))));
+    //weight *= ( 1 - exp(-1. * lastStep->GetStepLength() / GetBiasedMFP( theMom ) ) );
+    //weight *= ( 1. / ( 1 - exp( -1. * lastStep->GetStepLength() / GetNominalMFP( theMom ) ) ) );
 
     std::string cut = GetInteractionSubtype(*theTraj);
     if( cut == "" ){
@@ -540,26 +566,33 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
     }
 
     TGraph * theGraph = GetExclusiveVariationGraph( cut );
-    std::cout << "Getting " << cut << std::endl;
     if( theGraph ){
-      std::cout << "Got " << theGraph << std::endl;
       double exclusive_factor = 1;
       if( theMom > theGraph->GetX()[0] && theMom < theGraph->GetX()[ theGraph->GetN() - 1 ] ) {
         exclusive_factor = theGraph->Eval( theMom );
-        std::cout << "factor: " << exclusive_factor << std::endl;
       }
 
       weight *= exclusive_factor;
     }
 
   }
+  else if (theTraj->GetFinalProc() == "Decay") {
+    auto lastStep = theTraj->GetStep( theTraj->GetNSteps() - 1 );
+    double theMom = lastStep->GetFullPreStepP();
+    double bias_val = lastStep->GetStepLength() *
+                      ((1. / GetBiasedMFP(theMom)) +
+                       (1. / GetDecayMFP(theMom)));
+    double val = lastStep->GetStepLength() *
+                 ((1. / GetNominalMFP(theMom)) +
+                  (1. / GetDecayMFP(theMom)));
+    weight *= (1. - exp(-1.*bias_val));
+    weight /= (1. - exp(-1.*val));
 
-  //Correction
-  auto lastStep = theTraj->GetStep(theTraj->GetNSteps() - 1);
-  double theMom = lastStep->GetFullPreStepP();
-  double b = GetNominalMFP(theMom) / GetBiasedMFP(theMom);
-  std::cout << "Bias: " << b << std::endl;
-  weight /= (exp(-.58*(b - 1.)));
+    weight *= (1./GetDecayMFP(theMom)) / ((1./GetBiasedMFP(theMom) +
+                                          (1./GetDecayMFP(theMom))));
+    weight /= (1./GetDecayMFP(theMom)) / ((1./GetNominalMFP(theMom) +
+                                          (1./GetDecayMFP(theMom))));
+  }
 
   return weight;
 }
@@ -622,12 +655,12 @@ G4Reweighter::~G4Reweighter(){
       delete exclusiveVariationGraphs.at( theInts.at(i) );
 
     if( oldGraphs.find( theInts.at(i) ) != oldGraphs.end() ){
-      std::cout << theInts.at(i) << " " << oldGraphs.at( theInts.at(i) ) << std::endl;
+      //std::cout << theInts.at(i) << " " << oldGraphs.at( theInts.at(i) ) << std::endl;
       delete oldGraphs.at( theInts.at(i) );
     }
 
     if( newGraphs.find( theInts.at(i) ) != newGraphs.end() ){
-      std::cout << theInts.at(i) << " " << newGraphs.at( theInts.at(i) ) << std::endl;
+      //std::cout << theInts.at(i) << " " << newGraphs.at( theInts.at(i) ) << std::endl;
       delete newGraphs.at( theInts.at(i) );
     }
   }

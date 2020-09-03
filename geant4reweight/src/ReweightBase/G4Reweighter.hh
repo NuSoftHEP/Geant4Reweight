@@ -38,6 +38,7 @@ class G4Reweighter{
 
 
     double GetElasticWeight( const G4ReweightTraj * );
+    double GetDecayMFP( double );
     double GetNominalMFP( double );
     double GetBiasedMFP( double );
     double GetNominalElasticMFP( double );
@@ -77,6 +78,7 @@ class G4Reweighter{
 
     TGraph * totalGraph;
     TGraph * elasticGraph;
+    TGraph * decayGraph;
 
     TH1D * elasticBias;
 

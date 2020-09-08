@@ -43,6 +43,8 @@ class G4Reweighter{
     double GetBiasedMFP( double );
     double GetNominalElasticMFP( double );
     double GetBiasedElasticMFP( double );
+    double GetInelasticBias(double p);
+    double GetElasticBias(double p);
 
     void SetTotalGraph( TFile * );
 

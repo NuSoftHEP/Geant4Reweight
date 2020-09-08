@@ -10,6 +10,8 @@ parser.add_argument("-n", type=int, help='Number of vars', default = 1)
 parser.add_argument("-b", type=str, help='Binning', default = "(100, 0, 100)")
 parser.add_argument("-w", type=float, help='Width', default = 10.)
 parser.add_argument("-a", type=int, help='Use alt vars', default = 1)
+parser.add_argument("-t", type=str, help='Which PDG', default = '211')
+parser.add_argument("-x", type=int, help='Extra check', default=0)
 args = parser.parse_args()
 
 
@@ -20,9 +22,9 @@ fMC = RT.TFile(args.m, "OPEN")
 tMC = fMC.Get("pionana/beamana")
 
 if args.a:
-  check = "@g4rw_alt_primary_plus_sigma_weight.size() > 0 && true_beam_PDG == 211"
+  check = "@g4rw_alt_primary_plus_sigma_weight.size() > 0 && true_beam_PDG == " + args.t
 else: 
-  check = "@g4rw_primary_plus_sigma_weight.size() > 0 && true_beam_PDG == 211"
+  check = "@g4rw_primary_plus_sigma_weight.size() > 0 && true_beam_PDG == " + args.t
 tMC.Draw("true_beam_endZ>>hNom" + args.b, check)
 hNom = RT.gDirectory.Get("hNom")
 

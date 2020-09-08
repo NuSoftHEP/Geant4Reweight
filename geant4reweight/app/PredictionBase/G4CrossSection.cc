@@ -246,8 +246,8 @@ int main(int argc, char * argv[]){
   G4DecayHook decay_hook;
   
   std::vector<double> total_xsecs, elastic_xsecs, inelastic_xsecs, momenta,
-                      kinetic_energies, decay_mfps/*, ioni_mfps, brems_mfps,
-                      pairprod_mfps, coul_mfps*/;
+                      kinetic_energies, decay_mfps, ioni_mfps, brems_mfps,
+                      pairprod_mfps, coul_mfps;
 
   //Getting the cross sections from the processes
   G4ProcessManager * pm = part_def->GetProcessManager();
@@ -296,7 +296,7 @@ int main(int argc, char * argv[]){
     elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
 
-    /*
+    
     for( size_t i = 0; i < (size_t)pv->size(); ++i ){
       G4VProcess * proc = (*pv)(i);
       std::string theName = proc->GetProcessName();
@@ -331,17 +331,19 @@ int main(int argc, char * argv[]){
       else if (theName == "CoulombScat") {
         //std::cout << theName << std::endl;
         G4CoulombScattering * coul = (G4CoulombScattering*)proc;
-        coul_mfps.push_back(coul->MeanFreePath(*theTrack));
-        //if (coul->MeanFreePath(*theTrack) != DBL_MAX) {
+        if (coul->MeanFreePath(*theTrack) != DBL_MAX) {
         //  std::cout << theName << std::endl;
         //  std::cout << "MFP: " << coul->MeanFreePath(*theTrack) << std::endl;
-        //}
+          coul_mfps.push_back(coul->MeanFreePath(*theTrack));
+        }
+        else {
+          coul_mfps.push_back(-1.);
+        }
         //std::cout << coul->GetCurrentModel() << std::endl;
         //std::cout << coul->LambdaTable() << std::endl;
         //std::cout << coul->LambdaTablePrim() << std::endl;
       }
     }
-    */
     
 
     tree->Fill();
@@ -372,14 +374,14 @@ int main(int argc, char * argv[]){
   TGraph total_KE( kinetic_energies.size(), &kinetic_energies[0], &total_xsecs[0] );
   TGraph decay_mfp_momentum(momenta.size(), &momenta[0], &decay_mfps[0]);
   TGraph decay_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &decay_mfps[0]);
-  //TGraph ioni_mfp_momentum(momenta.size(), &momenta[0], &ioni_mfps[0]);
-  //TGraph ioni_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &ioni_mfps[0]);
-  //TGraph brems_mfp_momentum(momenta.size(), &momenta[0], &brems_mfps[0]);
-  //TGraph brems_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &brems_mfps[0]);
-  //TGraph pairprod_mfp_momentum(momenta.size(), &momenta[0], &pairprod_mfps[0]);
-  //TGraph pairprod_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &pairprod_mfps[0]);
-  //TGraph coul_mfp_momentum(momenta.size(), &momenta[0], &coul_mfps[0]);
-  //TGraph coul_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &coul_mfps[0]);
+  TGraph ioni_mfp_momentum(momenta.size(), &momenta[0], &ioni_mfps[0]);
+  TGraph ioni_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &ioni_mfps[0]);
+  TGraph brems_mfp_momentum(momenta.size(), &momenta[0], &brems_mfps[0]);
+  TGraph brems_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &brems_mfps[0]);
+  TGraph pairprod_mfp_momentum(momenta.size(), &momenta[0], &pairprod_mfps[0]);
+  TGraph pairprod_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &pairprod_mfps[0]);
+  TGraph coul_mfp_momentum(momenta.size(), &momenta[0], &coul_mfps[0]);
+  TGraph coul_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &coul_mfps[0]);
 
   fout->cd();
   inel_momentum.Write( "inel_momentum" );
@@ -390,14 +392,14 @@ int main(int argc, char * argv[]){
   total_KE.Write( "total_KE" );
   decay_mfp_momentum.Write("decay_mfp_momentum");
   decay_mfp_KE.Write("decay_mfp_KE");
-  //ioni_mfp_momentum.Write("ioni_mfp_momentum");
-  //ioni_mfp_KE.Write("ioni_mfp_KE");
-  //brems_mfp_momentum.Write("brems_mfp_momentum");
-  //brems_mfp_KE.Write("brems_mfp_KE");
-  //pairprod_mfp_momentum.Write("pairprod_mfp_momentum");
-  //pairprod_mfp_KE.Write("pairprod_mfp_KE");
-  //coul_mfp_momentum.Write("coul_mfp_momentum");
-  //coul_mfp_KE.Write("coul_mfp_KE");
+  ioni_mfp_momentum.Write("ioni_mfp_momentum");
+  ioni_mfp_KE.Write("ioni_mfp_KE");
+  brems_mfp_momentum.Write("brems_mfp_momentum");
+  brems_mfp_KE.Write("brems_mfp_KE");
+  pairprod_mfp_momentum.Write("pairprod_mfp_momentum");
+  pairprod_mfp_KE.Write("pairprod_mfp_KE");
+  coul_mfp_momentum.Write("coul_mfp_momentum");
+  coul_mfp_KE.Write("coul_mfp_KE");
 
   TVectorD m_vec(1);
   m_vec[0] = MaterialMass;

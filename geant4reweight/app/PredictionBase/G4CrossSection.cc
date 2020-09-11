@@ -337,7 +337,7 @@ int main(int argc, char * argv[]){
           coul_mfps.push_back(coul->MeanFreePath(*theTrack));
         }
         else {
-          coul_mfps.push_back(-1.);
+          coul_mfps.push_back(0.);
         }
         //std::cout << coul->GetCurrentModel() << std::endl;
         //std::cout << coul->LambdaTable() << std::endl;

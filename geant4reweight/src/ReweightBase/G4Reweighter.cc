@@ -556,7 +556,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
                                               : min)/* +
                   (coulGraph->Eval(p) > min ? 1. / GetCoulMFP(p) : min)*/);
 
-    std::cout << i << "vals: " << bias_val << " " << val << std::endl;
+    //std::cout << i << "vals: " << bias_val << " " << val << std::endl;
     /**/if (theStep->GetStepChosenProc() == "hadElastic") {
 
       if (bias_val > min && val > min) {

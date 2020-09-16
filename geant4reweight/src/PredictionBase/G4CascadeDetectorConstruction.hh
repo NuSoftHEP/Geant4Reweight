@@ -10,12 +10,14 @@ class G4CascadeDetectorConstruction : public G4VUserDetectorConstruction{
 
   public:
     G4CascadeDetectorConstruction();
+    G4CascadeDetectorConstruction(G4VPhysicalVolume * phys_vol);
     virtual ~G4CascadeDetectorConstruction();
 
     virtual G4VPhysicalVolume * Construct();
 
 
   protected:
+    G4VPhysicalVolume * fPhysicalVol = 0x0;
 };
 
 #endif

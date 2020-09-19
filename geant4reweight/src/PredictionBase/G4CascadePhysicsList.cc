@@ -4,17 +4,23 @@
 #include "Geant4/G4RadioactiveDecayPhysics.hh"
 #include "Geant4/G4EmStandardPhysics.hh"
 #include "Geant4/G4HadronPhysicsFTFP_BERT.hh"
+#include "Geant4/G4HadronPhysicsQGSP_BERT.hh"
 #include "Geant4/G4HadronElasticPhysics.hh"
 
 
-G4CascadePhysicsList::G4CascadePhysicsList() : G4VModularPhysicsList(){
+G4CascadePhysicsList::G4CascadePhysicsList(bool use_FTFP) : G4VModularPhysicsList(){
   SetVerboseLevel(0);
 
   RegisterPhysics( new G4DecayPhysics );
   RegisterPhysics( new G4RadioactiveDecayPhysics );
   RegisterPhysics( new G4EmStandardPhysics );
 
-  RegisterPhysics( new G4HadronPhysicsFTFP_BERT() );
+  if (use_FTFP) {
+    RegisterPhysics( new G4HadronPhysicsFTFP_BERT() );
+  }
+  else {
+    RegisterPhysics( new G4HadronPhysicsQGSP_BERT() );
+  }
   RegisterPhysics( new G4HadronElasticPhysics() );
   std::cout << "Finished Physics" << std::endl;
 }

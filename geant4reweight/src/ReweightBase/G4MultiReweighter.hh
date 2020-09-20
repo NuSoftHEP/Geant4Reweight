@@ -6,6 +6,7 @@
 #include "TRandom3.h"
 
 #include "G4Reweighter.hh"
+#include "G4NewReweighter.hh"
 #include "G4ReweightTraj.hh"
 #include "G4ReweighterFactory.hh"
 #include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
@@ -24,6 +25,11 @@ class G4MultiReweighter{
                     const std::vector<fhicl::ParameterSet> & parSet,
                     size_t nThrows = 100, int seed = 0);
 
+  G4MultiReweighter(int pdg, TFile & totalXSecFile,
+                    TFile & fracsFile,
+                    const std::vector<fhicl::ParameterSet> & parSet,
+                    const fhicl::ParameterSet & material,
+                    size_t nThrows = 100, int seed = 0);
   
   double GetWeightFromNominal(G4ReweightTraj & traj);
 
@@ -32,6 +38,9 @@ class G4MultiReweighter{
 
   std::pair<double, double> GetPlusMinusSigmaParWeight(G4ReweightTraj & traj,
                                                        size_t iPar);
+
+  std::pair<double, double> GetNewPlusMinusSigmaParWeight(G4ReweightTraj & traj,
+                                                          size_t iPar);
 
   double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow);
   std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj);
@@ -63,6 +72,7 @@ class G4MultiReweighter{
   G4ReweighterFactory factory;
   G4ReweightParameterMaker parMaker;
   G4Reweighter * reweighter; 
+  G4NewReweighter * new_reweighter;
   size_t numberOfThrows;
   TRandom3 rng;
 

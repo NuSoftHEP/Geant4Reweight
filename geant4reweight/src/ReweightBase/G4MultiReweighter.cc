@@ -65,6 +65,31 @@ G4MultiReweighter::G4MultiReweighter(
   GenerateThrows();
 }
 
+G4MultiReweighter::G4MultiReweighter(
+    int pdg, TFile & totalXSecFile, TFile & fracsFile,
+    const std::vector<fhicl::ParameterSet> & parSet,
+    const fhicl::ParameterSet & material,
+    size_t nThrows, int seed)
+    : parMaker(parSet, pdg),
+      reweighter(factory.BuildReweighter(pdg, &totalXSecFile, &fracsFile,
+                                         parMaker.GetFSHists(),
+                                         parMaker.GetElasticHist())),
+      new_reweighter(new G4NewReweighter(&fracsFile, parMaker.GetFSHists(), material,
+                     parMaker.GetElasticHist())),
+      numberOfThrows(nThrows),
+      rng(seed) {
+
+  //Get the parameters and set the values
+  for (size_t i = 0; i < parSet.size(); ++i) {
+    paramNames.push_back(parSet[i].get<std::string>("Name"));
+    paramNominalVals.push_back(parSet[i].get<double>("Nominal"));
+    paramSigmas.push_back(parSet[i].get<double>("Sigma"));
+    paramRandomVals.push_back(std::vector<double>()); 
+    paramVals[paramNames.back()] = paramNominalVals.back();
+  }
+
+  GenerateThrows();
+}
 
 
 void G4MultiReweighter::GenerateThrows() {
@@ -225,6 +250,50 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
   double minus_weight (reweighter->GetWeight(&traj)/**
                       reweighter->GetElasticWeight(&traj)*/);
+
+  return {plus_weight, minus_weight};
+}
+
+std::pair<double, double> G4MultiReweighter::GetNewPlusMinusSigmaParWeight(
+    G4ReweightTraj & traj,
+    size_t iPar) {
+
+  std::cout << "getting new weights " << new_reweighter << std::endl;
+
+  if (iPar+1 > paramNames.size()) {
+    std::cerr << "Requested parameter index out of bounds" << std::endl;
+    return {1., 1.};
+  }
+
+  //Build map with nominal +1 sigma for the requested parameter 
+  std::map<std::string, double> paramMap;
+  for (size_t i = 0; i < paramNames.size(); ++i) {
+    paramMap[paramNames[i]] = paramNominalVals[i];
+  }
+
+  paramMap[paramNames[iPar]] += paramSigmas[iPar];
+
+  //Give the variables to the parameter maker 
+  //and use these for the reweighter
+  parMaker.SetNewVals(paramMap);
+  new_reweighter->SetNewHists(parMaker.GetFSHists());
+  new_reweighter->SetNewElasticHists(parMaker.GetElasticHist());
+  //double plus_weight = new_reweighter->GetWeight(&traj);
+  double plus_weight (new_reweighter->GetWeight(&traj)/**
+                      new_reweighter->GetElasticWeight(&traj)*/);
+
+  //Do the same for the -1 sigma variation
+  //-2 to account for +1
+  paramMap[paramNames[iPar]] -= 2.*paramSigmas[iPar];
+
+  if (paramMap[paramNames[iPar]] < 0.)
+    paramMap[paramNames[iPar]] = 0.;
+
+  parMaker.SetNewVals(paramMap);
+  new_reweighter->SetNewHists(parMaker.GetFSHists());
+  new_reweighter->SetNewElasticHists(parMaker.GetElasticHist());
+  double minus_weight (new_reweighter->GetWeight(&traj)/**
+                      new_reweighter->GetElasticWeight(&traj)*/);
 
   return {plus_weight, minus_weight};
 }

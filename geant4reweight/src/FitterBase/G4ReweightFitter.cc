@@ -191,6 +191,7 @@ void G4ReweightFitter::GetMCFromCurves(std::string TotalXSecFileName, std::strin
 
   TFile FracFile(FracFileName.c_str(), "OPEN");
 
+  //Configurable
   theReweighter = new G4PiPlusReweighter(&TotalXSecFile, &FracFile, FSHists/*, false*/);
   total_inel = theReweighter->GetTotalGraph();
 

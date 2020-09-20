@@ -58,6 +58,7 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
     }
   }
 
+  //Make configurable?
   if( IsSetActive( "C_PiPlus" ) ){
     bool includeDUET = ps.get< bool >("IncludeDUET");
     std::string DUET_data = ps.get< std::string >( "DUETDataFile" ); 
@@ -318,6 +319,7 @@ void G4ReweightFitManager::DrawFitResults(){
     types.push_back( itSets->first );
   }
 
+  //Make this configurable for different particles
   std::map< std::string, std::string > titles = {
     {"reac", "Reactive"},
     {"inel", "Quasi-Elastic"},
@@ -449,6 +451,7 @@ void G4ReweightFitManager::DrawFitResults(){
       plus_sigma->SetFillColor(2);
       plus_sigma->SetMaximum( 1.2 * max );
       plus_sigma->SetMinimum(0.);
+      //Configurable
       std::string title = titles[cut_name] + ";Pion Momentum (MeV/c);#sigma (mb)";
       plus_sigma->SetTitle( title.c_str() ); 
       plus_sigma->GetXaxis()->SetTitleSize(.06);

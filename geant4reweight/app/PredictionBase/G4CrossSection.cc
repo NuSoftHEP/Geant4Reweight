@@ -54,6 +54,8 @@ int ndiv_override = 0;
 int type_override = -999;
 
 int verbose_override = -1;
+double inel_bias = 1.;
+double el_bias = 1.;
 
 bool parseArgs(int argc, char* argv[]);
 
@@ -295,7 +297,8 @@ int main(int argc, char * argv[]){
     inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
     elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
-
+    inelastic_xsec *= inel_bias;
+    elastic_xsec *= el_bias;
     
     for( size_t i = 0; i < (size_t)pv->size(); ++i ){
       G4VProcess * proc = (*pv)(i);
@@ -467,6 +470,14 @@ bool parseArgs(int argc, char ** argv){
 
     else if( strcmp( argv[i], "-v" ) == 0 ){
       verbose_override = atoi( argv[i+1] );
+    }
+
+    else if (strcmp(argv[i], "--bi") == 0) {
+      inel_bias = atof(argv[i+1]);
+      std::cout << "Inel bias: " << inel_bias << std::endl;
+    }
+    else if (strcmp(argv[i], "--ei") == 0) {
+      el_bias = atof(argv[i+1]);
     }
   }
 

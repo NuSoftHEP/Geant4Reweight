@@ -8,7 +8,7 @@ class G4CascadePhysicsList : public G4VModularPhysicsList
 {
 
   public:
-    G4CascadePhysicsList(bool use_FTFP = false);
+    G4CascadePhysicsList(int list = 0);
     virtual ~G4CascadePhysicsList();
 
   protected:

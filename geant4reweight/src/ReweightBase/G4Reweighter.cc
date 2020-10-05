@@ -358,7 +358,8 @@ void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales 
 
 
 
-
+//include elastic bias hist - variation of elastic cross section
+//put in new method now - make sure don't break existing one!
 void G4Reweighter::SetBaseHistsWithElast( const std::map< std::string, TH1D* > &FSScales , TH1D* elastBiasHist){
   std::vector< double > newPoints;
 
@@ -429,6 +430,8 @@ void G4Reweighter::SetBaseHistsWithElast( const std::map< std::string, TH1D* > &
 
   //fout->cd();
 
+	//inelastic exclusive channels here
+
   //Now go through and vary the exclusive channels
   for( size_t i = 0; i < theInts.size(); ++i ){
     TH1D * theVar = FSScales.at( theInts.at(i) ); 
@@ -496,7 +499,7 @@ for( size_t j = 0; j < newPoints.size(); ++j ){
 
 
 
-  //Now go through and vary the exclusive channels
+  //Do the same for elastic
   
     TH1D * theVar_elast = elastBiasHist;
     TGraph * theGraph_elast = newElasticGraph;
@@ -523,7 +526,6 @@ theGraph_elast->SetPoint( bin, point_elast, Content_elast );
 
 
 elastVariationGraph = theGraph_elast;
-
 
 DivideGraphs(elastVariationGraph,oldElasticGraph);
 
@@ -621,6 +623,7 @@ DivideGraphs(elastVariationGraph,oldElasticGraph);
 G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist)
 
 {
+ //C Thorpe: Use constructor with elastic variation histogram
   Initialize(totalInput, FSInput, FSScales, inputElasticBiasHist);
 }
 
@@ -652,6 +655,7 @@ TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
 newElasticGraph = (TGraph*)elasticGraph->Clone("new_elast");
 oldElasticGraph = (TGraph*)elasticGraph->Clone();
 
+//total cross section - reac + elastic
 new_el_inel_Graph = (TGraph*)el_inel_Graph->Clone("new_total");
 old_el_inel_Graph = (TGraph*)el_inel_Graph->Clone();
 
@@ -771,7 +775,9 @@ void G4Reweighter::SetTotalGraph( TFile * input ){
   totalGraph = (TGraph*)input->Get( "inel_momentum" );
 
   elasticGraph = (TGraph*)input->Get( "el_momentum" );
-el_inel_Graph = (TGraph*)input->Get("total_momentum"); //stores sum of elastic and inelastic contributions (total cross section)
+
+//stores sum of elastic and inelastic contributions (total cross section)
+el_inel_Graph = (TGraph*)input->Get("total_momentum");
 
 
 
@@ -808,7 +814,8 @@ double G4Reweighter::GetBiasedMFP( double theMom ){
   double b = 1.;
   if( as_graphs ){
     b = totalVariationGraph->Eval( theMom );
-  }
+ 
+ }
 
   return  GetNominalMFP( theMom ) / b;
 }

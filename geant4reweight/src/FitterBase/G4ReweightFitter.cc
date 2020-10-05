@@ -12,16 +12,13 @@
 #include "TMatrixD.h"
 
 
-G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp , int particle){
+G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp ){
   fOutputFile = output_file;
-
 
   //Increase later
   nDOF = 0;
 
   fExperimentName = exp.get< std::string >("Name");
-
-
 
   std::vector< std::pair< std::string, std::string > > temp_graph_names = exp.get< std::vector< std::pair<std::string, std::string> > >("Graphs");
 
@@ -59,9 +56,6 @@ void G4ReweightFitter::FinishUp(){
  delete it->second;
   }
 
-
-
-
   delete theReweighter;
 
 }
@@ -92,8 +86,8 @@ void G4ReweightFitter::SaveData(TDirectory * data_dir){
 //new fit method - calculates chi2 and num of data points for each process assoc with this fitter, stores them.
 void G4ReweightFitter::DoFitModified(bool fSave){
 
-cuts_and_ns_and_chi2.clear();
-
+//empty fit data store
+fitDataStore.clear();
 
   double Data_val, MC_val, Data_err;
   double x;
@@ -101,8 +95,7 @@ cuts_and_ns_and_chi2.clear();
   //Go through each cut defined for the experiment
   for( auto itXSec = Data_xsec_graphs.begin(); itXSec != Data_xsec_graphs.end(); ++itXSec ){
     std::string name = itXSec->first;
-		
-		
+			
 	  //record how many points there are for each cut
    		 
     TGraph * MC_xsec = MC_xsec_graphs.at(name);
@@ -110,7 +103,6 @@ cuts_and_ns_and_chi2.clear();
 
     int nPoints = Data_xsec->GetN(); 
   
-
    double partial_chi2 = 0.;
 	
    for( int i = 0; i < nPoints; ++i ){
@@ -126,23 +118,17 @@ cuts_and_ns_and_chi2.clear();
 
     }
 
- 
+	
+    //TODO: This probably needs updating to use new method for calculaing chi2
     if( fSave )
       SaveExpChi2( partial_chi2, name ); 
 
 
-std::pair<int,double>n_and_chi2 = std::make_pair(nPoints,partial_chi2);
+Chi2Store thisStore(name,nPoints,partial_chi2);
 
-//vector contains data type and corresponding num of data points and chi2
-cuts_and_ns_and_chi2.push_back(std::make_pair(name.c_str(),n_and_chi2));
+fitDataStore.push_back(thisStore);
 
 }
-
-/*
-for(size_t i=0;i<cuts_and_ns_and_chi2.size();i++) std::cout << cuts_and_ns_and_chi2.at(i).first << "   " << cuts_and_ns_and_chi2.at(i).second.first << "  " << cuts_and_ns_and_chi2.at(i).second.second << std::endl;
-
-*/
- 
 
 }
 
@@ -229,98 +215,22 @@ void G4ReweightFitter::LoadData(){
 
 
 //gets num of data points and associated chi2 for a specific kind of cross section for this fitter
-std::pair<int,double> G4ReweightFitter::GetNDataPointsAndChi2(std::string cut){
+Chi2Store G4ReweightFitter::GetNDataPointsAndChi2(std::string cut){
 
+//zero everything
+Chi2Store thisStore(cut,0,0);
 
-int n=0;
-double chi2=0;
+for(size_t i=0;i<fitDataStore.size();i++){
 
-std::vector<std::pair<std::string ,std::pair<int,double> > >::iterator itCuts;
-
-for(itCuts = cuts_and_ns_and_chi2.begin(); itCuts != cuts_and_ns_and_chi2.end(); ++itCuts){
-
-if(itCuts->first == cut){
-
- n = itCuts->second.first;
- chi2 = itCuts->second.second;
-}
+if(fitDataStore.at(i).cut == cut) thisStore = fitDataStore.at(i);
 
 }
 
-return std::make_pair(n,chi2);
-}
-
-
-/*
-//checks difference between data and nominal MC predictions - exclude data
-//more than outlier_disp*sigma from mc prediction
-void G4ReweightFitter::OutlierCheck(double outlier_disp){
-
-//std::cout << "Checking this fitter for outliers" << std::endl;
-
-  double Data_val, MC_val, Data_err;
-  double x;
-
-  //Go through each cut defined for the experiment
-  //std::map< std::string, TGraphErrors * >::iterator itXSec = Data_xsec_graphs.begin();
-  for( auto itXSec = Data_xsec_graphs.begin(); itXSec != Data_xsec_graphs.end(); ++itXSec ){
-    std::string name = itXSec->first;
-
-    TGraph * MC_xsec = MC_xsec_graphs.at(name);
-    TGraphErrors * Data_xsec = itXSec->second;
-
-    int nPoints = Data_xsec->GetN(); 
-
-   double this_chi2;
-
-
-TGraphErrors * Data_xsec_no;
-
-//put the data points that pass the outlier check in here, make a new graph with the same name in
-//Data_xsec_graphs_no using this data - this is then used in the subsequent fit
-std::vector<Double_t>X;
-std::vector<Double_t>Y;
-std::vector<Double_t>Err;
-
-
-	
-   for( int i = 0; i < nPoints; ++i ){
-
-      Data_xsec->GetPoint(i, x, Data_val);
-      Data_err = Data_xsec->GetErrorY(i);
-      MC_val = MC_xsec->Eval( x );
-
-//if(name == "total"){
-//std::cout << "MC: " << MC_val << " Data: " << Data_val << std::endl;
-//}
-
-this_chi2 = ( (Data_val - MC_val) / Data_err ) * ( (Data_val - MC_val) / Data_err );
- 			
- if(this_chi2 <  outlier_disp*outlier_disp){
-X.push_back(x);
-Y.push_back(Data_val);
-Err.push_back(Data_err);
-}
-else {
-//std::cout << "Outlier found at: " << std::endl;
-//std::cout << "MC: " << MC_val << " Data: " << Data_val <<  " Err: " << Data_err <<  std::endl;
+//if not found, return empty fit store
+return thisStore;
 
 }
 
-
-
-
-    }
-
-
-Data_xsec_no = new TGraphErrors(X.size(),&(X[0]),&(Y[0]),0,&(Err[0]));
-Data_xsec_graphs_no[ itXSec->first ] = Data_xsec_no;
-
-}
-
-
-}
-*/
 
 
 //If not given a covariance matrix and position, will default to using central values that have been set
@@ -329,8 +239,8 @@ void G4ReweightFitter::GetMCFromCurvesWithCovariance(std::string TotalXSecFileNa
 
 
 //store the info needed to calculate variances from the cov matrix
+//stores the list of parameters used, the momentum ranges they apply to
 theCovStore.clear();
-
 
   std::map< std::string, std::vector< FitParameter > >::iterator itPar;
 
@@ -540,6 +450,10 @@ TFile TotalXSecFile(TotalXSecFileName.c_str(), "OPEN");
     }   
   }
 
+
+
+//setup elastic prediction
+
 TH1D *ElasticHist; 
 
 std::vector< double > varX, varY;
@@ -614,9 +528,11 @@ if(cut_name == "total") continue;
 double y_var;
 
 
+//if no cov or position specified, just use central values
 if(cov != nullptr && position != "CV"){
 
-double v = sigmaWithCovariance(x,"reac",cov , use_reac);
+//new method to get +/- 1 sigma variations
+double v = SigmaWithCovariance(x,"reac",cov , use_reac);
 //std::cout << "reac: " << y << "  +/-  " <<  sqrt(v) << std::endl;
 
 if(position == "up") y_var = y + sqrt(v); //plus 1 sigma
@@ -638,8 +554,6 @@ y_var = y;
 }//cut_name == "reac"
 
 
-
-
     else if( cut_name == "abscx" ){
       for( int i = 0; i < total_inel->GetN(); ++i ){
         double x = total_inel->GetX()[i];
@@ -655,7 +569,7 @@ double y_var;
 
 if(cov != nullptr && position != "CV"){
 
-double v = sigmaWithCovariance(x,cut_name,cov , use_reac);
+double v = SigmaWithCovariance(x,cut_name,cov , use_reac);
 //std::cout <<"abscx: " << x << " , " <<y << "  +/-  " <<  sqrt(v)  << std::endl;
 
 if(position == "up") y_var = y + sqrt(v); //plus 1 sigma
@@ -699,7 +613,7 @@ double y_var;
 
 if(cov != nullptr && position != "CV"){
 
-double v = sigmaWithCovariance(x,cut_name,cov , use_reac);
+double v = SigmaWithCovariance(x,cut_name,cov , use_reac);
 
 if(position == "up") y_var =y*(theReweighter->GetNewGraph(cut_name.c_str())->Eval(x)) + sqrt(v); //plus 1 sigma
 else y_var =y*(theReweighter->GetNewGraph(cut_name.c_str())->Eval(x)) - sqrt(v); //minus 1 sigma
@@ -723,8 +637,6 @@ xs.push_back( x );
 std::vector<double>xs,ys;
 
 
-
-
 //Do elastic cross section
 
 for(int i = 0; i< total_el->GetN(); ++i){
@@ -741,7 +653,7 @@ double y_var;
 
 if(cov != nullptr && position != "CV"){
 
-double v = sigmaWithCovariance(x,"elast" ,cov , use_reac);
+double v = SigmaWithCovariance(x,"elast" ,cov , use_reac);
 
 
 if(position == "up") y_var = y*theReweighter->GetNewElastGraph()->Eval(x)+sqrt(v); //plus 1 sigma
@@ -784,7 +696,7 @@ double y_var;
 
 if(cov != nullptr && position != "CV"){
 
-double v = sigmaWithCovariance(x,"total",cov , use_reac);
+double v = SigmaWithCovariance(x,"total",cov , use_reac);
 
 if(position == "up") y_var = y + sqrt(v); //plus 1 sigma
 else y_var = y - sqrt(v); //minus 1 sigma
@@ -837,7 +749,7 @@ delete total_var;
 
 //arguments cut = type of cross section you want SD for , cov = covariance matrix for fit par 
 //use_reac -> Set to true if you want to fit all of the reaction channels with a single parameter
-double G4ReweightFitter::sigmaWithCovariance(double x , std::string cut , TMatrixD *cov  , bool use_reac){
+double G4ReweightFitter::SigmaWithCovariance(double x , std::string cut , TMatrixD *cov  , bool use_reac){
 
 double variance = 0;
 
@@ -846,6 +758,8 @@ double variance = 0;
 //key is two strings that look up which element of the cov matrix they correspond to
 std::map<std::pair<std::string,std::string> ,double   > cuts_and_covs;
 
+
+//setup map storing names of excl channels and cov matrix elements
 for(size_t i_cut=0;i_cut<theCovStore.size();i_cut++){
 for(size_t j_cut=0;j_cut<theCovStore.size();j_cut++){
 
@@ -869,17 +783,16 @@ cuts_and_covs[std::make_pair(theCovStore.at(i_cut).cut,theCovStore.at(j_cut).cut
 }
 
 
-//TODO: Find a way to figure out which channels to use from the params file 
+//TODO: Find a way to figure out which channels to use from the params file / make this less hard coded in (eg inherited class) 
 //or from how they're set in G4PionReweighter constructor
 std::string excl_channels[8] = {"abs","cex","inel","prod","dcex","elast","reac","total"};
 
-//go through excl channels check for any that are not in cov matrix, set corresponding
-//elements to zero
 
+//add any remaining data types not found in cov matrix
 for(int i_ch=0;i_ch<8;i_ch++){
 for(int j_ch=0;j_ch<8;j_ch++){
 
-
+//if entry in CM already exists, skip
 if ( cuts_and_covs.find(std::make_pair(excl_channels[i_ch] , excl_channels[j_ch] )) == cuts_and_covs.end() ){
 
 //if reac is being used as a parameter then set diagonal elements of cov matrix for abs, cex, inel, prod, dcex as equal to reac error
@@ -900,13 +813,12 @@ cuts_and_covs[std::make_pair(excl_channels[i_ch] , excl_channels[j_ch])] = 0.0;
 }
 
 //create a map between each name of exclusive channel and its Nominal prediction
-
+//TODO find way to make this less hard coded in
 std::map<std::string , double> cuts_and_noms;
 
 for(int i_ch=0;i_ch<8;i_ch++){
 
 //std::cout << excl_channels[i_ch] << std::endl;
-
 
 if(excl_channels[i_ch] == "elast"){
 
@@ -936,15 +848,13 @@ double y =  total_inel->Eval(x)*( theReweighter->GetOldGraph( "abs" )->Eval( x )
 				+ theReweighter->GetOldGraph( "inel" )->Eval( x ) + theReweighter->GetOldGraph( "prod" )->Eval( x )
 				+ theReweighter->GetOldGraph( "dcex" )->Eval( x ) );
 
-
 y += theReweighter->GetOldElastGraph()->Eval(x);
-
 
 cuts_and_noms["total"] = y;
 }
 
 
-//retrieve nominal inelastic cross sections
+//retrieve nominal excl channel cross sections cross sections
 else {
 
 double y = total_inel->Eval(x)*theReweighter->GetOldGraph( excl_channels[i_ch] )->Eval( x );
@@ -959,8 +869,6 @@ cuts_and_noms[excl_channels[i_ch]] = y;
 
 
 //now calculate the varaince depending on what sort of process you're dealing with
-
-
 //single exclusive channel
 if(cut != "total" && cut != "reac" && cut != "abscx"){		
  
@@ -974,7 +882,7 @@ if(cut != "total" && cut != "reac" && cut != "abscx"){
 else if(cut == "abscx"){
 	variance = cuts_and_noms["abs"] * cuts_and_noms["abs"] * cuts_and_covs[std::make_pair("abs","abs")]
 			+ cuts_and_noms["cex"] * cuts_and_noms["cex"] * cuts_and_covs[std::make_pair("cex","cex")] 
-			+ 2*cuts_and_noms["abs"]*cuts_and_noms["cex"]*cuts_and_covs[std::make_pair("cex","abs")];	
+			+ 2 * cuts_and_noms["abs"] * cuts_and_noms["cex"] * cuts_and_covs[std::make_pair("cex","abs")];	
 
 }
 // reac - sum of abs cex inel dcex and prod, include all their covariances
@@ -1039,11 +947,14 @@ variance = cuts_and_noms["reac"] * cuts_and_noms["reac"] * cuts_and_covs[std::ma
 
 }
 else {
+
 	std::cout << "Unrecognized process " << cut << " assuming 0 variance" << std::endl;
 	return 0;
 
 }
+
 return variance;
+
 }
 
 

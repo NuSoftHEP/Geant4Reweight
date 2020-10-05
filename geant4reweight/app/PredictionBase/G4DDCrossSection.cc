@@ -340,48 +340,37 @@ return 0;
 
 //run the cascade to do inelastic scatter
 
-//std::cout << theMomentum << std::endl;
     double KE = theConfig.Energy;
-//    double theMomentum = sqrt(2*part_def->GetPDGMass()*KE + KE*KE);
-//std::cout  << theMomentum << std::endl;
 
-//std::cout << theConfig.nCascades << std::endl;
 //double momentum;
 double Energy; //outgoing particle KE
 double sin_theta; //sine of outgoing particle angle 
 
 
-int n_Angle_bins = 2 / theConfig.BinningAngle;
+int n_Angle_bins = 180 / theConfig.BinningAngle;
 int n_Energy_bins = (1000-0)/theConfig.BinningEnergy;
 
-
-TH2D *h_inel = new TH2D("h_inel","h_inel",n_Energy_bins,0.,1000,n_Angle_bins,0,3.1415);
-TH2D *h_el = new TH2D("h_el","h_el",n_Energy_bins,0.,1000,n_Angle_bins,0,3.1415);
+TH2D *h_inel = new TH2D("h_inel","h_inel",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
+TH2D *h_el = new TH2D("h_el","h_el",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
 
 h_inel->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
-h_inel->GetYaxis()->SetTitle("Outgoing P #theta (rad)");
+h_inel->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
 //h_inel->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
 
 h_el->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
-h_el->GetYaxis()->SetTitle("Outgoing P #theta (rad)");
+h_el->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
 //h_el->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
-
-
-bool elastic = true;
-bool inelastic = true;
-
-
-if(elastic){
-
-std::cout << "Doing Elastic" << std::endl;
-  
+ 
     CheckAllProcs(part_def);
   
+//////////////////////////////////////////////////////////////////////////////////////////
+//                           Simulate Elastic processes                                 //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+std::cout << "Doing Elastic" << std::endl;
+
       G4HadronElasticProcess * elastic_proc = getElasticProc(part_def_elast, "hadElastic");
-
-
-
-
   
         if (!elastic_proc) {
   
@@ -440,31 +429,20 @@ newz = thePC->GetMomentumDirection()->z();
 
 sin_theta = sqrt(newx*newx + newy*newy)*newz/sqrt(newz*newz);
 
-double theta = TMath::ASin(sin_theta);
+double theta = (180/3.141)*TMath::ASin(sin_theta);
 
-if(sin_theta < 0) theta += 3.1415;
+if(sin_theta < 0) theta += 180;
 
-//std::cout  << theta << "  "  << Energy << std::endl;
 
-     // size_t nSecondaries = thePC->GetNumberOfSecondaries();
-
-       thePC->SetVerboseLevel(0);
+thePC->SetVerboseLevel(0);
 
 thePC->Initialize(*theTrack);
 
 h_el->Fill(Energy,theta);
 
-
-
 }
 
-//fill histogram
 
-
-
-std::cout << h_el->Integral() << std::endl;
-
-//normalize histogram to 1 * (1-abs probability) 
 
 h_el->Scale(1.0 / theConfig.nCascades);
 h_el->Scale(1.0 / theConfig.BinningAngle);
@@ -480,9 +458,12 @@ std::string histname = "el_" + std::to_string((int)theConfig.Energy) + "_MeV";
 
 h_el->Write(histname.c_str());
 
-}
 
-if(inelastic){
+//////////////////////////////////////////////////////////////////////////////////////////
+//                           Simulate Inelastic processes                               //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 std::cout << "Doing Inelastic" << std::endl;
   G4HadronInelasticProcess * inelastic_proc = getInelasticProc( /*inelastic_proc, */part_def, inel_name );
@@ -494,24 +475,17 @@ std::cout << "Doing Inelastic" << std::endl;
 
 
 
-
-  TrackStepPart track_par = initTrackAndPart( part_def, theMaterial  );
+ track_par = initTrackAndPart( part_def, theMaterial  );
  
- G4Track * theTrack = track_par.theTrack;
-  G4Step * theStep   = track_par.theStep;
-  G4DynamicParticle * dynamic_part = track_par.dynamic_part;
+ theTrack = track_par.theTrack;
+ theStep   = track_par.theStep;
+ dynamic_part = track_par.dynamic_part;
 
     dynamic_part->SetKineticEnergy( KE );
-
-
-
-
 
 //initialize everythin again
 //G4VParticleChange * thePC;
 //thePC->Initialize(*theTrack);
-
-
 
 for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
 
@@ -530,7 +504,6 @@ for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
 
 double outgoing_KE = 0;
 
-
 //std::cout << "NSecondaries: " << nSecondaries << std::endl;
 
 //first proton is always leading proton (I think)
@@ -548,19 +521,13 @@ outgoing_KE = part->GetKineticEnergy();
 sin_theta =sqrt( part->GetMomentumDirection().getX()*part->GetMomentumDirection().getX() + part->GetMomentumDirection().getY()*part->GetMomentumDirection().getY()) * part->GetMomentumDirection().getZ() / sqrt( part->GetMomentumDirection().getZ()*part->GetMomentumDirection().getZ());
 
 //scattering angle in rad
-double theta = TMath::ASin(sin_theta);
+double theta = (180/3.141)*TMath::ASin(sin_theta);
 
-if(sin_theta < 0) theta += 3.1415;
-
+if(sin_theta < 0) theta += 180;
 
 h_inel->Fill(outgoing_KE,theta);
 
 }
-
-//find highest momentum proton
-
-
-
 
 
 }
@@ -572,7 +539,6 @@ thePC->Initialize(*theTrack);
 }
 
 
-std::cout << h_inel->Integral() << std::endl;
 
 //normalize histogram to 1 * (1-abs probability) 
 
@@ -583,8 +549,6 @@ h_inel->Scale(1.0 / theConfig.BinningEnergy);
 
 std::cout << h_inel->Integral("width") << std::endl;
 
-
-
 //h_inel->Scale(1.0/h_inel->Integral("width"));
 
 h_inel->Scale(g_inel->Eval(theConfig.Energy));
@@ -592,21 +556,16 @@ h_inel->Scale(g_inel->Eval(theConfig.Energy));
 std::cout << h_inel->Integral("width") << std::endl;
 
 
-
-
-std::string histname = "inel_" + std::to_string((int)theConfig.Energy) + "_MeV";
+ histname = "inel_" + std::to_string((int)theConfig.Energy) + "_MeV";
 
 h_inel->Write(histname.c_str());
-
-
-}
 
 
 TH2D *h_tot = (TH2D*)h_inel->Clone("h_tot");
 h_tot->Add(h_el);
 
 
-std::string histname = "tot_" + std::to_string((int)theConfig.Energy) + "_MeV";
+ histname = "tot_" + std::to_string((int)theConfig.Energy) + "_MeV";
 h_tot->Write(histname.c_str());
 
   fout->Close();

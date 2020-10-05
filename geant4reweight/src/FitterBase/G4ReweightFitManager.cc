@@ -9,10 +9,10 @@
 #include "TPad.h"
 #include "TROOT.h"
 #include "TRandom.h"
+#include "util/FitStore.hh"
 
 
-
-G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save) : 
+G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save, double total_xsec_bias) : 
 	fit_tree("FitTree", ""),
 	fSave( do_save )
 {
@@ -20,15 +20,21 @@ G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_s
 	data_dir = out->mkdir( "Data" );
 	nDOF = 0;
 	fit_tree.Branch( "Chi2", &tree_chi2 );
+	
+	//scales contribution to chi2 from total cross section data
+	total_mix = total_xsec_bias;
+
 }
 
 void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
 
 	parMaker = G4ReweightParameterMaker( FitParSets );
 
+	//TODO nDOF calculation no longer valid with new fit method
 	nDOF -= parMaker.GetNParameters();
 	theParVals = parMaker.GetParametersAsPairs();
 
+	//add elastic parameters as well
 	for(std::string::size_type i=0;i<parMaker.GetElasticParameterSet().size();i++){
 
 		theElastParVals.push_back(std::pair(parMaker.GetElasticParameterSet().at(i).Name,parMaker.GetElasticParameterSet().at(i).Value));
@@ -77,7 +83,8 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
 for(size_t i = 0; i < exps.size(); ++i){
 
 		if( IsSetActive( exps.at(i).get<std::string >( "Type" ) ) ){
-			G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i) , pdg);
+			G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i) );
+						
 
 			mapSetsToFitters[ exp->GetType() ].push_back( exp );
 		}
@@ -120,9 +127,6 @@ void G4ReweightFitManager::DefineFCN(){
 			//params you have when computing the ndof
 				bool use_reac=false;
 
-				//TODO: This is hard coded in for now, should setup a way to determine what the 
-				//data types are from the params
-				std::string cuts[9] = {"total","elast","reac","abscx","cex","inel","dcex","abs","prod"};
 
 				std::string dir_name = "";
 				for(size_t i = 0; i < theParVals.size(); ++i){          
@@ -133,8 +137,8 @@ void G4ReweightFitManager::DefineFCN(){
 					parameter_values[ theParVals[i].first ] = coeffs[i];
 					if(theParVals[i].first == "fReac") use_reac=true;
 				}
-
-				//just set these to 1 for the time being
+	
+				//elast params get added onto end of parameter vector
 				for(size_t i=0;i< theElastParVals.size(); ++i){
 
 					theElastParVals[i].second = coeffs[i+theParVals.size()];
@@ -144,6 +148,7 @@ void G4ReweightFitManager::DefineFCN(){
 				}
 
 
+				//new method for setting params
 				if(theElastParVals.size())
 					parMaker.SetNewValsWithElast( theParVals , theElastParVals);
 				else
@@ -170,23 +175,18 @@ void G4ReweightFitManager::DefineFCN(){
 
 				double n=0;
 
-				std::vector<int> sets_per_target;	
+				//for each type of measurement, abs, elast, cex, reac, total etc. 
+				//store the num of points and the resulting chi2
+								
+				std::vector<Chi2Store> theStore;
+	
+				//zero everything at start of fit
+				for(size_t i_dt=0;i_dt<AllExclChannels.size();i_dt++){
 
-
-				//TODO make a more sensible data structure for this (make a struct)
-				std::vector<std::pair<std::string , std::pair<int,double> > > cuts_and_n_and_chi2;
-
-				//fill this vector with dummy parameters
-				for(int i_dt=0;i_dt<9;i_dt++){
-
-					//cuts_and_n_and_chi2.first - > Name of process
-					//cuts_and_n_and_chi2.second.first -> num of data points for that process
-					//cuts_and_n_and_chi2.second.second -> chi2 from that process
-
-					cuts_and_n_and_chi2.push_back(std::make_pair(cuts[i_dt].c_str(),std::make_pair(0,0.0)));
-
+					Chi2Store thisStore(AllExclChannels.at(i_dt),0,0);
+					theStore.push_back(thisStore);
+	
 				}
-
 
 
 				for( ; itSet != mapSetsToFitters.end(); ++itSet ){
@@ -199,29 +199,22 @@ void G4ReweightFitManager::DefineFCN(){
 
 						if( fSave )
 							theFitter->MakeFitDir( outdir );
-
-
-						//				        theFitter->GetMCFromCurves( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);	
-
+						
+						//get MC predictions
 						theFitter->GetMCFromCurvesWithCovariance( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);
 
-
-
-
+						//perform fit
 						theFitter->DoFitModified(fSave);
 
-						//go through all of the data types and get the total n and total chi2 for each, store in the vector cuts_and_n_and_chi2	
-						for(int i_dt=0;i_dt<9;i_dt++){
+						for(size_t i_dt=0;i_dt<AllExclChannels.size();i_dt++){
 
+						//Chi2Store object inside fitter stores n data points and chi2 for each exclusive channel fitted
+						Chi2Store thisStore = theFitter->GetNDataPointsAndChi2(AllExclChannels.at(i_dt).c_str());
 
-							//retirive the number of data points for this process and the chi2 the contribute
-							std::pair<int,double>n_and_chi2 = theFitter->GetNDataPointsAndChi2(cuts[i_dt].c_str());
-
-							cuts_and_n_and_chi2[i_dt].second.first += n_and_chi2.first;	
-							cuts_and_n_and_chi2[i_dt].second.second += n_and_chi2.second;
+						theStore[i_dt].nPoints += thisStore.nPoints;
+						theStore[i_dt].chi2 += thisStore.chi2;
 
 						}
-
 
 						theFitter->FinishUp();
 
@@ -232,37 +225,27 @@ void G4ReweightFitManager::DefineFCN(){
 
 				int p=0; //num of model parameters process i_dt is senstive to
 
-				for(int i_dt=0;i_dt<9;i_dt++){
+				//go through exclusive channels, calculate chi2 from each and num dof
+				for(size_t i_dt=0;i_dt<AllExclChannels.size();i_dt++){
+	
+					p = GetNModelParam(theStore.at(i_dt).cut,use_reac); 
 
-					switch(i_dt){
-						case 0: 
-
-							p = theElastParVals.size() + theParVals.size(); //total, use all of the parameters
-							break;
-						case 1:
-							p = theElastParVals.size(); //elastic, use all of the elastic parameters num of elast params
-							break;
-						case 2: 
-							p = theParVals.size(); //reac, use all the inelastic parameters
-							break;
-						case 3:
-							if(!use_reac)				
-								p = 2; //abscx - 2 parameters
-							else
-								p = theParVals.size(); //abscx but setting all reac using a single parameter
-							break;
-						default: 
-							p = 1; //everything else is 1 parameter
-
-
-					}
-
-				
 					//make sure you don't divide by zero!
-					if(cuts_and_n_and_chi2[i_dt].second.first - p >0){ 
+					if(theStore.at(i_dt).nPoints - p >0){ 
 
-							chi2 +=  cuts_and_n_and_chi2[i_dt].second.second/(cuts_and_n_and_chi2[i_dt].second.first-p); 
-							n++;						
+					double this_chi2 = theStore.at(i_dt).chi2/(theStore.at(i_dt).nPoints-p);
+		
+					//if this is a total cross section, multiply by bias parameter
+					if(i_dt == 0){ 
+						this_chi2 *= total_mix;					
+						n += total_mix;
+					}
+					else {
+						n++;			
+					}
+				
+					chi2 += this_chi2;
+
 					}
 
 				}
@@ -270,10 +253,15 @@ void G4ReweightFitManager::DefineFCN(){
 				tree_chi2 = chi2/n;
 				fit_tree.Fill();
 				return chi2/n;		
+
+
 			},
 		theParVals.size()+theElastParVals.size()
 			);
 }
+
+
+
 
 void G4ReweightFitManager::SaveFitTree(){
 
@@ -285,11 +273,18 @@ void G4ReweightFitManager::SaveFitTree(){
 
 void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
-	TMatrixD *cov = new TMatrixD( theParVals.size() + theElastParVals.size(), theParVals.size() + theElastParVals.size() );
+	TMatrixD *cov = new TMatrixD( theParVals.size() + theElastParVals.size() , theParVals.size() + theElastParVals.size() );
+	//correlation matrix
+	TMatrixD *corr = new TMatrixD( theParVals.size() + theElastParVals.size() , theParVals.size() + theElastParVals.size() );
 
-	TH1D parsHist("parsHist", "", theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size());
+	TH1D parsHist( "parsHist", ";; Value", theParVals.size()+theElastParVals.size() , 0 ,theParVals.size()+theElastParVals.size() );
 
-	TH2D covHist("covHist", "", theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size(), theParVals.size()+theElastParVals.size(), 0,theParVals.size()+theElastParVals.size());
+	TH2D covHist( "covHist", "" , theParVals.size()+theElastParVals.size() , 0 , theParVals.size()+theElastParVals.size() , theParVals.size()+theElastParVals.size() , 0 , theParVals.size()+theElastParVals.size() );
+
+
+	//Correlation matrix histogram
+	TH2D corrHist( "corrHist" , "" , theParVals.size()+theElastParVals.size() , 0 , theParVals.size()+theElastParVals.size() , theParVals.size()+theElastParVals.size() , 0 , theParVals.size()+theElastParVals.size() );
+
 
 	for( auto it = parMaker.GetParameterSet().begin(); it != parMaker.GetParameterSet().end(); ++it ){
 		std::cout << it->first << std::endl;
@@ -335,6 +330,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 			for( size_t i = 0; i < theParVals.size() + theElastParVals.size(); ++i ){
 
 
+				//add elastic params
 				if(i < theParVals.size())
 					std::cout << theParVals[i].first << " " << fMinimizer->X()[i] << std::endl;
 				else
@@ -351,24 +347,32 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
 				parsHist.SetBinError( i+1, errs.back() );
 
-				if(i < theParVals.size())
+				if(i < theParVals.size()){
 					covHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
-				else
+					corrHist.GetXaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
+					}
+				else {
 					covHist.GetXaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
+					corrHist.GetXaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
+					}
 
 
-
-				if(i < theParVals.size())
+				if(i < theParVals.size()){
 					covHist.GetYaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
-				else
+					corrHist.GetYaxis()->SetBinLabel( i+1, theParVals[i].first.c_str() );
+					}
+				else {
+					corrHist.GetYaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
 					covHist.GetYaxis()->SetBinLabel( i+1, theElastParVals[i-theParVals.size()].first.c_str() );
-
+					}
 
 				for( size_t j = 0; j < theParVals.size() + theElastParVals.size(); ++j ){
 					(*cov)(i,j) = fMinimizer->CovMatrix(i,j);
-
+					(*corr)(i,j) = fMinimizer->Correlation(i,j);
 
 					covHist.SetBinContent(i+1, j+1, fMinimizer->CovMatrix(i,j));
+					corrHist.SetBinContent(i+1, j+1, fMinimizer->Correlation(i,j));
+
 				}
 			}
 
@@ -399,6 +403,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 				}
 
 
+
 				if(theElastParVals.size())  
 					parMaker.SetNewValsWithElast( theParVals , theElastParVals ); 
 				else
@@ -426,6 +431,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 						else if(sigma_it == 2) position = "up";
 						else position = "CV";	
 
+
+						//new method to get MC predictions, supply cov matrix
 						theFitter->GetMCFromCurvesWithCovariance(NominalFile,FracsFile,parMaker.GetParameterSet() , parMaker.GetElasticParameterSet(),true, cov , position); 					
 
 
@@ -488,7 +495,9 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 		out->cd();
 		fit_tree.Write();
 		cov->Write( "FitCovariance" );
+		corr->Write( "FitCorrelation" );
 		covHist.Write( "FitCovHist" );
+		corrHist.Write( "FitCorrHist" );
 		parsHist.Write();
 		out->Close();
 		std::cout << "Done" << std::endl;
@@ -530,7 +539,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
 			types.push_back( itSets->first );
 		}
-
+		//add elastic parameters
 		std::map< std::string, std::string > titles = {
 			{"reac", "Reactive"},
 			{"inel", "Quasi-Elastic"},
@@ -559,7 +568,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 			for( int i = 0; i < data_keys->GetSize(); ++i ){
 
 				std::string data_name = data_keys->At(i)->GetName();
-				//			std::cout << "data_name: " << data_name << std::endl;
 				if( data_name.find( *itType ) == std::string::npos ) continue;
 				TDirectory * sub_dir = (TDirectory*)data_dir->Get( data_name.c_str() );
 
@@ -567,7 +575,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 				std::vector< std::string > data_graph_names;
 				for( int j = 0; j < exp_keys->GetSize(); ++j ){
 					std::string key_name = exp_keys->At(j)->GetName();
-					//				std::cout << "key_name: " << key_name << std::endl;
+					//	std::cout << "key_name: " << key_name << std::endl;
 					//Excluding Covariance from DUET
 					if( key_name.find( "cov" ) != std::string::npos )
 						continue;
@@ -610,7 +618,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
 				//PlusSigma
 				std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;
-				//std::cout << plus_name << std::endl;
 				TGraph * plus_sigma  = (TGraph*)out->Get( plus_name.c_str() );
 
 				double old_x = plus_sigma->GetX()[0];
@@ -627,11 +634,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 					if( plus_sigma->GetY()[j] > max ) max = plus_sigma->GetY()[j];
 				}
 
-				////////////
-				//	std::cout << "Making nominal" << std::endl;
 				//Nominal
 				std::string nominal_name = "Nominal/" + dirs[i] + "/" + cut_name;
-				//	std::cout << nominal_name << std::endl;
 				TGraph * nominal = (TGraph*)out->Get( nominal_name.c_str() );
 				for( int j = 0; j < nominal->GetN(); ++j ){
 					if( nominal->GetY()[j] > max ) max = nominal->GetY()[j];
@@ -639,10 +643,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 				///////////
 
 
-				//	std::cout << "Making minus sigma" << std::endl;
 				//MinusSigma
 				std::string minus_name = "MinusSigma/" + dirs[i] + "/" + cut_name;
-				//	std::cout << minus_name << std::endl;
 				TGraph * minus_sigma  = (TGraph*)out->Get( minus_name.c_str() );
 
 				old_x = minus_sigma->GetX()[0];
@@ -682,10 +684,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 				plus_sigma->Draw("AF");
 				minus_sigma->Draw("F same");
 
-				//	std::cout << "Making best fit" << std::endl;
 				//BestFit
 				std::string best_fit_name = "BestFit/" + dirs[i] + "/" + cut_name;
-				//	std::cout << best_fit_name << std::endl;
 				TGraph * best_fit = (TGraph*)out->Get( best_fit_name.c_str() );
 				best_fit->SetLineStyle(10);
 				best_fit->SetLineColor(1);
@@ -710,6 +710,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
 		TVectorD theChi2(3);
 		theChi2[0] = fMinimizer->MinValue();
+		//TODO nDOF calculation no longer valid, needs updating
 		theChi2[1] = nDOF;
 		theChi2[2] = fMinimizer->MinValue() / nDOF;
 		std::cout << "Minimum Chi-squared: " << fMinimizer->MinValue() << std::endl;

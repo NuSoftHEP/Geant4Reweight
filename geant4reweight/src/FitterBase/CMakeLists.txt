@@ -33,6 +33,7 @@ art_make_library( LIBRARY_NAME FitterBaseLib
     G4ReweightFitter.cc
     DUETFitter.cc
     G4ReweightFitManager.cc
+    G4ReweightPionFitManager.cc
   LIBRARIES
     ${ART_FRAMEWORK_CORE}
     ${ART_FRAMEWORK_PRINCIPAL}

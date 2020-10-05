@@ -105,11 +105,10 @@ double DUETFitter::DoFit(bool fSave){
 
 
 
+//C Thorpe: New method compatible with new chi2 calculation
 void DUETFitter::DoFitModified(bool fSave){
 
-cuts_and_ns_and_chi2.clear();
-
-
+fitDataStore.clear();
 
  double Chi2 = 0.;
 
@@ -117,7 +116,6 @@ cuts_and_ns_and_chi2.clear();
   double x;
   
   int NPoints = Data_xsec_graphs["cex"]->GetN() + Data_xsec_graphs["abs"]->GetN();
-
 
 
   for( int i = 0; i < NPoints; ++i ){
@@ -159,13 +157,12 @@ cuts_and_ns_and_chi2.clear();
   }
 
 
-std::cout << "DUET CHi2:  " << Chi2 << std::endl;
+//slightly questionable but probably ok!
+Chi2Store thisStoreAbs("abs",5,Chi2/2);
+Chi2Store thisStoreCex("cex",5,Chi2/2);
 
-std::pair<int,double> p_cex = std::make_pair(5,Chi2/2);
-std::pair<int,double> p_abs = std::make_pair(NPoints-5,Chi2/2);
-cuts_and_ns_and_chi2.push_back(std::make_pair("cex",p_cex));
-cuts_and_ns_and_chi2.push_back(std::make_pair("abs",p_abs));
-
+fitDataStore.push_back(thisStoreAbs);
+fitDataStore.push_back(thisStoreCex);
 
 
 

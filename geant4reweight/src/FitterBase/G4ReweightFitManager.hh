@@ -25,9 +25,10 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
+
 class G4ReweightFitManager{
   public:
-   G4ReweightFitManager(std::string &, bool );
+  explicit  G4ReweightFitManager(std::string &, bool , double total_xsec_bias=1.0);
 
 //G4ReweightFitManager(std::string &, bool , int particle);
 
@@ -56,13 +57,7 @@ class G4ReweightFitManager{
 
     void DefineFCN();
 
-
-
     double total_mix=1; 
-    double outlier_disp = 1000; //num of sigmas of disagreement needed for data point to be outlier
-
-
-
 
   protected:
     TFile      * out;
@@ -93,9 +88,13 @@ class G4ReweightFitManager{
     std::vector< int > theScanSteps;
     
     //int nDOF;
-	double nDOF;
 
+	double nDOF;
 	int pdg;
+
+	std::vector<std::string> AllExclChannels;
+	virtual int GetNModelParam(std::string cut,bool use_reac=false){ return 1;}
+
 
     ROOT::Math::Functor theFCN;
 
@@ -105,8 +104,8 @@ class G4ReweightFitManager{
 
     bool fSave;
 
+	
 
-   bool outlier_scan=false;
 
 };
 

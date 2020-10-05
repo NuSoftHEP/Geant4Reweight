@@ -1,4 +1,5 @@
 #include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
 #include "geant4reweight/src/util/FitParameter.hh"
 #include <vector>
 #include <string>
@@ -62,10 +63,16 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
-  G4ReweightFitManager FitMan( outFileName, fSave );
 
 
-
+//scales contribution to chi2 from total cross section data
+ double total_mix = pset.get<double>("TotalMix",1.0);
+ 
+  G4ReweightPionFitManager FitMan( outFileName, fSave, total_mix );
+  //setup exclusive channel code 
+  FitMan.SetExclusiveChannels(); 	
+ 
+  
   std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
   try{ 

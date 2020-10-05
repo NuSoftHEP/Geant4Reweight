@@ -20,6 +20,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
+#include "util/FitStore.hh"
+
 // stores elements of covariance matrix produced in fit
 struct covElementStore {
 
@@ -29,10 +31,12 @@ std::pair<double , double> Range; //range of momenta parameter applies to
 
 };
 
+
+
 class G4ReweightFitter{
   public:
     G4ReweightFitter() {};
-    G4ReweightFitter(TFile*, fhicl::ParameterSet , int particle);
+    G4ReweightFitter( TFile* , fhicl::ParameterSet );
     ~G4ReweightFitter(){};
 
     virtual void   LoadData();
@@ -41,24 +45,20 @@ class G4ReweightFitter{
     virtual void DoFitModified(bool fSave=true);
     virtual void   LoadMC(){};
 
+    //TODO: nDOF calculation needs updating 
     double GetNDOF(){ return nDOF; };
 
     
-	std::pair<int,double> GetNDataPointsAndChi2(std::string cut);
-	virtual int num_cuts() { return cuts_and_ns_and_chi2.size(); };
-
-
-   void OutlierCheck(double outlier_disp);
-
-
+    Chi2Store GetNDataPointsAndChi2(std::string cut);
+	
 
 //    void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false);
 
+    //arguments : Total xsec filename , Fracs file name , parameters , elastic parameters , fSave , covariance matrix , position(central value,+1 sigma,-1 sigma) 
     void GetMCFromCurvesWithCovariance(std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false,TMatrixD *cov=nullptr, std::string position = "CV");
 
-
-double sigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use_reac);
-
+    //Calculates SD using full covariance matrix. use_reac = true if fit was using a single parameter for reac instead of individual exclusive channels
+    double SigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use_reac);
 
     void SaveExpChi2( double &, std::string & );
     void FinishUp();
@@ -91,13 +91,13 @@ double sigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use
 
     std::map< std::string, TGraph* > MC_xsec_graphs;
     std::map< std::string, TGraphErrors* > Data_xsec_graphs;
-//    std::map< std::string , TGraphErrors* > Data_xsec_graphs_no; //data graphs with outliers removed
 
 
-	std::vector< std::pair<std::string , std::pair<int, double> > > cuts_and_ns_and_chi2; //stores the name of the cut and how many points there are for it and what the chi2 was 
+	//stores number of data points and resulting chi2 for each experiment
+	std::vector<Chi2Store> fitDataStore;
 
 
-    std::string set_prec(double input){
+      std::string set_prec(double input){
       std::stringstream stream_in; 
       stream_in << std::fixed << std::setprecision(2) << input;
       return stream_in.str();
@@ -114,8 +114,10 @@ double sigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use
 
         int nDOF;
 	//double nDOF;
-
+	
+	
 	std::vector<covElementStore> theCovStore;
+
 };
 
 

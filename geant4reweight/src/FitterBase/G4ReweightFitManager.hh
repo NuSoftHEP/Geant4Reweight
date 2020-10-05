@@ -50,14 +50,14 @@ class G4ReweightFitManager{
 
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
-    
+
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
 
     void DefineFCN();
 
-    double total_mix=1; 
+    double total_mix=1;
 
   protected:
     TFile      * out;
@@ -81,19 +81,19 @@ class G4ReweightFitManager{
     std::vector< std::string > thePars;
     std::vector< double > theVals;
     std::vector< std::pair< std::string, double > > theParVals;
-	//added by C Thorpe, store elastic param info as paris
-	std::vector<std::pair<std::string,double>> theElastParVals;
+    //added by C Thorpe, store elastic param info as paris
+    std::vector<std::pair<std::string,double>> theElastParVals;
 
     std::vector< double > theScanStarts, theScanDeltas;
     std::vector< int > theScanSteps;
-    
+
     //int nDOF;
 
-	double nDOF;
-	int pdg;
+    double nDOF;
+    int pdg;
 
-	std::vector<std::string> AllExclChannels;
-	virtual int GetNModelParam(std::string cut,bool use_reac=false){ return 1;}
+    std::vector<std::string> AllExclChannels;
+    virtual int GetNModelParam(std::string cut,bool use_reac=false){ return 1;}
 
 
     ROOT::Math::Functor theFCN;
@@ -103,10 +103,6 @@ class G4ReweightFitManager{
     std::map< std::string, double > parameter_values;
 
     bool fSave;
-
-	
-
-
 };
 
 #endif

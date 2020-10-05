@@ -157,16 +157,13 @@ fitDataStore.clear();
   }
 
 
-//slightly questionable but probably ok!
-Chi2Store thisStoreAbs("abs",5,Chi2/2);
-Chi2Store thisStoreCex("cex",5,Chi2/2);
-
-fitDataStore.push_back(thisStoreAbs);
-fitDataStore.push_back(thisStoreCex);
-
-
-
-//  return Chi2;
+  //slightly questionable but probably ok!
+  Chi2Store thisStoreAbs("abs",5,Chi2/2);
+  Chi2Store thisStoreCex("cex",5,Chi2/2);
+  
+  fitDataStore.push_back(thisStoreAbs);
+  fitDataStore.push_back(thisStoreCex);
+  //return Chi2;
 }
 
 

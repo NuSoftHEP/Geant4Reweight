@@ -158,11 +158,9 @@ std::cout << "starting" << std::endl;
   fhicl::ParameterSet pset;
   makeFCLParameterSet(pset);
 
-std::cout << "Params made" << std::endl;
-
+  std::cout << "Params made" << std::endl;
   Config theConfig( pset );
-
-std::cout << "Config made" << std::endl;
+  std::cout << "Config made" << std::endl;
 
 
 /*
@@ -177,20 +175,20 @@ std::cout << "Config made" << std::endl;
 */
 
 
-//std::cout << theConfig.CrossSecFile << std::endl;
-
-
-TFile *f_CrossSection = TFile::Open(theConfig.CrossSecFile.c_str());
-
-TGraph *g_inel;
-TGraph *g_el;
-
-f_CrossSection->GetObject("inel_KE",g_inel);
-f_CrossSection->GetObject("el_KE",g_el);
-
-f_CrossSection->Close();
-
-///  std::vector< double > momenta = fillMomenta( theConfig );
+  //std::cout << theConfig.CrossSecFile << std::endl;
+  
+  
+  TFile *f_CrossSection = TFile::Open(theConfig.CrossSecFile.c_str());
+  
+  TGraph *g_inel;
+  TGraph *g_el;
+  
+  f_CrossSection->GetObject("inel_KE",g_inel);
+  f_CrossSection->GetObject("el_KE",g_el);
+  
+  f_CrossSection->Close();
+  
+  ///  std::vector< double > momenta = fillMomenta( theConfig );
 
   TFile * fout = new TFile( theConfig.outFileName.c_str(), "RECREATE");
 
@@ -222,10 +220,8 @@ f_CrossSection->Close();
   G4RunManager rm;
   initRunMan( rm );
  
-
- G4SteppingManager sm;
-
- G4SteppingManager sm_elast;
+  G4SteppingManager sm;
+  G4SteppingManager sm_elast;
 
   std::cout << "Initialized" << std::endl;
 
@@ -235,35 +231,33 @@ f_CrossSection->Close();
   G4Neutron   * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
   G4ParticleDefinition * part_def_elast = 0x0;  
-std::string inel_name = "";
+  std::string inel_name = "";
   std::string el_name = ""; 
 
-switch( theConfig.type ){
+  switch( theConfig.type ){
     case 211:
       std::cout << "Chose PiPlus" << std::endl;
       part_def = piplus->Definition();
       part_def_elast = piplus->Definition();
       inel_name = "pi+Inelastic";
-     el_name = "hadElastic"; 
-	break;
+      el_name = "hadElastic"; 
+      break;
     
     case -211:
       std::cout << "Chose PiMinus" << std::endl;
       part_def = piminus->Definition();
-	part_def_elast = piminus->Definition();
-
+      part_def_elast = piminus->Definition();
       inel_name = "pi-Inelastic";
-	el_name = "hadElastic";
+      el_name = "hadElastic";
       break;
 
     case 2212: 
     {
       std::cout << "Chose Proton" << std::endl;
       part_def = proton->Definition();
-	part_def_elast = proton->Definition();
-     
- inel_name = "protonInelastic";
-	el_name = "hadElastic";
+      part_def_elast = proton->Definition();
+      inel_name = "protonInelastic";
+      el_name = "hadElastic";
 
       //Default for now
  //     ++momenta.back(); 
@@ -283,9 +277,8 @@ switch( theConfig.type ){
     {
       std::cout << "Chose Neutron" << std::endl;
       part_def = neutron->Definition();
-	part_def_elast = neutron->Definition();
-     
- inel_name = "neutronInelastic";
+      part_def_elast = neutron->Definition();
+      inel_name = "neutronInelastic";
       el_name = "hadElastic";
       //Default for now
   //    ++momenta.back(); 
@@ -299,173 +292,114 @@ switch( theConfig.type ){
     
       //Returns before this, but... eh
       break;
-      
     }
-    
-
     default:
       std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
       fout->cd();
       fout->Close();
       //delete rm;
       return 0;
-      
   }
 
-
-
   //G4HadronInelasticProcess * inelastic_proc = 0x0;
-//G4HadronElasticProcess   * elastic_proc = getElasticProc(part_def , el_name);
-
-
+  //G4HadronElasticProcess   * elastic_proc = getElasticProc(part_def , el_name);
   //std::cout << "inelastic_proc: " << inelastic_proc << std::endl;
   //G4HadronInelasticProcess * inelastic_proc = 0x0;
-                 
+  //std::cout << "Elastic: " << elastic_proc << std::endl;
 
-
-//  std::cout << "Elastic: " << elastic_proc << std::endl;
-
-/*
-if(!elastic_proc){
-return 0;
-}
-*/
-
-
+  /*
+  if(!elastic_proc){
+  return 0;
+  }
+  */
   G4Material * theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialZ, theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  //run the cascade to do inelastic scatter
+  double KE = theConfig.Energy;
 
+  //double momentum;
+  double Energy; //outgoing particle KE
+  double sin_theta; //sine of outgoing particle angle 
 
-
-
-
-//run the cascade to do inelastic scatter
-
-    double KE = theConfig.Energy;
-
-//double momentum;
-double Energy; //outgoing particle KE
-double sin_theta; //sine of outgoing particle angle 
-
-
-int n_Angle_bins = 180 / theConfig.BinningAngle;
-int n_Energy_bins = (1000-0)/theConfig.BinningEnergy;
-
-TH2D *h_inel = new TH2D("h_inel","h_inel",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
-TH2D *h_el = new TH2D("h_el","h_el",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
-
-h_inel->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
-h_inel->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
-//h_inel->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
-
-h_el->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
-h_el->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
-//h_el->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
+  int n_Angle_bins = 180 / theConfig.BinningAngle;
+  int n_Energy_bins = (1000-0)/theConfig.BinningEnergy;
+  
+  TH2D *h_inel = new TH2D("h_inel","h_inel",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
+  TH2D *h_el = new TH2D("h_el","h_el",n_Energy_bins,0.,1000,n_Angle_bins,0,180);
+  
+  h_inel->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
+  h_inel->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
+  //h_inel->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
+  
+  h_el->GetXaxis()->SetTitle("Outgoing P KE (MeV)");
+  h_el->GetYaxis()->SetTitle("Outgoing P #theta (deg)");
+  //h_el->GetZaxis()->SetTitle("d#sigma / d#theta d E_{k} (mb/sr/MeV)");
  
-    CheckAllProcs(part_def);
+  CheckAllProcs(part_def);
   
-//////////////////////////////////////////////////////////////////////////////////////////
-//                           Simulate Elastic processes                                 //
-//////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //                           Simulate Elastic processes                                 //
+  //////////////////////////////////////////////////////////////////////////////////////////
 
 
-std::cout << "Doing Elastic" << std::endl;
-
-      G4HadronElasticProcess * elastic_proc = getElasticProc(part_def_elast, "hadElastic");
+  std::cout << "Doing Elastic" << std::endl;
+  G4HadronElasticProcess * elastic_proc = getElasticProc(part_def_elast, "hadElastic");
   
-        if (!elastic_proc) {
-  
-            std::cout << "Could not find elastic process" << std::endl;
-  
-              return 0;
-                   }
-  
- 
+  if (!elastic_proc) {
+    std::cout << "Could not find elastic process" << std::endl;
+    return 0;
+  }
   elastic_proc->SetVerboseLevel(0);
-
   elastic_proc->ProcessDescription(std::cout);
-
-
-
-
-
   TrackStepPart track_par = initTrackAndPart_withSM( part_def, theMaterial , sm );
- 
- G4Track * theTrack = track_par.theTrack;
+  G4Track * theTrack = track_par.theTrack;
   G4Step * theStep   = track_par.theStep;
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
+  dynamic_part->SetKineticEnergy( KE );
+  for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
+    //momentum = dynamic_part->GetTotalMomentum();
+    if( !(iC % 10000) ) std::cout << "\tCascade: " << iC << std::endl;
 
 
+    //old components of 4 momentum
+    //double oldx,oldy,oldz;
+    //oldx = theTrack->GetMomentumDirection().x();
+    //oldy = theTrack->GetMomentumDirection().y();
+    //oldz = theTrack->GetMomentumDirection().z();
+        //  std::cout << "Old x: " << theTrack_elast->GetMomentumDirection().x() << std::endl;
+      //    std::cout << "Old y: " << theTrack_elast->GetMomentumDirection().y() << std::endl;
+    //      std::cout << "Old z: " << theTrack_elast->GetMomentumDirection().z() << std::endl;
+    G4ParticleChange * thePC = (G4ParticleChange*)elastic_proc->PostStepDoIt( *theTrack, *theStep );        
+    double newx,newy,newz;
+    Energy = thePC->GetEnergy();
+    //std::cout << "Outgoing hadron energy:  " << Energy << std::endl;
+    newx = thePC->GetMomentumDirection()->x();
+    newy = thePC->GetMomentumDirection()->y();
+    newz = thePC->GetMomentumDirection()->z();
+    sin_theta = sqrt(newx*newx + newy*newy)*newz/sqrt(newz*newz);
+    
+    double theta = (180/3.141)*TMath::ASin(sin_theta);
+    
+    if(sin_theta < 0) theta += 180;
+    thePC->SetVerboseLevel(0);
+    thePC->Initialize(*theTrack);
+    h_el->Fill(Energy,theta);
+  }
 
-    dynamic_part->SetKineticEnergy( KE );
+  h_el->Scale(1.0 / theConfig.nCascades);
+  h_el->Scale(1.0 / theConfig.BinningAngle);
+  h_el->Scale(1.0 / theConfig.BinningEnergy);
+  
+  std::cout << h_el->Integral("width") << std::endl;
+  h_el->Scale(g_el->Eval(theConfig.Energy));
+  std::cout << h_el->Integral("width") << std::endl;
+  std::string histname = "el_" + std::to_string((int)theConfig.Energy) + "_MeV";
+  h_el->Write(histname.c_str());
+  
+  //////////////////////////////////////////////////////////////////////////////////////////
+  //                           Simulate Inelastic processes                               //
+  //////////////////////////////////////////////////////////////////////////////////////////
 
-    for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
-
- //     momentum = dynamic_part->GetTotalMomentum();
-     if( !(iC % 10000) ) std::cout << "\tCascade: " << iC << std::endl;
-
-
-//old components of 4 momentum
-//double oldx,oldy,oldz;
-
-//oldx = theTrack->GetMomentumDirection().x();
-//oldy = theTrack->GetMomentumDirection().y();
-//oldz = theTrack->GetMomentumDirection().z();
-
-
-    //  std::cout << "Old x: " << theTrack_elast->GetMomentumDirection().x() << std::endl;
-  //    std::cout << "Old y: " << theTrack_elast->GetMomentumDirection().y() << std::endl;
-//      std::cout << "Old z: " << theTrack_elast->GetMomentumDirection().z() << std::endl;
-
-G4ParticleChange * thePC = (G4ParticleChange*)elastic_proc->PostStepDoIt( *theTrack, *theStep );	
-
-double newx,newy,newz;
-
-Energy = thePC->GetEnergy();
-//std::cout << "Outgoing hadron energy:  " << Energy << std::endl;
-
-newx = thePC->GetMomentumDirection()->x();
-newy = thePC->GetMomentumDirection()->y();
-newz = thePC->GetMomentumDirection()->z();
-
-sin_theta = sqrt(newx*newx + newy*newy)*newz/sqrt(newz*newz);
-
-double theta = (180/3.141)*TMath::ASin(sin_theta);
-
-if(sin_theta < 0) theta += 180;
-
-
-thePC->SetVerboseLevel(0);
-
-thePC->Initialize(*theTrack);
-
-h_el->Fill(Energy,theta);
-
-}
-
-
-
-h_el->Scale(1.0 / theConfig.nCascades);
-h_el->Scale(1.0 / theConfig.BinningAngle);
-h_el->Scale(1.0 / theConfig.BinningEnergy);
-
-std::cout << h_el->Integral("width") << std::endl;
-
-h_el->Scale(g_el->Eval(theConfig.Energy));
-
-std::cout << h_el->Integral("width") << std::endl;
-
-std::string histname = "el_" + std::to_string((int)theConfig.Energy) + "_MeV";
-
-h_el->Write(histname.c_str());
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                           Simulate Inelastic processes                               //
-//////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-std::cout << "Doing Inelastic" << std::endl;
+  std::cout << "Doing Inelastic" << std::endl;
   G4HadronInelasticProcess * inelastic_proc = getInelasticProc( /*inelastic_proc, */part_def, inel_name );
 
   if( !inelastic_proc ){
@@ -473,106 +407,65 @@ std::cout << "Doing Inelastic" << std::endl;
     return 0;
   }
 
+  track_par = initTrackAndPart( part_def, theMaterial  );
+  theTrack = track_par.theTrack;
+  theStep   = track_par.theStep;
+  dynamic_part = track_par.dynamic_part;
+  dynamic_part->SetKineticEnergy( KE );
+
+  //initialize everythin again
+  //G4VParticleChange * thePC;
+  //thePC->Initialize(*theTrack);
+  
+  for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
+  //std::cout << "Cascade " << iC << std::endl;
+    if( !(iC % 10000) ) std::cout << "\tCascade: " << iC << std::endl;
+
+    G4VParticleChange * thePC = (G4VParticleChange*)inelastic_proc->PostStepDoIt( *theTrack, *theStep );
+    size_t nSecondaries = thePC->GetNumberOfSecondaries();
+
+    //std::cout << "Num Inel Secondaries: " << nSecondaries << std::endl;
+    double outgoing_KE = 0;
+    //std::cout << "NSecondaries: " << nSecondaries << std::endl;
+    //first proton is always leading proton (I think)
+    for( size_t i = 0; i < nSecondaries; ++i ){
+      auto part = thePC->GetSecondary(i)->GetDynamicParticle();
+      //std::cout << part->GetPDGcode() << "    " << part->GetKineticEnergy() << std::endl;
+      if(part->GetPDGcode() == theConfig.type){
+        outgoing_KE = part->GetKineticEnergy();
+        sin_theta = sqrt(part->GetMomentumDirection().getX()*part->GetMomentumDirection().getX() + part->GetMomentumDirection().getY()*part->GetMomentumDirection().getY()) * part->GetMomentumDirection().getZ() / sqrt( part->GetMomentumDirection().getZ()*part->GetMomentumDirection().getZ());
+        
+        //scattering angle in rad
+        double theta = (180/3.141)*TMath::ASin(sin_theta);
+        if(sin_theta < 0) theta += 180;
+        h_inel->Fill(outgoing_KE,theta);
+      }
 
 
- track_par = initTrackAndPart( part_def, theMaterial  );
- 
- theTrack = track_par.theTrack;
- theStep   = track_par.theStep;
- dynamic_part = track_par.dynamic_part;
+    }
+    thePC->SetVerboseLevel(0);
+    thePC->Initialize(*theTrack);
+  }
 
-    dynamic_part->SetKineticEnergy( KE );
-
-//initialize everythin again
-//G4VParticleChange * thePC;
-//thePC->Initialize(*theTrack);
-
-for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
-
-//std::cout << "Cascade " << iC << std::endl;
-
-     if( !(iC % 10000) ) std::cout << "\tCascade: " << iC << std::endl;
-
-//std::cout << "Doing Inelastic" << std::endl;
-//
-      //momentum = dynamic_part->GetTotalMomentum();
-  G4VParticleChange *   thePC = (G4VParticleChange*)inelastic_proc->PostStepDoIt( *theTrack, *theStep );
-
-      size_t nSecondaries = thePC->GetNumberOfSecondaries();
-
-//std::cout << "Num Inel Secondaries: " << nSecondaries << std::endl;
-
-double outgoing_KE = 0;
-
-//std::cout << "NSecondaries: " << nSecondaries << std::endl;
-
-//first proton is always leading proton (I think)
-      for( size_t i = 0; i < nSecondaries; ++i ){
-
-        auto part = thePC->GetSecondary(i)->GetDynamicParticle();
-
-//std::cout << part->GetPDGcode() << "    " << part->GetKineticEnergy() << std::endl;
-if(part->GetPDGcode() == theConfig.type){
-
-
-outgoing_KE = part->GetKineticEnergy();
-
- 
-sin_theta =sqrt( part->GetMomentumDirection().getX()*part->GetMomentumDirection().getX() + part->GetMomentumDirection().getY()*part->GetMomentumDirection().getY()) * part->GetMomentumDirection().getZ() / sqrt( part->GetMomentumDirection().getZ()*part->GetMomentumDirection().getZ());
-
-//scattering angle in rad
-double theta = (180/3.141)*TMath::ASin(sin_theta);
-
-if(sin_theta < 0) theta += 180;
-
-h_inel->Fill(outgoing_KE,theta);
-
-}
-
-
-}
-      thePC->SetVerboseLevel(0);
-
-thePC->Initialize(*theTrack);
-
-
-}
-
-
-
-//normalize histogram to 1 * (1-abs probability) 
-
-
-h_inel->Scale(1.0 / theConfig.nCascades);
-h_inel->Scale(1.0 / theConfig.BinningAngle);
-h_inel->Scale(1.0 / theConfig.BinningEnergy);
-
-std::cout << h_inel->Integral("width") << std::endl;
-
-//h_inel->Scale(1.0/h_inel->Integral("width"));
-
-h_inel->Scale(g_inel->Eval(theConfig.Energy));
-
-std::cout << h_inel->Integral("width") << std::endl;
-
-
- histname = "inel_" + std::to_string((int)theConfig.Energy) + "_MeV";
-
-h_inel->Write(histname.c_str());
-
-
-TH2D *h_tot = (TH2D*)h_inel->Clone("h_tot");
-h_tot->Add(h_el);
-
-
- histname = "tot_" + std::to_string((int)theConfig.Energy) + "_MeV";
-h_tot->Write(histname.c_str());
+  //normalize histogram to 1 * (1-abs probability) 
+  h_inel->Scale(1.0 / theConfig.nCascades);
+  h_inel->Scale(1.0 / theConfig.BinningAngle);
+  h_inel->Scale(1.0 / theConfig.BinningEnergy);
+  std::cout << h_inel->Integral("width") << std::endl;
+  //h_inel->Scale(1.0/h_inel->Integral("width"));
+  h_inel->Scale(g_inel->Eval(theConfig.Energy));
+  std::cout << h_inel->Integral("width") << std::endl;
+  histname = "inel_" + std::to_string((int)theConfig.Energy) + "_MeV";
+  h_inel->Write(histname.c_str());
+  
+  TH2D *h_tot = (TH2D*)h_inel->Clone("h_tot");
+  h_tot->Add(h_el);
+  histname = "tot_" + std::to_string((int)theConfig.Energy) + "_MeV";
+  h_tot->Write(histname.c_str());
 
   fout->Close();
   //delete rm;
-
- 
- return 0;
+  return 0;
 }
 
 
@@ -740,36 +633,20 @@ G4HadronElasticProcess * getElasticProc( G4ParticleDefinition * part_def, std::s
 G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::string el_name) {
 
   G4ProcessManager * pm = part_def->GetProcessManager();
-
   G4ProcessVector  * pv = pm->GetProcessList();
-
   for( int i = 0; i < pv->size(); ++i ){
-
     G4VProcess * proc = (*pv)(i);
-
     std::string theName = proc->GetProcessName();
-
     std::cout <<  theName << std::endl;
-
     if (theName == el_name) {
-
-    std::cout << "Found elastic" << std::endl;
-
+      std::cout << "Found elastic" << std::endl;
       //return (G4HadronElasticProcess*)proc;
+      return dynamic_cast<G4HadronElasticProcess *>(proc);
+    }
+  }
+  return 0x0;
+}
       
-            return dynamic_cast<G4HadronElasticProcess *>(proc);
-      
-                }
-      
-                  }
-      
-                    return 0x0;
-     
-                    }
-      
-
-
-
 
 Config configure(fhicl::ParameterSet & pset){
   Config theConfig;
@@ -797,55 +674,27 @@ Config configure(fhicl::ParameterSet & pset){
   return theConfig;
 }
 
-
-
-
 TrackStepPart initTrackAndPart_withSM(G4ParticleDefinition * part_def, G4Material * theMaterial, G4SteppingManager & stepman){
-
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
-
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
-
   G4Track * theTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
-
   G4Step * theStep = new G4Step();
-
   G4StepPoint * thePoint = new G4StepPoint();
-
   thePoint->SetMaterial( theMaterial );
-
   theStep->SetPreStepPoint( thePoint );
-
   theTrack->SetStep( theStep );
 
   //new
   //
-    stepman.SetInitialStep(theTrack);
+  stepman.SetInitialStep(theTrack);
+  theStep->InitializeStep(theTrack);
   
-      theStep->InitializeStep(theTrack);
- 
-       ///////
-  
-         TrackStepPart results;
- 
-           results.theTrack = theTrack;
-  
-             results.theStep = theStep;
- 
-               results.dynamic_part = dynamic_part;
- 
-                return results;
- 
-              }
- 
-
-
-
-
-
-
-
-
+  TrackStepPart results;
+  results.theTrack = theTrack;
+  results.theStep = theStep;
+  results.dynamic_part = dynamic_part;
+  return results;
+}
 
 TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * theMaterial ){
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
@@ -865,28 +714,14 @@ TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * the
   return results;
 }
 
-
-
-
-
-
 void CheckAllProcs(G4ParticleDefinition * part_def) {
-
   G4ProcessManager * pm = part_def->GetProcessManager();
-
   G4ProcessVector  * pv = pm->GetProcessList();
 
-  
-
   for (int i = 0; i < pv->size(); ++i) {
-
     G4VProcess * proc = (*pv)(i);
-
     std::string theName = proc->GetProcessName();
-
     std::cout <<  theName << std::endl;
-
   }
-
 }
 

@@ -50,7 +50,7 @@ class G4ReweightFitter{
 
     
     Chi2Store GetNDataPointsAndChi2(std::string cut);
-	
+        
 
 //    void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false);
 
@@ -68,7 +68,7 @@ class G4ReweightFitter{
     std::string GetType(){ return type; };
     std::string GetName(){ return fExperimentName; };
 
-	//weighting for total cross section in chi^2 calculation
+        //weighting for total cross section in chi^2 calculation
     double total_mix=1;
 
 
@@ -93,8 +93,8 @@ class G4ReweightFitter{
     std::map< std::string, TGraphErrors* > Data_xsec_graphs;
 
 
-	//stores number of data points and resulting chi2 for each experiment
-	std::vector<Chi2Store> fitDataStore;
+        //stores number of data points and resulting chi2 for each experiment
+        std::vector<Chi2Store> fitDataStore;
 
 
       std::string set_prec(double input){
@@ -113,10 +113,10 @@ class G4ReweightFitter{
     TGraph * total_el;
 
         int nDOF;
-	//double nDOF;
-	
-	
-	std::vector<covElementStore> theCovStore;
+        //double nDOF;
+        
+        
+        std::vector<covElementStore> theCovStore;
 
 };
 

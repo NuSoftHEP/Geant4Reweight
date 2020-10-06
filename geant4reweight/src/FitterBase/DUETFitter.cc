@@ -59,11 +59,7 @@ double DUETFitter::DoFit(bool fSave){
   double x;
   
   int NPoints = Data_xsec_graphs["cex"]->GetN() + Data_xsec_graphs["abs"]->GetN();
-
-
   for( int i = 0; i < NPoints; ++i ){
-     
-    
     if( i < 5 ){
       Data_xsec_graphs["cex"]->GetPoint(i, x, Data_val_i);
       MC_val_i = MC_xsec_graphs["cex"]->Eval( x );
@@ -72,7 +68,6 @@ double DUETFitter::DoFit(bool fSave){
       Data_xsec_graphs["abs"]->GetPoint(i - 5, x, Data_val_i);
       MC_val_i = MC_xsec_graphs["abs"]->Eval(x);
     }
-
 
     for( int j = 0; j < NPoints; ++j ){
    
@@ -108,10 +103,8 @@ double DUETFitter::DoFit(bool fSave){
 //C Thorpe: New method compatible with new chi2 calculation
 void DUETFitter::DoFitModified(bool fSave){
 
-fitDataStore.clear();
-
- double Chi2 = 0.;
-
+  fitDataStore.clear();
+  double Chi2 = 0.;
   double Data_val_i, Data_val_j, MC_val_i, MC_val_j, cov_val;
   double x;
   
@@ -165,12 +158,3 @@ fitDataStore.clear();
   fitDataStore.push_back(thisStoreCex);
   //return Chi2;
 }
-
-
-
-
-
-
-
-
-

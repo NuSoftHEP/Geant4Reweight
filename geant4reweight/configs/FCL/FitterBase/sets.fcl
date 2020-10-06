@@ -1,12 +1,14 @@
+#include "material.fcl"
+
+
 BEGIN_PROLOG
 
 C_PiPlus: {
 
   Name: "C_PiPlus"
-  
   File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_C.root"
-
   FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_C.root" 
+  Material: @local::C
 }
 
 C_PiMinus: {
@@ -15,6 +17,7 @@ C_PiMinus: {
   
   File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_C.root"
   FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_C.root" 
+  Material: @local::C
 }
 
 O_PiPlus: {
@@ -23,8 +26,7 @@ O_PiPlus: {
  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_O.root"
  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_O.root"  
  
-
-
+  Material: @local::O
 }
 
 O_PiMinus: {
@@ -34,6 +36,7 @@ O_PiMinus: {
  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_O.root"
  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_O.root"  
  
+  Material: @local::O
 }
 
 Al_PiPlus: {
@@ -45,6 +48,7 @@ File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_sectio
 FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Al.root"  
 
 
+  Material: @local::Al
 }
 
 Al_PiMinus: {
@@ -54,7 +58,7 @@ Al_PiMinus: {
 
  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Al.root"
  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Al.root"  
- 
+  Material: @local::Al
 
 } 
 
@@ -66,7 +70,7 @@ Fe_PiPlus: {
 File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Fe.root"
 FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Fe.root"  
 
-
+  Material: @local::Fe
  
 }
 
@@ -76,7 +80,7 @@ Fe_PiMinus: {
 
  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Fe.root"
  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Fe.root"  
- 
+  Material: @local::Fe 
 }
 
 Cu_PiPlus: {
@@ -84,18 +88,18 @@ Cu_PiPlus: {
   Name: "Cu_PiPlus"
 
 
-File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Cu.root"
-FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Cu.root"  
-
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Cu.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Cu.root"  
+  Material: @local::Cu 
 }
 
 Cu_PiMinus: {
 
   Name: "Cu_PiMinus"
  
- File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Cu.root"
- FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Cu.root"  
-  
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Cu.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Cu.root"  
+  Material: @local::Cu
 }
 
 Pb_PiPlus: {
@@ -103,18 +107,17 @@ Pb_PiPlus: {
   Name: "Pb_PiPlus"
 
 
-File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Pb.root"
-FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Pb.root"  
-
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Pb.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Pb.root"  
+  Material: @local::Pb
 } 
 
 Pb_PiMinus: {
 
   Name: "Pb_PiMinus"
-  
- File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Pb.root"
- FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Pb.root"  
- 
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Pb.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Pb.root"  
+   Material: @local::Pb
 }
 
 #O18_PiPlus: {
@@ -183,9 +186,6 @@ File:"/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_sect
 FSFile:  "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_O18.root"
 
 }
-
-
-
 
 
 END_PROLOG

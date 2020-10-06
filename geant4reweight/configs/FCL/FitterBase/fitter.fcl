@@ -49,7 +49,7 @@ Experiments: [
   @sequence::Fe_experiments,
  @sequence::Cu_experiments,
   @sequence::Pb_experiments,
-@sequence::He4_experiments
+#@sequence::He4_experiments
 #@sequence::C14_experiments,
 #@sequence::O18_experiments
 

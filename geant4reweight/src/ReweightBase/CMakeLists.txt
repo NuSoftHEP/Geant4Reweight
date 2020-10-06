@@ -13,8 +13,23 @@
     LIBRARIES
       ${FHICLCPP}
       ${CETLIB} ${CETLIB_EXCEPT}
+      clhep
+      ${G4EVENT}
+      ${G4INTERCOMS}
+      ${G4INTERFACES}
+      ${G4RUN}
+      ${G4TRACK}
+      ${G4TRACKING}
+      ${G4PARTICLES}
+      ${G4PROCESSES}
+      ${G4MATERIALS}
+      ${G4GEOMETRY}
+      ${G4GLOBAL}
+      ${G4PERSISTENCY}
+      ${G4PHYSICSLISTS}
       ${ROOT_BASIC_LIB_LIST}
       PropBaseLib
+      PredictionBaseLib    
   )
   install_headers()
   install_source()

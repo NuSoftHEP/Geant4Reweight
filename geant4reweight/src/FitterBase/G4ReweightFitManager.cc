@@ -57,6 +57,7 @@ void G4ReweightFitManager::DefineMCSets( std::vector< fhicl::ParameterSet > &MCS
     sets.push_back( theSet );
     mapSetsToFracs[ theSet ] = MCSets[i].get< std::string >( "FSFile" );
     mapSetsToNominal[ theSet ] = MCSets[i].get< std::string >( "File" );
+    mapSetsToMaterial[theSet] = MCSets[i].get<fhicl::ParameterSet>("Material");
   }
 }
 
@@ -83,8 +84,8 @@ void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
 }
 
 void G4ReweightFitManager::GetAllData(){
-  auto itSet = mapSetsToFitters.begin();
-  for( ; itSet != mapSetsToFitters.end(); ++itSet ){
+  
+  for( auto itSet = mapSetsToFitters.begin(); itSet != mapSetsToFitters.end(); ++itSet ){
     std::vector< G4ReweightFitter* > fitters = itSet->second;
     for( size_t i = 0; i < fitters.size(); ++i ){
       fitters[i]->LoadData();
@@ -161,12 +162,14 @@ void G4ReweightFitManager::DefineFCN(){
               auto theFitter = itSet->second.at(i);
               std::string NominalFile = mapSetsToNominal[ itSet->first ];
               std::string FracsFile = mapSetsToFracs[ itSet->first ];
+              auto material = mapSetsToMaterial[itSet->first];
 
               if( fSave )
                 theFitter->MakeFitDir( outdir );
 
               //get MC predictions
-              theFitter->GetMCFromCurvesWithCovariance( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);
+              //theFitter->GetMCFromCurvesWithCovariance( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);
+              theFitter->GetMCValsWithCov(FracsFile, parMaker, material, fSave);
               //perform fit
               theFitter->DoFitModified(fSave);
 
@@ -353,6 +356,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
             std::string NominalFile = mapSetsToNominal[ itSet->first ];
             std::string FracsFile = mapSetsToFracs[ itSet->first ];
+            auto material = mapSetsToMaterial[itSet->first];
 
             theFitter->MakeFitDir( outdir );
             std::string position;
@@ -362,7 +366,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
             else position = "CV";
 
             //new method to get MC predictions, supply cov matrix
-            theFitter->GetMCFromCurvesWithCovariance(NominalFile,FracsFile,parMaker.GetParameterSet() , parMaker.GetElasticParameterSet(),true, cov , position);
+            //theFitter->GetMCFromCurvesWithCovariance(NominalFile,FracsFile,parMaker.GetParameterSet() , parMaker.GetElasticParameterSet(),true, cov , position);
+            theFitter->GetMCValsWithCov(FracsFile, parMaker, material, true, cov, position);
             theFitter->FinishUp();
           }
         }

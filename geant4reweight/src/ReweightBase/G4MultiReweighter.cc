@@ -4,12 +4,15 @@
 #include <iostream>
 
 G4MultiReweighter::G4MultiReweighter(
-    int pdg, TFile & totalXSecFile, TFile & fracsFile,
-    const std::vector<fhicl::ParameterSet> & parSet, TFile & fitResults,
+    int pdg, TFile & fracsFile,
+    const std::vector<fhicl::ParameterSet> & parSet,
+    const fhicl::ParameterSet & material,
+    TFile & fitResults,
     size_t nThrows, int seed)
     : parMaker(parSet, pdg),
-      reweighter(factory.BuildReweighter(pdg, &totalXSecFile, &fracsFile,
+      reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
+                                         material,
                                          parMaker.GetElasticHist())),
       numberOfThrows(nThrows),
       rng(seed) {
@@ -44,11 +47,14 @@ G4MultiReweighter::G4MultiReweighter(
 }
 
 G4MultiReweighter::G4MultiReweighter(
-    int pdg, TFile & totalXSecFile, TFile & fracsFile,
-    const std::vector<fhicl::ParameterSet> & parSet, size_t nThrows, int seed)
+    int pdg, TFile & fracsFile,
+    const std::vector<fhicl::ParameterSet> & parSet,
+    const fhicl::ParameterSet & material,
+    size_t nThrows, int seed)
     : parMaker(parSet, pdg),
-      reweighter(factory.BuildReweighter(pdg, &totalXSecFile, &fracsFile,
+      reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
+                                         material,
                                          parMaker.GetElasticHist())),
       numberOfThrows(nThrows),
       rng(seed) {

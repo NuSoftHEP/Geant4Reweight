@@ -13,15 +13,17 @@
 
 class G4MultiReweighter{
  public:
-  G4MultiReweighter(int pdg, TFile & totalXSecFile,
+  G4MultiReweighter(int pdg,
                     TFile & fracsFile,
                     const std::vector<fhicl::ParameterSet> & parSet,
+                    const fhicl::ParameterSet & material,
                     TFile & fitResults, size_t nThrows = 100,
                     int seed = 0);
 
-  G4MultiReweighter(int pdg, TFile & totalXSecFile,
+  G4MultiReweighter(int pdg,
                     TFile & fracsFile,
                     const std::vector<fhicl::ParameterSet> & parSet,
+                    const fhicl::ParameterSet & material,
                     size_t nThrows = 100, int seed = 0);
 
   

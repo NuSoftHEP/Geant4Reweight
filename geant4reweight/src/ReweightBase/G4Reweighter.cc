@@ -9,687 +9,29 @@
 #include "TVectorD.h"
 
 
-G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales/*double max, double min, */)
-/*: Maximum(max), Minimum(min)*/{
 
-  Initialize(totalInput, FSInput, FSScales);
-}
+G4Reweighter::G4Reweighter(TFile * FSInput,
+                           const std::map<std::string, TH1D*> &FSScales,
+                           const fhicl::ParameterSet & material_pars,
+                           TH1D * inputElasticBiasHist, bool fix)
+  : fix_total(fix),
+    MaterialParameters(material_pars),
+    elasticBias(inputElasticBiasHist) {
 
-void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales/*double max, double min, */)
-/*: Maximum(max), Minimum(min)*/{
-  as_graphs = true;
-
-  SetTotalGraph( totalInput );
- std::map< std::string, TGraph* > theVariations;
-  //TFile *fout = new TFile ("graph_weights.root", "RECREATE");
-  for( auto it = theInts.begin(); it != theInts.end(); ++it ){
+  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
     std::string name = *it;
-
-    TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
-    //theHist->Write();
-
-    //Load the Hists
-    newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
-    oldGraphs[ name ] = (TGraph*)theGraph->Clone();
-    //fout->cd();
-    //oldGraphs[ name ]->Write( ("old_" + name).c_str());
-  }
-  //delete fout;
-
-  std::vector< double > newPoints;
-
-  //fout->cd();
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    theVariations[ theInts.at(i) ] = FSScales[ theInts.at(i) ];
-    //theVariations[ theInts.at(i) ]->Write( theInts.at(i).c_str() );
-
-    //New: Accounting for parameter edges between bins in the fraction graphs
-    for( int j = 0; j < theVariations[ theInts.at(i) ]->GetN(); ++j ){
-      double ptX = theVariations[ theInts.at(i) ]->GetX()[ j ];
-      if( ptX == 0. ) continue;
-
-      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX - .001 );
-      }
-      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX + .001 );
-      }
-    }
-  }
-
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    for( size_t j = 0; j < newPoints.size(); ++j ){
-
-      double new_x = newPoints.at(j);
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-
-        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
-        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
-
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-
-        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-
-        continue;
-      }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){
-        continue;
-      }
-      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k]
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-
-    }
-  }
-
-
-
-  //fout->cd();
-
-  //Now go through and vary the exclusive channels
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * theVar = theVariations.at( theInts.at(i) );
-    TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
-
-      double Content = theGraph->GetY()[bin];
-      double binCenter   = theGraph->GetX()[bin];
-      double theScale    = theVar->Eval(binCenter);
-
-      //Check if >/< max/min of var graph
-      if( /*( binCenter < Minimum )
-      ||  ( binCenter > Maximum )
-      ||*/  ( binCenter < theVar->GetX()[0])
-      ||  ( binCenter > theVar->GetX()[ theVar->GetN() - 1 ] ) ){
-        theGraph->SetPoint( bin, binCenter, Content );
-      }
-      else{
-        theGraph->SetPoint( bin, binCenter, theScale * Content );
-      }
-    }
-    //theGraph->Write();
-
-    //Save the varied and nominal
-    //theHist->Write();
-    //oldHists.at( theInts.at(i) )->Write();
-  }
-
-  //Form the total cross sections from
-  //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
-  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-
-  for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
-  }
-  //oldTotal->Write("oldTotal");
-  //newTotal->Write("newTotal");
-
-  //Save the Totals
-  //oldTotal->Write();
-  //newTotal->Write();
-
-  //Need to make this smarter when going through the bins.
-  //What if there's an empty bin?
-/*
-  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
-
-    if( oldTotal->GetBinContent( bin ) == 0. ){
-      oldTotal->SetBinContent( bin, 1. );
-    }
-
-    if( ( newTotal->GetBinCenter( bin ) < Minimum )
-    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
-      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
-    }
-  }
-*/
-
-  //Form the variation from the new and old totals
-  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
-  //totalVariationGraph->Write("totalVar");
-
-  //Now go back through the varied exclusive channels
-  //and compute the final scale
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
-
-    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-
-    DivideGraphs( exclusiveVariation, totalVariationGraph );
-    //exclusiveVariation->Write();
-
-    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
-
-    std::string name = theInts.at(i);
-    std::string new_name = "new_" + name;
-    //exclusiveVariation->Write((name + "Var").c_str());
-
-    //Delete the pointers here
-//    delete newHists.at( theInts.at(i) );
-//    delete oldHists.at( theInts.at(i) );
-//    gDirectory->Delete(name.c_str());
-//    gDirectory->Delete(new_name.c_str());
-  }
-
-  //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-//
-//  gDirectory->Delete("oldTotal");
-//  gDirectory->Delete("newTotal");
-
-  //fout->Close();
-}
-
-void G4Reweighter::SetBaseHists( const std::map< std::string, TH1D* > &FSScales ){
-  std::vector< double > newPoints;
-
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    int nBins = theVar->GetNbinsX();
-    for( int j = 1; j <= nBins; ++j ){
-      double ptX = theVar->GetBinLowEdge(j);
-      if( ptX == 0. ) continue;
-
-      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX - .001 );
-      }
-      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX + .001 );
-      }
-    }
-
-    //Add last upper bin edge
-    double ptX = theVar->GetBinLowEdge( nBins );
-    ptX += theVar->GetBinWidth( nBins );
-
-    if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX - .001 );
-    }
-    if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX + .001 );
-    }
-  }
-
-
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    for( size_t j = 0; j < newPoints.size(); ++j ){
-
-      double new_x = newPoints.at(j);
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-
-        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
-        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
-
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-
-        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-
-        continue;
-      }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){
-        continue;
-      }
-      for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k]
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-
-    }
-  }
-
-  //Now go through and vary the exclusive channels
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
-
-      double Content = theGraph->GetY()[bin];
-      double point   = theGraph->GetX()[bin];
-      double theScale    = theVar->GetBinContent( theVar->FindBin( point ) );
-
-      //Check if >/< max/min of var graph
-      if( ( point < theVar->GetBinLowEdge(1))
-      ||  ( point > ( theVar->GetBinLowEdge( theVar->GetNbinsX() ) + theVar->GetBinWidth( theVar->GetNbinsX() ) ) ) ){
-        theGraph->SetPoint( bin, point, Content );
-      }
-      else{
-        theGraph->SetPoint( bin, point, theScale * Content );
-      }
-    }
-  }
-
-  //Form the total cross sections from
-  //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
-  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-  for (size_t i = 1; i < theInts.size(); ++i) {
-    AddGraphs(oldTotal, oldGraphs[theInts.at(i)]);
-    AddGraphs(newTotal, newGraphs[theInts.at(i)]);
-  }
-
-  //Form the variation from the new and old totals
-  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
-
-  if (fix_total) {
-    for (size_t i = 0; i < theInts.size(); ++i) {
-      DivideGraphs(newGraphs[theInts[i]], totalVariationGraph);
-    }
-
-    delete newTotal;
-
-    TGraph * newTotal = (TGraph*)newGraphs[theInts[0]]->Clone("newTotal_fixed");
-    for (size_t i = 1; i < theInts.size(); ++i) {
-      AddGraphs(newTotal, newGraphs[theInts[i]]);
-    }
-
-    delete totalVariationGraph;
-    totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation_fixed");
-    DivideGraphs(totalVariationGraph, oldTotal);
-  }
-
-  //Now go back through the varied exclusive channels
-  //and compute the final scale
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at(theInts.at(i))->Clone(
-        (theInts.at(i) + "Variation").c_str());
-
-    DivideGraphs(exclusiveVariation, oldGraphs[theInts[i]]);
-
-    if (!fix_total) {
-      DivideGraphs(exclusiveVariation, totalVariationGraph);
-    }
-
-    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
-  }
-
-  //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-}
-
-//include elastic bias hist - variation of elastic cross section
-//put in new method now - make sure don't break existing one!
-void G4Reweighter::SetBaseHistsWithElast( const std::map< std::string, TH1D* > &FSScales , TH1D* elastBiasHist){
-  std::vector< double > newPoints;
-
-  //fout->cd();
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    int nBins = theVar->GetNbinsX();
-    for( int j = 1; j <= nBins; ++j ){
-      double ptX = theVar->GetBinLowEdge(j);
-      if( ptX == 0. ) continue;
-
-      if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX - .001 );
-      }
-      if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-        newPoints.push_back( ptX + .001 );
-      }
-    }
-
-    //Add last upper bin edge
-    double ptX = theVar->GetBinLowEdge( nBins );
-    ptX += theVar->GetBinWidth( nBins );
-
-    if( std::find( newPoints.begin(), newPoints.end(), ptX - .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX - .001 );
-    }
-    if( std::find( newPoints.begin(), newPoints.end(), ptX + .001 ) == newPoints.end() ){
-      newPoints.push_back( ptX + .001 );
-    }
-  }
-
-
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    for( size_t j = 0; j < newPoints.size(); ++j ){
-
-      double new_x = newPoints.at(j);
-      double new_y = oldGraphs[ theInts.at(i) ]->Eval( new_x );
-
-      if( new_x < oldGraphs[ theInts.at(i) ]->GetX()[0] ){
-
-        double old_x = oldGraphs[ theInts.at(i) ]->GetX()[0];
-        double old_y = oldGraphs[ theInts.at(i) ]->GetY()[0];
-
-        oldGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-        newGraphs[ theInts.at(i) ]->InsertPointBefore(1, old_x, old_y );
-
-        oldGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-        newGraphs[ theInts.at(i) ]->SetPoint(0, new_x, new_y );
-
-        continue;
-      }
-      else if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[ oldGraphs[ theInts.at(i) ]->GetN() - 1]){
-        continue;
-      }
-    //  std::cout << "oldGraphs[ theInts.at(i) ]->GetN(): " << oldGraphs[ theInts.at(i) ]->GetN() << std::endl;
-        for( int k = 0; k < oldGraphs[ theInts.at(i) ]->GetN() - 1; ++k ){
-        if( new_x > oldGraphs[ theInts.at(i) ]->GetX()[k]
-        &&  new_x < oldGraphs[ theInts.at(i) ]->GetX()[k + 1] ){
-          oldGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-          newGraphs[ theInts.at(i) ]->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-
-    }
-  }
-
-
-
-  //fout->cd();
-
-        //inelastic exclusive channels here
-
-  //Now go through and vary the exclusive channels
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) ); 
-
-
- TGraph * theGraph = newGraphs.at( theInts.at(i) );
- TGraph * theOldGraph = oldGraphs.at( theInts.at(i));  
-
-         for( int bin = 0; bin < theGraph->GetN(); ++bin ){
-
-      double Content = theGraph->GetY()[bin];
-      double point   = theGraph->GetX()[bin];
-      double theScale    = theVar->GetBinContent( theVar->FindBin( point ) );
-
-
-      //Check if >/< max/min of var graph
-      if( ( point < theVar->GetBinLowEdge(1))
-      ||  ( point > ( theVar->GetBinLowEdge( theVar->GetNbinsX() ) + theVar->GetBinWidth( theVar->GetNbinsX() ) ) ) ){
-        theGraph->SetPoint( bin, point, Content );
-      }
-      else{
-        theGraph->SetPoint( bin, point, theScale * Content );
-      }
-theOldGraph->SetPoint( bin, point,Content );
-    }
-    //theGraph->Write();
-
-    //Save the varied and nominal
-    //theHist->Write();
-    //oldHists.at( theInts.at(i) )->Write();
-  }
-
-
-for( size_t j = 0; j < newPoints.size(); ++j ){
-
-      double new_x = newPoints.at(j);
-      double new_y = oldElasticGraph->Eval( new_x );
-
-      if( new_x < oldElasticGraph->GetX()[0] ){
-
-        double old_x = oldElasticGraph->GetX()[0];
-        double old_y = oldElasticGraph->GetY()[0];
-
-        oldElasticGraph->InsertPointBefore(1, old_x, old_y );
-        newElasticGraph->InsertPointBefore(1, old_x, old_y );
-
-        oldElasticGraph->SetPoint(0, new_x, new_y );
-        newElasticGraph->SetPoint(0, new_x, new_y );
-
-        continue;
-      }
-      else if( new_x > oldElasticGraph->GetX()[ oldElasticGraph->GetN() - 1]){
-        continue;
-      }
-//        std::cout << "oldElasticGraph->GetN() :  " << oldElasticGraph->GetN() << std::endl;   
-   for( int k = 0; k < oldElasticGraph->GetN() - 1; ++k ){
-        if( new_x > oldElasticGraph->GetX()[k]
-        &&  new_x < oldElasticGraph->GetX()[k + 1] ){
-          oldElasticGraph->InsertPointBefore(k + 1, new_x, new_y );
-          newElasticGraph->InsertPointBefore(k + 1, new_x, new_y );
-        }
-      }
-
-    }
-
-
-
-  //Do the same for elastic
-  
-    TH1D * theVar_elast = elastBiasHist;
-    TGraph * theGraph_elast = newElasticGraph;
-
-    for( int bin = 0; bin < theGraph_elast->GetN(); ++bin ){
-
-      double Content_elast = theGraph_elast->GetY()[bin];
-      double point_elast   = theGraph_elast->GetX()[bin];
-      double theScale_elast    = theVar_elast->GetBinContent( theVar_elast->FindBin( point_elast ) );
-
-
-      //Check if >/< max/min of var graph
-      if( ( point_elast < theVar_elast->GetBinLowEdge(1))
-      ||  ( point_elast > ( theVar_elast->GetBinLowEdge( theVar_elast->GetNbinsX() ) + theVar_elast->GetBinWidth( theVar_elast->GetNbinsX() ) ) ) ){
-
-theGraph_elast->SetPoint( bin, point_elast, Content_elast );
-      }
-      else{
-        theGraph_elast->SetPoint( bin, point_elast, theScale_elast * Content_elast );
-        }
-
-
-    }
-
-
-elastVariationGraph = theGraph_elast;
-
-DivideGraphs(elastVariationGraph,oldElasticGraph);
-
-
-    //theGraph->Write();
-
-    //Save the varied and nominal
-    //theHist->Write();
-    //oldHists.at( theInts.at(i) )->Write();
-  
-
-  //Form the total cross sections from
-  //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
-  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-  for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs( newTotal,   newGraphs[ theInts.at(i) ] );
+    exclusiveFracs[name] = (TGraph*)FSInput->Get(name.c_str());
+    inelScales[name] = FSScales.at(name);
   }
   
-
-
-//oldTotal->Write("oldTotal");
-  //newTotal->Write("newTotal");
-
-  //Save the Totals
-  //oldTotal->Write();
-  //newTotal->Write();
-
-  //Need to make this smarter when going through the bins.
-  //What if there's an empty bin?
-/*
-  for(size_t bin = 1; bin <= newTotal->GetNbinsX(); ++bin){
-
-    if( oldTotal->GetBinContent( bin ) == 0. ){
-      oldTotal->SetBinContent( bin, 1. );
-    }
-
-    if( ( newTotal->GetBinCenter( bin ) < Minimum )
-    ||  ( newTotal->GetBinCenter( bin ) > Maximum ) ){
-      newTotal->SetBinContent( bin, oldTotal->GetBinContent( bin ) );
-    }
-  }
-*/
-
-  //Form the variation from the new and old totals
-  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
-  //totalVariationGraph->Write("totalVar");
-
-  //Now go back through the varied exclusive channels
-  //and compute the final scale
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
-
-    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-
-    DivideGraphs( exclusiveVariation, totalVariationGraph );
-    //exclusiveVariation->Write();
-
-    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
-
-    std::string name = theInts.at(i);
-    std::string new_name = "new_" + name;
-    //exclusiveVariation->Write((name + "Var").c_str());
-
-    //Delete the pointers here
-//    delete newHists.at( theInts.at(i) );
-//    delete oldHists.at( theInts.at(i) );
-//    gDirectory->Delete(name.c_str());
-//    gDirectory->Delete(new_name.c_str());
-  }
-
-
-//now get the new total and its variation
-//
-
-
-  //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-//
-//  gDirectory->Delete("oldTotal");
-//  gDirectory->Delete("newTotal");
-
-  //fout->Close();
+  SetupProcesses();
 }
 
-
-
-
-
-G4Reweighter::G4Reweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix)/*: fix_total(fix)*/
-{
-  Initialize(totalInput, FSInput, FSScales, inputElasticBiasHist, fix);
-}
-
-void G4Reweighter::Initialize(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix)
-{
-  as_graphs = true;
-  fix_total = fix;
-
-  for( auto it = theInts.begin(); it != theInts.end(); ++it ){
+void G4Reweighter::SetNewHists(const std::map<std::string, TH1D*> & FSScales) {
+   for (auto it = theInts.begin(); it != theInts.end(); ++it) {
     std::string name = *it;
-    TGraph * theGraph = (TGraph*)FSInput->Get(name.c_str());
-    newGraphs[ name ] = (TGraph*)theGraph->Clone( ("new_" + name).c_str() );
-    oldGraphs[ name ] = (TGraph*)theGraph->Clone();
-  }
-  SetTotalGraph( totalInput );
-
-
-  newElasticGraph = (TGraph*)elasticGraph->Clone("new_elast");
-  oldElasticGraph = (TGraph*)elasticGraph->Clone();
-
-  //total cross section - reac + elastic
-  new_el_inel_Graph = (TGraph*)el_inel_Graph->Clone("new_total");
-  old_el_inel_Graph = (TGraph*)el_inel_Graph->Clone();
-
-  SetBaseHistsWithElast( FSScales , inputElasticBiasHist);
-  elasticBias = inputElasticBiasHist;
-}
-
-void G4Reweighter::SetNewHists(const std::map< std::string, TH1D* > &FSScales){
-
-  for( auto it = theInts.begin(); it != theInts.end(); ++it ){
-    std::string name = *it;
-
-    //Load the Hists
-    if( newGraphs[ name ] )
-      delete newGraphs[ name ];
-    newGraphs[ name ] = (TGraph*)oldGraphs[ name ]->Clone( ("new_" + name).c_str() );
-  }
-
-  //Now go through and vary the exclusive channels
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TH1D * theVar = FSScales.at( theInts.at(i) );
-    TGraph * theGraph = newGraphs.at( theInts.at(i) );
-    for( int bin = 0; bin < theGraph->GetN(); ++bin ){
-
-      double Content = theGraph->GetY()[bin];
-      double point   = theGraph->GetX()[bin];
-      double theScale    = theVar->GetBinContent( theVar->FindBin( point ) );
-
-      //Check if >/< max/min of var graph
-      if( ( point < theVar->GetBinLowEdge(1))
-      ||  ( point > ( theVar->GetBinLowEdge( theVar->GetNbinsX() ) + theVar->GetBinWidth( theVar->GetNbinsX() ) ) ) ){
-        theGraph->SetPoint( bin, point, Content );
-      }
-      else{
-        theGraph->SetPoint( bin, point, theScale * Content );
-      }
-    }
-  }
-
-
-
-
-
-  //Form the total cross sections from
-  //the nominal and varied exlcusive channels
-  TGraph * oldTotal = (TGraph*)oldGraphs[ theInts.at(0) ]->Clone("oldTotal");
-  TGraph * newTotal = (TGraph*)newGraphs[ theInts.at(0) ]->Clone("newTotal");
-
-  for(size_t i = 1; i < theInts.size(); ++i){
-    AddGraphs(oldTotal, oldGraphs[ theInts.at(i) ] );
-    AddGraphs(newTotal, newGraphs[ theInts.at(i) ] );
-  }
-
-  //Form the variation from the new and old totals
-  if( totalVariationGraph )
-    delete totalVariationGraph;
-  totalVariationGraph = (TGraph*)newTotal->Clone("totalVariation");
-  DivideGraphs(totalVariationGraph, oldTotal);
-
-  //Now go back through the varied exclusive channels
-  //and compute the final scale
-  for( size_t i = 0; i < theInts.size(); ++i ){
-    TGraph * exclusiveVariation = (TGraph*)newGraphs.at( theInts.at(i) )->Clone( (theInts.at(i) + "Variation").c_str() );
-
-    DivideGraphs( exclusiveVariation, oldGraphs.at( theInts.at(i) ) );
-    DivideGraphs( exclusiveVariation, totalVariationGraph );
-
-    if( exclusiveVariationGraphs[ theInts.at(i) ] )
-      delete exclusiveVariationGraphs[ theInts.at(i) ];
-    exclusiveVariationGraphs[ theInts.at(i) ] = exclusiveVariation;
-
-    std::string name = theInts.at(i);
-    std::string new_name = "new_" + name;
-  }
-
-  //Now go through and clear from memory all of the pointers
-  delete newTotal;
-  delete oldTotal;
-
-
+    inelScales[name] = FSScales.at(name);
+  } 
 }
 
 void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist)
@@ -697,83 +39,183 @@ void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist)
   elasticBias = inputElasticBiasHist;
 }
 
-double G4Reweighter::GetWeight( std::string theInt, double theMomentum ){
 
-  if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
-    return 1.;
+void G4Reweighter::SetupWorld() {
+  std::string MaterialName = MaterialParameters.get<std::string>("Name");
+
+  int MaterialZ = MaterialParameters.get<int>("Z");
+  Mass = MaterialParameters.get<double>("Mass");
+  Density = MaterialParameters.get<double>("Density");
+  testMaterial = new G4Material(MaterialName,
+                                MaterialZ,
+                                Mass*g/mole,
+                                Density*g/cm3);
+  //World
+  solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
+  logicWorld = new G4LogicalVolume(solidWorld,
+                                   testMaterial,
+                                   "World");
+  physWorld = new G4PVPlacement(
+      0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
+
+  detector = new G4CascadeDetectorConstruction(physWorld);
+  physList = new G4CascadePhysicsList();
+ 
+}
+
+void G4Reweighter::DefineParticle() {
+  std::cout << "Chose PiPlus" << std::endl;
+  part_def = piplus->Definition();
+}
+
+void G4Reweighter::SetupParticle() {
+  //G4PionPlus  * piplus = 0x0;
+  //G4PionMinus * piminus = 0x0;
+  //G4Proton  * proton = 0x0;
+  //G4Neutron * neutron = 0x0;
+  //G4ParticleDefinition * part_def = 0x0;
+  //if( type == 211 ){
+   /* std::cout << "Chose PiPlus" << std::endl;
+    part_def = piplus->Definition();
+    inel_name = "pi+Inelastic";
+  }
+  else if( type == -211 ){
+    std::cout << "Chose PiMinus" << std::endl;
+    part_def = piminus->Definition();
+    inel_name = "pi-Inelastic";
+  }
+  else if( type == 2212 ){
+    std::cout << "Chose Proton" << std::endl;
+    part_def = proton->Definition();
+    inel_name = "protonInelastic";
+  }
+  else if( type == 2112 ){
+    std::cout << "Chose Neutron" << std::endl;
+    part_def = neutron->Definition();
+    inel_name = "neutronInelastic";
+  }
+  else{
+    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+    //throw
+  }*/
+
+  DefineParticle();
+
+  dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0.);
+  testTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  testStep = new G4Step();
+  testPoint = new G4StepPoint();
+  testPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
+  testPoint->SetMaterialCutsCouple(
+      physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
+  testStep->SetPreStepPoint(testPoint);
+  testTrack->SetStep(testStep);
+
+}
+
+void G4Reweighter::SetupProcesses() {
+  //Initializing
+  rm = new G4RunManager();
+
+  SetupWorld();
+
+  rm->SetUserInitialization(detector);
+  rm->SetUserInitialization(physList);
+  rm->Initialize();
+  rm->ConfirmBeamOnCondition();
+  rm->ConstructScoringWorlds();
+  rm->RunInitialization();
+
+  //auto theElement = (*testMaterial->GetElementVector())[0];
+
+  SetupParticle();
+  decay_hook = new G4DecayHook();
+  G4ProcessManager * pm = part_def->GetProcessManager();
+  G4ProcessVector  * pv = pm->GetProcessList();
+  
+  for( size_t i = 0; i < (size_t)pv->size(); ++i ){
+    G4VProcess * proc = (*pv)(i);
+    std::string theName = proc->GetProcessName();
+    if( theName == "hadElastic" ){          
+      std::cout << "Found elastic" << std::endl;
+      elastic_proc = (G4HadronElasticProcess*)proc;
+    }
+    else if( theName == fInelastic ){
+      std::cout << "Found inelastic" << std::endl;
+      inelastic_proc = (G4HadronInelasticProcess*)proc;
+    }
+    else if (theName == "CoulombScat") {
+      coul_proc = (G4CoulombScattering*)proc;
+    }
   }
 
-  TH1D * theHist = GetExclusiveVariation( theInt );
-  int theBin = theHist->FindBin( theMomentum );
-  double theWeight = theHist->GetBinContent( theBin );
-
-  return theWeight;
-}
-
-double G4Reweighter::GetWeightFromGraph( std::string theInt, double theMomentum ){
-
-  if( ( theMomentum < Minimum ) || ( theMomentum > Maximum ) ){
-    return 1.;
+  if (!elastic_proc || !inelastic_proc || !coul_proc) {
+    std::cout << "Fatal Error: could not get the processes" << std::endl;
+    //throw;
   }
 
-  TGraph * theGraph = GetExclusiveVariationGraph( theInt );
-  double theWeight = theGraph->Eval( theMomentum );
+  //G4CrossSectionDataStore *theElastStore   = elastic_proc->GetCrossSectionDataStore();
+  //G4CrossSectionDataStore *theInelastStore = inelastic_proc->GetCrossSectionDataStore();
+    //inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, testMaterial ) / millibarn;
+    //elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, testMaterial ) / millibarn;
 
-  return theWeight;
 }
 
-void G4Reweighter::SetTotalGraph( TFile * input ){
-  totalGraph = (TGraph*)input->Get( "inel_momentum" );
 
-  elasticGraph = (TGraph*)input->Get( "el_momentum" );
-
-  decayGraph = (TGraph*)input->Get("decay_mfp_momentum");
-  //coulGraph = (TGraph*)input->Get("coul_mfp_momentum");
-  //std::cout << "Got coul " << coulGraph << std::endl;
-  //stores sum of elastic and inelastic contributions (total cross section)
-  el_inel_Graph = (TGraph*)input->Get("total_momentum");
-
-  TVectorD * m_vec = (TVectorD*)input->Get("Mass");
-  Mass = (*m_vec)(0);
-
-  TVectorD * d_vec = (TVectorD*)input->Get("Density");
-  Density = (*d_vec)(0);
-
-  delete d_vec;
-  delete m_vec;
+void G4Reweighter::SetMomentum(double p) {
+  double KE = sqrt(p*p + std::pow(part_def->GetPDGMass(), 2))
+              - part_def->GetPDGMass(); 
+  dynamic_part->SetKineticEnergy(KE);
 }
-
 
 double G4Reweighter::GetDecayMFP(double p) {
-  return decayGraph->Eval(p);
+  SetMomentum(p);
+  return decay_hook->GetMFP(*testTrack);
 }
 
-
-/*
 double G4Reweighter::GetCoulMFP(double p) {
-  return coulGraph->Eval(p);
-}*/
+  SetMomentum(p);
+  double mfp = coul_proc->MeanFreePath(*testTrack);
+  if (mfp == DBL_MAX) {
+    return 0.;
+  }
+  return mfp;
+}
 
-double G4Reweighter::GetNominalMFP( double theMom ){
-  double xsec = totalGraph->Eval( theMom );
+double G4Reweighter::GetInelasticXSec(double p) {
+  SetMomentum(p);
 
+  return (inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+      dynamic_part, (*testMaterial->GetElementVector())[0],
+      testMaterial) / millibarn);
+}
+
+double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
+  return (exclusiveFracs[cut]->Eval(p)*GetInelasticXSec(p));
+}
+
+double G4Reweighter::GetElasticXSec(double p) {
+  SetMomentum(p);
+
+  return (elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+      dynamic_part, (*testMaterial->GetElementVector())[0],
+      testMaterial) / millibarn);
+}
+
+double G4Reweighter::GetNominalMFP(double p) {
+  double xsec = GetInelasticXSec(p);
   return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
 }
 
-double G4Reweighter::GetBiasedMFP( double theMom ){
-  /*
-  double b = 1.;
-  if( as_graphs ){
-    b = totalVariationGraph->Eval( theMom );
-  }
-  */
-  double b = GetInelasticBias(theMom);
-  return  GetNominalMFP( theMom ) / b;
+double G4Reweighter::GetBiasedMFP(double p){
+  double b = GetInelasticBias(p);
+  return  GetNominalMFP( p ) / b;
 }
 
-
-double G4Reweighter::GetNominalElasticMFP( double theMom ){
-  double xsec = elasticGraph->Eval( theMom );
+double G4Reweighter::GetNominalElasticMFP(double p){
+  double xsec = GetElasticXSec(p);/*(elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+      dynamic_part, (*testMaterial->GetElementVector())[0],
+      testMaterial) / millibarn);*/
   return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
 }
 
@@ -782,26 +224,52 @@ double G4Reweighter::GetElasticBias(double p) {
 }
 
 double G4Reweighter::GetInelasticBias(double p) {
-  return totalVariationGraph->Eval(p);
+  double bias = 0.;
+  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
+    std::string name = *it;
+    TH1D * scale = inelScales[name];
+    bias += (exclusiveFracs[name]->Eval(p) *
+             scale->GetBinContent(scale->FindBin(p)));
+  }
+  return bias;
 }
 
-double G4Reweighter::GetBiasedElasticMFP( double theMom ){
-  /*
-  double b = 1.;
-  if( as_graphs ){
-    b = elasticBias->GetBinContent(
-      elasticBias->FindBin( theMom )
-    );
-  }*/
-  double b = GetElasticBias(theMom);
-  return GetNominalElasticMFP( theMom ) / b;
+double G4Reweighter::GetExclusiveFactor(double p, std::string cut) {
+  return inelScales[cut]->GetBinContent(inelScales[cut]->FindBin(p));
+}
+
+double G4Reweighter::GetBiasedElasticMFP( double p ){
+  double b = GetElasticBias(p);
+  return GetNominalElasticMFP( p ) / b;
 }
 
 std::string G4Reweighter::GetInteractionSubtype( const G4ReweightTraj & theTraj ){
+  int nPi0     = theTraj.HasChild(111).size();
+  int nPiPlus  = theTraj.HasChild(211).size();
+  int nPiMinus = theTraj.HasChild(-211).size();
+
+  if( (nPi0 + nPiPlus + nPiMinus) == 0){
+    return "abs";
+  }
+  else if( (nPiPlus + nPiMinus) == 0 && nPi0 == 1 ){
+    return "cex";
+  }
+  else if( (nPiPlus + nPiMinus + nPi0) > 1 ){
+    return "prod";
+  }
+  else if( (nPi0 + nPiMinus) == 0 && nPiPlus == 1 ){
+    return "inel";
+  }
+  else if( (nPi0 + nPiPlus) == 0 && nPiMinus == 1 ){
+    return "dcex";
+  }
+
   return "";
+
 }
 
 double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
+
   double total = 0.;
   double bias_total = 0.;
 
@@ -817,16 +285,16 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
     double bias_val =
         theStep->GetStepLength() *
-        ((totalGraph->Eval(p) > min ? 1. / GetBiasedMFP(p) : min) +
-         (decayGraph->Eval(p) > min ? 1. / GetDecayMFP(p) : min) +
-         (elasticGraph->Eval(p) > min ? 1. / GetBiasedElasticMFP(p) : min)/* +
-         (coulGraph->Eval(p) > min ? 1. / GetCoulMFP(p) : min)*/);
+        ((GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
+         (GetDecayMFP(p) > min ? 1. / GetDecayMFP(p) : min) +
+         (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min)/* +
+         (GetCoulMFP(p) > min ? 1. / GetCoulMFP(p) : min)*/);
     double val = theStep->GetStepLength() *
-                 ((totalGraph->Eval(p) > min ? 1. / GetNominalMFP(p) : min) +
-                  (decayGraph->Eval(p) > min ? 1. / GetDecayMFP(p) : min) +
-                  (elasticGraph->Eval(p) > min ? 1. / GetNominalElasticMFP(p) 
+                 ((GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
+                  (GetDecayMFP(p) > min ? 1. / GetDecayMFP(p) : min) +
+                  (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) 
                                               : min)/* +
-                  (coulGraph->Eval(p) > min ? 1. / GetCoulMFP(p) : min)*/);
+                  (GetCoulMFP(p) > min ? 1. / GetCoulMFP(p) : min)*/);
 
     //std::cout << i << "vals: " << bias_val << " " << val << std::endl;
     /**/if (theStep->GetStepChosenProc() == "hadElastic") {
@@ -834,8 +302,8 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
       if (bias_val > min && val > min) {
         weight *= (1. - exp(-1.*bias_val));
         weight /= (1. - exp(-1.*val));
-        weight *= /*(1. / GetBiasedElasticMFP(p))*/ GetElasticBias(p) / bias_val;
-        weight /= /*(1. / GetNominalElasticMFP(p))*/ 1. / val;
+        weight *= GetElasticBias(p) / bias_val;
+        weight /= 1. / val;
       }
     }
     else /**/if (theStep->GetStepChosenProc() == fInelastic) {
@@ -843,8 +311,8 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
       if (bias_val > min && val > min) {
         weight *= (1. - exp(-1.*bias_val));
         weight /= (1. - exp(-1.*val));
-        weight *= /*(1./GetBiasedMFP(p))*/ GetInelasticBias(p) / bias_val;
-        weight /= /*(1./GetNominalMFP(p))*/ 1. / val;
+        weight *= /*GetInelasticBias(p)*/1. / bias_val;
+        weight /= 1. / val;
       }
 
       std::string cut = GetInteractionSubtype(*theTraj);
@@ -852,6 +320,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
         return 1.;
       }
 
+/*
       TGraph * theGraph = GetExclusiveVariationGraph( cut );
       if( theGraph ){
         double exclusive_factor = 1;
@@ -862,6 +331,9 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
         weight *= exclusive_factor;
       }
+      */
+      
+      weight *= GetExclusiveFactor(p, cut);
 
     }
     else if (theStep->GetStepChosenProc() == "Decay"/* ||
@@ -878,12 +350,12 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
       //             " " << GetBiasedMFP(p) << " " <<
       //             totalGraph->Eval( p ) << std::endl;
       total += theStep->GetStepLength()*(
-          (totalGraph->Eval(p) > min ? 1. / GetNominalMFP(p) : min) +
-          (elasticGraph->Eval(p) > min ? 1. / GetNominalElasticMFP(p) : min));
+          (GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
+          (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) : min));
 
       bias_total += theStep->GetStepLength() *(
-          (totalGraph->Eval(p) > min ? 1. / GetBiasedMFP(p) : min) +
-          (elasticGraph->Eval(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
+          (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
+          (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
       //std::cout << "totals: " << total << " " << bias_total << std::endl;
     }
     //std::cout << i << " " << theStep->GetStepChosenProc() << " " << weight << std::endl;
@@ -892,103 +364,9 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   //std::cout << "weight: " << weight << std::endl;
   weight *= exp(total - bias_total);
   //std::cout << "weight after totals: " << weight << std::endl;
-
   return weight;
 }
 
-double G4Reweighter::GetElasticWeight( const G4ReweightTraj * theTraj ){
-  double total = 0.;
-  double bias_total = 0.;
-  double elastic_weight = 1.;
-
-  for(size_t is = 0; is < theTraj->GetNSteps(); ++is){
-    auto theStep = theTraj->GetStep(is);
-    double theMom = theStep->GetFullPreStepP();
-
-    if( theStep->GetStepChosenProc() == "hadElastic" ){
-      elastic_weight *= elasticBias->GetBinContent( elasticBias->FindBin( theMom ) );
-    }
-    else{
-      total += ( theStep->GetStepLength() / GetNominalElasticMFP(theMom) );
-      bias_total += ( theStep->GetStepLength() / GetBiasedElasticMFP( theMom ) );
-    }
-  }
-
-  elastic_weight *= exp( total - bias_total );
-  return elastic_weight;
-}
-
-
-TH1D * G4Reweighter::GetExclusiveVariation( std::string theInt ){
-  if( ( !exclusiveVariations.size() ) ||
-      ( exclusiveVariations.find( theInt ) == exclusiveVariations.end() ) ){
-    return 0x0;
-  }
-
-  return exclusiveVariations.at( theInt );
-}
-
-TGraph * G4Reweighter::GetExclusiveVariationGraph( std::string theInt ){
-  if( ( !exclusiveVariationGraphs.size() ) ||
-      ( exclusiveVariationGraphs.find( theInt ) == exclusiveVariationGraphs.end() ) ){
-    return 0x0;
-  }
-
-  return exclusiveVariationGraphs.at( theInt );
-}
-
 G4Reweighter::~G4Reweighter(){
-  
-for( size_t i = 0; i < theInts.size(); ++i){
-//    delete gROOT->FindObject( theInts.at(i).c_str() );
-    if( exclusiveVariations.find( theInts.at(i) ) != exclusiveVariations.end() )
-      delete exclusiveVariations.at( theInts.at(i) );
-
-    if( oldHists.find( theInts.at(i) ) != oldHists.end() )
-      delete oldHists.at( theInts.at(i) );
-
-    if( newHists.find( theInts.at(i) ) != newHists.end() )
-      delete newHists.at( theInts.at(i) );
-
-    if( exclusiveVariationGraphs.find( theInts.at(i) ) != exclusiveVariationGraphs.end() )
-      delete exclusiveVariationGraphs.at( theInts.at(i) );
-
-    if( oldGraphs.find( theInts.at(i) ) != oldGraphs.end() ){
-      delete oldGraphs.at( theInts.at(i) );
-    }
-
-    if( newGraphs.find( theInts.at(i) ) != newGraphs.end() ){
-      delete newGraphs.at( theInts.at(i) );
-    }
-  }
-
-
-//delete the extra graphs you made for elast
-
-delete newElasticGraph;
-delete oldElasticGraph;
-//
-delete new_el_inel_Graph;
-delete old_el_inel_Graph;
-
 }
 
-
-void G4Reweighter::AddGraphs( TGraph *target, TGraph* adder  ){
-  int nbins = target->GetN();
-  for( int i = 0; i < nbins; ++i ){
-    target->SetPoint(i , target->GetX()[i], (target->GetY()[i] + adder->GetY()[i]) );
-  }
-}
-
-void G4Reweighter::DivideGraphs( TGraph *target, TGraph* divider  ){
-  int nbins = target->GetN();
-  for( int i = 0; i < nbins; ++i ){
-    if( divider->GetY()[i] < 0.000001 ){
-      target->SetPoint(i , target->GetX()[i], 1. );
-    }
-    else{
-      target->SetPoint(i , target->GetX()[i], (target->GetY()[i] / divider->GetY()[i]) );
-    }
-  }
-}

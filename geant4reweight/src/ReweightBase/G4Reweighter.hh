@@ -16,6 +16,38 @@
 
 #include <iostream>
 
+#include "Geant4/G4CrossSectionDataStore.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4DynamicParticle.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4VProcess.hh"
+#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4String.hh"
+#include "Geant4/G4hIonisation.hh"
+#include "Geant4/G4hPairProduction.hh"
+#include "Geant4/G4hBremsstrahlung.hh"
+#include "Geant4/G4CoulombScattering.hh"
+#include "Geant4/G4Box.hh"
+#include "Geant4/G4LogicalVolume.hh"
+#include "Geant4/G4PVPlacement.hh"
+
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
+
+#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "cetlib/filepath_maker.h"
+
+
 class G4ReweightTraj;
 //class G4ReweightStep;
 
@@ -23,116 +55,76 @@ class G4Reweighter{
   public:
 
     G4Reweighter(){};
-    G4Reweighter(TFile *, TFile *, std::map< std::string, TGraph*> &);
-    G4Reweighter(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool fix=false);
+    G4Reweighter(TFile *, const std::map<std::string, TH1D*> &,
+                 const fhicl::ParameterSet &,
+                 TH1D * inputElasticBiasHist = 0x0, bool fix = false);
     virtual ~G4Reweighter();
 
-    void Initialize(TFile *, TFile *, std::map< std::string, TGraph*> &);
-    void Initialize(TFile *, TFile *, const std::map< std::string, TH1D*> &, TH1D * inputElasticBiasHist=0x0, bool fix=false);
+    double GetWeight(const G4ReweightTraj * theTraj);
+    virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
-    double GetWeight( std::string, double );
-    double GetWeightFromGraph( std::string, double );
-
-    double GetWeight( const G4ReweightTraj * theTraj );
-    virtual std::string GetInteractionSubtype( const G4ReweightTraj & );
-
-    double GetElasticWeight( const G4ReweightTraj * );
-    double GetDecayMFP( double );
-    //double GetCoulMFP( double );
-    double GetNominalMFP( double );
-    double GetNominalMFPDebug( double );
-
-    double GetBiasedMFP( double );
-    double GetBiasedMFPDebug( double );
-    
-    double GetNominalElasticMFP( double );
-    double GetBiasedElasticMFP( double );
+    void SetMomentum(double p);
+    double GetDecayMFP(double p);
+    double GetCoulMFP(double p);
+    double GetNominalMFP(double p);
+    double GetBiasedMFP(double p);
+    double GetNominalElasticMFP(double p);
+    double GetBiasedElasticMFP(double p);
     double GetInelasticBias(double p);
     double GetElasticBias(double p);
+    double GetExclusiveFactor(double p, std::string cut);
 
-    void SetTotalGraph( TFile * );
-   
-    void SetNewHists( const std::map< std::string, TH1D* > &FSScales );
+    double GetInelasticXSec(double p);
+    double GetExclusiveXSec(double p, std::string cut);
+    double GetElasticXSec(double p);
+
+    void SetNewHists(const std::map< std::string, TH1D* > &FSScales);
     void SetNewElasticHists(TH1D * inputElasticBiasHist);
-    void SetBaseHists( const std::map< std::string, TH1D* > &FSScales );
-    void SetBaseHistsWithElast( const std::map< std::string, TH1D* > &FSScales , TH1D * elastBiasHist );
-
-
-    TH1D * GetTotalVariation(){ return totalVariation; };
-    TGraph * GetTotalVariationGraph(){ return totalVariationGraph; };
-
-    TH1D * GetElastVariation(){ return elasticBias;};
-    TGraph *GetElastVariationGraph(){ return elastVariationGraph; };
-
-
-
-    //added by C Thorpe
-    //TGraph * GetElastVariationGraph(){ return elastVariationGraph; };
-
-    TH1D * GetExclusiveVariation( std::string );
-    TGraph * GetExclusiveVariationGraph( std::string );
-    TH1D * GetOldHist( std::string cut ){ return oldHists[cut]; };
-    TH1D * GetNewHist( std::string cut ){ return newHists[cut]; };
-    TGraph * GetOldGraph( std::string cut ){return oldGraphs[cut]; };
-    TGraph * GetNewGraph( std::string cut ){ return newGraphs[cut]; };
-
-
-    TGraph* GetNewElastGraph(){ return newElasticGraph; };
-    TGraph* GetOldElastGraph(){ return oldElasticGraph; };
-
-    void AddGraphs(TGraph*, TGraph*);
-    void DivideGraphs(TGraph*, TGraph*);
-    bool AsGraph(){return as_graphs; };
-
-    TGraph * GetTotalGraph(){ return totalGraph; };
-    //added by C Thorpe    
-    TGraph * GetElastGraph(){ return elasticGraph; };
 
   protected:
 
-    bool as_graphs = false;
     bool fix_total = false;
 
-    std::map< std::string, TH1D* > exclusiveVariations;
-    TH1D * totalVariation;
+    std::map<std::string, TGraph *> exclusiveFracs;
+    std::map<std::string, TH1D *> inelScales;
 
-    std::map< std::string, TGraph* > exclusiveVariationGraphs;
-    TGraph * totalVariationGraph;
-
-    TGraph * totalGraph = 0x0;
-    TGraph * elasticGraph = 0x0;
-    TGraph * decayGraph;
-    //TGraph * coulGraph;
-
-    TGraph * elastVariationGraph;
-    TGraph *el_inel_VariationGraph;
-
-    //graph to store total cross section
-    TGraph *el_inel_Graph;
+    fhicl::ParameterSet MaterialParameters;
     TH1D * elasticBias;
 
-    double Maximum;
-    double Minimum;
-
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
-    std::string fInelastic;
-    
-    std::vector< std::string > theInts;
-
-    std::map< std::string, TH1D* > oldHists;
-    std::map< std::string, TH1D* > newHists;
-    std::map< std::string, TGraph* > oldGraphs;
-    std::map< std::string, TGraph* > newGraphs;
-
-    //added by C Thorpe
-    TGraph *newElasticGraph=nullptr;
-    TGraph *oldElasticGraph=nullptr;
-    TGraph *old_el_inel_Graph=nullptr;
-    TGraph *new_el_inel_Graph=nullptr;
-
+    std::string fInelastic = "pi+Inelastic";
+    std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
 
     double Mass;
     double Density;
+
+    G4RunManager * rm;
+    G4Track * testTrack;
+    G4Step * testStep;
+    G4StepPoint * testPoint;
+    G4Material * testMaterial;
+    G4Box * solidWorld;
+    G4LogicalVolume * logicWorld;
+    G4VPhysicalVolume * physWorld;
+    G4CascadeDetectorConstruction * detector;
+    G4CascadePhysicsList * physList;
+
+    G4PionPlus  * piplus;
+    G4ParticleDefinition * part_def;
+    G4DynamicParticle * dynamic_part;
+
+    std::string inel_name;
+
+    G4DecayHook * decay_hook;
+    G4HadronElasticProcess * elastic_proc;
+    G4HadronInelasticProcess * inelastic_proc;
+    G4CoulombScattering * coul_proc;
+
+    void SetupProcesses();
+    virtual void DefineParticle();
+    void SetupWorld();
+    void SetupParticle();
+
 };
 
 #endif

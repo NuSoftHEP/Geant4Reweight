@@ -17,6 +17,7 @@
 //#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
 #include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 
@@ -48,12 +49,18 @@ class G4ReweightFitter{
 
     Chi2Store GetNDataPointsAndChi2(std::string cut);
     //void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false);
+    void GetMCValsWithCov(std::string FracFileName,
+                          G4ReweightParameterMaker & parMaker,
+                          const fhicl::ParameterSet & material,
+                          bool fSave = false, TMatrixD * cov = 0x0,
+                          std::string position = "CV");
 
     //arguments : Total xsec filename , Fracs file name , parameters , elastic parameters , fSave , covariance matrix , position(central value,+1 sigma,-1 sigma) 
-    void GetMCFromCurvesWithCovariance(std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false,TMatrixD *cov=nullptr, std::string position = "CV");
+    //void GetMCFromCurvesWithCovariance(std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false,TMatrixD *cov=nullptr, std::string position = "CV");
 
     //Calculates SD using full covariance matrix. use_reac = true if fit was using a single parameter for reac instead of individual exclusive channels
-    double SigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use_reac);
+    //double SigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use_reac);
+    double NewSigmaWithCov(double x, std::string cut, TMatrixD * cov, bool use_reac);
 
     void SaveExpChi2( double &, std::string & );
     void FinishUp();

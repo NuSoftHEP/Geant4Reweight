@@ -25,6 +25,15 @@
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 #include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
 
+//physics models needed for muons
+#include "Geant4/G4EmCalculator.hh"
+
+#include "Geant4/G4MuIonisation.hh"
+#include "Geant4/G4MuBremsstrahlung.hh"
+#include "Geant4/G4MuPairProduction.hh"
+//#include "Geant4/G4MuNuclearInteraction.hh"
+
+
 #include <utility>
 #include <iostream>
 #include <fstream>
@@ -136,6 +145,8 @@ int main(int argc, char * argv[]){
   tree->Branch( "inelastic_xsec", &inelastic_xsec );
   tree->Branch( "elastic_xsec", &elastic_xsec );
 
+
+
   //Initializing
   G4RunManager * rm = new G4RunManager();
 
@@ -190,13 +201,11 @@ int main(int argc, char * argv[]){
     inel_name = "neutronInelastic";
   }
   else{
-    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+    std::cout << "Please specify either 211, -211, 2212 or 2112" << std::endl;
     return 0;
   }
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
-
-
   std::cout << "testing" << std::endl;
   /*
   G4Track * tempTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
@@ -250,7 +259,6 @@ int main(int argc, char * argv[]){
   std::vector<double> total_xsecs, elastic_xsecs, inelastic_xsecs, momenta,
                       kinetic_energies, decay_mfps, ioni_mfps, brems_mfps,
                       pairprod_mfps, coul_mfps;
-
   //Getting the cross sections from the processes
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
@@ -347,7 +355,6 @@ int main(int argc, char * argv[]){
         //std::cout << coul->LambdaTablePrim() << std::endl;
       }
     }
-    
 
     tree->Fill();
     if( verbose && !( n % 100) ){
@@ -359,7 +366,8 @@ int main(int argc, char * argv[]){
 
     inelastic_xsecs.push_back( inelastic_xsec );
     elastic_xsecs.push_back( elastic_xsec );
-    total_xsecs.push_back( elastic_xsec + inelastic_xsec );
+    //total cross section now includes neutron capture component (zero for anything that isn't a neutron!)
+    total_xsecs.push_back( elastic_xsec + inelastic_xsec);
     momenta.push_back( momentum );
     kinetic_energies.push_back( kinetic_energy );
     decay_mfps.push_back(decay_hook.GetMFP(*theTrack));
@@ -373,6 +381,7 @@ int main(int argc, char * argv[]){
   TGraph inel_KE( kinetic_energies.size(), &kinetic_energies[0], &inelastic_xsecs[0] );
   TGraph el_momentum( momenta.size(), &momenta[0], &elastic_xsecs[0] );
   TGraph el_KE( kinetic_energies.size(), &kinetic_energies[0], &elastic_xsecs[0] );
+
   TGraph total_momentum( momenta.size(), &momenta[0], &total_xsecs[0] );
   TGraph total_KE( kinetic_energies.size(), &kinetic_energies[0], &total_xsecs[0] );
   TGraph decay_mfp_momentum(momenta.size(), &momenta[0], &decay_mfps[0]);
@@ -391,6 +400,7 @@ int main(int argc, char * argv[]){
   inel_KE.Write( "inel_KE" );
   el_momentum.Write( "el_momentum" );
   el_KE.Write( "el_KE" );
+
   total_momentum.Write( "total_momentum" );
   total_KE.Write( "total_KE" );
   decay_mfp_momentum.Write("decay_mfp_momentum");

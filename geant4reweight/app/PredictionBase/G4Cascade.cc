@@ -143,8 +143,6 @@ int main(int argc, char * argv[]){
   d_vec[0] = theConfig.MaterialDensity;
   d_vec.Write("Density");
 
-  std::cout << "Got mass & density" << std::endl;
-
   TTree * tree = new TTree("tree","");  
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
@@ -160,8 +158,6 @@ int main(int argc, char * argv[]){
   G4RunManager rm;
   initRunMan( rm );
   ////
-
-  std::cout << "Initialized" << std::endl;
 
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;

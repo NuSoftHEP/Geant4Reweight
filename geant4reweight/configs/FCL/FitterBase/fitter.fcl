@@ -6,41 +6,75 @@
 #include "Fe_experiments.fcl"
 #include "Cu_experiments.fcl"
 #include "Pb_experiments.fcl"
+#include "He4_experiments.fcl"
+#include "C14_experiments.fcl"
+#include "O18_experiments.fcl"
 
-OutputFile: "fitter_out.root.root"
+#include "C_experiments_totalonly.fcl"
+#include "O_experiments_totalonly.fcl"
+#include "Al_experiments_totalonly.fcl"
+#include "Fe_experiments_totalonly.fcl"
+#include "Pb_experiments_totalonly.fcl"
+
+
+
+OutputFile: "fit_results/piP_fit.root"
+
 #FitScan: true
 #Save: true
 
 Sets: [
-  @local::C_PiPlus,
-#  @local::C_PiMinus,
-#  @local::O_PiPlus,
-#  @local::O_PiMinus,
-#  @local::Al_PiPlus,
-#  @local::Al_PiMinus,
-#  @local::Fe_PiPlus,
-#  @local::Fe_PiMinus,
-#  @local::Cu_PiPlus,
-#  @local::Cu_PiMinus,
-#  @local::Pb_PiPlus,
-#  @local::Pb_PiMinus
+#@local::C_PiPlus,
+@local::C_PiMinus,
+#@local::O_PiPlus,
+@local::O_PiMinus,
+#@local::Al_PiPlus,
+@local::Al_PiMinus,
+#@local::Fe_PiPlus,
+@local::Fe_PiMinus,
+#@local::Cu_PiPlus,
+@local::Cu_PiMinus,
+#@local::Pb_PiPlus,
+@local::Pb_PiMinus
+#@local::He4_PiPlus
+#@local::He4_PiMinus
+#@local::C14_PiPlus,
+#@local::O18_PiPlus
 ]
 
 Experiments: [ 
   @sequence::C_experiments,
-#  @sequence::O_experiments,
-#  @sequence::Al_experiments,
-#  @sequence::Fe_experiments,
-#  @sequence::Cu_experiments,
-#  @sequence::Pb_experiments
+  @sequence::O_experiments,
+  @sequence::Al_experiments,
+  @sequence::Fe_experiments,
+ @sequence::Cu_experiments,
+  @sequence::Pb_experiments,
+@sequence::He4_experiments
+#@sequence::C14_experiments,
+#@sequence::O18_experiments
+
 ]
+
+
+#Experiments: [ 
+#  @sequence::C_experiments_totalonly
+#  @sequence::O_experiments_totalonly,
+#  @sequence::Al_experiments_totalonly,
+#  @sequence::Fe_experiments_totalonly,
+#  @sequence::Pb_experiments_totalonly
+#]
+
+
 
 ParameterSet: @local::TheParameters
 
-IncludeDUET: true
-DUETDataFile: "/pnfs/dune/resilient/users/calcuttj/Reweight-Data/DUET.root"
+IncludeDUET: false
+DUETDataFile: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/DUET.root"
 
-MaxCalls: 500
-Tolerance: 1.e-5
-UpperLimit: 2.0 
-LowerLimit: .5
+MaxCalls: 2000
+Tolerance: 0.001
+UpperLimit: 2.0
+LowerLimit: 0.25
+
+
+

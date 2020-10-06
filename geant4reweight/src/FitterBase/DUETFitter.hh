@@ -23,7 +23,7 @@ class DUETFitter : public G4ReweightFitter {
     virtual void   LoadData() override;
     void SaveData( TDirectory * ) override;
     double DoFit(bool fSave=true) override;
-
+    virtual void DoFitModified(bool fSave=true);
 
   private:
     TMatrixD * DUET_cov_matrix;

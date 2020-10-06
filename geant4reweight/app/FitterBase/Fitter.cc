@@ -1,4 +1,5 @@
 #include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
 #include <vector>
 #include <string>
@@ -45,7 +46,6 @@ int main(int argc, char ** argv){
     }
 
     cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
-
     fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
   //#else
@@ -62,8 +62,14 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
-  G4ReweightFitManager FitMan( outFileName, fSave);
-
+  //scales contribution to chi2 from total cross section data
+  double total_mix = pset.get<double>("TotalMix",1.0);
+ 
+  G4ReweightPionFitManager FitMan( outFileName, fSave, total_mix );
+  //setup exclusive channel code 
+  FitMan.SetExclusiveChannels();         
+ 
+  
   std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
   try{ 
@@ -76,18 +82,20 @@ int main(int argc, char ** argv){
 
     ///Defining experiments
     FitMan.DefineExperiments( pset );
+    std::cout << "Experiments defined" << std::endl;
     ///////////////////////////////////////////
 
-
-    FitMan.GetAllData();
-
     FitMan.MakeMinimizer( pset );
+    FitMan.GetAllData();
 
     bool fFitScan = pset.get< bool >( "FitScan", false );
     if( scan_override != -1 )
       fFitScan = scan_override;
 
+    std::cout << "Preparing to run fit" << std::endl;
     FitMan.RunFitAndSave(fFitScan);
+
+    std::cout << "Fit is run" << std::endl;
   }
   catch( const std::exception &e ){
     std::cout << "Caught exception " << std::endl;  
@@ -111,16 +119,13 @@ bool parseArgs(int argc, char ** argv){
 
       return false;
     }
-
     else if( strcmp( argv[i], "-c" ) == 0 ){
       fcl_file = argv[i+1];
       found_fcl_file = true;
     }
-
     else if( strcmp( argv[i], "-o" ) == 0 ){
       output_file_override = argv[i+1];
     }
-
     else if( strcmp( argv[i], "--scan" ) == 0 ){
       scan_override = atoi( argv[i+1] );
       if( scan_override > 1 || scan_override < 0 ){
@@ -128,7 +133,6 @@ bool parseArgs(int argc, char ** argv){
         return false;
       }
     }
-
     else if( strcmp( argv[i], "--save" ) == 0 ){
       save_override = atoi( argv[i+1] );
       if( save_override > 1 || save_override < 0 ){

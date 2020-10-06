@@ -25,11 +25,12 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
+
 class G4ReweightFitManager{
   public:
-    G4ReweightFitManager(std::string &, bool );
+    explicit  G4ReweightFitManager(std::string &, bool , double total_xsec_bias=1.0);
+    //G4ReweightFitManager(std::string &, bool , int particle);
     void MakeFitParameters( std::vector< fhicl::ParameterSet > &);
-
     bool CheckIsDummy( std::string theCut ){
       //Maybe throw an exception if not in the map?
       return CutIsDummy.at( theCut );
@@ -39,15 +40,21 @@ class G4ReweightFitManager{
     void DefineExperiments( fhicl::ParameterSet &);
     void GetAllData();
     void RunFitAndSave(bool fFitScan=false/*, bool fSave = false*/);
+    void SaveFitTree();
+
+
+    //void DoParameterScan(fhicl::ParameterSet & ps);
+
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
-    
+
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );
     };
 
     void DefineFCN();
 
+    double total_mix=1;
 
   protected:
     TFile      * out;
@@ -71,10 +78,20 @@ class G4ReweightFitManager{
     std::vector< std::string > thePars;
     std::vector< double > theVals;
     std::vector< std::pair< std::string, double > > theParVals;
+    //added by C Thorpe, store elastic param info as paris
+    std::vector<std::pair<std::string,double>> theElastParVals;
+
     std::vector< double > theScanStarts, theScanDeltas;
     std::vector< int > theScanSteps;
-    
-    int nDOF;
+
+    //int nDOF;
+
+    double nDOF;
+    int pdg;
+
+    std::vector<std::string> AllExclChannels;
+    virtual int GetNModelParam(std::string cut,bool use_reac=false){ return 1;}
+
 
     ROOT::Math::Functor theFCN;
 

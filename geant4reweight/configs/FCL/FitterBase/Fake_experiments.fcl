@@ -16,7 +16,6 @@ C_experiments: [
 
     Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Fake.root"
 
-    Thickness: .5
     Mass:      12.01
     Density:   2.266
 

@@ -7,6 +7,7 @@
       G4PiPlusReweighter.cc
       G4PiMinusReweighter.cc
       G4ProtonReweighter.cc
+      G4NeutronReweighter.cc
       G4ReweighterFactory.cc
       G4MultiReweighter.cc
     LIBRARIES

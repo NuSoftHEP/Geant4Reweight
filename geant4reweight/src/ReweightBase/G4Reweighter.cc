@@ -743,10 +743,6 @@ void G4Reweighter::SetTotalGraph( TFile * input ){
   delete m_vec;
 }
 
-void G4Reweighter::SetCaptureGraph(TFile * input){
-  nCaptureGraph = (TGraph*)input->Get( "n_capture_momentum");
-}
-
 
 double G4Reweighter::GetDecayMFP(double p) {
   return decayGraph->Eval(p);

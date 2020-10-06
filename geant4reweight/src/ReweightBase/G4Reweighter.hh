@@ -52,9 +52,6 @@ class G4Reweighter{
 
     void SetTotalGraph( TFile * );
    
-    void SetCaptureGraph( TFile *); //set neutron capture graph for neutrons
-
-
     void SetNewHists( const std::map< std::string, TH1D* > &FSScales );
     void SetNewElasticHists(TH1D * inputElasticBiasHist);
     void SetBaseHists( const std::map< std::string, TH1D* > &FSScales );
@@ -104,7 +101,6 @@ class G4Reweighter{
 
     TGraph * totalGraph = 0x0;
     TGraph * elasticGraph = 0x0;
-    TGraph * nCaptureGraph = 0x0; //stores neutron capture cross section
     TGraph * decayGraph;
     //TGraph * coulGraph;
 
@@ -120,8 +116,6 @@ class G4Reweighter{
 
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
     std::string fInelastic;
-    std::string fCapture="FakeProcess"; // Name of neutron capture process - 
-    //FakeProcess -  placeholder to prevent any particles that aren't neutrons from trying to look up capture cross section
     
     std::vector< std::string > theInts;
 

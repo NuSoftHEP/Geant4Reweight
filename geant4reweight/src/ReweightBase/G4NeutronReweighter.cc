@@ -25,4 +25,8 @@ std::string G4NeutronReweighter::GetInteractionSubtype(
   return "total";
 }
 
+void G4NeutronReweighter::SetCaptureGraph(TFile * input){
+  nCaptureGraph = (TGraph*)input->Get( "n_capture_momentum");
+}
+
 G4NeutronReweighter::~G4NeutronReweighter(){}

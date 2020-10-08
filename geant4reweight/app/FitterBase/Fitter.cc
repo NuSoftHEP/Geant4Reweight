@@ -1,5 +1,6 @@
 #include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
 #include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
 #include <vector>
 #include <string>
@@ -62,10 +63,32 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
+  //Get the materials
+  std::vector<fhicl::ParameterSet> FCLSets =
+      pset.get<std::vector<fhicl::ParameterSet>>("Sets");
+  std::vector<fhicl::ParameterSet> all_materials;
+  for (size_t i = 0; i < FCLSets.size(); ++i) {
+    auto set = FCLSets[i];
+    fhicl::ParameterSet material = set.get<fhicl::ParameterSet>("Material");
+    bool found_material = false;
+    for (size_t j = 0; j < all_materials.size(); ++j) {
+      if (all_materials[j].get<std::string>("Name") ==
+          material.get<std::string>("Name")) {
+        found_material = true;
+        break;
+      }
+    }
+    if (!found_material) {
+      all_materials.push_back(material);
+      std::cout << "Adding " << material.get<std::string>("Name") << std::endl;
+    }
+  }
+  G4ReweightManager rw_manager(all_materials);
+
   //scales contribution to chi2 from total cross section data
   double total_mix = pset.get<double>("TotalMix",1.0);
  
-  G4ReweightPionFitManager FitMan( outFileName, fSave, total_mix );
+  G4ReweightPionFitManager FitMan( outFileName, fSave, &rw_manager, total_mix );
   //setup exclusive channel code 
   FitMan.SetExclusiveChannels();         
  
@@ -76,7 +99,6 @@ int main(int argc, char ** argv){
     FitMan.MakeFitParameters( FitParSets );
 
     ///Defining MC Sets
-    std::vector< fhicl::ParameterSet > FCLSets = pset.get< std::vector< fhicl::ParameterSet > >("Sets");
     FitMan.DefineMCSets( FCLSets );
     ///////////////////////////////////////////
 

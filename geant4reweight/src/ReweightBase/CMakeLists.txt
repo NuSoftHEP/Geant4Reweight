@@ -3,6 +3,7 @@
     SOURCE 
       G4ReweightStep.cc
       G4ReweightTraj.cc
+      G4ReweightManager.cc
       G4Reweighter.cc
       G4PiPlusReweighter.cc
       G4PiMinusReweighter.cc

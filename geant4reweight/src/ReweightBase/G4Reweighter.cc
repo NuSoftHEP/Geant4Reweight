@@ -13,9 +13,11 @@
 G4Reweighter::G4Reweighter(TFile * FSInput,
                            const std::map<std::string, TH1D*> &FSScales,
                            const fhicl::ParameterSet & material_pars,
+                           G4ReweightManager * rw_manager,
                            TH1D * inputElasticBiasHist, bool fix)
   : fix_total(fix),
     MaterialParameters(material_pars),
+    RWManager(rw_manager),
     elasticBias(inputElasticBiasHist) {
 
   for (auto it = theInts.begin(); it != theInts.end(); ++it) {
@@ -64,67 +66,52 @@ void G4Reweighter::SetupWorld() {
 }
 
 void G4Reweighter::DefineParticle() {
-  std::cout << "Chose PiPlus" << std::endl;
   part_def = piplus->Definition();
+  std::cout << "Chose PiPlus " << part_def << std::endl;
 }
 
 void G4Reweighter::SetupParticle() {
-  //G4PionPlus  * piplus = 0x0;
-  //G4PionMinus * piminus = 0x0;
-  //G4Proton  * proton = 0x0;
-  //G4Neutron * neutron = 0x0;
-  //G4ParticleDefinition * part_def = 0x0;
-  //if( type == 211 ){
-   /* std::cout << "Chose PiPlus" << std::endl;
-    part_def = piplus->Definition();
-    inel_name = "pi+Inelastic";
-  }
-  else if( type == -211 ){
-    std::cout << "Chose PiMinus" << std::endl;
-    part_def = piminus->Definition();
-    inel_name = "pi-Inelastic";
-  }
-  else if( type == 2212 ){
-    std::cout << "Chose Proton" << std::endl;
-    part_def = proton->Definition();
-    inel_name = "protonInelastic";
-  }
-  else if( type == 2112 ){
-    std::cout << "Chose Neutron" << std::endl;
-    part_def = neutron->Definition();
-    inel_name = "neutronInelastic";
-  }
-  else{
-    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
-    //throw
-  }*/
+  Mass = MaterialParameters.get<double>("Mass");
+  Density = MaterialParameters.get<double>("Density");
 
   DefineParticle();
 
+  std::string material_name = MaterialParameters.get<std::string>("Name");
+
   dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0.);
-  testTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  //testTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
+  double center = RWManager->GetCenter(material_name);
+  G4ThreeVector point(0., 0., center);
+  testTrack = new G4Track(dynamic_part, 0., point);
   testStep = new G4Step();
   testPoint = new G4StepPoint();
-  testPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
+  testMaterial =
+      RWManager->GetVolume(material_name)->GetLogicalVolume()->GetMaterial();
+  //testPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
+  //testPoint->SetMaterialCutsCouple(
+  //    physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
+  
+  testPoint->SetMaterial(testMaterial);
   testPoint->SetMaterialCutsCouple(
-      physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
+      RWManager->GetVolume(
+          material_name)->GetLogicalVolume()->GetMaterialCutsCouple());
   testStep->SetPreStepPoint(testPoint);
   testTrack->SetStep(testStep);
-
 }
 
 void G4Reweighter::SetupProcesses() {
   //Initializing
+  /*
   rm = new G4RunManager();
 
   SetupWorld();
-
   rm->SetUserInitialization(detector);
   rm->SetUserInitialization(physList);
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();
   rm->RunInitialization();
+  */
 
   //auto theElement = (*testMaterial->GetElementVector())[0];
 
@@ -137,11 +124,11 @@ void G4Reweighter::SetupProcesses() {
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     if( theName == "hadElastic" ){          
-      std::cout << "Found elastic" << std::endl;
+      std::cout << "Found elastic " << proc << std::endl;
       elastic_proc = (G4HadronElasticProcess*)proc;
     }
     else if( theName == fInelastic ){
-      std::cout << "Found inelastic" << std::endl;
+      std::cout << "Found inelastic " << proc << std::endl;
       inelastic_proc = (G4HadronInelasticProcess*)proc;
     }
     else if (theName == "CoulombScat") {

@@ -7,12 +7,14 @@ G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet,
     const fhicl::ParameterSet & material,
+    G4ReweightManager * rw_manager,
     TFile & fitResults,
     size_t nThrows, int seed)
     : parMaker(parSet, pdg),
       reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
                                          material,
+                                         rw_manager,
                                          parMaker.GetElasticHist())),
       numberOfThrows(nThrows),
       rng(seed) {
@@ -50,11 +52,13 @@ G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet,
     const fhicl::ParameterSet & material,
+    G4ReweightManager * rw_manager,
     size_t nThrows, int seed)
     : parMaker(parSet, pdg),
       reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
                                          material,
+                                         rw_manager,
                                          parMaker.GetElasticHist())),
       numberOfThrows(nThrows),
       rng(seed) {
@@ -216,6 +220,7 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   reweighter->SetNewHists(parMaker.GetFSHists());
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
   //double plus_weight = reweighter->GetWeight(&traj);
+  //std::cout << "Getting plus weight" << std::endl;
   double plus_weight (reweighter->GetWeight(&traj)/**
                       reweighter->GetElasticWeight(&traj)*/);
 
@@ -229,6 +234,7 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   parMaker.SetNewVals(paramMap);
   reweighter->SetNewHists(parMaker.GetFSHists());
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
+  //std::cout << "Getting minus weight" << std::endl;
   double minus_weight (reweighter->GetWeight(&traj)/**
                       reweighter->GetElasticWeight(&traj)*/);
 

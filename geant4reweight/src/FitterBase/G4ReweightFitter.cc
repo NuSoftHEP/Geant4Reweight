@@ -29,6 +29,7 @@ G4ReweightFitter::G4ReweightFitter( TFile * output_file, fhicl::ParameterSet exp
   fDataFileName = exp.get< std::string >("Data");
   type = exp.get< std::string >("Type");
 
+  //Can remove
   double dummyX = 0.;
   double dummyY = 1.;
 
@@ -166,13 +167,13 @@ void G4ReweightFitter::MakeFitDir( TDirectory *output_dir ){
 }
 
 void G4ReweightFitter::LoadData(){
-//std::cout << "Loading data" << std::endl;
-//std::cout << fDataFileName << std::endl;
+std::cout << "Loading data" << std::endl;
+std::cout << fDataFileName << std::endl;
   fDataFile = new TFile( fDataFileName.c_str(), "READ");
 
   std::map< std::string, std::string >::iterator itGraphs;
   for( itGraphs = graph_names.begin(); itGraphs != graph_names.end(); ++itGraphs ){
-//std::cout << itGraphs->first << std::endl;
+    std::cout << itGraphs->first << " " << itGraphs->second << std::endl;
     Data_xsec_graphs[ itGraphs->first ] = (TGraphErrors*)fDataFile->Get(itGraphs->second.c_str());
   }
 }
@@ -198,7 +199,8 @@ void G4ReweightFitter::GetMCValsWithCov(
     std::vector<FitParameter> elast_pars,*/
     G4ReweightParameterMaker & parMaker,
     const fhicl::ParameterSet & material,
-    bool fSave,TMatrixD *cov, std::string position) {
+    G4ReweightManager * rw_manager,
+    bool fSave,TMatrixD *cov, std::string position, bool doFullRange) {
   //store the info needed to calculate variances from the cov matrix
   //stores the list of parameters used, the momentum ranges they apply to
   theCovStore.clear();
@@ -209,8 +211,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
   //inelastic parameters always go in first
 
-/*
-  bool use_reac=false;
+  bool use_reac = false;
   if(cov != nullptr && position != "CV"){
     int i=0;
     for (auto itPar = pars.begin(); itPar != pars.end(); ++itPar) {
@@ -223,7 +224,8 @@ void G4ReweightFitter::GetMCValsWithCov(
           S.Range = itPar->second.at(j).Range;
           S.cut = name1;
 
-          if(name1 == "reac") use_reac = true;
+          if(name1 == "reac")
+            use_reac = true;
           theCovStore.push_back(S);
           i++;
         }
@@ -241,13 +243,39 @@ void G4ReweightFitter::GetMCValsWithCov(
       i++;
     }
   }
-  */
 
 
   //Eventually: reweighter factory
   TFile FracFile(FracFileName.c_str(), "OPEN");
   theReweighter = new G4PiPlusReweighter(
-      &FracFile, parMaker.GetFSHists(), material, parMaker.GetElasticHist());
+      &FracFile, parMaker.GetFSHists(), material, rw_manager,
+      parMaker.GetElasticHist());
+
+  std::map<std::string, double> ranges;
+  if (doFullRange) {
+    double max = -1.;
+    for (auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut) {
+      if (*itCut == "elast") {
+        ranges["elast"] =
+            parMaker.GetElasticHist()->GetXaxis()->GetBinUpEdge(
+                parMaker.GetElasticHist()->GetNbinsX());
+      }
+      else if (*itCut == "reac" || *itCut == "abscx") {
+        continue;
+      }
+      else {
+        ranges[*itCut] =
+            parMaker.GetFSHists().at(*itCut)->GetXaxis()->GetBinUpEdge(
+                parMaker.GetFSHists().at(*itCut)->GetNbinsX());
+        if (ranges[*itCut] > max)
+          max = ranges[*itCut];
+      }
+    }
+
+    ranges["reac"] = max;
+    ranges["abscx"] = (ranges["abs"] > ranges["cex"] ?
+                       ranges["abs"] : ranges["cex"]);
+  }
 
   //Go through each cut and get the values for the MC
   //based off of the points from the Data 
@@ -255,47 +283,96 @@ void G4ReweightFitter::GetMCValsWithCov(
     std::string cut_name = *itCut;
 
     //Get the data graph for this cut
-    auto data_graph = Data_xsec_graphs[cut_name];
+    //Add flag to draw full range
     std::vector<double> xs, ys;
-    for (int i = 0; i < data_graph->GetN(); ++i) {
-      xs.push_back(data_graph->GetX()[i]);
+
+    if (doFullRange) {
+      double x = 0.;
+      while (x < ranges[*itCut]) {
+        xs.push_back(x);
+        x += .1;
+      }
+      //Get the last one for good measure
+      xs.push_back(x);
+    }
+    else {
+      auto data_graph = Data_xsec_graphs[cut_name];
+      for (int i = 0; i < data_graph->GetN(); ++i) {
+        xs.push_back(data_graph->GetX()[i]);
+      }
     }
 
     //Get the biased cross section from the reweighter
     if (cut_name == "reac") {
       for (size_t i = 0; i < xs.size(); ++i) {
-        ys.push_back(theReweighter->GetInelasticXSec(xs[i])*
-                     theReweighter->GetInelasticBias(xs[i]));
+        double x = xs[i];
+        ys.push_back(theReweighter->GetInelasticXSec(x)*
+                     theReweighter->GetInelasticBias(x));
+
+        //if no cov or position specified, just use central values
+        if (cov && position != "CV") {
+          //new method to get +/- 1 sigma variations
+          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
+        }
       }
     }
     else if (cut_name == "elast") {
       for (size_t i = 0; i < xs.size(); ++i) {
-        ys.push_back(theReweighter->GetElasticXSec(xs[i])*
-                     theReweighter->GetElasticBias(xs[i]));
+        double x = xs[i];
+        ys.push_back(theReweighter->GetElasticXSec(x)*
+                     theReweighter->GetElasticBias(x));
+
+        if (cov && position != "CV") {
+          //new method to get +/- 1 sigma variations
+          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
+        }
       }
     }
     else if (cut_name == "total") {
       for (size_t i = 0; i < xs.size(); ++i) {
-        ys.push_back((theReweighter->GetElasticXSec(xs[i])*
-                      theReweighter->GetElasticBias(xs[i])) +
-                     (theReweighter->GetInelasticXSec(xs[i])*
-                      theReweighter->GetInelasticBias(xs[i])));
+        double x = xs[i];
+        ys.push_back((theReweighter->GetElasticXSec(x)*
+                      theReweighter->GetElasticBias(x)) +
+                     (theReweighter->GetInelasticXSec(x)*
+                      theReweighter->GetInelasticBias(x)));
+
+        if (cov && position != "CV") {
+          //new method to get +/- 1 sigma variations
+          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
+        }
       }     
     }
     else if (cut_name == "abscx") {
       for (size_t i = 0; i < xs.size(); ++i) {
+        double x = xs[i];
         ys.push_back(
-            (theReweighter->GetExclusiveFactor(xs[i], "abs")*
-             theReweighter->GetExclusiveXSec(xs[i], "abs")) +
-            (theReweighter->GetExclusiveFactor(xs[i], "cex")*
-             theReweighter->GetExclusiveXSec(xs[i], "cex")));
+            (theReweighter->GetExclusiveFactor(x, "abs")*
+             theReweighter->GetExclusiveXSec(x, "abs")) +
+            (theReweighter->GetExclusiveFactor(x, "cex")*
+             theReweighter->GetExclusiveXSec(x, "cex")));
+
+        if (cov && position != "CV") {
+          //new method to get +/- 1 sigma variations
+          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
+        }
       }
     }
     else {
       for (size_t i = 0; i < xs.size(); ++i) {
+        double x = xs[i];
         ys.push_back(
-            (theReweighter->GetExclusiveFactor(xs[i], cut_name)*
-             theReweighter->GetExclusiveXSec(xs[i], cut_name)));
+            (theReweighter->GetExclusiveFactor(x, cut_name)*
+             theReweighter->GetExclusiveXSec(x, cut_name)));
+
+        if (cov && position != "CV") {
+          //new method to get +/- 1 sigma variations
+          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
+        }
       }
     }
     MC_xsec_graphs[cut_name] = new TGraph(xs.size(), &xs[0], &ys[0]);

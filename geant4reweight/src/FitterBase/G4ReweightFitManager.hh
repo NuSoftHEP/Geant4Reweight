@@ -12,6 +12,7 @@
 #include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
 #include "G4ReweightFitter.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
 
 #include <iostream>
 #include <iomanip>
@@ -28,7 +29,9 @@
 
 class G4ReweightFitManager{
   public:
-    explicit  G4ReweightFitManager(std::string &, bool , double total_xsec_bias=1.0);
+    explicit  G4ReweightFitManager(std::string & fOutFileName, bool do_save,
+                                   G4ReweightManager * rw_manager,
+                                   double total_xsec_bias=1.0);
     //G4ReweightFitManager(std::string &, bool , int particle);
     void MakeFitParameters( std::vector< fhicl::ParameterSet > &);
     bool CheckIsDummy( std::string theCut ){
@@ -101,6 +104,7 @@ class G4ReweightFitManager{
     std::map< std::string, double > parameter_values;
 
     bool fSave;
+    G4ReweightManager * fRWManager;
 };
 
 #endif

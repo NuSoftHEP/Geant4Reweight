@@ -17,6 +17,7 @@ class G4MultiReweighter{
                     TFile & fracsFile,
                     const std::vector<fhicl::ParameterSet> & parSet,
                     const fhicl::ParameterSet & material,
+                    G4ReweightManager * rw_manager,
                     TFile & fitResults, size_t nThrows = 100,
                     int seed = 0);
 
@@ -24,6 +25,7 @@ class G4MultiReweighter{
                     TFile & fracsFile,
                     const std::vector<fhicl::ParameterSet> & parSet,
                     const fhicl::ParameterSet & material,
+                    G4ReweightManager * rw_manager,
                     size_t nThrows = 100, int seed = 0);
 
   

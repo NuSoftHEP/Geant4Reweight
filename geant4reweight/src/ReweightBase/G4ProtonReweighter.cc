@@ -4,9 +4,11 @@ G4ProtonReweighter::G4ProtonReweighter(
     TFile * FSInput,
     const std::map<std::string, TH1D*> &FSScales,
     const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager,
     TH1D * inputElasticBiasHist, bool fix) {
 
   fix_total = fix;
+  RWManager = rw_manager;
   MaterialParameters = material_pars;
   elasticBias = inputElasticBiasHist;
 

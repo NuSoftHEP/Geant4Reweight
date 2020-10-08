@@ -52,8 +52,9 @@ class G4ReweightFitter{
     void GetMCValsWithCov(std::string FracFileName,
                           G4ReweightParameterMaker & parMaker,
                           const fhicl::ParameterSet & material,
+                          G4ReweightManager * rw_manager,
                           bool fSave = false, TMatrixD * cov = 0x0,
-                          std::string position = "CV");
+                          std::string position = "CV", bool doFullRange = false);
 
     //arguments : Total xsec filename , Fracs file name , parameters , elastic parameters , fSave , covariance matrix , position(central value,+1 sigma,-1 sigma) 
     //void GetMCFromCurvesWithCovariance(std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false,TMatrixD *cov=nullptr, std::string position = "CV");

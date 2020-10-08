@@ -42,6 +42,7 @@
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 #include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
+#include "G4ReweightManager.hh"
 
 #include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -56,7 +57,8 @@ class G4Reweighter{
 
     G4Reweighter(){};
     G4Reweighter(TFile *, const std::map<std::string, TH1D*> &,
-                 const fhicl::ParameterSet &,
+                 const fhicl::ParameterSet & material_pars,
+                 G4ReweightManager * rw_manager,
                  TH1D * inputElasticBiasHist = 0x0, bool fix = false);
     virtual ~G4Reweighter();
 
@@ -89,6 +91,7 @@ class G4Reweighter{
     std::map<std::string, TH1D *> inelScales;
 
     fhicl::ParameterSet MaterialParameters;
+    G4ReweightManager * RWManager;
     TH1D * elasticBias;
 
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)

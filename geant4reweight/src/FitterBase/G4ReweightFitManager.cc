@@ -27,7 +27,7 @@ G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_s
   total_mix = total_xsec_bias;
 }
 
-void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet > & FitParSets ){
+void G4ReweightFitManager::MakeFitParameters(std::vector< fhicl::ParameterSet > & FitParSets) {
 
   parMaker = G4ReweightParameterMaker( FitParSets );
 
@@ -52,32 +52,42 @@ void G4ReweightFitManager::MakeFitParameters( std::vector< fhicl::ParameterSet >
     parameter_values[ branch_name ] = 0.;
     fit_tree.Branch( branch_name.c_str() , &parameter_values.at( branch_name ) , (branch_name + "/D").c_str() );
   }
+
 }
 
-void G4ReweightFitManager::DefineMCSets( std::vector< fhicl::ParameterSet > &MCSets ){
+void G4ReweightFitManager::DefineMCSets(std::vector< fhicl::ParameterSet > &MCSets) {
   for( size_t i = 0; i < MCSets.size(); ++i ){
-    std::string theSet = MCSets[i].get< std::string >("Name");
-    sets.push_back( theSet );
-    mapSetsToFracs[ theSet ] = MCSets[i].get< std::string >( "FSFile" );
-    //mapSetsToNominal[ theSet ] = MCSets[i].get< std::string >( "File" );
+    std::string theSet = MCSets[i].get<std::string>("Name");
+    sets.push_back(theSet);
+    mapSetsToFracs[theSet] = MCSets[i].get<std::string>("FSFile");
     mapSetsToMaterial[theSet] = MCSets[i].get<fhicl::ParameterSet>("Material");
   }
 }
 
-void G4ReweightFitManager::DefineExperiments( fhicl::ParameterSet &ps){
-    std::vector< fhicl::ParameterSet > exps = ps.get< std::vector< fhicl::ParameterSet > >("Experiments");
+void G4ReweightFitManager::DefineExperiments(fhicl::ParameterSet &ps) {
+    std::vector<fhicl::ParameterSet> exps =
+        ps.get<std::vector<fhicl::ParameterSet>>("Experiments");
 
   for(size_t i = 0; i < exps.size(); ++i){
-    if( IsSetActive( exps.at(i).get<std::string >( "Type" ) ) ){
-      G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i) );
-      mapSetsToFitters[ exp->GetType() ].push_back( exp );
+    std::string the_type = exps.at(i).get<std::string >("Type");
+    if (IsSetActive(the_type)) {
+      G4ReweightFitter * exp = new G4ReweightFitter(out, exps.at(i),
+                                                    mapSetsToFracs[the_type],
+                                                    parMaker,
+                                                    mapSetsToMaterial[the_type],
+                                                    fRWManager);
+      mapSetsToFitters[exp->GetType()].push_back(exp);
     }
   }
 
   if( IsSetActive( "C_PiPlus" ) ){
     bool includeDUET = ps.get< bool >("IncludeDUET");
     std::string DUET_data = ps.get< std::string >( "DUETDataFile" );
-    DUETFitter * df = new DUETFitter(out, DUET_data);
+
+    fhicl::ParameterSet DUET_set = ps.get<fhicl::ParameterSet>("DUETSet");
+    DUETFitter * df = new DUETFitter(out, DUET_set, mapSetsToFracs["C_PiPlus"],
+                                     parMaker, mapSetsToMaterial["C_PiPlus"],
+                                     fRWManager);
     if( includeDUET ){
       mapSetsToFitters["C_PiPlus"].push_back( df );
     }
@@ -163,7 +173,6 @@ void G4ReweightFitManager::DefineFCN(){
           for(auto itSet = mapSetsToFitters.begin(); itSet != mapSetsToFitters.end(); ++itSet ){
             for( size_t i = 0; i < itSet->second.size(); ++i ){
               auto theFitter = itSet->second.at(i);
-              //std::string NominalFile = mapSetsToNominal[ itSet->first ];
               std::string FracsFile = mapSetsToFracs[ itSet->first ];
               auto material = mapSetsToMaterial[itSet->first];
 
@@ -171,9 +180,7 @@ void G4ReweightFitManager::DefineFCN(){
                 theFitter->MakeFitDir( outdir );
 
               //get MC predictions
-              //theFitter->GetMCFromCurvesWithCovariance( NominalFile, FracsFile, parMaker.GetParameterSet(),parMaker.GetElasticParameterSet(), fSave);
-              theFitter->GetMCValsWithCov(FracsFile, parMaker, material,
-                                          fRWManager, fSave);
+              theFitter->GetMCValsWithCov(parMaker, fSave);
               //perform fit
               theFitter->DoFitModified(fSave);
 
@@ -356,7 +363,6 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
           for (size_t i = 0; i < itSet->second.size(); ++i) {
             auto theFitter = itSet->second.at(i);
 
-            //std::string NominalFile = mapSetsToNominal[ itSet->first ];
             std::string FracsFile = mapSetsToFracs[ itSet->first ];
             auto material = mapSetsToMaterial[itSet->first];
 
@@ -368,9 +374,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
             else position = "CV";
 
             //new method to get MC predictions, supply cov matrix
-            //theFitter->GetMCFromCurvesWithCovariance(NominalFile,FracsFile,parMaker.GetParameterSet() , parMaker.GetElasticParameterSet(),true, cov , position);
-            theFitter->GetMCValsWithCov(FracsFile, parMaker, material,
-                                        fRWManager, fSave, cov, position, true);
+            theFitter->GetMCValsWithCov(parMaker, fSave, cov, position, true);
             theFitter->FinishUp();
           }
         }
@@ -530,6 +534,7 @@ void G4ReweightFitManager::DrawFitResults(){
 
     for( size_t i = 0; i < all_cuts.size(); ++i ){
       std::string cut_name = all_cuts[i];
+      std::cout << "cut name " << cut_name << std::endl;
       double max = 0.;
       std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
       for( size_t j = 0; j < data_vec.size(); ++j ){

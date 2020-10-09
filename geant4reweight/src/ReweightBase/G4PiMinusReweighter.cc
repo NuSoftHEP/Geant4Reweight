@@ -5,21 +5,13 @@ G4PiMinusReweighter::G4PiMinusReweighter(
     const std::map<std::string, TH1D*> &FSScales,
     const fhicl::ParameterSet & material_pars,
     G4ReweightManager * rw_manager,
-    TH1D * inputElasticBiasHist, bool fix) {
+    TH1D * inputElasticBiasHist, bool fix)
+  : G4Reweighter(FSInput, FSScales, material_pars, rw_manager,
+                 {"inel", "cex", "abs", "dcex", "prod"},
+                 inputElasticBiasHist, fix) {
 
-  fix_total = fix;
-  RWManager = rw_manager;
-  MaterialParameters = material_pars;
-  elasticBias = inputElasticBiasHist;
-
-  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
-    std::string name = *it;
-    exclusiveFracs[name] = (TGraph*)FSInput->Get(name.c_str());
-    inelScales[name] = FSScales.at(name);
-  }
-  
+  part_def = piminus->Definition();
   fInelastic = "pi-Inelastic";
-  theInts = {"inel", "cex", "abs", "dcex", "prod"};
   SetupProcesses();
 }
 
@@ -48,9 +40,10 @@ std::string G4PiMinusReweighter::GetInteractionSubtype(
   return "";
 }
 
+/*
 void G4PiMinusReweighter::DefineParticle() {
   std::cout << "Chose PiMinus" << std::endl;
   part_def = piminus->Definition();
-}
+}*/
 
 G4PiMinusReweighter::~G4PiMinusReweighter(){}

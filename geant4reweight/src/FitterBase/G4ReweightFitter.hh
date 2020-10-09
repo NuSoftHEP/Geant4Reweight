@@ -35,7 +35,11 @@ struct covElementStore {
 class G4ReweightFitter{
   public:
     G4ReweightFitter() {};
-    G4ReweightFitter( TFile* , fhicl::ParameterSet );
+    G4ReweightFitter(TFile * output_file, fhicl::ParameterSet exp,
+                     std::string frac_file_name,
+                     G4ReweightParameterMaker & parMaker,
+                     const fhicl::ParameterSet & material,
+                     G4ReweightManager * rw_manager);
     ~G4ReweightFitter(){};
 
     virtual void   LoadData();
@@ -48,19 +52,12 @@ class G4ReweightFitter{
     double GetNDOF(){ return nDOF; };
 
     Chi2Store GetNDataPointsAndChi2(std::string cut);
-    //void GetMCFromCurves( std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false);
-    void GetMCValsWithCov(std::string FracFileName,
+    void GetMCValsWithCov(//std::string FracFileName,
                           G4ReweightParameterMaker & parMaker,
-                          const fhicl::ParameterSet & material,
-                          G4ReweightManager * rw_manager,
+                          /*const fhicl::ParameterSet & material,
+                          G4ReweightManager * rw_manager,*/
                           bool fSave = false, TMatrixD * cov = 0x0,
                           std::string position = "CV", bool doFullRange = false);
-
-    //arguments : Total xsec filename , Fracs file name , parameters , elastic parameters , fSave , covariance matrix , position(central value,+1 sigma,-1 sigma) 
-    //void GetMCFromCurvesWithCovariance(std::string, std::string, std::map< std::string, std::vector< FitParameter > >,std::vector<FitParameter>, bool fSave=false,TMatrixD *cov=nullptr, std::string position = "CV");
-
-    //Calculates SD using full covariance matrix. use_reac = true if fit was using a single parameter for reac instead of individual exclusive channels
-    //double SigmaWithCovariance(double x , std::string cut , TMatrixD *cov , bool use_reac);
     double NewSigmaWithCov(double x, std::string cut, TMatrixD * cov, bool use_reac);
 
     void SaveExpChi2( double &, std::string & );
@@ -105,9 +102,8 @@ class G4ReweightFitter{
       return stream_in.str();
     };
 
+    TFile * fFracFile;
     G4PiPlusReweighter * theReweighter;
-    TGraph * dummyGraph;
-    TH1D * dummyHist;
 
     TGraph * total_inel;
 

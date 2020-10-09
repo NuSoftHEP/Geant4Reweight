@@ -14,30 +14,28 @@ G4Reweighter::G4Reweighter(TFile * FSInput,
                            const std::map<std::string, TH1D*> &FSScales,
                            const fhicl::ParameterSet & material_pars,
                            G4ReweightManager * rw_manager,
+                           std::vector<std::string> the_ints,
                            TH1D * inputElasticBiasHist, bool fix)
   : fix_total(fix),
     MaterialParameters(material_pars),
     RWManager(rw_manager),
     elasticBias(inputElasticBiasHist) {
 
-  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
+  for (auto it = the_ints.begin(); it != the_ints.end(); ++it) {
     std::string name = *it;
     exclusiveFracs[name] = (TGraph*)FSInput->Get(name.c_str());
     inelScales[name] = FSScales.at(name);
   }
-  
-  SetupProcesses();
 }
 
 void G4Reweighter::SetNewHists(const std::map<std::string, TH1D*> & FSScales) {
-   for (auto it = theInts.begin(); it != theInts.end(); ++it) {
-    std::string name = *it;
-    inelScales[name] = FSScales.at(name);
+  for (auto it = inelScales.begin(); it != inelScales.end(); ++it) {
+    std::string name = it->first;
+    it->second = FSScales.at(name);
   } 
 }
 
-void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist)
-{
+void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist) {
   elasticBias = inputElasticBiasHist;
 }
 
@@ -65,21 +63,13 @@ void G4Reweighter::SetupWorld() {
  
 }
 
-void G4Reweighter::DefineParticle() {
-  part_def = piplus->Definition();
-  std::cout << "Chose PiPlus " << part_def << std::endl;
-}
-
 void G4Reweighter::SetupParticle() {
   Mass = MaterialParameters.get<double>("Mass");
   Density = MaterialParameters.get<double>("Density");
 
-  DefineParticle();
-
   std::string material_name = MaterialParameters.get<std::string>("Name");
 
   dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0.);
-  //testTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
   double center = RWManager->GetCenter(material_name);
   G4ThreeVector point(0., 0., center);
   testTrack = new G4Track(dynamic_part, 0., point);
@@ -87,9 +77,6 @@ void G4Reweighter::SetupParticle() {
   testPoint = new G4StepPoint();
   testMaterial =
       RWManager->GetVolume(material_name)->GetLogicalVolume()->GetMaterial();
-  //testPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
-  //testPoint->SetMaterialCutsCouple(
-  //    physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
   
   testPoint->SetMaterial(testMaterial);
   testPoint->SetMaterialCutsCouple(
@@ -100,21 +87,6 @@ void G4Reweighter::SetupParticle() {
 }
 
 void G4Reweighter::SetupProcesses() {
-  //Initializing
-  /*
-  rm = new G4RunManager();
-
-  SetupWorld();
-  rm->SetUserInitialization(detector);
-  rm->SetUserInitialization(physList);
-  rm->Initialize();
-  rm->ConfirmBeamOnCondition();
-  rm->ConstructScoringWorlds();
-  rm->RunInitialization();
-  */
-
-  //auto theElement = (*testMaterial->GetElementVector())[0];
-
   SetupParticle();
   decay_hook = new G4DecayHook();
   G4ProcessManager * pm = part_def->GetProcessManager();
@@ -140,11 +112,6 @@ void G4Reweighter::SetupProcesses() {
     std::cout << "Fatal Error: could not get the processes" << std::endl;
     //throw;
   }
-
-  //G4CrossSectionDataStore *theElastStore   = elastic_proc->GetCrossSectionDataStore();
-  //G4CrossSectionDataStore *theInelastStore = inelastic_proc->GetCrossSectionDataStore();
-    //inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, testMaterial ) / millibarn;
-    //elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, testMaterial ) / millibarn;
 
 }
 
@@ -212,9 +179,9 @@ double G4Reweighter::GetElasticBias(double p) {
 
 double G4Reweighter::GetInelasticBias(double p) {
   double bias = 0.;
-  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
-    std::string name = *it;
-    TH1D * scale = inelScales[name];
+  for (auto it = inelScales.begin(); it != inelScales.end(); ++it) {
+    std::string name = it->first;
+    TH1D * scale = it->second;
     bias += (exclusiveFracs[name]->Eval(p) *
              scale->GetBinContent(scale->FindBin(p)));
   }

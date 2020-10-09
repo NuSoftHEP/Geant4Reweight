@@ -70,6 +70,12 @@ ParameterSet: @local::TheParameters
 
 IncludeDUET: false
 DUETDataFile: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/DUET.root"
+DUETSet: {
+  Name: "DUET_C_PiPlus"
+  Graphs: [["abs", "xsec_abs"], ["cex", "xsec_cex"]]
+  Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/DUET.root"
+  Type: "C_PiPlus"
+}
 
 MaxCalls: 2000
 Tolerance: 0.001

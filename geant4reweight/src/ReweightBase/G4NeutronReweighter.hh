@@ -12,7 +12,6 @@ class G4NeutronReweighter : public G4Reweighter {
                         TH1D * inputElasticBiasHist = 0x0, bool fix = false);
     virtual ~G4NeutronReweighter();
     std::string GetInteractionSubtype (const G4ReweightTraj &) override;
-    void DefineParticle() override;
     //void SetCaptureGraph( TFile *); //set neutron capture graph for neutrons
   protected:
     G4Neutron * neutron;

@@ -19,7 +19,11 @@
 class DUETFitter : public G4ReweightFitter { 
   public:
   
-    DUETFitter( TFile * output, std::string data_file );
+    DUETFitter(TFile * output_file, fhicl::ParameterSet exp,
+               std::string frac_file_name,
+               G4ReweightParameterMaker & parMaker,
+               const fhicl::ParameterSet & material,
+               G4ReweightManager * rw_manager);
     virtual void   LoadData() override;
     void SaveData( TDirectory * ) override;
     double DoFit(bool fSave=true) override;

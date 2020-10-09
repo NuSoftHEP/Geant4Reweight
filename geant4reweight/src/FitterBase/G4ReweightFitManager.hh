@@ -68,7 +68,6 @@ class G4ReweightFitManager{
     std::map< std::string, std::vector< G4ReweightFitter* > > mapSetsToFitters;
     std::map< std::string, std::string > mapSetsToFracs;
     std::map<std::string, fhicl::ParameterSet> mapSetsToMaterial;
-    std::map< std::string, std::string > mapSetsToNominal;
     std::vector< G4ReweightFitter* > allFitters;
 
     std::map< std::string, std::vector< FitParameter > > FullParameterSet;

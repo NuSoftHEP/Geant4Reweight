@@ -59,6 +59,7 @@ class G4Reweighter{
     G4Reweighter(TFile *, const std::map<std::string, TH1D*> &,
                  const fhicl::ParameterSet & material_pars,
                  G4ReweightManager * rw_manager,
+                 std::vector<std::string> the_ints,
                  TH1D * inputElasticBiasHist = 0x0, bool fix = false);
     virtual ~G4Reweighter();
 
@@ -95,8 +96,7 @@ class G4Reweighter{
     TH1D * elasticBias;
 
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
-    std::string fInelastic = "pi+Inelastic";
-    std::vector< std::string > theInts = {"inel", "cex", "abs", "dcex", "prod"};
+    std::string fInelastic/* = "pi+Inelastic"*/;
 
     double Mass;
     double Density;
@@ -116,15 +116,13 @@ class G4Reweighter{
     G4ParticleDefinition * part_def;
     G4DynamicParticle * dynamic_part;
 
-    std::string inel_name;
-
     G4DecayHook * decay_hook;
     G4HadronElasticProcess * elastic_proc;
     G4HadronInelasticProcess * inelastic_proc;
     G4CoulombScattering * coul_proc;
 
     void SetupProcesses();
-    virtual void DefineParticle();
+    //virtual void DefineParticle() = 0;
     void SetupWorld();
     void SetupParticle();
 

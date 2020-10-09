@@ -5,21 +5,13 @@ G4PiPlusReweighter::G4PiPlusReweighter(
     const std::map<std::string, TH1D*> &FSScales,
     const fhicl::ParameterSet & material_pars,
     G4ReweightManager * rw_manager,
-    TH1D * inputElasticBiasHist, bool fix) {
-
-  fix_total = fix;
-  RWManager = rw_manager;
-  MaterialParameters = material_pars;
-  elasticBias = inputElasticBiasHist;
-
-  for (auto it = theInts.begin(); it != theInts.end(); ++it) {
-    std::string name = *it;
-    exclusiveFracs[name] = (TGraph*)FSInput->Get(name.c_str());
-    inelScales[name] = FSScales.at(name);
-  }
-  
+    TH1D * inputElasticBiasHist, bool fix)
+  : G4Reweighter(FSInput, FSScales, material_pars, rw_manager,
+                 {"inel", "cex", "abs", "dcex", "prod"},
+                 inputElasticBiasHist, fix) {
+  part_def = piplus->Definition();
   fInelastic = "pi+Inelastic";
-  theInts = {"inel", "cex", "abs", "dcex", "prod"};
+  std::cout << "Part def: " << part_def << std::endl;
   SetupProcesses();
 }
 
@@ -46,12 +38,6 @@ std::string G4PiPlusReweighter::GetInteractionSubtype(
   }
 
   return "";
-}
-
-void G4PiPlusReweighter::DefineParticle() {
-  std::cout << "Chose PiPlus" << std::endl;
-  part_def = piplus->Definition();
-  inel_name = "pi+Inelastic";
 }
 
 G4PiPlusReweighter::~G4PiPlusReweighter(){}

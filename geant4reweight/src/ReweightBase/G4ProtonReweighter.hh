@@ -12,7 +12,6 @@ class G4ProtonReweighter : public G4Reweighter {
                        TH1D * inputElasticBiasHist = 0x0, bool fix = false);
     virtual ~G4ProtonReweighter();
     std::string GetInteractionSubtype( const G4ReweightTraj & ) override;
-    void DefineParticle() override;
 
   protected:
     G4Proton * proton;

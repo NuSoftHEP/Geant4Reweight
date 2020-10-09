@@ -1,12 +1,14 @@
 #include "DUETFitter.hh"
 
-DUETFitter::DUETFitter(TFile * output_file, std::string data_file) { 
-
-  fOutputFile = output_file;
-  cuts = { "abs", "cex" };
-  fExperimentName = "DUET_C_PiPlus";
-  fDataFileName = data_file; 
-  nDOF = 10;
+DUETFitter::DUETFitter(TFile * output_file,
+                       fhicl::ParameterSet exp,
+                       std::string frac_file_name,
+                       G4ReweightParameterMaker & parMaker,
+                       const fhicl::ParameterSet & material,
+                       G4ReweightManager * rw_manager) 
+  : G4ReweightFitter(output_file, exp, frac_file_name, parMaker, material, 
+                     rw_manager) {
+  nDOF = 10; // override the nDOF
 } 
 
 void DUETFitter::SaveData(TDirectory * data_dir){
@@ -26,16 +28,6 @@ void DUETFitter::SaveData(TDirectory * data_dir){
   DUET_cov_matrix->Write("cov");
   DUET_cov_inv->Write("cov_inv");
 
-
-  double dummyX = 0.;
-  double dummyY = 1.;
-
-  dummyGraph = new TGraph(1, &dummyX, &dummyY );
-  dummyHist  = new TH1D("dummy", "", 1,0,1);
-  //Set the over/underflow bins for the dummy 
-  dummyHist->SetBinContent(0,1.);
-  dummyHist->SetBinContent(1,1.);
-  dummyHist->SetBinContent(2,1.);
 }
 
 void DUETFitter::LoadData(){

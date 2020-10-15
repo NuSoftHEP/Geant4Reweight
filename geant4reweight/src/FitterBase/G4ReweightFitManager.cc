@@ -374,7 +374,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
             else position = "CV";
 
             //new method to get MC predictions, supply cov matrix
-            theFitter->GetMCValsWithCov(parMaker, fSave, cov, position, true);
+            theFitter->GetMCValsWithCov(parMaker, true, cov, position, true);
             theFitter->FinishUp();
           }
         }
@@ -548,7 +548,6 @@ void G4ReweightFitManager::DrawFitResults(){
           if( val > max) max = val;
         }
       }
-
 
       //PlusSigma
       std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;

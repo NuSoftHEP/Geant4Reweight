@@ -87,7 +87,7 @@ void G4ReweightFitter::DoFitModified(bool fSave){
   //Go through each cut defined for the experiment
   for( auto itXSec = Data_xsec_graphs.begin(); itXSec != Data_xsec_graphs.end(); ++itXSec ){
     std::string name = itXSec->first;
-                        
+
     //record how many points there are for each cut
     TGraph * MC_xsec = MC_xsec_graphs.at(name);
     TGraphErrors * Data_xsec = itXSec->second;
@@ -262,7 +262,7 @@ void G4ReweightFitter::GetMCValsWithCov(
         max = ranges[name];
       //std::cout << "max: " << max << std::endl;
     }
-    
+
 
     ranges["reac"] = max;
     ranges["abscx"] = (ranges["abs"] > ranges["cex"] ?
@@ -273,7 +273,7 @@ void G4ReweightFitter::GetMCValsWithCov(
   }
 
   //Go through each cut and get the values for the MC
-  //based off of the points from the Data 
+  //based off of the points from the Data
   for (auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut) {
     std::string cut_name = *itCut;
 
@@ -339,7 +339,7 @@ void G4ReweightFitter::GetMCValsWithCov(
           double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
-      }     
+      }
     }
     else if (cut_name == "abscx") {
       for (size_t i = 0; i < xs.size(); ++i) {
@@ -389,8 +389,8 @@ double G4ReweightFitter::NewSigmaWithCov (double x, std::string cut, TMatrixD * 
   //key is two strings that look up which element of the cov matrix they correspond to
   std::map<std::pair<std::string,std::string>, double> cuts_and_covs;
   //setup map storing names of excl channels and cov matrix elements
-  for (size_t i_cut = 0; i_cut<theCovStore.size(); ++i_cut) {
-    for (size_t j_cut = 0; j_cut<theCovStore.size(); ++j_cut) {
+  for (size_t i_cut = 0; i_cut < theCovStore.size(); ++i_cut) {
+    for (size_t j_cut = 0; j_cut < theCovStore.size(); ++j_cut) {
       //if x outside the range of either parameter, set corresponding cov element to zero
       if ((x < theCovStore.at(i_cut).Range.first) ||
           (x > theCovStore.at(i_cut).Range.second) ||
@@ -449,7 +449,7 @@ double G4ReweightFitter::NewSigmaWithCov (double x, std::string cut, TMatrixD * 
 
   //now calculate the varaince depending on what sort of process you're dealing with
   //single exclusive channel
-  if(cut != "total" && cut != "reac" && cut != "abscx"){                
+  if(cut != "total" && cut != "reac" && cut != "abscx"){
     variance = cuts_and_noms[cut]*
                cuts_and_noms[cut]*
                cuts_and_covs[{cut, cut}];

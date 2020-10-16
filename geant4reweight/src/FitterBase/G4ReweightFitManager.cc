@@ -467,10 +467,10 @@ void G4ReweightFitManager::MakeMinimizer( fhicl::ParameterSet & ps ){
 
 void G4ReweightFitManager::DrawFitResults(){
 
-  std::vector< std::string > types;
-  for( auto itSets = mapSetsToFitters.begin(); itSets != mapSetsToFitters.end(); ++itSets ){
-
-    types.push_back( itSets->first );
+  std::vector<std::string> types;
+  for(auto itSets = mapSetsToFitters.begin(); itSets != mapSetsToFitters.end();
+      ++itSets){
+    types.push_back(itSets->first);
   }
   //add elastic parameters
   std::map< std::string, std::string > titles = {
@@ -636,10 +636,8 @@ void G4ReweightFitManager::DrawFitResults(){
 
       typedir->cd();
       c1.Write( cut_name.c_str() );
-
     }
   }
-
 
   TVectorD theChi2(3);
   theChi2[0] = fMinimizer->MinValue();

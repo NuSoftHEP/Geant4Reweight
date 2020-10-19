@@ -4,6 +4,7 @@
 #include "TMatrixD.h"
 #include "TGraph.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TGraphErrors.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -24,11 +25,12 @@
 #include "util/FitStore.hh"
 
 // stores elements of covariance matrix produced in fit
+/*
 struct covElementStore {
   std::string cut; //name of process (abs, cex etc)
   int index; //index in CM
   std::pair<double , double> Range; //range of momenta parameter applies to
-};
+};*/
 
 
 
@@ -56,9 +58,12 @@ class G4ReweightFitter{
                           G4ReweightParameterMaker & parMaker,
                           /*const fhicl::ParameterSet & material,
                           G4ReweightManager * rw_manager,*/
-                          bool fSave = false, TMatrixD * cov = 0x0,
+                          bool fSave = false, TH2D/*TMatrixD*/ * cov = 0x0,
                           std::string position = "CV", bool doFullRange = false);
-    double NewSigmaWithCov(double x, std::string cut, TMatrixD * cov, bool use_reac);
+    double SigmaWithCov(
+        double x, std::string cut, /*TH2D * cov,*/
+        std::map<std::pair<std::string, std::string>, double> & cov_vals_map,
+        G4ReweightParameterMaker & parMaker);
 
     void SaveExpChi2( double &, std::string & );
     void FinishUp();
@@ -113,8 +118,6 @@ class G4ReweightFitter{
     int nDOF;
     //double nDOF;
     
-    std::vector<covElementStore> theCovStore;
-
 };
 
 

@@ -194,14 +194,8 @@ Chi2Store G4ReweightFitter::GetNDataPointsAndChi2(std::string cut){
 }
 
 void G4ReweightFitter::GetMCValsWithCov(
-    //std::string FracFileName,
     G4ReweightParameterMaker & parMaker,
-    /*const fhicl::ParameterSet & material,
-    G4ReweightManager * rw_manager,*/
-    bool fSave,TMatrixD *cov, std::string position, bool doFullRange) {
-  //store the info needed to calculate variances from the cov matrix
-  //stores the list of parameters used, the momentum ranges they apply to
-  theCovStore.clear();
+    bool fSave, /*TMatrixD */TH2D * cov, std::string position, bool doFullRange) {
 
   std::map<std::string, std::vector<FitParameter>> pars =
       parMaker.GetParameterSet();
@@ -209,41 +203,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
   //inelastic parameters always go in first
 
-  bool use_reac = false;
-  if(cov != nullptr && position != "CV"){
-    int i=0;
-    for (auto itPar = pars.begin(); itPar != pars.end(); ++itPar) {
-      for (size_t j=0; j<itPar->second.size(); j++) {
-        if (!itPar->second.at( j ).Dummy) {
-          std::string name1 = itPar->first;
-          covElementStore S;
-
-          S.index = i;
-          S.Range = itPar->second.at(j).Range;
-          S.cut = name1;
-
-          if(name1 == "reac")
-            use_reac = true;
-          theCovStore.push_back(S);
-          i++;
-        }
-      }
-    }
-
-    for (size_t i_ep=0; i_ep < elast_pars.size(); ++i_ep) {
-      std::string name = elast_pars.at(i_ep).Cut;
-
-      covElementStore S;
-      S.index = i;
-      S.Range = elast_pars.at(i_ep).Range;
-      S.cut = name;
-      theCovStore.push_back(S);
-      i++;
-    }
-  }
-
   //Set the new values for the parameters
-
   theReweighter->SetNewHists(parMaker.GetFSHists());
   theReweighter->SetNewElasticHists(parMaker.GetElasticHist());
 
@@ -274,6 +234,20 @@ void G4ReweightFitter::GetMCValsWithCov(
 
   //Go through each cut and get the values for the MC
   //based off of the points from the Data
+  //First transform the cov into a map
+  //Transform cov into map for easier use
+  std::map<std::pair<std::string, std::string>, double> cov_vals_map;
+  if (cov) {
+    for (int i = 1; i <= cov->GetNbinsX(); ++i) {
+      for (int j = 1; j <= cov->GetNbinsY(); ++j) {
+        std::string x_label = cov->GetXaxis()->GetBinLabel(i);
+        std::string y_label = cov->GetYaxis()->GetBinLabel(j);
+
+        cov_vals_map[{x_label, y_label}] = cov->GetBinContent(i, j);
+      }
+    }
+  }
+
   for (auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut) {
     std::string cut_name = *itCut;
 
@@ -308,7 +282,7 @@ void G4ReweightFitter::GetMCValsWithCov(
         //if no cov or position specified, just use central values
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
-          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          double v = SigmaWithCov(x, cut_name, cov_vals_map, parMaker);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
       }
@@ -321,7 +295,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
-          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          double v = SigmaWithCov(x, cut_name, cov_vals_map, parMaker);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
       }
@@ -336,7 +310,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
-          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          double v = SigmaWithCov(x, cut_name, cov_vals_map, parMaker);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
       }
@@ -352,7 +326,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
-          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          double v = SigmaWithCov(x, cut_name, cov_vals_map, parMaker);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
       }
@@ -366,7 +340,7 @@ void G4ReweightFitter::GetMCValsWithCov(
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
-          double v = NewSigmaWithCov(x, cut_name, cov, use_reac);
+          double v = SigmaWithCov(x, cut_name, cov_vals_map, parMaker);
           ys.back() += (position == "up" ? sqrt(v) : -1.*sqrt(v));
         }
       }
@@ -382,134 +356,242 @@ void G4ReweightFitter::GetMCValsWithCov(
   }
 }
 
-double G4ReweightFitter::NewSigmaWithCov (double x, std::string cut, TMatrixD * cov, bool use_reac) {
-  double variance = 0;
-  //variances of individual channels as a fraction of nominal cross section
+double G4ReweightFitter::SigmaWithCov(
+    double x, std::string cut,
+    std::map<std::pair<std::string, std::string>, double> & cov_vals_map,
+    G4ReweightParameterMaker & parMaker) {
+  std::map<std::string, std::vector<FitParameter>> pars =
+      parMaker.GetParameterSet();
+  std::vector<FitParameter> reac_pars = pars.at("reac");
+  std::vector<FitParameter> elast_pars = parMaker.GetElasticParameterSet();
+  std::map<std::string, double> par_vals;
 
-  //key is two strings that look up which element of the cov matrix they correspond to
-  std::map<std::pair<std::string,std::string>, double> cuts_and_covs;
-  //setup map storing names of excl channels and cov matrix elements
-  for (size_t i_cut = 0; i_cut < theCovStore.size(); ++i_cut) {
-    for (size_t j_cut = 0; j_cut < theCovStore.size(); ++j_cut) {
-      //if x outside the range of either parameter, set corresponding cov element to zero
-      if ((x < theCovStore.at(i_cut).Range.first) ||
-          (x > theCovStore.at(i_cut).Range.second) ||
-          (x < theCovStore.at(j_cut).Range.first) ||
-          (x > theCovStore.at(j_cut).Range.second)) {
-        cuts_and_covs[{theCovStore.at(i_cut).cut, theCovStore.at(j_cut).cut}] = 0;
+  std::vector<std::string> all_cuts = {"elast"};
+  for (auto it = pars.begin(); it != pars.end(); ++it) {
+    all_cuts.push_back(it->first);
+  }
+
+  //go through the different vectors to find the ranges of the parameters
+  //and check against x
+  std::map<std::pair<std::string, std::string>, double> cov_map_cuts;
+  for (size_t i = 0; i < all_cuts.size(); ++i) {
+    std::string cut1 = all_cuts[i];
+    bool is_dummy = false;
+    bool is_out_of_range = true;
+    size_t index1 = 0;
+    if (cut1 == "elast") {
+      if (!elast_pars.size()) {
+        is_dummy = true;
       }
       else {
-        cuts_and_covs[{theCovStore.at(i_cut).cut,theCovStore.at(j_cut).cut}] =
-            (*cov)(theCovStore.at(i_cut).index, theCovStore.at(j_cut).index);
-      }
-    }
-  }
-
-
-  //TODO: Find a way to figure out which channels to use from the params file / make this less hard coded in (eg inherited class)
-  //or from how they're set in G4PionReweighter constructor
-  std::string excl_channels[8] = {"abs", "cex", "inel", "prod", "dcex", "elast",
-                                  "reac", "total"};
-  //add any remaining data types not found in cov matrix
-  for (int i_ch=0; i_ch<8; i_ch++) {
-    for (int j_ch=0; j_ch<8; j_ch++) {
-      //if entry in CM already exists, skip
-      if (cuts_and_covs.find({excl_channels[i_ch] , excl_channels[j_ch]}) == cuts_and_covs.end()) {
-        //if reac is being used as a parameter then set diagonal elements of cov matrix for abs, cex, inel, prod, dcex as equal to reac error
-        if (use_reac && i_ch==j_ch && excl_channels[i_ch] != "elast" && excl_channels[i_ch] != "total") {
-          cuts_and_covs[{excl_channels[i_ch], excl_channels[i_ch]}] = cuts_and_covs[{"reac","reac"}];
+        for (size_t j = 0; j < elast_pars.size(); ++j) {
+          FitParameter par = elast_pars[j];
+          if ((x >= par.Range.first) && (x <= par.Range.second)) {
+            index1 = j;
+            is_out_of_range = false;
+            break;
+          }
         }
-        else
-          cuts_and_covs[{excl_channels[i_ch], excl_channels[j_ch]}] = 0.0;
+      }
+    }
+    else if (pars.at(cut1)[0].Dummy) {
+      is_dummy = true;
+    }
+    else {
+      std::vector<FitParameter> cut_pars = pars.at(cut1);
+      for (size_t j = 0; j < cut_pars.size(); ++j) {
+        FitParameter par = cut_pars[j];
+        if ((x >= par.Range.first) && (x <= par.Range.second)) {
+          index1 = j;
+          is_out_of_range = false;
+          break;
+        }
+      }
+    }
+    
+    if (is_dummy || is_out_of_range) {
+      par_vals[cut1] = 1.;
+      for (size_t j = 0; j < all_cuts.size(); ++j) {
+        std::string cut2 = all_cuts[j];
+        cov_map_cuts[{cut1, cut2}] = 0.;
+      }
+    }
+    else {
+      if (cut1 == "elast") {
+        par_vals[cut1] = elast_pars[index1].Value;
+      }
+      else {
+        par_vals[cut1] = pars.at(cut1)[index1].Value;
+      }
+      for (size_t j = 0; j < all_cuts.size(); ++j) {
+        bool is_out_of_range_2 = true;
+        std::string cut2 = all_cuts[j];
+        if (cut2 == "elast") {
+          if (!elast_pars.size()) {
+            cov_map_cuts[{cut1, cut2}] = 0.;
+          }
+          else {
+            for (size_t k = 0; k < elast_pars.size(); ++k) {
+              FitParameter par = elast_pars[k];
+              if ((x >= par.Range.first) && (x <= par.Range.second)) {
+                is_out_of_range_2 = false;
+                if (cut1 == "elast") {
+                  cov_map_cuts[{cut1, cut2}] =
+                      fabs(cov_vals_map[{elast_pars[index1].Name, par.Name}]);
+                }
+                else {
+                  cov_map_cuts[{cut1, cut2}] =
+                      fabs(cov_vals_map[{pars.at(cut1)[index1].Name, par.Name}]);
+                }
+                break;
+              }
+              if (is_out_of_range_2) {
+                cov_map_cuts[{cut1, cut2}] = 0.;
+              }
+            }
+          }
+        }
+        else {
+          std::vector<FitParameter> pars2 = pars[cut2];
+          if (pars2[0].Dummy) {
+            cov_map_cuts[{cut1, cut2}] = 0.;      
+          }
+          else {
+            for (size_t k = 0; k < pars2.size(); ++k) {
+              FitParameter par = pars2[k];
+              if ((x >= par.Range.first) && (x <= par.Range.second)) {
+                is_out_of_range_2 = false;
+                if (cut1 == "elast") {
+                  cov_map_cuts[{cut1, cut2}] =
+                      fabs(cov_vals_map[{elast_pars[index1].Name, par.Name}]);
+                }
+                else {
+                  cov_map_cuts[{cut1, cut2}] =
+                      fabs(cov_vals_map[{pars.at(cut1)[index1].Name, par.Name}]);
+                }
+                break;
+              }
+              if (is_out_of_range_2) {
+                cov_map_cuts[{cut1, cut2}] = 0.;
+              }
+            }
+          }
+        }
       }
     }
   }
-
-  //create a map between each name of exclusive channel and its Nominal prediction
-  //TODO find way to make this less hard coded in
-  std::map<std::string , double> cuts_and_noms;
-  for (int i_ch=0; i_ch<8; ++i_ch) {
-    //std::cout << excl_channels[i_ch] << std::endl;
-    if (excl_channels[i_ch] == "elast") {
-      cuts_and_noms["elast"] = theReweighter->GetElasticXSec(x);
-    }
-    else if(excl_channels[i_ch] == "reac"){
-      cuts_and_noms["reac"] = theReweighter->GetInelasticXSec(x);
-    }
-    else if(excl_channels[i_ch] == "total"){
-      cuts_and_noms["total"] = theReweighter->GetElasticXSec(x) +
-                               theReweighter->GetInelasticXSec(x);
-    }
-    //retrieve nominal excl channel cross sections cross sections
-    else {
-      cuts_and_noms[excl_channels[i_ch]] =
-          theReweighter->GetExclusiveXSec(x, excl_channels[i_ch]);
-    }
+  
+  //Just do the elastic error. simple
+  if (cut == "elast") {
+    return (std::pow(theReweighter->GetElasticXSec(x), 2)*cov_map_cuts[{cut, cut}]);
   }
-
-  //now calculate the varaince depending on what sort of process you're dealing with
-  //single exclusive channel
-  if(cut != "total" && cut != "reac" && cut != "abscx"){
-    variance = cuts_and_noms[cut]*
-               cuts_and_noms[cut]*
-               cuts_and_covs[{cut, cut}];
+  else if (cut != "reac" && cut != "total" && cut != "abscx") {
+    return ((std::pow(par_vals[cut]*
+                      theReweighter->GetExclusiveXSec(x, cut), 2)*
+             cov_map_cuts[{"reac", "reac"}]) +
+            (std::pow(par_vals["reac"]*
+                      theReweighter->GetExclusiveXSec(x, cut), 2)*
+             cov_map_cuts[{cut, cut}]) +
+            (2*par_vals["reac"]*
+             par_vals[cut]*
+             std::pow(theReweighter->GetExclusiveXSec(x, cut), 2)*
+             cov_map_cuts[{cut, "reac"}]));
   }
-  //abscx - sum of abs and cex, include cov between the two
   else if (cut == "abscx") {
-    variance = (cuts_and_noms["abs"]*cuts_and_noms["abs"]*
-                cuts_and_covs[{"abs", "abs"}]) +
-               (cuts_and_noms["cex"]*cuts_and_noms["cex"]*
-                cuts_and_covs[std::make_pair("cex","cex")]) +
-               (2*cuts_and_noms["abs"]*cuts_and_noms["cex"]*
-                cuts_and_covs[{"cex", "abs"}]);
-  }
-  // reac - sum of abs cex inel dcex and prod, include all their covariances
-  else if (cut == "reac") {
-    if (!use_reac) {
+    //reac term
+    double variance = std::pow((par_vals["abs"]*
+                                theReweighter->GetExclusiveXSec(x, "abs")) +
+                               (par_vals["cex"]*
+                                theReweighter->GetExclusiveXSec(x, "cex")), 2)*
+                      cov_map_cuts[{"reac", "reac"}];
 
-      std::string reac_excl_ch[5] = {"abs", "cex", "inel", "prod", "dcex"};
-      variance = 0;
+    //abs term
+    variance += std::pow(par_vals["abs"]*par_vals["reac"], 2)*
+                cov_map_cuts[{"abs", "abs"}];
 
-      for (int i=0; i<5; i++) {
-        for (int j=0; j<5; j++) {
-          variance += (cuts_and_noms[reac_excl_ch[i]]*
-                       cuts_and_noms[reac_excl_ch[j]]*
-                       cuts_and_covs[{reac_excl_ch[i],reac_excl_ch[j]}]);
-        }
-      }
-    }// !use_reac
-    else {
-      variance = (cuts_and_noms["reac"]*
-                  cuts_and_noms["reac"]*
-                  cuts_and_covs[{"reac", "reac"}]);
-    }// use_reac
+    //cex term
+    variance += std::pow(par_vals["cex"]*par_vals["reac"], 2)*
+                cov_map_cuts[{"cex", "cex"}];
+
+    //cross terms: abs/cex with reac
+    variance += 2*((par_vals["abs"]*
+                    theReweighter->GetExclusiveXSec(x, "abs")) +
+                   (par_vals["cex"]*
+                    theReweighter->GetExclusiveXSec(x, "cex")))*
+                  ((par_vals["reac"]*
+                    theReweighter->GetExclusiveXSec(x, "abs")*
+                    cov_map_cuts[{"abs", "reac"}]) +
+                   (par_vals["reac"]*
+                    theReweighter->GetExclusiveXSec(x, "cex")*
+                    cov_map_cuts[{"cex", "reac"}]));
+
+    //cross term: abs with cex
+    variance += 2*std::pow(par_vals["reac"], 2)*
+                theReweighter->GetExclusiveXSec(x, "abs")*
+                theReweighter->GetExclusiveXSec(x, "cex")*
+                cov_map_cuts[{"abs", "cex"}];
+    return variance;
   }
-  else if (cut == "total") {
-    if (!use_reac) {
-      std::string reac_excl_ch[6] = {"abs", "cex", "inel", "prod", "dcex",
-                                     "elast"};
-      variance = 0;
-      for (int i=0; i<6; i++) {
-        for (int j=0; j<6; j++) {
-          variance += (cuts_and_noms[reac_excl_ch[i]]*
-                       cuts_and_noms[reac_excl_ch[j]]*
-                       cuts_and_covs[{reac_excl_ch[i],reac_excl_ch[j]}]);
-        }
+  else if (cut == "total" || cut == "reac") {
+
+    //reac term
+    double reac_term = 0.;
+    for (size_t i = 0; i < all_cuts.size(); ++i) {
+      if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
+      reac_term += (par_vals[all_cuts[i]]*
+                  theReweighter->GetExclusiveXSec(x, all_cuts[i]));
+    }
+    double variance = reac_term*cov_map_cuts[{"reac", "reac"}];
+
+    //exclusive terms
+    for (size_t i = 0; i < all_cuts.size(); ++i) {
+      if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
+      variance += cov_map_cuts[{all_cuts[i], all_cuts[i]}]*
+                  std::pow(theReweighter->GetExclusiveXSec(x, all_cuts[i]), 2)*
+                  par_vals["reac"]*par_vals["reac"];
+    }
+
+    //Cross terms: reac with exclusive
+    double sub_var = (2.*par_vals["reac"]*reac_term);
+
+    for (size_t i = 0; i < all_cuts.size(); ++i) {
+      if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
+      variance += sub_var*theReweighter->GetExclusiveXSec(x, all_cuts[i])*
+                  cov_map_cuts[{"reac", all_cuts[i]}];
+    }
+
+    //Cross terms: mixed exclusive
+    for (size_t i = 0; i < all_cuts.size(); ++i) {
+      if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
+      for (size_t j = 0; j < all_cuts.size(); ++j) {
+        if ((i == j) || (all_cuts[j] == "elast") || (all_cuts[j] == "reac"))
+          continue;
+        variance += par_vals["reac"]*par_vals["reac"]*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[i])*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[j])*
+                    cov_map_cuts[{all_cuts[i], all_cuts[j]}];
       }
     }
-    else {
-      variance = (cuts_and_noms["reac"]*cuts_and_noms["reac"]*
-                  cuts_and_covs[{"reac", "reac"}]) +
-                 (cuts_and_noms["elast"]*cuts_and_noms["elast"]*
-                  cuts_and_covs[{"elast", "elast"}]) +
-                 (2*cuts_and_noms["elast"]*cuts_and_noms["reac"]*
-                  cuts_and_covs[{"elast", "reac"}]);
-    }
-  }
-  else {
-    std::cout << "Unrecognized process " << cut << " assuming 0 variance" << std::endl;
-    return 0;
-  }
 
-  return variance;
+    //If total, add in terms proportional to elast
+    if (cut == "total") {
+      //Elast term
+      variance += std::pow(theReweighter->GetElasticXSec(x), 2)*
+                  cov_map_cuts[{"elast", "elast"}];
+      
+      //Cross term: elast with reac
+      variance += 2.*reac_term*cov_map_cuts[{"elast", "reac"}];
+
+      //Cross term: elast with exclusive
+      for (size_t i = 0; i < all_cuts.size(); ++i) {
+        if (all_cuts[i] == "reac" || all_cuts[i] == "elast") continue;
+        variance += 2.*theReweighter->GetElasticXSec(x)*par_vals["reac"]*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[i])*
+                    cov_map_cuts[{"elast", all_cuts[i]}];
+      }
+    }
+
+    return variance;
+  }
+  return 0.;
 }

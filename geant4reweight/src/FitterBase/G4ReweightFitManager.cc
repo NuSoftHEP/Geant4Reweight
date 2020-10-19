@@ -374,7 +374,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
             else position = "CV";
 
             //new method to get MC predictions, supply cov matrix
-            theFitter->GetMCValsWithCov(parMaker, true, cov, position, true);
+            theFitter->GetMCValsWithCov(parMaker, true, &covHist, position, true);
             theFitter->FinishUp();
           }
         }

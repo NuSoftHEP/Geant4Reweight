@@ -265,6 +265,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
       if (bias_val > min && val > min) {
         weight *= (1. - exp(-1.*bias_val));
         weight /= (1. - exp(-1.*val));
+                  //Handled by exclusive factor below
         weight *= /*GetInelasticBias(p)*/1. / bias_val;
         weight /= 1. / val;
       }

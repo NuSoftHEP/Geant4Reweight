@@ -32,6 +32,18 @@ G4Reweighter * G4ReweighterFactory::BuildReweighter(
                                      rw_manager, inputElasticBiasHist,
                                      fix_total);
     }   
+    case 321:
+    {
+      return new G4KPlusReweighter(FSInput, FSScales, material_pars,
+                                   rw_manager, inputElasticBiasHist,
+                                   fix_total);
+    }
+    case -321:
+    {
+      return new G4KMinusReweighter(FSInput, FSScales, material_pars,
+                                   rw_manager, inputElasticBiasHist,
+                                   fix_total);
+    }
     default:
       std::cerr << "Error: Reweighter for PDG code " << PDG << " is not implemented" << std::endl;
       return 0x0;

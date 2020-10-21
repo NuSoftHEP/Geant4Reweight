@@ -10,7 +10,7 @@ G4MultiReweighter::G4MultiReweighter(
     G4ReweightManager * rw_manager,
     TFile & fitResults,
     size_t nThrows, int seed)
-    : parMaker(parSet, pdg),
+    : parMaker(parSet, false, pdg),
       reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
                                          material,
@@ -54,7 +54,7 @@ G4MultiReweighter::G4MultiReweighter(
     const fhicl::ParameterSet & material,
     G4ReweightManager * rw_manager,
     size_t nThrows, int seed)
-    : parMaker(parSet, pdg),
+    : parMaker(parSet, false, pdg),
       reweighter(factory.BuildReweighter(pdg, &fracsFile,
                                          parMaker.GetFSHists(),
                                          material,

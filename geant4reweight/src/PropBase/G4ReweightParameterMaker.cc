@@ -6,7 +6,7 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
   BuildHistsFromPars();
 }
 
-G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, int pdg/*bool doProton*/ ){
+G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, bool check_overlap, int pdg){
 
   std::vector< std::string > all_cuts;
   switch (pdg) {
@@ -21,6 +21,14 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     case 2212: {
       all_cuts = {"total", "reac"};
       //all_cuts = {"0n0p", "1n0p", "0n1p", "1n1p", "Other", "reac"};
+      break;
+    }
+    case 321: {
+      all_cuts = {"total", "reac"};
+      break;
+    }
+    case -321: {
+      all_cuts = {"total", "reac"};
       break;
     }
     /*
@@ -96,32 +104,34 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
   }
 
   //Check range here
-  for (auto it = FullParameterSet.begin();
-       it != FullParameterSet.end(); ++it) {
-    for (size_t i = 0; i < it->second.size(); ++i) {
-      std::string i_name = it->second.at(i).Name;
-      std::pair<double, double> i_range = it->second.at(i).Range;
-      for (size_t j = 0; j < it->second.size(); ++j) {
-        if (i == j) continue;
-        std::pair<double, double> j_range = it->second.at(j).Range;
-        std::string j_name = it->second.at(j).Name;
-        if ((i_range.first >= j_range.first) &&
-            (i_range.first < j_range.second)) {
-          std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
-                    << i_range.first << ", " << i_range.second << ")" << "\n"
-                    << j_name << " (" << j_range.first << ", "
-                    << j_range.second << ")" << std::endl;
-          std::exception e;
-          throw e;
-        }
-        if ((i_range.second <= j_range.second) &&
-            (i_range.second > j_range.first)) {
-          std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
-                    << i_range.first << ", " << i_range.second << ")" << "\n"
-                    << j_name << " (" << j_range.first << ", "
-                    << j_range.second << ")" << std::endl;
-          std::exception e;
-          throw e;
+  if (check_overlap) {
+    for (auto it = FullParameterSet.begin();
+         it != FullParameterSet.end(); ++it) {
+      for (size_t i = 0; i < it->second.size(); ++i) {
+        std::string i_name = it->second.at(i).Name;
+        std::pair<double, double> i_range = it->second.at(i).Range;
+        for (size_t j = 0; j < it->second.size(); ++j) {
+          if (i == j) continue;
+          std::pair<double, double> j_range = it->second.at(j).Range;
+          std::string j_name = it->second.at(j).Name;
+          if ((i_range.first >= j_range.first) &&
+              (i_range.first < j_range.second)) {
+            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                      << i_range.first << ", " << i_range.second << ")" << "\n"
+                      << j_name << " (" << j_range.first << ", "
+                      << j_range.second << ")" << std::endl;
+            std::exception e;
+            throw e;
+          }
+          if ((i_range.second <= j_range.second) &&
+              (i_range.second > j_range.first)) {
+            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                      << i_range.first << ", " << i_range.second << ")" << "\n"
+                      << j_name << " (" << j_range.first << ", "
+                      << j_range.second << ")" << std::endl;
+            std::exception e;
+            throw e;
+          }
         }
       }
     }

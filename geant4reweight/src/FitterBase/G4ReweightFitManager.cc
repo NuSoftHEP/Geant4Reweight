@@ -29,7 +29,7 @@ G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_s
 
 void G4ReweightFitManager::MakeFitParameters(std::vector< fhicl::ParameterSet > & FitParSets) {
 
-  parMaker = G4ReweightParameterMaker( FitParSets );
+  parMaker = G4ReweightParameterMaker( FitParSets, true );
 
   //TODO nDOF calculation no longer valid with new fit method
   nDOF -= parMaker.GetNParameters();

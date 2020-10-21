@@ -18,8 +18,6 @@
 
 #include "Geant4/G4CrossSectionDataStore.hh"
 #include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4PionMinus.hh"
-#include "Geant4/G4Proton.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4DynamicParticle.hh"
 #include "Geant4/G4ThreeVector.hh"

@@ -1,6 +1,7 @@
 #ifndef G4ProtonReweighter_h
 #define G4ProtonReweighter_h
 
+#include "Geant4/G4Proton.hh"
 #include "G4Reweighter.hh"
 
 class G4ProtonReweighter : public G4Reweighter {

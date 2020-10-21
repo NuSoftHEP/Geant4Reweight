@@ -2,6 +2,7 @@
 #define G4PiMinusReweighter_h
 
 #include "G4Reweighter.hh"
+#include "Geant4/G4PionMinus.hh"
 
 class G4PiMinusReweighter : public G4Reweighter {
   public:

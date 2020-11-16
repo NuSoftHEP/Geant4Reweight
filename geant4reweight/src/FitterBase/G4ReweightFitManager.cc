@@ -380,6 +380,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
         }
       }
       DrawFitResults();
+      DoScans();
     }
   }
   else{
@@ -648,5 +649,31 @@ void G4ReweightFitManager::DrawFitResults(){
 
   out->cd("Fit");
   theChi2.Write( "Chi2" );
+
+}
+
+void G4ReweightFitManager::DoScans() {
+  TDirectory * scans = (TDirectory *)out->mkdir("Scans");
+  scans->cd();
+
+  std::cout << "Scanning parameters" << std::endl;
+  size_t total_parameters = theParVals.size()+theElastParVals.size();
+
+  unsigned int fNScanSteps = 100;
+  double * x = new double[fNScanSteps] {};
+  double * y = new double[fNScanSteps] {};
+  for (size_t i = 0; i < total_parameters; ++i) {
+    std::cout << "\tParameter " << fMinimizer->VariableName(i) << std::endl;
+    bool scanned = fMinimizer->Scan(i, fNScanSteps, x, y);
+    if (scanned) {
+      TGraph gr(fNScanSteps - 1, x, y);
+      std::string title_name = "#chi^{2} Scan: " + fMinimizer->VariableName(i);
+      gr.SetTitle(title_name.c_str());
+      gr.Write(fMinimizer->VariableName(i).c_str());
+    }
+  }
+
+  delete[] x;
+  delete[] y;
 
 }

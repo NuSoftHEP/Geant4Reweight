@@ -506,11 +506,11 @@ double G4ReweightFitter::SigmaWithCov(
                       cov_map_cuts[{"reac", "reac"}];
 
     //abs term
-    variance += std::pow(par_vals["abs"]*par_vals["reac"], 2)*
+    variance += std::pow(theReweighter->GetExclusiveXSec(x, "abs")*par_vals["reac"], 2)*
                 cov_map_cuts[{"abs", "abs"}];
 
     //cex term
-    variance += std::pow(par_vals["cex"]*par_vals["reac"], 2)*
+    variance += std::pow(theReweighter->GetExclusiveXSec(x, "cex")*par_vals["reac"], 2)*
                 cov_map_cuts[{"cex", "cex"}];
 
     //cross terms: abs/cex with reac
@@ -541,7 +541,7 @@ double G4ReweightFitter::SigmaWithCov(
       reac_term += (par_vals[all_cuts[i]]*
                   theReweighter->GetExclusiveXSec(x, all_cuts[i]));
     }
-    double variance = reac_term*cov_map_cuts[{"reac", "reac"}];
+    double variance = reac_term*reac_term*cov_map_cuts[{"reac", "reac"}];
 
     //exclusive terms
     for (size_t i = 0; i < all_cuts.size(); ++i) {

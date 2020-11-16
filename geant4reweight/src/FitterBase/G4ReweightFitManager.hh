@@ -50,6 +50,7 @@ class G4ReweightFitManager{
 
     void MakeMinimizer( fhicl::ParameterSet & );
     void DrawFitResults();
+    void DoScans();
 
     bool IsSetActive( std::string theSetName ){
       return ( std::find( sets.begin(), sets.end(), theSetName ) != sets.end() );

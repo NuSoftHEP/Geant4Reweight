@@ -1,12 +1,14 @@
 #include "DUETFitter.hh"
 
-DUETFitter::DUETFitter(TFile * output_file, std::string data_file) { 
-
-  fOutputFile = output_file;
-  cuts = { "abs", "cex" };
-  fExperimentName = "DUET_C_PiPlus";
-  fDataFileName = data_file; 
-  nDOF = 10;
+DUETFitter::DUETFitter(TFile * output_file,
+                       fhicl::ParameterSet exp,
+                       std::string frac_file_name,
+                       G4ReweightParameterMaker & parMaker,
+                       const fhicl::ParameterSet & material,
+                       G4ReweightManager * rw_manager) 
+  : G4ReweightFitter(output_file, exp, frac_file_name, parMaker, material, 
+                     rw_manager) {
+  nDOF = 10; // override the nDOF
 } 
 
 void DUETFitter::SaveData(TDirectory * data_dir){
@@ -26,16 +28,6 @@ void DUETFitter::SaveData(TDirectory * data_dir){
   DUET_cov_matrix->Write("cov");
   DUET_cov_inv->Write("cov_inv");
 
-
-  double dummyX = 0.;
-  double dummyY = 1.;
-
-  dummyGraph = new TGraph(1, &dummyX, &dummyY );
-  dummyHist  = new TH1D("dummy", "", 1,0,1);
-  //Set the over/underflow bins for the dummy 
-  dummyHist->SetBinContent(0,1.);
-  dummyHist->SetBinContent(1,1.);
-  dummyHist->SetBinContent(2,1.);
 }
 
 void DUETFitter::LoadData(){
@@ -55,6 +47,56 @@ void DUETFitter::LoadData(){
 double DUETFitter::DoFit(bool fSave){
   double Chi2 = 0.;
 
+  double Data_val_i, Data_val_j, MC_val_i, MC_val_j, cov_val;
+  double x;
+  
+  int NPoints = Data_xsec_graphs["cex"]->GetN() + Data_xsec_graphs["abs"]->GetN();
+  for( int i = 0; i < NPoints; ++i ){
+    if( i < 5 ){
+      Data_xsec_graphs["cex"]->GetPoint(i, x, Data_val_i);
+      MC_val_i = MC_xsec_graphs["cex"]->Eval( x );
+    }
+    else{
+      Data_xsec_graphs["abs"]->GetPoint(i - 5, x, Data_val_i);
+      MC_val_i = MC_xsec_graphs["abs"]->Eval(x);
+    }
+
+    for( int j = 0; j < NPoints; ++j ){
+   
+      if( j < 5 ){
+        Data_xsec_graphs["cex"]->GetPoint(j, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["cex"]->Eval(x);
+      }
+      else{
+        Data_xsec_graphs["abs"]->GetPoint(j - 5, x, Data_val_j);
+        MC_val_j = MC_xsec_graphs["abs"]->Eval(x);
+      }
+
+      cov_val = DUET_cov_inv[0][i][j];
+
+      double partial_chi2 = ( MC_val_i - Data_val_i ) * cov_val * ( MC_val_j - Data_val_j );
+      Chi2 += partial_chi2; 
+    }
+  }
+
+  if( fSave ){
+    std::string name = "abs";
+    SaveExpChi2( Chi2, name );
+    name = "cex";
+    SaveExpChi2( Chi2, name );
+  }
+  return Chi2;
+}
+
+
+
+
+
+//C Thorpe: New method compatible with new chi2 calculation
+void DUETFitter::DoFitModified(bool fSave){
+
+  fitDataStore.clear();
+  double Chi2 = 0.;
   double Data_val_i, Data_val_j, MC_val_i, MC_val_j, cov_val;
   double x;
   
@@ -98,5 +140,13 @@ double DUETFitter::DoFit(bool fSave){
     name = "cex";
     SaveExpChi2( Chi2, name );
   }
-  return Chi2;
+
+
+  //slightly questionable but probably ok!
+  Chi2Store thisStoreAbs("abs",5,Chi2/2);
+  Chi2Store thisStoreCex("cex",5,Chi2/2);
+  
+  fitDataStore.push_back(thisStoreAbs);
+  fitDataStore.push_back(thisStoreCex);
+  //return Chi2;
 }

@@ -1,4 +1,4 @@
-from ROOT import * 
+import ROOT as RT
 from array import array
 import sys
 import math
@@ -7,14 +7,14 @@ import math
 def mom_to_ke( grin ):
   xs = [math.sqrt(grin.GetX()[i]*grin.GetX()[i] + 139.57*139.57 ) - 139.57 for i in range(0,grin.GetN())] 
   ys = [grin.GetY()[i] for i in range(0,grin.GetN())] 
-  print xs
-  grout = TGraph( len(xs), array("d", xs), array("d", ys) )
+  print(xs)
+  grout = RT.TGraph( len(xs), array("d", xs), array("d", ys) )
   return grout
 
-fout = TFile(sys.argv[3], "RECREATE")
+fout = RT.TFile(sys.argv[3], "RECREATE")
 
-total_file = TFile(sys.argv[1], "OPEN")
-frac_file  = TFile(sys.argv[2], "OPEN")
+total_file = RT.TFile(sys.argv[1], "OPEN")
+frac_file  = RT.TFile(sys.argv[2], "OPEN")
 
 
 grabs = ["momentum", "KE"]
@@ -38,11 +38,11 @@ for grab in grabs:
       if( x > frac.GetX()[frac.GetN() - 1] ): break
       if( x < frac.GetX()[0] ): continue
       xsec_xs.append( x )
-      if( y < 0. ): print "warning", x,y
-      if( frac.Eval( x ) < 0. ): print "eval", x,frac.Eval( x )
+      if( y < 0. ): print("warning", x,y)
+      if( frac.Eval( x ) < 0. ): print("eval", x,frac.Eval( x ))
       xsec_ys.append( y * frac.Eval( x ) )
-    print xsec_xs[-1]
-    xsecs[ cut ] = TGraph(len(xsec_xs), array("d", xsec_xs), array("d", xsec_ys))
+    print(xsec_xs[-1])
+    xsecs[ cut ] = RT.TGraph(len(xsec_xs), array("d", xsec_xs), array("d", xsec_ys))
     fout.cd()
     xsecs[ cut ].Write( cut + "_" + grab)
     

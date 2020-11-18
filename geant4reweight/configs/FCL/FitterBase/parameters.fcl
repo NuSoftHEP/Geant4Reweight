@@ -1,41 +1,55 @@
 BEGIN_PROLOG 
 
 TheParameters: [
-  { 
-    Name:       "fReacLow"
-    Cut:        "reac"
-    Range:      [10., 200.]
-    Nominal:    1.0 
-    NScanSteps: 1
-  },
-  { 
-    Name:       "fReacLow"
-    Cut:        "reac"
-    Name:       "fReacHigh"
-    Range:      [700., 2005.]
-    ScanDelta:  .2
-  },
+
+
+   {
+      Name:       "fPiPlusElast"
+      Cut:        "elast"
+     Range:      [30.0, 2005.00]
+      Nominal:    1.0
+     NScanSteps: 1
+   },
+
+ 
 
   {
     Cut:        "abs"
-    Name:       "fAbs"
-    Range:      [200.0, 700.00]        
+    Name:       "fPiPlusAbs"
+    Range:      [50.0, 2005.00]        
     ScanDelta:  .3
-  }, 
-
+  },
   {
     Cut:        "cex"
-    Name:       "fCex"
-    Range:      [200.0, 700.00]        
-    ScanDelta:  .4
+    Name:       "fPiPlusCex"
+   Range:      [50.0, 2005.00]    
+     ScanDelta:  .3
+ },
+{
+  
+   Cut:        "inel"
+    Name:       "fPiPlusInel"
+    Range:      [50.0, 2005.00]        
+    ScanDelta:  .5
   },
 
-  {
-    Cut:        "inel"
-    Name:       "fInel"
-    Range:      [200.0, 700.00]        
-    ScanDelta:  .5
-  }
+{
+	Cut: "dcex"
+       Name: "fPiPlusDCex"
+ 	Range: [10.0 , 2005 ]
+	ScanDelta: .5
+},
+
+{
+          Cut: "prod"
+          Name: "fPiPlusProd"
+          Range: [10.0 , 2005 ]
+         ScanDelta: .5
+}
+  
+
 ]
+
+
 
 END_PROLOG

@@ -1,16 +1,18 @@
 #include "G4ProtonReweighter.hh"
 
-G4ProtonReweighter::G4ProtonReweighter(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales){
-  fInelastic = "protonInelastic";
-  theInts = {"total"};
-  Initialize(totalInput, FSInput, FSScales);
-}
+G4ProtonReweighter::G4ProtonReweighter(
+    TFile * FSInput,
+    const std::map<std::string, TH1D*> &FSScales,
+    const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager,
+    TH1D * inputElasticBiasHist, bool fix)
+  : G4Reweighter(FSInput, FSScales, material_pars, rw_manager,
+                 {"total"},
+                 inputElasticBiasHist, fix) {
 
-G4ProtonReweighter::G4ProtonReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix)
-     /*: fix_total(fix)*/ {
+  part_def = proton->Definition();
   fInelastic = "protonInelastic";
-  theInts = {"total"};
-  Initialize(totalInput,FSInput,FSScales,inputElasticBiasHist, fix);
+  SetupProcesses();
 }
 
 std::string G4ProtonReweighter::GetInteractionSubtype(

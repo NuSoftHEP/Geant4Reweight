@@ -1,0 +1,21 @@
+BEGIN_PROLOG
+
+O18_experiments: [  
+
+#add some total xsec data too
+
+{
+Name: "Altman_O18_PiPlus"
+Graphs: [ ["dcex" , "O18_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Altman_piP.root"
+
+Type: "O18_PiPlus"
+
+TotalMix: 1
+
+}
+
+
+]
+
+END_PROLOG

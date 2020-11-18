@@ -1,4 +1,4 @@
-from ROOT import * 
+import ROOT as RT
 from array import array
 import math
 import sys
@@ -6,13 +6,13 @@ import sys
 def mom_to_ke( grin ):
   xs = [math.sqrt(grin.GetX()[i]*grin.GetX()[i] + 139.57*139.57 ) - 139.57 for i in range(0,grin.GetN())] 
   ys = [grin.GetY()[i] for i in range(0,grin.GetN())] 
-  print xs
-  grout = TGraph( len(xs), array("d", xs), array("d", ys) )
+  print(xs)
+  grout = RT.TGraph( len(xs), array("d", xs), array("d", ys) )
   return grout
 
-f = TFile( sys.argv[1] )
+f = RT.TFile( sys.argv[1] )
 
-gROOT.SetBatch(1)
+RT.gROOT.SetBatch(1)
 grabs =  f.Get( "abs" ) 
 grcex =  f.Get( "cex" ) 
 grinel = f.Get( "inel" )
@@ -40,32 +40,41 @@ grcex.SetLineColor(4)
 grdcex.SetLineColor(8)
 grprod.SetLineColor(46)
 
-c1 = TCanvas("c1","c1",500,400)
+c1 = RT.TCanvas("c1","c1",500,400)
 c1.SetTickx(1)
 c1.SetTicky(1)
-gStyle.SetOptStat(0)
-gPad.SetLeftMargin( gPad.GetLeftMargin() * 1.10 )
+RT.gStyle.SetOptStat(0)
+RT.gPad.SetLeftMargin( RT.gPad.GetLeftMargin() * 1.10 )
 
 
-grabs.Draw()
-grcex.Draw("same")
-grinel.Draw("same")
-grdcex.Draw("same")
-grprod.Draw("same")
+grabs.Draw("AC")
+grcex.Draw("same C")
+grinel.Draw("same C")
+grdcex.Draw("same C")
+grprod.Draw("same C")
 
-#leg = TLegend(.6,.6,.85,.85)
-#leg.AddEntry( grabs,  "Absorption",  "lp")
-#leg.AddEntry( grinel, "Inelastic/Quasi-Elastic",  "lp")
-#leg.AddEntry( grcex,  "Charge Exchange",  "lp")
-#leg.AddEntry( grdcex, "Double Charge Exchange",  "lp")
-#leg.AddEntry( grprod, "Pion Production",  "lp")
-#
-#leg.Draw("same")
+grtotal = RT.TGraph()
+grtotal.SetLineColor(1)
 
-c1.SaveAs( sys.argv[2] + ".pdf")
-c1.SaveAs( sys.argv[2] + ".png")
+pos = [float(i) for i in sys.argv[3].split(",")]
+#.6,.6,.85,.85
+leg = RT.TLegend(pos[0], pos[1], pos[2], pos[3])
+leg.AddEntry( grtotal, "Total Inelastic", "l")
+leg.AddEntry( grabs,  "Absorption",  "l")
+leg.AddEntry( grinel, "Inelastic/Quasi-Elastic",  "l")
+leg.AddEntry( grcex,  "Charge Exchange",  "l")
+leg.AddEntry( grdcex, "Double Charge Exchange",  "l")
+leg.AddEntry( grprod, "Pion Production",  "l")
 
-tpt = TPaveText( .15, .15, .95, .87, "brNDC")
+leg.Draw("same")
+RT.gPad.RedrawAxis()
+
+title = sys.argv[2]
+ext = title.split(".")[1]
+title = title.split(".")[0]
+c1.SaveAs( title + "." + ext)
+
+tpt = RT.TPaveText( .15, .15, .95, .87, "brNDC")
 
 texts = ["Absorption",
          "Inelastic/Quasi-elastic",
@@ -80,8 +89,8 @@ for t,c in zip( texts, text_colors ):
 tpt.SetTextSize(.06)
 tpt.SetFillColor(0)
 tpt.SetBorderSize(0)
-c2 = TCanvas("c2","c2",500,400)
+c2 = RT.TCanvas("c2","c2",500,400)
 tpt.Draw()
-gPad.SetLeftMargin( gPad.GetRightMargin() )
-c2.SaveAs( sys.argv[2] + "_leg.pdf" )
+RT.gPad.SetLeftMargin( RT.gPad.GetRightMargin() )
+c2.SaveAs( title + "_leg." + ext)
 

@@ -46,7 +46,7 @@ G4ReweightFitter::G4ReweightFitter(TFile * output_file,
 
 void G4ReweightFitter::FinishUp() {
   for (auto it = MC_xsec_graphs.begin(); it!= MC_xsec_graphs.end(); ++it) {
-    delete it->second;
+    if (it->second) delete it->second;
   }
 
   //delete theReweighter;
@@ -195,7 +195,8 @@ Chi2Store G4ReweightFitter::GetNDataPointsAndChi2(std::string cut){
 
 void G4ReweightFitter::GetMCValsWithCov(
     G4ReweightParameterMaker & parMaker,
-    bool fSave, /*TMatrixD */TH2D * cov, std::string position, bool doFullRange) {
+    bool fSave, TH2D * cov, std::string position, bool doFullRange,
+    std::vector<std::string> * channels) {
 
   std::map<std::string, std::vector<FitParameter>> pars =
       parMaker.GetParameterSet();
@@ -223,13 +224,17 @@ void G4ReweightFitter::GetMCValsWithCov(
       //std::cout << "max: " << max << std::endl;
     }
 
+    for (auto it = parMaker.GetFSHists().begin();
+         it != parMaker.GetFSHists().end(); ++it) {
+      std::string name = it->first;
+      //std::cout << "cut: " << name << std::endl;
+      ranges[name] = max;
+    }
 
     ranges["reac"] = max;
-    ranges["abscx"] = (ranges["abs"] > ranges["cex"] ?
-                       ranges["abs"] : ranges["cex"]);
-    ranges["elast"] =
-        parMaker.GetElasticHist()->GetXaxis()->GetBinUpEdge(
-            parMaker.GetElasticHist()->GetNbinsX());
+    ranges["abscx"] = max;
+    ranges["elast"] = max;
+    ranges["total"] = max;
   }
 
   //Go through each cut and get the values for the MC
@@ -248,7 +253,9 @@ void G4ReweightFitter::GetMCValsWithCov(
     }
   }
 
-  for (auto itCut = cuts.begin(); itCut != cuts.end(); ++itCut) {
+  auto itCut = (channels == 0x0 ? cuts.begin() : channels->begin());
+  auto endCut = (channels == 0x0 ? cuts.end() : channels->end());
+  for (; itCut != endCut; ++itCut) {
     std::string cut_name = *itCut;
 
     //Get the data graph for this cut
@@ -258,7 +265,7 @@ void G4ReweightFitter::GetMCValsWithCov(
     if (doFullRange) {
       //std::cout << "Full range: " << *itCut << " " << ranges[*itCut] << std::endl;
       double x = 0.;
-      while (x < ranges[*itCut]) {
+      while (x < ranges[*itCut]-.1) {
         xs.push_back(x);
         x += .1;
       }

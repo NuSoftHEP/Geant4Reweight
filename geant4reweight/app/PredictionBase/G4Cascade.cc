@@ -219,7 +219,19 @@ int main(int argc, char * argv[]){
       break;
       
     }
-    
+
+    case -1:
+    {
+      std::cout << "Default option" << std::endl;
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+    }
 
     default:
       std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
@@ -314,7 +326,7 @@ int main(int argc, char * argv[]){
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
   }
-  if( theConfig.type == 2212 || theConfig.type == 2112 ){
+  else if( theConfig.type == 2212 || theConfig.type == 2112 ){
     cuts["0n0p"] = "nProton == 0 && nNeutron == 0";
     cuts["1n0p"] = "nProton == 0 && nNeutron == 1";
     cuts["0n1p"] = "nProton == 1 && nNeutron == 0";

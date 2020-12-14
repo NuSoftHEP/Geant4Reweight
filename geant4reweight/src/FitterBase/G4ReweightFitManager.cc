@@ -10,6 +10,7 @@
 #include "TROOT.h"
 #include "TRandom.h"
 #include "util/FitStore.hh"
+#include "TLegend.h"
 
 
 G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save,
@@ -326,6 +327,7 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
           corrHist.SetBinContent(i+1, j+1, fMinimizer->Correlation(i,j));
         }
       }
+      DoScans();
 
       std::string dir_names[4] = {"MinusSigma", "BestFit", "PlusSigma", "Nominal"};
 
@@ -360,11 +362,8 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
 
         for (auto itSet = mapSetsToFitters.begin();
              itSet != mapSetsToFitters.end(); ++itSet) {
-          for (size_t i = 0; i < itSet->second.size(); ++i) {
-            auto theFitter = itSet->second.at(i);
-
-            std::string FracsFile = mapSetsToFracs[ itSet->first ];
-            auto material = mapSetsToMaterial[itSet->first];
+          //for (size_t i = 0; i < itSet->second.size(); ++i) {
+            auto theFitter = itSet->second.at(0/*i*/);
 
             theFitter->MakeFitDir( outdir );
             std::string position;
@@ -374,13 +373,13 @@ void G4ReweightFitManager::RunFitAndSave( bool fFitScan ){
             else position = "CV";
 
             //new method to get MC predictions, supply cov matrix
-            theFitter->GetMCValsWithCov(parMaker, true, &covHist, position, true);
+            theFitter->GetMCValsWithCov(parMaker, true, &covHist, position, true, &AllExclChannels);
             theFitter->FinishUp();
-          }
+          //}
         }
       }
       DrawFitResults();
-      DoScans();
+      //DoScans();
     }
   }
   else{
@@ -475,13 +474,13 @@ void G4ReweightFitManager::DrawFitResults(){
   }
   //add elastic parameters
   std::map< std::string, std::string > titles = {
-    {"reac", "Reactive"},
-    {"inel", "Quasi-Elastic"},
+    {"reac", "Reaction"},
+    {"inel", "Quasielastic"},
     {"abs", "Absorption"},
     {"cex", "Charge Exchange"},
-    {"abscx", "Abs + CEx"},
-    {"total","Total"},
-    {"elast","Elastic"}
+    {"abscx", "Abs. + Ch. Ex."},
+    {"total", "Total"},
+    {"elast", "Elastic"}
   };
 
   gROOT->SetBatch(1);
@@ -489,6 +488,7 @@ void G4ReweightFitManager::DrawFitResults(){
   TDirectory * fitdir = (TDirectory*)out->mkdir("Fit");
   fitdir->cd();
 
+  TLegend * leg = 0x0;
   for( auto itType = types.begin(); itType != types.end(); ++itType ){
 
     TDirectory * typedir = (TDirectory*)fitdir->mkdir( (*itType).c_str() );
@@ -533,11 +533,14 @@ void G4ReweightFitManager::DrawFitResults(){
     }
 
 
-    for( size_t i = 0; i < all_cuts.size(); ++i ){
-      std::string cut_name = all_cuts[i];
+    //for( size_t i = 0; i < all_cuts.size(); ++i ){
+    //  std::string cut_name = all_cuts[i];
+    for( size_t i = 0; i < AllExclChannels.size(); ++i ){
+      std::string cut_name = AllExclChannels[i];
       std::cout << "cut name " << cut_name << std::endl;
       double max = 0.;
       std::vector< TGraphErrors * > data_vec = all_data[ cut_name ];
+      std::cout << "Data vec size: " << data_vec.size() << std::endl;
       for( size_t j = 0; j < data_vec.size(); ++j ){
 
         TGraphErrors * data_gr = data_vec[j];
@@ -551,25 +554,25 @@ void G4ReweightFitManager::DrawFitResults(){
       }
 
       //PlusSigma
-      std::string plus_name = "PlusSigma/" + dirs[i] + "/" + cut_name;
+      std::string plus_name = "PlusSigma/" + mapSetsToFitters[*itType].at(0)->GetName() + "/" + cut_name;
       TGraph * plus_sigma  = (TGraph*)out->Get( plus_name.c_str() );
 
       double old_x = plus_sigma->GetX()[0];
       double old_y = plus_sigma->GetY()[0];
       plus_sigma->InsertPointBefore(1, old_x, old_y);
-      plus_sigma->SetPoint(0, old_x-.001, 0.);
+      plus_sigma->SetPoint(0, old_x/*-.001*/, 0.);
 
       old_x = plus_sigma->GetX()[ plus_sigma->GetN() - 1 ];
       old_y = plus_sigma->GetY()[ plus_sigma->GetN() - 1 ];
       plus_sigma->InsertPointBefore( (plus_sigma->GetN() - 1), old_x, old_y );
-      plus_sigma->SetPoint( (plus_sigma->GetN() - 1), old_x+.001, 0. );
+      plus_sigma->SetPoint( (plus_sigma->GetN() - 1), old_x/*+.001*/, 0. );
 
       for( int j = 0; j < plus_sigma->GetN(); ++j ){
         if( plus_sigma->GetY()[j] > max ) max = plus_sigma->GetY()[j];
       }
 
       //Nominal
-      std::string nominal_name = "Nominal/" + dirs[i] + "/" + cut_name;
+      std::string nominal_name = "Nominal/" + mapSetsToFitters[*itType].at(0)->GetName() + "/" + cut_name;
       TGraph * nominal = (TGraph*)out->Get( nominal_name.c_str() );
       for( int j = 0; j < nominal->GetN(); ++j ){
         if( nominal->GetY()[j] > max ) max = nominal->GetY()[j];
@@ -578,18 +581,18 @@ void G4ReweightFitManager::DrawFitResults(){
 
 
       //MinusSigma
-      std::string minus_name = "MinusSigma/" + dirs[i] + "/" + cut_name;
+      std::string minus_name = "MinusSigma/" + mapSetsToFitters[*itType].at(0)->GetName() + "/" + cut_name;
       TGraph * minus_sigma  = (TGraph*)out->Get( minus_name.c_str() );
 
       old_x = minus_sigma->GetX()[0];
       old_y = minus_sigma->GetY()[0];
       minus_sigma->InsertPointBefore(1, old_x, old_y);
-      minus_sigma->SetPoint(0, old_x-.001, 0.);
+      minus_sigma->SetPoint(0, old_x/*-.001*/, 0.);
 
       old_x = minus_sigma->GetX()[ minus_sigma->GetN() - 1 ];
       old_y = minus_sigma->GetY()[ minus_sigma->GetN() - 1 ];
       minus_sigma->InsertPointBefore( (minus_sigma->GetN() - 1), old_x, old_y );
-      minus_sigma->SetPoint( (minus_sigma->GetN() - 1), old_x+.001, 0. );
+      minus_sigma->SetPoint( (minus_sigma->GetN() - 1), old_x/*+.001*/, 0. );
       ////////////
 
 
@@ -615,15 +618,17 @@ void G4ReweightFitManager::DrawFitResults(){
 
       minus_sigma->SetFillColor(0);
 
+      plus_sigma->GetXaxis()->SetRangeUser(0., old_x);
       plus_sigma->Draw("AF");
       minus_sigma->Draw("F same");
 
       //BestFit
-      std::string best_fit_name = "BestFit/" + dirs[i] + "/" + cut_name;
+      std::string best_fit_name = "BestFit/" + mapSetsToFitters[*itType].at(0)->GetName() + "/" + cut_name;
       TGraph * best_fit = (TGraph*)out->Get( best_fit_name.c_str() );
       best_fit->SetLineStyle(10);
       best_fit->SetLineColor(1);
       best_fit->Draw("same");
+      best_fit->SetFillColor(kRed);
 
       nominal->SetLineStyle(10);
       nominal->SetLineColor(4);
@@ -631,7 +636,15 @@ void G4ReweightFitManager::DrawFitResults(){
 
       for( size_t j = 0; j < data_vec.size(); ++j ){
         data_vec[j]->Draw( "P same" );
+        if (!leg) {
+          leg = new TLegend();
+          leg->AddEntry(data_vec[j], "Data", "l");
+          leg->AddEntry(best_fit, "Best Fit #pm1#sigma", "lf");
+          leg->AddEntry(nominal, "Nominal", "l");
+          leg->Write("legend");
+        }
       }
+
 
       gPad->RedrawAxis();
 
@@ -640,6 +653,7 @@ void G4ReweightFitManager::DrawFitResults(){
     }
   }
 
+  delete leg;
   TVectorD theChi2(3);
   theChi2[0] = fMinimizer->MinValue();
   //TODO nDOF calculation no longer valid, needs updating
@@ -667,8 +681,13 @@ void G4ReweightFitManager::DoScans() {
     bool scanned = fMinimizer->Scan(i, fNScanSteps, x, y);
     if (scanned) {
       TGraph gr(fNScanSteps - 1, x, y);
-      std::string title_name = "#chi^{2} Scan: " + fMinimizer->VariableName(i);
+      std::string title_name = /*"#chi^{2} Scan: " + fMinimizer->VariableName(i)
+                               + */";Parameter Value;#chi^{2}";
       gr.SetTitle(title_name.c_str());
+      gr.GetXaxis()->SetTitleSize(.04);
+      gr.GetYaxis()->SetTitleSize(.04);
+      gr.SetLineColor(kBlue);
+      gr.SetLineWidth(2);
       gr.Write(fMinimizer->VariableName(i).c_str());
     }
   }

@@ -363,7 +363,7 @@ void G4ReweightParameterMaker::SetNewValsWithElast( const std::map< std::string,
 
     //Go through and set all bins to 1. as a reset
     TH1D * excHist = FSHists[name];
-    for( int i = 1; i <= excHist->GetNbinsX(); ++i )
+    for( int i = 0; i <= excHist->GetNbinsX()+1; ++i )
       excHist->SetBinContent(i, 1.);
 
     auto thePars = itPar->second;
@@ -425,7 +425,7 @@ void G4ReweightParameterMaker::SetNewValsWithElast( const std::map< std::string,
   // Finally regenerate elastic histogram
 
   //Go through and set all bins to 1. as a reset
-  for( int i = 1; i <= ElasticHist->GetNbinsX(); ++i )
+  for( int i = 0; i <= ElasticHist->GetNbinsX()+1; ++i )
     ElasticHist->SetBinContent(i, 1.);
 
   // Now set bin contents according to parameter value
@@ -466,7 +466,8 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double >
 
     //Go through and set all bins to 1. as a reset
     TH1D * excHist = FSHists[name];
-    for( int i = 1; i <= excHist->GetNbinsX(); ++i )
+    //for( int i = 1; i <= excHist->GetNbinsX(); ++i )
+    for( int i = 0; i <= excHist->GetNbinsX()+1; ++i )
       excHist->SetBinContent(i, 1.);
 
     auto thePars = itPar->second;
@@ -527,7 +528,7 @@ void G4ReweightParameterMaker::SetNewVals( const std::map< std::string, double >
   // Finally regenerate elastic histogram
 
   //Go through and set all bins to 1. as a reset
-  for( int i = 1; i <= ElasticHist->GetNbinsX(); ++i )
+  for( int i = 0; i <= ElasticHist->GetNbinsX()+1; ++i )
     ElasticHist->SetBinContent(i, 1.);
 
   // Now set bin contents according to parameter value

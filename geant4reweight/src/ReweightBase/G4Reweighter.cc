@@ -96,11 +96,9 @@ void G4Reweighter::SetupProcesses() {
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     if( theName == "hadElastic" ){          
-      std::cout << "Found elastic " << proc << std::endl;
       elastic_proc = (G4HadronElasticProcess*)proc;
     }
     else if( theName == fInelastic ){
-      std::cout << "Found inelastic " << proc << std::endl;
       inelastic_proc = (G4HadronInelasticProcess*)proc;
     }
     else if (theName == "CoulombScat") {
@@ -108,9 +106,8 @@ void G4Reweighter::SetupProcesses() {
     }
   }
 
-  if (!elastic_proc || !inelastic_proc || !coul_proc) {
-    std::cout << "Fatal Error: could not get the processes" << std::endl;
-    //throw;
+  if (!elastic_proc || !inelastic_proc /*|| !coul_proc*/) {
+    throw cet::exception("G4Reweighter") << "Fatal Error: Could not find procs";
   }
 
 }
@@ -236,7 +233,6 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   for (size_t i = 0; i < nsteps; ++i) {
     auto theStep = theTraj->GetStep(i);
     double p = theStep->GetFullPreStepP();
-
     double bias_val =
         theStep->GetStepLength() *
         ((GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +

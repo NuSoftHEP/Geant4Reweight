@@ -263,6 +263,8 @@ int main(int argc, char * argv[]){
     std::cout << "Could not find elastic process" << std::endl;
     return 0;
   }
+  elastic_proc->ProcessDescription(std::cout);
+  //elastic_proc->SetVerboseLevel(10);
 
   G4Material * theMaterial = new G4Material(
       theConfig.MaterialName, theConfig.MaterialZ,
@@ -272,6 +274,7 @@ int main(int argc, char * argv[]){
   G4Track * theTrack = track_par.theTrack;
   G4Step * theStep   = track_par.theStep;
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
+  std::cout << "Status: " << theTrack->GetTrackStatus() << std::endl;
 
   for (size_t iM = 0; iM < momenta.size(); ++iM){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
@@ -280,7 +283,7 @@ int main(int argc, char * argv[]){
                      part_def->GetPDGMass()*part_def->GetPDGMass()) -
                 part_def->GetPDGMass();
 
-    //std::cout << "init ke: " << KE << std::endl; 
+    std::cout << "init ke: " << KE << std::endl; 
 
     initialKE = KE;
     for (size_t iC = 0; iC < theConfig.nCascades; ++iC){
@@ -303,12 +306,23 @@ int main(int argc, char * argv[]){
       initialMomentumY = momentum*initDirY;
       initialMomentumZ = momentum*initDirZ;
 
+      //std::cout << "\t\tOld mom: " << theTrack->GetMomentumDirection().x() <<
+      //             " " << theTrack->GetMomentumDirection().y() << " " <<
+      //             theTrack->GetMomentumDirection().z() << std::endl;
       G4ParticleChange * thePC =
           (G4ParticleChange*)elastic_proc->PostStepDoIt(*theTrack, *theStep);
-
+      //std::cout << "\t\tNew mom: " << theTrack->GetMomentumDirection().x() <<
+      //             " " << theTrack->GetMomentumDirection().y() << " " <<
+      //             theTrack->GetMomentumDirection().z() << std::endl;
       //std::cout << "New2 x: " << thePC->GetMomentumDirection()->x() << std::endl;
       //std::cout << "New2 y: " << thePC->GetMomentumDirection()->y() << std::endl;
       //std::cout << "New2 z: " << thePC->GetMomentumDirection()->z() << std::endl;
+
+      //size_t nSecondaries = thePC->GetNumberOfSecondaries();
+      //for( size_t i = 0; i < nSecondaries; ++i ){
+      //  auto part = thePC->GetSecondary(i)->GetDynamicParticle();
+      //  std::cout << "\t\t" << part->GetPDGcode() << std::endl;
+      //}
 
       double finalDirX = thePC->GetMomentumDirection()->x();
       double finalDirY = thePC->GetMomentumDirection()->y();
@@ -568,6 +582,7 @@ TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * the
   //new
   stepman.SetInitialStep(theTrack);
   theStep->InitializeStep(theTrack);
+  theTrack->SetTrackStatus(fAlive);
   ///////
 
   TrackStepPart results;

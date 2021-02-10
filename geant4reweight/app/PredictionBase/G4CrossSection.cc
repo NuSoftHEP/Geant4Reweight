@@ -162,12 +162,31 @@ int main(int argc, char * argv[]){
 
   //World
   //
-  fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
-  std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
-  int MaterialZ = MaterialParameters.get< int >( "Z" );
-  double MaterialMass = MaterialParameters.get< double >( "Mass" );
-  double MaterialDensity = MaterialParameters.get< double >( "Density" );
-  G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  fhicl::ParameterSet MaterialParameters = pset.get<fhicl::ParameterSet>("Material");
+  std::string MaterialName = MaterialParameters.get<std::string>("Name");
+  double MaterialDensity = MaterialParameters.get<double>("Density");
+  std::vector<fhicl::ParameterSet> MaterialComponents
+      = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
+
+  G4Material * theMaterial = 0x0;
+  if (MaterialComponents.size() == 1) {
+    int MaterialZ = MaterialComponents[0].get<int>("Z");
+    double MaterialMass = MaterialComponents[0].get<double>("Mass");
+    theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  }
+  else {
+    theMaterial = new G4Material(MaterialName, MaterialDensity, MaterialComponents.size());
+    for (auto s : MaterialComponents) {
+      int MaterialZ = s.get<int>("Z");
+      double MaterialMass = s.get<double>("Mass");
+      std::string name = s.get<std::string>("Name");
+      int nAtoms = s.get<int>("NAtoms");
+      G4Element * element = new G4Element(name, " ", MaterialZ, MaterialMass*g/mole);
+      theMaterial->AddElement(element, nAtoms);
+    }
+  }
+
+  //G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
 
   //G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
   G4Box * solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
@@ -228,37 +247,6 @@ int main(int argc, char * argv[]){
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
   std::cout << "testing" << std::endl;
-  /*
-  G4Track * tempTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
-  G4Step * tempStep = new G4Step();
-  G4StepPoint * tempPoint = new G4StepPoint();
-  tempPoint->SetMaterial(physWorld->GetLogicalVolume()->GetMaterial());
-  tempPoint->SetMaterialCutsCouple(physWorld->GetLogicalVolume()->GetMaterialCutsCouple());
-  tempStep->SetPreStepPoint( tempPoint );
-  tempTrack->SetStep( tempStep );
-  std::cout << "ind: " << std::endl;
-  std::cout << tempTrack->GetMaterialCutsCouple() << std::endl;
-  std::cout << "Done" << std::endl;
-  */
-
-
-
-  //Material
-  /*
-  fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
-  std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
-  int MaterialZ = MaterialParameters.get< int >( "Z" );
-  double MaterialMass = MaterialParameters.get< double >( "Mass" );
-  double MaterialDensity = MaterialParameters.get< double >( "Density" );
-  G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
-
-  std::cout << "Checking material" << std::endl;
-  std::cout << "N Elements: " << theMaterial->GetNumberOfElements() << std::endl;
-  if( theMaterial->GetNumberOfElements() != 1 ){
-    std::cout << "Fatal: exiting the application because NElements != 1" << std::endl;
-    return 0;
-  }
-  */
   auto theElement = (*theMaterial->GetElementVector())[0];
   std::cout << theElement->GetName() << " " << theElement->GetSymbol() << " " << theElement->GetZ() << " " << theElement->GetN() << std::endl;
   ///////////
@@ -324,8 +312,10 @@ int main(int argc, char * argv[]){
     momentum = theMomentum;
     kinetic_energy = KE;
 
-    inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
-    elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
+    //inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
+    //elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
+    inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theMaterial ) / (millibarn*theMaterial->GetTotNbOfAtomsPerVolume());
+    elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theMaterial ) / (millibarn*theMaterial->GetTotNbOfAtomsPerVolume());
 
     inelastic_xsec *= inel_bias;
     elastic_xsec *= el_bias;
@@ -458,9 +448,9 @@ int main(int argc, char * argv[]){
 
   cap_mfp_momentum.Write("cap_mfp_momentum");
   fis_mfp_momentum.Write("fis_mfp_momentum");
-  TVectorD m_vec(1);
-  m_vec[0] = MaterialMass;
-  m_vec.Write("Mass");
+  //TVectorD m_vec(1);
+  //m_vec[0] = MaterialMass;
+  //m_vec.Write("Mass");
 
   TVectorD d_vec(1);
   d_vec[0] = MaterialDensity;

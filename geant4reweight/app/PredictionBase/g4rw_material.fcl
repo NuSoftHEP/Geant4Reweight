@@ -2,16 +2,47 @@ BEGIN_PROLOG
 
 LAr: {
   Name: "liquidArgon"
-  Z:    18
-  Mass: 39.95
   Density: 1.390
+  Components: [
+    {
+      Name: "Ar"
+      NAtoms: 1
+      Z:    18
+      Mass: 39.95
+    }
+  ]
 }
 
 C: {
   Name: "graphite"
-  Z:   6
-  Mass: 12.01
   Density: 2.266 
+  Components: [
+    {
+      Name: "C"
+      NAtoms: 1
+      Z:   6
+      Mass: 12.01
+    }
+  ]
+}
+
+CLAr: {
+  Name: "liquidArgon"
+  Density: 1.390
+  Components: [
+    {
+      Name: "Ar"
+      NAtoms: 1
+      Z:    18
+      Mass: 39.95
+    },
+    {
+      Name: "C"
+      NAtoms: 1
+      Z:   6
+      Mass: 12.01
+    }   
+  ]
 }
 
 O: {

@@ -80,6 +80,10 @@ struct CascadeConfig{
     MaterialMass = MaterialParameters.get< double >( "Mass" );
     MaterialDensity = MaterialParameters.get< double >( "Density" );
 
+    std::vector<std::pair<int, double>> temp_vec
+        = pset.get<std::vector<std::pair<int, double>>>("Thresholds");
+    thresholds = std::map<int, double>(temp_vec.begin(), temp_vec.end());
+
   };
 
   size_t nCascades; 
@@ -93,6 +97,17 @@ struct CascadeConfig{
   double MaterialMass;
   double MaterialDensity;
   std::string MaterialName;
+
+  std::map<int, double> thresholds;
+
+  bool AboveThreshold(int pdg, double p) {
+    if (thresholds.find(pdg) == thresholds.end()) {
+      return true;
+    }
+    else {
+      return (p > thresholds.at(pdg));
+    }
+  };
 
 };
 
@@ -282,15 +297,30 @@ int main(int argc, char * argv[]){
 
         switch( part->GetPDGcode() ){
           case( 211 ):
-            ++nPiPlus; break;
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum())) 
+              ++nPiPlus;
+            break;
           case( -211 ):
-            ++nPiMinus; break;
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum())) 
+              ++nPiMinus;
+            break;
           case( 111 ):
-            ++nPi0; break;          
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum())) 
+              ++nPi0;
+            break;          
           case( 2212 ):
-            ++nProton; break;
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum())) 
+              ++nProton;
+            break;
           case( 2112 ):
-            ++nNeutron; break;
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum())) 
+              ++nNeutron;
+            break;
           default:
             break;
         }

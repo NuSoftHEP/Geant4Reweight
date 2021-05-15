@@ -35,7 +35,7 @@
 #include "TGraph.h"
 #include "TVectorD.h"
 
-#include "fhiclcpp/make_ParameterSet.h"
+//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 //#ifdef FNAL_FHICL
@@ -468,7 +468,8 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
 
   cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  //fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
 }
 
 

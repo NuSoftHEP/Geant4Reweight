@@ -12,8 +12,8 @@ G4NeutronReweighter::G4NeutronReweighter(
 
 
   part_def = neutron->Definition();
-  SetupProcesses();
   fInelastic = "neutronInelastic";
+  SetupProcesses();
 }
 
 std::string G4NeutronReweighter::GetInteractionSubtype(

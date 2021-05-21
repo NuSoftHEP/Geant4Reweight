@@ -349,20 +349,25 @@ double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
     /**/if (theStep->GetStepChosenProc() == "hadElastic") {
 
       if (bias_val > min && val > min) {
-        weight *= (1. - exp(-1.*bias_val));
-        weight /= (1. - exp(-1.*val));
-        weight *= GetElasticBias(p) / bias_val;
-        weight /= 1. / val;
+        //weight *= (1. - exp(-1.*bias_val));
+        //weight /= (1. - exp(-1.*val));
+        weight *= GetElasticBias(p)/* / bias_val*/;
+        //weight /= 1. / val;
+
+        //New:
+        weight *= exp(val - bias_val);
       }
     }
     else /**/if (theStep->GetStepChosenProc() == fInelastic) {
 
       if (bias_val > min && val > min) {
-        weight *= (1. - exp(-1.*bias_val));
-        weight /= (1. - exp(-1.*val));
-                  //Handled by exclusive factor below
-        weight *= /*GetInelasticBias(p)*/1. / bias_val;
-        weight /= 1. / val;
+      //  weight *= (1. - exp(-1.*bias_val));
+      //  weight /= (1. - exp(-1.*val));
+      //            //Handled by exclusive factor below
+      //  weight *= /*GetInelasticBias(p)*/1. / bias_val;
+      //  weight /= 1. / val;
+        //New:
+        weight *= exp(val - bias_val);
       }
 
       std::string cut = GetInteractionSubtype(*theTraj);
@@ -376,13 +381,16 @@ double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
     else if (theStep->GetStepChosenProc() == "Decay"/* ||
              theStep->GetStepChosenProc() == "CoulombScat"*/) {
       if (bias_val > min && val > min) {
-        weight *= (1. - exp(-1.*bias_val));
-        weight /= (1. - exp(-1.*val));
-        weight *= 1. / bias_val;
-        weight /= 1. / val;
+        //weight *= (1. - exp(-1.*bias_val));
+        //weight /= (1. - exp(-1.*val));
+        //weight *= 1. / bias_val;
+        //weight /= 1. / val;
+
+        //New:
+        weight *= exp(val - bias_val);
       }
     }
-    else {
+//    else {
       //std::cout << "Survive " << p << " " << GetNominalMFP(p) <<
       //             " " << GetBiasedMFP(p) << " " <<
       //             totalGraph->Eval( p ) << std::endl;
@@ -394,7 +402,7 @@ double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
           (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
           (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
       //std::cout << "totals: " << total << " " << bias_total << std::endl;
-    }
+    //}
     //std::cout << i << " " << theStep->GetStepChosenProc() << " " << weight << std::endl;
   }
 

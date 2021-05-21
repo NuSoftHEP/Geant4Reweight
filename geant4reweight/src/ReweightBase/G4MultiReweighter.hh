@@ -34,8 +34,8 @@ class G4MultiReweighter{
   double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow);
   std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj);
 
-  std::pair<double, double> GetPlusMinusSigmaParWeight(G4ReweightTraj & traj,
-                                                       size_t iPar);
+  std::pair<double, double> GetPlusMinusSigmaParWeight(
+      G4ReweightTraj & traj, size_t iPar, bool cathal_weight = false);
 
   double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow);
   std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj);
@@ -44,7 +44,8 @@ class G4MultiReweighter{
 
   bool SetParameterValue(size_t iPar, double value); 
   bool SetAllParameterValues(std::vector<double> values);
-  double GetWeightFromSetParameters(G4ReweightTraj & traj);
+  double GetWeightFromSetParameters(G4ReweightTraj & traj,
+                                    bool cathal_weight = false);
 
   /*
   std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();

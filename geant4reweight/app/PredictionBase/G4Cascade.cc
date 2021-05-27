@@ -76,9 +76,9 @@ struct CascadeConfig{
 
     fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
     MaterialName = MaterialParameters.get< std::string >( "Name" );
-    MaterialZ = MaterialParameters.get< int >( "Z" );
-    MaterialMass = MaterialParameters.get< double >( "Mass" );
     MaterialDensity = MaterialParameters.get< double >( "Density" );
+
+    MaterialComponents = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
 
   };
 
@@ -89,10 +89,10 @@ struct CascadeConfig{
 
   std::string outFileName;
 
-  int MaterialZ;
-  double MaterialMass;
   double MaterialDensity;
   std::string MaterialName;
+  std::vector<fhicl::ParameterSet> MaterialComponents;
+
 
 };
 
@@ -135,13 +135,6 @@ int main(int argc, char * argv[]){
 
   TFile * fout = new TFile( theConfig.outFileName.c_str(), "RECREATE");
 
-  TVectorD m_vec(1);
-  m_vec[0] = theConfig.MaterialMass;
-  m_vec.Write("Mass");
-
-  TVectorD d_vec(1);
-  d_vec[0] = theConfig.MaterialDensity;
-  d_vec.Write("Density");
 
   TTree * tree = new TTree("tree","");  
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
@@ -252,7 +245,42 @@ int main(int argc, char * argv[]){
     return 0;
   }
 
-  G4Material * theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialZ, theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  G4Material * theMaterial = 0x0;
+  if (theConfig.MaterialComponents.size() == 1) {
+    int MaterialZ = theConfig.MaterialComponents[0].get<int>("Z");
+    double MaterialMass = theConfig.MaterialComponents[0].get<double>("Mass");
+    theMaterial = new G4Material(theConfig.MaterialName, MaterialZ, MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  }
+  else {
+
+    double sum = 0.0;
+    for (auto s : theConfig.MaterialComponents) { 
+      double frac = s.get<double>("Fraction"); 
+      sum += frac;
+    }
+    if(sum < 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "Fractions will be divided by this factor to normalize \n";
+    }
+    else if(sum > 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "This is greater than 1.0 - something is wrong here \n";
+      abort();
+    }
+
+    theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialDensity*g/cm3, theConfig.MaterialComponents.size());
+    for (auto s : theConfig.MaterialComponents) {
+      int MaterialZ = s.get<int>("Z");
+      double MaterialMass = s.get<double>("Mass");
+      std::string name = s.get<std::string>("Name");
+      double frac = s.get<double>("Fraction");
+      G4Element * element = new G4Element(name, " ", MaterialZ, MaterialMass*g/mole);
+      theMaterial->AddElement(element, frac/sum);
+    }
+  }// end else()  (complex material)
+
+
+
 
   auto track_par = initTrackAndPart( part_def, theMaterial );
   G4Track * theTrack = track_par.theTrack;
@@ -539,8 +567,6 @@ CascadeConfig configure(fhicl::ParameterSet & pset){
 
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   theConfig.MaterialName = MaterialParameters.get< std::string >( "Name" );
-  theConfig.MaterialZ = MaterialParameters.get< int >( "Z" );
-  theConfig.MaterialMass = MaterialParameters.get< double >( "Mass" );
   theConfig.MaterialDensity = MaterialParameters.get< double >( "Density" );
 
 

@@ -41,15 +41,58 @@ void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist) {
 
 
 void G4Reweighter::SetupWorld() {
+
+  testMaterial = 0x0;
+
   std::string MaterialName = MaterialParameters.get<std::string>("Name");
 
-  int MaterialZ = MaterialParameters.get<int>("Z");
-  Mass = MaterialParameters.get<double>("Mass");
+  std::vector<fhicl::ParameterSet> MaterialComponents
+  = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
+
   Density = MaterialParameters.get<double>("Density");
-  testMaterial = new G4Material(MaterialName,
-                                MaterialZ,
-                                Mass*g/mole,
-                                Density*g/cm3);
+
+
+  if(MaterialComponents.size() == 1){
+    int MaterialZ = MaterialComponents[0].get<int>("Z");
+
+    testMaterial = new G4Material(MaterialName,
+                                  MaterialZ,
+                                  Mass*g/mole,
+                                  Density*g/cm3);
+  }
+  else {                                                                                       
+    double sum = 0.0;                                                                  
+    for (auto s : MaterialComponents) {                                      
+      double frac = s.get<double>("Fraction");                                         
+      sum += frac;                                                                     
+    }                                                                                  
+    if(sum < 1.0){                                                                     
+      std::cout << "Sum of all element fractions equals " << sum << "\n";              
+      std::cout << "Fractions will be divided by this factor to normalize \n";         
+    }                                                                                  
+    else if(sum > 1.0){                                                                
+      std::cout << "Sum of all element fractions equals " << sum << "\n";              
+      std::cout << "This is greater than 1.0 - something is wrong here \n";            
+      abort();                                                                         
+    }                                                                                  
+                                                                                       
+    testMaterial = new G4Material(MaterialName, 
+                                 Density*g/cm3, 
+                                 MaterialComponents.size());    
+    for (auto s : MaterialComponents) {                                      
+      int MaterialZ = s.get<int>("Z");                                                 
+      double Mass = s.get<double>("Mass");                                     
+      std::string name = s.get<std::string>("Name");                                   
+      double frac = s.get<double>("Fraction");                                         
+      G4Element * element = new G4Element(name, " ", MaterialZ, Mass*g/mole);  
+      testMaterial->AddElement(element, frac/sum);                                      
+    }                                                                                  
+  }// end else()  (complex material)                       
+   
+
+
+
+
   //World
   solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
   logicWorld = new G4LogicalVolume(solidWorld,
@@ -64,7 +107,6 @@ void G4Reweighter::SetupWorld() {
 }
 
 void G4Reweighter::SetupParticle() {
-  Mass = MaterialParameters.get<double>("Mass");
   Density = MaterialParameters.get<double>("Density");
 
   std::string material_name = MaterialParameters.get<std::string>("Name");
@@ -136,9 +178,8 @@ double G4Reweighter::GetCoulMFP(double p) {
 double G4Reweighter::GetInelasticXSec(double p) {
   SetMomentum(p);
 
-  return (inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
-      dynamic_part, (*testMaterial->GetElementVector())[0],
-      testMaterial) / millibarn);
+  return ( inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+             dynamic_part, testMaterial) *cm );
 }
 
 double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
@@ -148,14 +189,13 @@ double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
 double G4Reweighter::GetElasticXSec(double p) {
   SetMomentum(p);
 
-  return (elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
-      dynamic_part, (*testMaterial->GetElementVector())[0],
-      testMaterial) / millibarn);
+  return ( elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+            dynamic_part, testMaterial) *cm );
 }
 
 double G4Reweighter::GetNominalMFP(double p) {
   double xsec = GetInelasticXSec(p);
-  return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
+  return 1.0 / xsec;
 }
 
 double G4Reweighter::GetBiasedMFP(double p){
@@ -167,7 +207,7 @@ double G4Reweighter::GetNominalElasticMFP(double p){
   double xsec = GetElasticXSec(p);/*(elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
       dynamic_part, (*testMaterial->GetElementVector())[0],
       testMaterial) / millibarn);*/
-  return 1.e27 * Mass / ( Density * 6.022e23 * xsec );
+  return 1.0 / xsec;
 }
 
 double G4Reweighter::GetElasticBias(double p) {
@@ -317,6 +357,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   //std::cout << "weight after totals: " << weight << std::endl;
   return weight;
 }
+
 
 G4Reweighter::~G4Reweighter(){
 }

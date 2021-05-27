@@ -45,6 +45,8 @@ class G4MultiReweighter{
   bool SetParameterValue(size_t iPar, double value); 
   bool SetAllParameterValues(std::vector<double> values);
   double GetWeightFromSetParameters(G4ReweightTraj & traj);
+  double GetWeightFromSetParameters_Cathal(G4ReweightTraj & traj);
+  double GetWeightFromSetParameters_Cathal2(G4ReweightTraj & traj);
 
   /*
   std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();

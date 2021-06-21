@@ -355,20 +355,20 @@ double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
         //weight /= 1. / val;
 
         //New:
-        weight *= exp(val - bias_val);
+        //weight *= exp(val - bias_val);
       }
     }
     else /**/if (theStep->GetStepChosenProc() == fInelastic) {
 
-      if (bias_val > min && val > min) {
-      //  weight *= (1. - exp(-1.*bias_val));
-      //  weight /= (1. - exp(-1.*val));
-      //            //Handled by exclusive factor below
-      //  weight *= /*GetInelasticBias(p)*/1. / bias_val;
-      //  weight /= 1. / val;
-        //New:
-        weight *= exp(val - bias_val);
-      }
+      //if (bias_val > min && val > min) {
+      ////  weight *= (1. - exp(-1.*bias_val));
+      ////  weight /= (1. - exp(-1.*val));
+      ////            //Handled by exclusive factor below
+      ////  weight *= /*GetInelasticBias(p)*/1. / bias_val;
+      ////  weight /= 1. / val;
+      //  //New:
+      //  weight *= exp(val - bias_val);
+      //}
 
       std::string cut = GetInteractionSubtype(*theTraj);
       if( cut == "" ){
@@ -378,32 +378,25 @@ double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
       weight *= GetExclusiveFactor(p, cut);
 
     }
-    else if (theStep->GetStepChosenProc() == "Decay"/* ||
-             theStep->GetStepChosenProc() == "CoulombScat"*/) {
-      if (bias_val > min && val > min) {
-        //weight *= (1. - exp(-1.*bias_val));
-        //weight /= (1. - exp(-1.*val));
-        //weight *= 1. / bias_val;
-        //weight /= 1. / val;
+    //else if (theStep->GetStepChosenProc() == "Decay"/* ||
+    //         theStep->GetStepChosenProc() == "CoulombScat"*/) {
+    //  if (bias_val > min && val > min) {
+    //    //weight *= (1. - exp(-1.*bias_val));
+    //    //weight /= (1. - exp(-1.*val));
+    //    //weight *= 1. / bias_val;
+    //    //weight /= 1. / val;
 
-        //New:
-        weight *= exp(val - bias_val);
-      }
-    }
-//    else {
-      //std::cout << "Survive " << p << " " << GetNominalMFP(p) <<
-      //             " " << GetBiasedMFP(p) << " " <<
-      //             totalGraph->Eval( p ) << std::endl;
-      total += theStep->GetStepLength()*(
-          (GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
-          (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) : min));
-
-      bias_total += theStep->GetStepLength() *(
-          (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
-          (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
-      //std::cout << "totals: " << total << " " << bias_total << std::endl;
+    //    //New:
+    //    weight *= exp(val - bias_val);
+    //  }
     //}
-    //std::cout << i << " " << theStep->GetStepChosenProc() << " " << weight << std::endl;
+    total += theStep->GetStepLength()*(
+        (GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
+        (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) : min));
+
+    bias_total += theStep->GetStepLength() *(
+        (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
+        (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
   }
 
   //std::cout << "weight: " << weight << std::endl;

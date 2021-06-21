@@ -318,7 +318,7 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
   return weight;
 }
 
-double G4Reweighter::GetWeight_Cathal( const G4ReweightTraj * theTraj ){
+double G4Reweighter::GetAlternateWeight( const G4ReweightTraj * theTraj ){
 
   double total = 0.;
   double bias_total = 0.;

@@ -199,7 +199,7 @@ std::vector<double> G4MultiReweighter::GetWeightFromAllCorrelatedThrows(
 
 std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
     G4ReweightTraj & traj,
-    size_t iPar, bool cathal_weight) {
+    size_t iPar, bool alternate_weight) {
 
   if (iPar+1 > paramNames.size()) {
     std::cerr << "Requested parameter index out of bounds" << std::endl;
@@ -223,8 +223,8 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   //std::cout << "Getting plus weight" << std::endl;
   //double plus_weight = (reweighter->GetWeight(&traj)/**
   //                    reweighter->GetElasticWeight(&traj)*/);
-  double plus_weight = (cathal_weight ?
-                        reweighter->GetWeight_Cathal(&traj) :
+  double plus_weight = (alternate_weight ?
+                        reweighter->GetAlternateWeight(&traj) :
                         reweighter->GetWeight(&traj));
 
   //Do the same for the -1 sigma variation
@@ -240,8 +240,8 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   //std::cout << "Getting minus weight" << std::endl;
   //double minus_weight (reweighter->GetWeight(&traj)/**
   //                    reweighter->GetElasticWeight(&traj)*/);
-  double minus_weight = (cathal_weight ?
-                         reweighter->GetWeight_Cathal(&traj) :
+  double minus_weight = (alternate_weight ?
+                         reweighter->GetAlternateWeight(&traj) :
                          reweighter->GetWeight(&traj));
 
   return {plus_weight, minus_weight};
@@ -285,8 +285,8 @@ bool G4MultiReweighter::SetAllParameterValues(std::vector<double> values) {
   return true;
 }
 
-double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj, bool cathal_weight) {
-  return (cathal_weight ?
-          reweighter->GetWeight_Cathal(&traj) :
+double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj, bool alternate_weight) {
+  return (alternate_weight ?
+          reweighter->GetAlternateWeight(&traj) :
           reweighter->GetWeight(&traj)/**reweighter->GetElasticWeight(&traj)*/);
 }

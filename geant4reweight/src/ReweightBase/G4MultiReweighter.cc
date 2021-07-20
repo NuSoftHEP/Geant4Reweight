@@ -282,11 +282,3 @@ bool G4MultiReweighter::SetAllParameterValues(std::vector<double> values) {
 double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj) {
   return (reweighter->GetWeight(&traj)/**reweighter->GetElasticWeight(&traj)*/);
 }
-
-double G4MultiReweighter::GetWeightFromSetParameters_Cathal(G4ReweightTraj & traj) {
-  return (reweighter->GetWeight_Cathal(&traj)/**reweighter->GetElasticWeight(&traj)*/);
-}
-
-double G4MultiReweighter::GetWeightFromSetParameters_Cathal2(G4ReweightTraj & traj) {
-  return (reweighter->GetWeight_Cathal2(&traj)/**reweighter->GetElasticWeight(&traj)*/);
-}

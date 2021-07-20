@@ -19,7 +19,7 @@ elif( sys.argv[2] == "KE" ):
 
 #grtotal.SetMaximum(500.)
 ys = [grtotal.GetY()[i] for i in range(0, grtotal.GetN())]
-grtotal.SetMaximum(1.2*max(ys))
+grtotal.SetMaximum(float(sys.argv[5])*max(ys))
 grtotal.SetMinimum(0.)
 grtotal.GetXaxis().SetRangeUser( 0., [grabs.GetX()[i] for i in range(0, grabs.GetN())][-1] )
 grtotal.SetTitle(";Pion " + title + ";#sigma (mb)")
@@ -51,15 +51,18 @@ grinel.Draw("same C")
 grdcex.Draw("same C")
 grprod.Draw("same C")
 
+pos = [float(i) for i in sys.argv[4].split(",")]
+#.6,.6,.85,.85
+leg = RT.TLegend(pos[0], pos[1], pos[2], pos[3])
 #leg = TLegend(.6,.6,.85,.85)
-#leg.AddEntry( grtotal, "Total", "lp")
-#leg.AddEntry( grabs,  "Absorption",  "lp")
-#leg.AddEntry( grinel, "Inelastic/Quasi-Elastic",  "lp")
-#leg.AddEntry( grcex,  "Charge Exchange",  "lp")
-#leg.AddEntry( grdcex, "Double Charge Exchange",  "lp")
-#leg.AddEntry( grprod, "Pion Production",  "lp")
-#
-#leg.Draw("same")
+leg.AddEntry( grtotal, "Total", "lp")
+leg.AddEntry( grabs,  "Absorption",  "lp")
+leg.AddEntry( grinel, "Quasielastic",  "lp")
+leg.AddEntry( grcex,  "Charge Exchange",  "lp")
+leg.AddEntry( grdcex, "Double Charge Exchange",  "lp")
+leg.AddEntry( grprod, "Pion Production",  "lp")
+
+leg.Draw("same")
 
 RT.gPad.RedrawAxis()
 c1.SaveAs( sys.argv[3] + ".pdf")

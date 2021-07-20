@@ -62,6 +62,7 @@ class G4Reweighter{
     virtual ~G4Reweighter();
 
     double GetWeight(const G4ReweightTraj * theTraj);
+    double GetAlternateWeight(const G4ReweightTraj * theTraj);
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);

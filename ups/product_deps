@@ -34,12 +34,12 @@ fcldir  product_dir     fcl
 product          version
 nug4            v1_07_00  s106
 nug4            v1_05_04  s102
-nug4            v1_05_01  s97
+nug4            v1_04_04  s97
 nug4            v1_04_02  s96
 nug4            v1_04_01  s95
 nug4            v1_04_00  s94
 nug4            v1_03_01  s93
-nug4            v1_02_02  s85
+nug4            v1_02_02_01  s85
 nutools         v2_27_06  s78
 cetbuildtools   v7_17_01  -    only_for_build
 end_product_list

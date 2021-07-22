@@ -3,17 +3,36 @@
     SOURCE 
       G4ReweightStep.cc
       G4ReweightTraj.cc
+      G4ReweightManager.cc
       G4Reweighter.cc
       G4PiPlusReweighter.cc
       G4PiMinusReweighter.cc
+      G4KPlusReweighter.cc
+      G4KMinusReweighter.cc
       G4ProtonReweighter.cc
+      G4NeutronReweighter.cc
       G4ReweighterFactory.cc
       G4MultiReweighter.cc
     LIBRARIES
       ${FHICLCPP}
       ${CETLIB} ${CETLIB_EXCEPT}
+      clhep
+      ${G4EVENT}
+      ${G4INTERCOMS}
+      ${G4INTERFACES}
+      ${G4RUN}
+      ${G4TRACK}
+      ${G4TRACKING}
+      ${G4PARTICLES}
+      ${G4PROCESSES}
+      ${G4MATERIALS}
+      ${G4GEOMETRY}
+      ${G4GLOBAL}
+      ${G4PERSISTENCY}
+      ${G4PHYSICSLISTS}
       ${ROOT_BASIC_LIB_LIST}
       PropBaseLib
+      PredictionBaseLib    
   )
   install_headers()
   install_source()

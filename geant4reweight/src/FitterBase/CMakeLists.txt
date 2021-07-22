@@ -4,6 +4,7 @@
       G4ReweightFitter.cc
       DUETFitter.cc
       G4ReweightFitManager.cc
+      G4ReweightPionFitManager.cc
     LIBRARIES
       ${FHICLCPP}
       ${CETLIB} ${CETLIB_EXCEPT}

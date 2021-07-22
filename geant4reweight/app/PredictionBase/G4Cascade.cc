@@ -28,7 +28,7 @@
 #include "TGraph.h"
 #include "TVectorD.h"
 
-#include "fhiclcpp/make_ParameterSet.h"
+//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 //#ifdef FNAL_FHICL
@@ -143,8 +143,6 @@ int main(int argc, char * argv[]){
   d_vec[0] = theConfig.MaterialDensity;
   d_vec.Write("Density");
 
-  std::cout << "Got mass & density" << std::endl;
-
   TTree * tree = new TTree("tree","");  
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
@@ -160,8 +158,6 @@ int main(int argc, char * argv[]){
   G4RunManager rm;
   initRunMan( rm );
   ////
-
-  std::cout << "Initialized" << std::endl;
 
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
@@ -223,7 +219,19 @@ int main(int argc, char * argv[]){
       break;
       
     }
-    
+
+    case -1:
+    {
+      std::cout << "Default option" << std::endl;
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+    }
 
     default:
       std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
@@ -318,7 +326,7 @@ int main(int argc, char * argv[]){
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
   }
-  if( theConfig.type == 2212 || theConfig.type == 2112 ){
+  else if( theConfig.type == 2212 || theConfig.type == 2112 ){
     cuts["0n0p"] = "nProton == 0 && nNeutron == 0";
     cuts["1n0p"] = "nProton == 0 && nNeutron == 1";
     cuts["0n1p"] = "nProton == 1 && nNeutron == 0";
@@ -464,7 +472,8 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
 
   cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  //fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
 }
 
 /*void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefinition * part_def, std::string inel_name ){

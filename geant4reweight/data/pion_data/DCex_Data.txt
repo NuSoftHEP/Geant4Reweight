@@ -1,0 +1,58 @@
+#mesurements of dcex total cross section from several sources
+
+#pion KE , xsec (microbarn) , xsec error
+
+#18Oxygen -> 18Ne, piplus, A Altman et al, PRL 55, 1273 (1985) https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.55.1273
+
+50 16.7 1.2
+
+#14C -> 14Oxygen , piplus, M J Leitch et al , PRL 54, 1482 (1985) https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.54.1482
+
+50 15.3 1.6
+
+
+#https://journals.aps.org/prc/abstract/10.1103/PhysRevC.58.1576
+#4He, piplus, J Grater et al, PRC 58 Vol 3, 1576 (1998) 
+
+70 5 7
+80 27 18
+90 60 21
+100 75 21
+115 131 30
+130 164 24
+
+#4He, piplus, I V Falomkin et al, Nuovo Cimento A22, 333 (1974)
+#https://link.springer.com/article/10.1007/BF02790621
+
+100 300 150
+
+
+#Apparently there is another paper by Falomkin from 1976 (referenced  by Grater)
+#but I haven't found it yet
+
+#4He, piplus, I V Falomkin et al, Lett Nuovo Cimento 16 525-530 (1976)
+#https://lib-extopc.kek.jp/preprints/PDF/1976/7611/7611082.pdf
+
+
+98 300 100
+135 290 110
+145 340 170
+155 130 70
+485 1200 210
+
+
+
+#4He, piplus, E R Kinney et al, PRC 72, 044608 (2005) 
+#https://journals.aps.org/prc/abstract/10.1103/PhysRevC.72.044608
+
+240 886 138
+270 951 116
+
+#4He piminus, E R Kinney et al, PRC 72, 0444608 (2005)
+#https://journals.aps.org/prc/abstract/10.1103/PhysRevC.72.044608
+
+240 926 77
+
+
+
+

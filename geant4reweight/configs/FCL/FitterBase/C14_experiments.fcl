@@ -1,0 +1,21 @@
+BEGIN_PROLOG
+
+C14_experiments: [  
+
+#add some total xsec data too
+
+{
+Name: "Leitch_C14_PiPlus"
+Graphs: [ ["dcex" , "C14_xsec_dcex_piplus" ] ]
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Leitch_piP.root"
+
+Type: "C14_PiPlus"
+
+TotalMix: 1
+
+}
+
+
+]
+
+END_PROLOG

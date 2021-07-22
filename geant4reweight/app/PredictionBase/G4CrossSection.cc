@@ -1,6 +1,8 @@
 #include "Geant4/G4CrossSectionDataStore.hh"
 #include "Geant4/G4PionPlus.hh"
 #include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4MuonPlus.hh"
+#include "Geant4/G4MuonMinus.hh"
 #include "Geant4/G4Proton.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4DynamicParticle.hh"
@@ -12,6 +14,8 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronCaptureProcess.hh"
+#include "Geant4/G4HadronFissionProcess.hh"
 #include "Geant4/G4String.hh"
 #include "Geant4/G4hIonisation.hh"
 #include "Geant4/G4hPairProduction.hh"
@@ -25,6 +29,15 @@
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 #include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
 
+//physics models needed for muons
+#include "Geant4/G4EmCalculator.hh"
+
+#include "Geant4/G4MuIonisation.hh"
+#include "Geant4/G4MuBremsstrahlung.hh"
+#include "Geant4/G4MuPairProduction.hh"
+//#include "Geant4/G4MuNuclearInteraction.hh"
+
+
 #include <utility>
 #include <iostream>
 #include <fstream>
@@ -35,7 +48,7 @@
 #include "TGraph.h"
 #include "TVectorD.h"
 
-#include "fhiclcpp/make_ParameterSet.h"
+//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 //#ifdef FNAL_FHICL
@@ -52,8 +65,11 @@ std::string output_file_override = "empty";
 
 int ndiv_override = 0;
 int type_override = -999;
+int list_override = -999;
 
 int verbose_override = -1;
+double inel_bias = 1.;
+double el_bias = 1.;
 
 bool parseArgs(int argc, char* argv[]);
 
@@ -78,7 +94,8 @@ int main(int argc, char * argv[]){
 
   cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  //fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
 
 
 
@@ -119,6 +136,11 @@ int main(int argc, char * argv[]){
   }
   double delta = ( range.second - range.first ) / nDivisions;
 
+  int list = pset.get<int>("List", 0);
+  if( list_override != -999 )
+    list = list_override;
+  bool print_procs = pset.get<bool>("PrintProcs", false);
+
   //Root Output here
   std::string outFileName = pset.get< std::string >("Outfile");
    if( output_file_override  != "empty" ){
@@ -134,6 +156,8 @@ int main(int argc, char * argv[]){
   tree->Branch( "inelastic_xsec", &inelastic_xsec );
   tree->Branch( "elastic_xsec", &elastic_xsec );
 
+
+
   //Initializing
   G4RunManager * rm = new G4RunManager();
 
@@ -145,6 +169,7 @@ int main(int argc, char * argv[]){
   double MaterialMass = MaterialParameters.get< double >( "Mass" );
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
   G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+
   //G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
   G4Box * solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
   G4LogicalVolume * logicWorld = new G4LogicalVolume(solidWorld, theMaterial, "World");
@@ -152,7 +177,7 @@ int main(int argc, char * argv[]){
       0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
 
   rm->SetUserInitialization(new G4CascadeDetectorConstruction(physWorld));
-  rm->SetUserInitialization(new G4CascadePhysicsList);
+  rm->SetUserInitialization(new G4CascadePhysicsList(list));
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();
@@ -163,6 +188,8 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
+  G4MuonPlus  * muonplus = 0x0;
+  G4MuonMinus * muonminus = 0x0;
   G4Proton  * proton = 0x0;
   G4Neutron * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
@@ -187,14 +214,20 @@ int main(int argc, char * argv[]){
     part_def = neutron->Definition();
     inel_name = "neutronInelastic";
   }
+  else if (type == -13) {
+    std::cout << "Chose MuonPlus" << std::endl;
+    part_def = muonplus->Definition();
+  }
+  else if (type == 13) {
+    std::cout << "Chose MuonMinus" << std::endl;
+    part_def = muonminus->Definition();
+  }
   else{
-    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+    std::cout << "Please specify either 211, -211, 2212 or 2112" << std::endl;
     return 0;
   }
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );
   std::cout << "PDG: " << dynamic_part->GetPDGcode() << std::endl;
-
-
   std::cout << "testing" << std::endl;
   /*
   G4Track * tempTrack = new G4Track( dynamic_part, 0., G4ThreeVector(0.,0.,0.) );
@@ -247,8 +280,7 @@ int main(int argc, char * argv[]){
   
   std::vector<double> total_xsecs, elastic_xsecs, inelastic_xsecs, momenta,
                       kinetic_energies, decay_mfps, ioni_mfps, brems_mfps,
-                      pairprod_mfps, coul_mfps;
-
+                      pairprod_mfps, coul_mfps, cap_mfps, fis_mfps;
   //Getting the cross sections from the processes
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
@@ -270,6 +302,7 @@ int main(int argc, char * argv[]){
       inelastic_proc = (G4HadronInelasticProcess*)proc;
     }
   }
+  if (print_procs) return 0;
 
   if ( !elastic_proc || !inelastic_proc ){
     std::cout << "Fatal Error: could not get the processes" << std::endl;
@@ -295,7 +328,8 @@ int main(int argc, char * argv[]){
     inelastic_xsec = theInelastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
     elastic_xsec = theElastStore->GetCrossSection( dynamic_part, theElement, theMaterial ) / millibarn;
 
-
+    inelastic_xsec *= inel_bias;
+    elastic_xsec *= el_bias;
     
     for( size_t i = 0; i < (size_t)pv->size(); ++i ){
       G4VProcess * proc = (*pv)(i);
@@ -343,8 +377,25 @@ int main(int argc, char * argv[]){
         //std::cout << coul->LambdaTable() << std::endl;
         //std::cout << coul->LambdaTablePrim() << std::endl;
       }
+      else if (theName == "nCapture") {
+        G4HadronCaptureProcess * cap = (G4HadronCaptureProcess*)proc;
+        if (cap->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
+          cap_mfps.push_back(cap->GetMeanFreePath(*theTrack, 0., 0x0));
+        }
+        else {
+          cap_mfps.push_back(0.);
+        }
+      }
+      else if (theName == "nFission") {
+        G4HadronFissionProcess * fis = (G4HadronFissionProcess*)proc;
+        if (fis->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
+          fis_mfps.push_back(fis->GetMeanFreePath(*theTrack, 0., 0x0));
+        }
+        else {
+          fis_mfps.push_back(0.);
+        }
+      }
     }
-    
 
     tree->Fill();
     if( verbose && !( n % 100) ){
@@ -356,7 +407,8 @@ int main(int argc, char * argv[]){
 
     inelastic_xsecs.push_back( inelastic_xsec );
     elastic_xsecs.push_back( elastic_xsec );
-    total_xsecs.push_back( elastic_xsec + inelastic_xsec );
+    //total cross section now includes neutron capture component (zero for anything that isn't a neutron!)
+    total_xsecs.push_back( elastic_xsec + inelastic_xsec);
     momenta.push_back( momentum );
     kinetic_energies.push_back( kinetic_energy );
     decay_mfps.push_back(decay_hook.GetMFP(*theTrack));
@@ -370,6 +422,7 @@ int main(int argc, char * argv[]){
   TGraph inel_KE( kinetic_energies.size(), &kinetic_energies[0], &inelastic_xsecs[0] );
   TGraph el_momentum( momenta.size(), &momenta[0], &elastic_xsecs[0] );
   TGraph el_KE( kinetic_energies.size(), &kinetic_energies[0], &elastic_xsecs[0] );
+
   TGraph total_momentum( momenta.size(), &momenta[0], &total_xsecs[0] );
   TGraph total_KE( kinetic_energies.size(), &kinetic_energies[0], &total_xsecs[0] );
   TGraph decay_mfp_momentum(momenta.size(), &momenta[0], &decay_mfps[0]);
@@ -382,12 +435,15 @@ int main(int argc, char * argv[]){
   TGraph pairprod_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &pairprod_mfps[0]);
   TGraph coul_mfp_momentum(momenta.size(), &momenta[0], &coul_mfps[0]);
   TGraph coul_mfp_KE(kinetic_energies.size(), &kinetic_energies[0], &coul_mfps[0]);
+  TGraph cap_mfp_momentum(momenta.size(), &momenta[0], &cap_mfps[0]);
+  TGraph fis_mfp_momentum(momenta.size(), &momenta[0], &fis_mfps[0]);
 
   fout->cd();
   inel_momentum.Write( "inel_momentum" );
   inel_KE.Write( "inel_KE" );
   el_momentum.Write( "el_momentum" );
   el_KE.Write( "el_KE" );
+
   total_momentum.Write( "total_momentum" );
   total_KE.Write( "total_KE" );
   decay_mfp_momentum.Write("decay_mfp_momentum");
@@ -401,6 +457,8 @@ int main(int argc, char * argv[]){
   coul_mfp_momentum.Write("coul_mfp_momentum");
   coul_mfp_KE.Write("coul_mfp_KE");
 
+  cap_mfp_momentum.Write("cap_mfp_momentum");
+  fis_mfp_momentum.Write("fis_mfp_momentum");
   TVectorD m_vec(1);
   m_vec[0] = MaterialMass;
   m_vec.Write("Mass");
@@ -465,8 +523,20 @@ bool parseArgs(int argc, char ** argv){
       type_override = atoi( argv[i+1] );
     }
 
+    else if( strcmp( argv[i], "-l" ) == 0 ){
+      list_override = atoi( argv[i+1] );
+    }
+
     else if( strcmp( argv[i], "-v" ) == 0 ){
       verbose_override = atoi( argv[i+1] );
+    }
+
+    else if (strcmp(argv[i], "--bi") == 0) {
+      inel_bias = atof(argv[i+1]);
+      std::cout << "Inel bias: " << inel_bias << std::endl;
+    }
+    else if (strcmp(argv[i], "--ei") == 0) {
+      el_bias = atof(argv[i+1]);
     }
   }
 

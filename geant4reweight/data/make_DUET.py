@@ -1,6 +1,7 @@
 from ROOT import * 
 from array import array 
-from numpy import sign
+#from numpy import sign
+from math import sqrt
 
 f = TFile("DUET.root", "RECREATE")
 
@@ -52,7 +53,11 @@ cov_vals = [
 ]
 
 ##need to square it
-cov_vals = [sign(c)*c*c for c in cov_vals]
+cov_vals = [(c/sqrt(c*c))*c*c for c in cov_vals]
+
+#sign not currently working, find replacement
+
+#s = c/sqrt(c*c)
 
 #also, need to convert from fractional to full covariance:
 for i in range(0,10):

@@ -2,11 +2,24 @@ BEGIN_PROLOG
 
 Al_experiments: [
 
+{
+Name: "Caroll_Al_PiPlus"
+Graphs: [ ["total" , "Al_xsec_total_piplus" ] ]
+
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Caroll_piP.root"
+
+Type: "Al_PiPlus"
+
+
+} ,
+
+
+
   {
     Name:   "Allardyce_Al_PiPlus"
     Graphs: [ ["reac", "Al_xsec_reac_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Allardyce.root"
 
     Type:   "Al_PiPlus"
   },
@@ -15,7 +28,7 @@ Al_experiments: [
     Name:   "Allardyce_Al_PiMinus"
     Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Allardyce.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Allardyce.root"
 
     Type:   "Al_PiMinus"
   }, 
@@ -24,7 +37,7 @@ Al_experiments: [
     Name:   "Saunders_Al_PiPlus"
     Graphs: [ ["reac", "Al_xsec_reac_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Saunders.root"
 
     Type:   "Al_PiPlus"
   },
@@ -33,7 +46,7 @@ Al_experiments: [
     Name:   "Saunders_Al_PiMinus"
     Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Saunders.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Saunders.root"
 
     Type:   "Al_PiMinus"
   }, 
@@ -42,34 +55,35 @@ Al_experiments: [
     Name:   "Gelderloos_Al_PiMinus"
     Graphs: [ ["reac", "Al_xsec_reac_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Gelderloos.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Gelderloos.root"
 
     Type:   "Al_PiMinus"
   },
 
   {
     Name:   "Ashery_2173_Al_PiPlus"
-    Graphs: [ ["inel", "Al_xsec_inel_piplus"], ["abscx", "Al_xsec_abscx_piplus"] ]
+    Graphs: [ ["inel", "Al_xsec_inel_piplus"], ["abscx", "Al_xsec_abscx_piplus"],["elast","Al_xsec_elast_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_2173.root"
 
     Type:   "Al_PiPlus"
   },
 
   {
     Name:   "Ashery_2173_Al_PiMinus"
-    Graphs: [ ["inel", "Al_xsec_inel_piminus"], ["abscx", "Al_xsec_abscx_piminus"] ]
+    Graphs: [ ["inel", "Al_xsec_inel_piminus"], ["abscx", "Al_xsec_abscx_piminus"] , ["elast","Al_xsec_elast_piminus"] , ["total","Al_xsec_total_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_2173.root"
 
     Type:   "Al_PiMinus"
+    TotalMix: 1
   }, 
 
   {
     Name:   "Nakai_Al_PiPlus"
     Graphs: [ ["abs", "Al_xsec_abs_piplus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Nakai.root"
 
     Type:   "Al_PiPlus"
   },
@@ -78,7 +92,7 @@ Al_experiments: [
     Name:   "Nakai_Al_PiMinus"
     Graphs: [ ["abs", "Al_xsec_abs_piminus"] ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Nakai.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Nakai.root"
 
     Type:   "Al_PiMinus"
   }

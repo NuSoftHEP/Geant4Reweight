@@ -1,4 +1,6 @@
 #include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
 #include <vector>
 #include <string>
@@ -8,7 +10,7 @@
 #include "TH2D.h"
 #include "TGraph2D.h"
 
-#include "fhiclcpp/make_ParameterSet.h"
+//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 //#ifdef FNAL_FHICL
@@ -45,8 +47,8 @@ int main(int argc, char ** argv){
     }
 
     cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
-
-    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+    //fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+    pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
 
   //#else
   //  pset = fhicl::make_ParameterSet(fcl_file);
@@ -62,32 +64,61 @@ int main(int argc, char ** argv){
     outFileName = output_file_override;
   }
 
-  G4ReweightFitManager FitMan( outFileName, fSave);
+  //Get the materials
+  std::vector<fhicl::ParameterSet> FCLSets =
+      pset.get<std::vector<fhicl::ParameterSet>>("Sets");
+  std::vector<fhicl::ParameterSet> all_materials;
+  for (size_t i = 0; i < FCLSets.size(); ++i) {
+    auto set = FCLSets[i];
+    fhicl::ParameterSet material = set.get<fhicl::ParameterSet>("Material");
+    bool found_material = false;
+    for (size_t j = 0; j < all_materials.size(); ++j) {
+      if (all_materials[j].get<std::string>("Name") ==
+          material.get<std::string>("Name")) {
+        found_material = true;
+        break;
+      }
+    }
+    if (!found_material) {
+      all_materials.push_back(material);
+      std::cout << "Adding " << material.get<std::string>("Name") << std::endl;
+    }
+  }
+  G4ReweightManager rw_manager(all_materials);
 
+  //scales contribution to chi2 from total cross section data
+  double total_mix = pset.get<double>("TotalMix",1.0);
+ 
+  G4ReweightPionFitManager FitMan( outFileName, fSave, &rw_manager, total_mix );
+  //setup exclusive channel code 
+  FitMan.SetExclusiveChannels();         
+ 
+  
   std::vector< fhicl::ParameterSet > FitParSets = pset.get< std::vector< fhicl::ParameterSet > >("ParameterSet");
 
   try{ 
     FitMan.MakeFitParameters( FitParSets );
 
     ///Defining MC Sets
-    std::vector< fhicl::ParameterSet > FCLSets = pset.get< std::vector< fhicl::ParameterSet > >("Sets");
     FitMan.DefineMCSets( FCLSets );
     ///////////////////////////////////////////
 
     ///Defining experiments
     FitMan.DefineExperiments( pset );
+    std::cout << "Experiments defined" << std::endl;
     ///////////////////////////////////////////
 
-
-    FitMan.GetAllData();
-
     FitMan.MakeMinimizer( pset );
+    FitMan.GetAllData();
 
     bool fFitScan = pset.get< bool >( "FitScan", false );
     if( scan_override != -1 )
       fFitScan = scan_override;
 
+    std::cout << "Preparing to run fit" << std::endl;
     FitMan.RunFitAndSave(fFitScan);
+
+    std::cout << "Fit is run" << std::endl;
   }
   catch( const std::exception &e ){
     std::cout << "Caught exception " << std::endl;  
@@ -111,16 +142,13 @@ bool parseArgs(int argc, char ** argv){
 
       return false;
     }
-
     else if( strcmp( argv[i], "-c" ) == 0 ){
       fcl_file = argv[i+1];
       found_fcl_file = true;
     }
-
     else if( strcmp( argv[i], "-o" ) == 0 ){
       output_file_override = argv[i+1];
     }
-
     else if( strcmp( argv[i], "--scan" ) == 0 ){
       scan_override = atoi( argv[i+1] );
       if( scan_override > 1 || scan_override < 0 ){
@@ -128,7 +156,6 @@ bool parseArgs(int argc, char ** argv){
         return false;
       }
     }
-
     else if( strcmp( argv[i], "--save" ) == 0 ){
       save_override = atoi( argv[i+1] );
       if( save_override > 1 || save_override < 0 ){

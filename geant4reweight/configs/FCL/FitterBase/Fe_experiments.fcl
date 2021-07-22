@@ -1,29 +1,49 @@
 BEGIN_PROLOG
 
 Fe_experiments: [  
-  {
-    Name:   "Ashery_2173_Fe_PiPlus"
-    Graphs: [ ["inel", "Fe_xsec_inel_piplus"], ["abscx", "Fe_xsec_abscx_piplus"] ]
+  
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+{
+Name: "Caroll_Fe_PiPlus"
+Graphs: [ ["total" , "Fe_xsec_total_piplus" ] ]
+
+Data: "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Caroll_piP.root"
+
+Type: "Fe_PiPlus"
+
+
+} ,
+
+
+
+
+
+
+{
+    Name:   "Ashery_2173_Fe_PiPlus"
+    Graphs: [ ["inel", "Fe_xsec_inel_piplus"], ["abscx", "Fe_xsec_abscx_piplus"] , ["elast","Fe_xsec_elast_piplus"] ]
+
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_2173.root"
 
     Type:   "Fe_PiPlus"
   },
 
   {
     Name:   "Ashery_2173_Fe_PiMinus"
-    Graphs: [ ["inel", "Fe_xsec_inel_piminus"], ["abscx", "Fe_xsec_abscx_piminus"] ]
+    Graphs: [ ["inel", "Fe_xsec_inel_piminus"], ["abscx", "Fe_xsec_abscx_piminus"] , ["elast","Fe_xsec_elast_piminus"] , ["total","Fe_xsec_total_piminus" ]  ]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Ashery_2173.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Ashery_2173.root"
 
     Type:   "Fe_PiMinus"
+
+
   }, 
 
   {
     Name:   "Navon_Fe_PiPlus"
     Graphs: [ ["abscx", "Fe_xsec_abscx_piplus"]]
 
-    Data:   "/dune/app/users/calcuttj/geant/GeantReweight/data/Navon.root"
+    Data:   "/uboone/app/users/cthorpe/g4systematics/srcs/geant4reweight/geant4reweight/data/root_files/Navon.root"
 
     Type:   "Fe_PiPlus"
   }

@@ -1,108 +1,191 @@
+#include "material.fcl"
+
+
 BEGIN_PROLOG
 
 C_PiPlus: {
 
   Name: "C_PiPlus"
-  
-  File: "/dune/app/users/calcuttj/geant/GeantReweight/PredictionBase-build/C_PiPlus_cross_section_out.root"
-
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiPlus_cascade.root" 
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_C.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_C.root" 
+  Material: @local::C
 }
 
 C_PiMinus: {
 
   Name: "C_PiMinus"
   
-  File: "/dune/app/users/calcuttj/geant/GeantReweight/G4PiCascade-build/C_PiMinus_cross_section_out.root"
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/C_PiMinus_cascade.root" 
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_C.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_C.root" 
+  Material: @local::C
 }
 
 O_PiPlus: {
 
   Name: "O_PiPlus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piplus_nom_0.root"
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiPlus_cascade.root" 
+ File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_O.root"
+ FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_O.root"  
+ 
+  Material: @local::O
 }
 
 O_PiMinus: {
 
   Name: "O_PiMinus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/O/pt_nom_O_piminus_nom_0.root"
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/O_PiMinus_cascade.root" 
+
+ File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_O.root"
+ FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_O.root"  
+ 
+  Material: @local::O
 }
 
 Al_PiPlus: {
 
   Name: "Al_PiPlus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piplus_nom_0.root"
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiPlus_cascade.root" 
+
+File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Al.root"
+FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Al.root"  
+
+
+  Material: @local::Al
 }
 
 Al_PiMinus: {
 
   Name: "Al_PiMinus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Al/pt_nom_Al_piminus_nom_0.root"
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Al_PiMinus_cascade.root" 
-}
+
+ File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Al.root"
+ FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Al.root"  
+  Material: @local::Al
+
+} 
 
 Fe_PiPlus: {
 
   Name: "Fe_PiPlus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piplus_nom_0.root"
+ 
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiPlus_cascade.root" 
+File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Fe.root"
+FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Fe.root"  
+
+  Material: @local::Fe
+ 
 }
 
 Fe_PiMinus: {
 
   Name: "Fe_PiMinus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Fe/pt_nom_Fe_piminus_nom_0.root"
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Fe_PiMinus_cascade.root" 
+ File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Fe.root"
+ FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Fe.root"  
+  Material: @local::Fe 
 }
 
 Cu_PiPlus: {
 
   Name: "Cu_PiPlus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piplus_nom_0.root"
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiPlus_cascade.root" 
+
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Cu.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Cu.root"  
+  Material: @local::Cu 
 }
 
 Cu_PiMinus: {
 
   Name: "Cu_PiMinus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Cu/pt_nom_Cu_piminus_nom_0.root"
-
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Cu_PiMinus_cascade.root" 
+ 
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Cu.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Cu.root"  
+  Material: @local::Cu
 }
 
 Pb_PiPlus: {
 
   Name: "Pb_PiPlus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piplus_nom_0.root"
 
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiPlus_cascade.root" 
-}
+
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cross_section_Pb.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piP_cascade_Pb.root"  
+  Material: @local::Pb
+} 
 
 Pb_PiMinus: {
 
   Name: "Pb_PiMinus"
-  
-  File: "/dune/data2/users/calcuttj/GeantReweight/Fit/Pb/pt_nom_Pb_piminus_nom_0.root"
-
-  FSFile: "/dune/data2/users/calcuttj/GeantReweight/Fit/Reweight/Pb_PiMinus_cascade.root" 
+  File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_Pb.root"
+  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cascade_Pb.root"  
+   Material: @local::Pb
 }
+
+#O18_PiPlus: {
+#
+#Name: "O18_PiPlus"
+# 
+# File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_oxygen18.root"
+# FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_O18.root"  
+# 
+#}
+
+
+#C18_PiPlus: {
+#
+#Name: "C18_PiPlus"
+# 
+# File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_carbon14.root"
+#  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_C14.root"  
+#
+#}
+
+
+#Ca48_PiPlus: {
+#
+#Name: "C48_PiPlus"
+# 
+# File: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_calcium48.root"
+#  FSFile: "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_Ca48.root"  
+#
+#}
+
+
+He4_PiPlus: {
+
+Name: "He4_PiPlus"
+
+File:"/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_He4.root"
+FSFile:  "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_He4.root"
+
+}
+
+He4_PiMinus: {
+
+Name: "He4_PiMinus"
+
+File:"/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piM_cross_section_He4.root"
+FSFile:  "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piminus_cascade_He4.root"
+
+}
+
+
+C14_PiPlus: {
+
+Name: "C14_PiPlus"
+
+File:"/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_C14.root"
+FSFile:  "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_C14.root"
+
+}
+
+O18_PiPlus: {
+
+Name: "O18_PiPlus"
+
+File:"/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cross_section_O18.root"
+FSFile:  "/uboone/app/users/cthorpe/g4systematics/fhicls/rootfiles/piplus_cascade_O18.root"
+
+}
+
 
 END_PROLOG

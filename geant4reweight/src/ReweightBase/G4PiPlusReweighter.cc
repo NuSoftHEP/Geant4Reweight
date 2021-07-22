@@ -1,15 +1,18 @@
 #include "G4PiPlusReweighter.hh"
 
-G4PiPlusReweighter::G4PiPlusReweighter(TFile * totalInput, TFile * FSInput, std::map< std::string, TGraph* > &FSScales){
+G4PiPlusReweighter::G4PiPlusReweighter(
+    TFile * FSInput,
+    const std::map<std::string, TH1D*> &FSScales,
+    const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager,
+    TH1D * inputElasticBiasHist, bool fix)
+  : G4Reweighter(FSInput, FSScales, material_pars, rw_manager,
+                 {"inel", "cex", "abs", "dcex", "prod"},
+                 inputElasticBiasHist, fix) {
+  part_def = piplus->Definition();
   fInelastic = "pi+Inelastic";
-  theInts = {"inel", "cex", "abs", "dcex", "prod"};
-  Initialize(totalInput, FSInput, FSScales);
-}
-
-G4PiPlusReweighter::G4PiPlusReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist, bool fix){
-  fInelastic = "pi+Inelastic";
-  theInts = {"inel", "cex", "abs", "dcex", "prod"};
-  Initialize(totalInput,FSInput,FSScales,inputElasticBiasHist, fix);
+  std::cout << "Part def: " << part_def << std::endl;
+  SetupProcesses();
 }
 
 std::string G4PiPlusReweighter::GetInteractionSubtype(

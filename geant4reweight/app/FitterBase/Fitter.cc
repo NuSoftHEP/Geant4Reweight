@@ -10,7 +10,7 @@
 #include "TH2D.h"
 #include "TGraph2D.h"
 
-//#include "fhiclcpp/make_ParameterSet.h"
+#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
 //#ifdef FNAL_FHICL
@@ -47,8 +47,7 @@ int main(int argc, char ** argv){
     }
 
     cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
-    //fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
-    pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
+    fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
 
   //#else
   //  pset = fhicl::make_ParameterSet(fcl_file);

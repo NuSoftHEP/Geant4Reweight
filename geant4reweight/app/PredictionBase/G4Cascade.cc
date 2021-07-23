@@ -41,7 +41,7 @@ bool range_override = false;
 double range_low_override = 0.;
 double range_high_override = 0.;
 
-std::string output_file_override = "empty"; 
+std::string output_file_override = "empty";
 
 int ncasc_override = 0;
 int ndiv_override = 0;
@@ -53,7 +53,7 @@ struct CascadeConfig{
   CascadeConfig(){};
   CascadeConfig( fhicl::ParameterSet & pset ){
     nCascades = pset.get< size_t >("NCascades");
-    if( ncasc_override > 0 ) 
+    if( ncasc_override > 0 )
       nCascades = ncasc_override;
 
     type      = pset.get< int >("Type");
@@ -61,12 +61,12 @@ struct CascadeConfig{
       type = type_override;
 
     range = pset.get< std::pair< double, double > >("Range");
-    if( range_override) 
+    if( range_override)
       range = std::make_pair(range_low_override, range_high_override);
 
 
     nDivisions = pset.get< size_t >("NDivisions");
-    if( ndiv_override > 0 ) 
+    if( ndiv_override > 0 )
       nDivisions = ndiv_override;
 
     outFileName = pset.get< std::string >("Outfile");
@@ -76,23 +76,23 @@ struct CascadeConfig{
 
     fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
     MaterialName = MaterialParameters.get< std::string >( "Name" );
-    MaterialZ = MaterialParameters.get< int >( "Z" );
-    MaterialMass = MaterialParameters.get< double >( "Mass" );
     MaterialDensity = MaterialParameters.get< double >( "Density" );
+
+    MaterialComponents = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
 
   };
 
-  size_t nCascades; 
+  size_t nCascades;
   size_t nDivisions;
   int type;
   std::pair< double, double > range;
 
   std::string outFileName;
 
-  int MaterialZ;
-  double MaterialMass;
   double MaterialDensity;
   std::string MaterialName;
+  std::vector<fhicl::ParameterSet> MaterialComponents;
+
 
 };
 
@@ -114,7 +114,7 @@ G4HadronInelasticProcess * getInelasticProc( /*G4HadronInelasticProcess * inelas
 
 int main(int argc, char * argv[]){
 
-  if( !parseArgs(argc, argv) ) 
+  if( !parseArgs(argc, argv) )
     return 0;
 
   fhicl::ParameterSet pset;
@@ -135,15 +135,8 @@ int main(int argc, char * argv[]){
 
   TFile * fout = new TFile( theConfig.outFileName.c_str(), "RECREATE");
 
-  TVectorD m_vec(1);
-  m_vec[0] = theConfig.MaterialMass;
-  m_vec.Write("Mass");
 
-  TVectorD d_vec(1);
-  d_vec[0] = theConfig.MaterialDensity;
-  d_vec.Write("Density");
-
-  TTree * tree = new TTree("tree","");  
+  TTree * tree = new TTree("tree","");
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
   tree->Branch( "nPi0", &nPi0 );
@@ -171,14 +164,14 @@ int main(int argc, char * argv[]){
       part_def = piplus->Definition();
       inel_name = "pi+Inelastic";
       break;
-    
+
     case -211:
       std::cout << "Chose PiMinus" << std::endl;
       part_def = piminus->Definition();
       inel_name = "pi-Inelastic";
       break;
 
-    case 2212: 
+    case 2212:
     {
       std::cout << "Chose Proton" << std::endl;
       part_def = proton->Definition();
@@ -186,7 +179,7 @@ int main(int argc, char * argv[]){
 
 /*
       //Default for now
-      ++momenta.back(); 
+      ++momenta.back();
       std::vector< double > total_ys(momenta.size(), 1.);
       TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
       fout->cd();
@@ -194,7 +187,7 @@ int main(int argc, char * argv[]){
       fout->Close();
       //delete rm;
       return 1;
-*/    
+*/
       //Returns before this, but... eh
       break;
     }
@@ -206,7 +199,7 @@ int main(int argc, char * argv[]){
       inel_name = "neutronInelastic";
 /*
       //Default for now
-      ++momenta.back(); 
+      ++momenta.back();
       std::vector< double > total_ys(momenta.size(), 1.);
       TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
       fout->cd();
@@ -214,16 +207,16 @@ int main(int argc, char * argv[]){
       fout->Close();
       //delete rm;
       return 1;
-*/    
+*/
       //Returns before this, but... eh
       break;
-      
+
     }
 
     case -1:
     {
       std::cout << "Default option" << std::endl;
-      ++momenta.back(); 
+      ++momenta.back();
       std::vector< double > total_ys(momenta.size(), 1.);
       TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
       fout->cd();
@@ -239,7 +232,7 @@ int main(int argc, char * argv[]){
       fout->Close();
       //delete rm;
       return 0;
-      
+
   }
 
   //G4HadronInelasticProcess * inelastic_proc = 0x0;
@@ -252,7 +245,42 @@ int main(int argc, char * argv[]){
     return 0;
   }
 
-  G4Material * theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialZ, theConfig.MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  G4Material * theMaterial = 0x0;
+  if (theConfig.MaterialComponents.size() == 1) {
+    int MaterialZ = theConfig.MaterialComponents[0].get<int>("Z");
+    double MaterialMass = theConfig.MaterialComponents[0].get<double>("Mass");
+    theMaterial = new G4Material(theConfig.MaterialName, MaterialZ, MaterialMass*g/mole, theConfig.MaterialDensity*g/cm3);
+  }
+  else {
+
+    double sum = 0.0;
+    for (auto s : theConfig.MaterialComponents) {
+      double frac = s.get<double>("Fraction");
+      sum += frac;
+    }
+    if(sum < 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "Fractions will be divided by this factor to normalize \n";
+    }
+    else if(sum > 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "This is greater than 1.0 - something is wrong here \n";
+      abort();
+    }
+
+    theMaterial = new G4Material(theConfig.MaterialName, theConfig.MaterialDensity*g/cm3, theConfig.MaterialComponents.size());
+    for (auto s : theConfig.MaterialComponents) {
+      int MaterialZ = s.get<int>("Z");
+      double MaterialMass = s.get<double>("Mass");
+      std::string name = s.get<std::string>("Name");
+      double frac = s.get<double>("Fraction");
+      G4Element * element = new G4Element(name, " ", MaterialZ, MaterialMass*g/mole);
+      theMaterial->AddElement(element, frac/sum);
+    }
+  }// end else()  (complex material)
+
+
+
 
   auto track_par = initTrackAndPart( part_def, theMaterial );
   G4Track * theTrack = track_par.theTrack;
@@ -261,15 +289,15 @@ int main(int argc, char * argv[]){
 
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
-    double theMomentum = momenta[iM]; 
+    double theMomentum = momenta[iM];
     double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );
     for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
 
       if( !(iC % 1000) ) std::cout << "\tCascade: " << iC << std::endl;
 
-      nPi0 = 0; 
-      nPiPlus = 0; 
+      nPi0 = 0;
+      nPiPlus = 0;
       nPiMinus = 0;
       nProton = 0;
       nNeutron = 0;
@@ -286,7 +314,7 @@ int main(int argc, char * argv[]){
           case( -211 ):
             ++nPiMinus; break;
           case( 111 ):
-            ++nPi0; break;          
+            ++nPi0; break;
           case( 2212 ):
             ++nProton; break;
           case( 2112 ):
@@ -295,7 +323,7 @@ int main(int argc, char * argv[]){
             break;
         }
       }
-      
+
       thePC->SetVerboseLevel(0);
       thePC->Initialize(*theTrack);
 
@@ -306,12 +334,12 @@ int main(int argc, char * argv[]){
 
   fout->cd();
   tree->Write();
- 
+
   std::map< std::string, std::string > cuts;
   //Define cuts and make graphs out of the results
   //
   //
-  //These can be made FHiCL-able 
+  //These can be made FHiCL-able
   if( theConfig.type == 211 ){
     cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
     cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
@@ -354,12 +382,12 @@ int main(int argc, char * argv[]){
     std::string draw = "momentum>>" + name + binning;
     std::cout << "Draw: " << draw << std::endl;
 
-    tree->Draw( draw.c_str(), itCut->second.c_str(), "goff" ); 
+    tree->Draw( draw.c_str(), itCut->second.c_str(), "goff" );
     TH1F * hist = (TH1F*)gDirectory->Get( name.c_str() );
     hist->Divide( total );
 
     std::vector< double > xs,ys;
-    
+
     for( size_t i = 0; i < bins.size(); ++i ){
       xs.push_back( bins.at(i) );
       ys.push_back( hist->GetBinContent(bins.at(i)) );
@@ -389,8 +417,8 @@ bool parseArgs(int argc, char ** argv){
       std::cout << std::endl;
       std::cout << "Options: " << std::endl;
       std::cout << "\t-o <output_file_override>.root" << std::endl;
-      std::cout << "\t--low <range_low_value> (must be provided along with -high)" << std::endl; 
-      std::cout << "\t--high <range_high_value> (must be provided along with -low)" << std::endl; 
+      std::cout << "\t--low <range_low_value> (must be provided along with -high)" << std::endl;
+      std::cout << "\t--high <range_high_value> (must be provided along with -low)" << std::endl;
       std::cout << "\t--NC <number_of_cascades_per_point> (must be > 0 to work)" << std::endl;
       std::cout << "\t--ND <divisor_of_range> (must be > 0 to work)" << std::endl;
       std::cout << "\t-t <probe type> (currently only works with 211 and -211)" << std::endl;
@@ -408,21 +436,21 @@ bool parseArgs(int argc, char ** argv){
     }
 
     else if( strcmp( argv[i], "--low" ) == 0 ){
-      range_low_override = atof( argv[i+1] ); 
+      range_low_override = atof( argv[i+1] );
       found_range_low = true;
     }
 
     else if( strcmp( argv[i], "--high" ) == 0 ){
-      range_high_override = atof( argv[i+1] ); 
+      range_high_override = atof( argv[i+1] );
       found_range_high = true;
     }
 
     else if( strcmp( argv[i], "--NC" ) == 0 ){
-      ncasc_override = atoi( argv[i+1] ); 
+      ncasc_override = atoi( argv[i+1] );
     }
 
     else if( strcmp( argv[i], "--ND" ) == 0 ){
-      ndiv_override = atoi( argv[i+1] ); 
+      ndiv_override = atoi( argv[i+1] );
     }
 
     else if( strcmp( argv[i], "-t" ) == 0 ){
@@ -443,7 +471,7 @@ bool parseArgs(int argc, char ** argv){
     range_override = found_range_low;
   }
 
-  
+
 
   return true;
 }
@@ -479,7 +507,7 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
 
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
-  
+
   for( int i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
@@ -497,7 +525,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
 
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
-  
+
   //for( int i = 0; i < pv->size(); ++i ){
   for( size_t i = 0; i < (size_t)pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
@@ -516,7 +544,7 @@ CascadeConfig configure(fhicl::ParameterSet & pset){
   CascadeConfig theConfig;
 
   theConfig.nCascades = pset.get< size_t >("NCascades");
-  if( ncasc_override > 0 ) 
+  if( ncasc_override > 0 )
     theConfig.nCascades = ncasc_override;
 
   theConfig.type      = pset.get< int >("Type");
@@ -524,12 +552,12 @@ CascadeConfig configure(fhicl::ParameterSet & pset){
     theConfig.type = type_override;
 
   theConfig.range = pset.get< std::pair< double, double > >("Range");
-  if( range_override) 
+  if( range_override)
     theConfig.range = std::make_pair(range_low_override, range_high_override);
 
 
   theConfig.nDivisions = pset.get< size_t >("NDivisions");
-  if( ndiv_override > 0 ) 
+  if( ndiv_override > 0 )
     theConfig.nDivisions = ndiv_override;
 
   theConfig.outFileName = pset.get< std::string >("Outfile");
@@ -539,8 +567,6 @@ CascadeConfig configure(fhicl::ParameterSet & pset){
 
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   theConfig.MaterialName = MaterialParameters.get< std::string >( "Name" );
-  theConfig.MaterialZ = MaterialParameters.get< int >( "Z" );
-  theConfig.MaterialMass = MaterialParameters.get< double >( "Mass" );
   theConfig.MaterialDensity = MaterialParameters.get< double >( "Density" );
 
 
@@ -551,7 +577,7 @@ std::vector< double > fillMomenta( CascadeConfig theConfig ){
   std::cout << "Range: " << theConfig.range.first << " " << theConfig.range.second << std::endl;
   std::vector< double > momenta;
   double delta = theConfig.range.second - theConfig.range.first;
-  double step = delta / theConfig.nDivisions; 
+  double step = delta / theConfig.nDivisions;
   for( size_t i = 0; i <= theConfig.nDivisions; ++i ){
     momenta.push_back( theConfig.range.first + i * step );
   }

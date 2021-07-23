@@ -35,12 +35,55 @@ void G4ReweightManager::SetupWorld() {
   G4LogicalVolume * logicWorld = 0x0;
   for (size_t i = 0; i < fMaterialSets.size(); ++i) {
     const fhicl::ParameterSet & material_set = fMaterialSets[i];
-    int MaterialZ = material_set.get<int>("Z");
-    double Mass = material_set.get<double>("Mass");
+
+    std::vector<fhicl::ParameterSet> MaterialComponents
+    = material_set.get<std::vector<fhicl::ParameterSet>>("Components");
+
     double Density = material_set.get<double>("Density");
     std::string MaterialName = material_set.get<std::string>("Name");
-    G4Material * testMaterial = new G4Material(MaterialName, MaterialZ,
-                                               Mass*g/mole, Density*g/cm3);
+
+
+    G4Material* testMaterial = 0x0;
+
+    if(MaterialComponents.size() == 1){
+      int MaterialZ = MaterialComponents[0].get<int>("Z");
+      double Mass = MaterialComponents[0].get<double>("Mass");
+
+      testMaterial = new G4Material(MaterialName,
+                                    MaterialZ,
+                                    Mass*g/mole,
+                                    Density*g/cm3);
+    }
+    else {
+      double sum = 0.0;
+      for (auto s : MaterialComponents) {
+        double frac = s.get<double>("Fraction");
+        sum += frac;
+      }
+      if(sum < 1.0){
+        std::cout << "Sum of all element fractions equals " << sum << "\n";
+        std::cout << "Fractions will be divided by this factor to normalize \n";
+      }
+      else if(sum > 1.0){
+        std::cout << "Sum of all element fractions equals " << sum << "\n";
+        std::cout << "This is greater than 1.0 - something is wrong here \n";
+        abort();
+      }
+
+      testMaterial = new G4Material(MaterialName,
+                                   Density*g/cm3,
+                                   MaterialComponents.size());
+      for (auto s : MaterialComponents) {
+        int MaterialZ = s.get<int>("Z");
+        double Mass = s.get<double>("Mass");
+        std::string name = s.get<std::string>("Name");
+        double frac = s.get<double>("Fraction");
+        G4Element * element = new G4Element(name, " ", MaterialZ, Mass*g/mole);
+        testMaterial->AddElement(element, frac/sum);
+      }
+    }// end else()  (complex material)
+
+
     if (i == 0) {
       //For the first material, set it as the 'world'
       //centered at 0
@@ -62,9 +105,9 @@ void G4ReweightManager::SetupWorld() {
                             MaterialName, logicWorld, false, 0, true));
       fVolumes[MaterialName] = physSubBoxes.back();
     }
-     
+
   }
-  
+
   detector = new G4CascadeDetectorConstruction(physWorld);
   physList = new G4CascadePhysicsList();
 }

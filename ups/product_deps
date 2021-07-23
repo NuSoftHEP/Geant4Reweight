@@ -2,8 +2,8 @@
 
 # The *parent* line must the first non-commented line and defines this product and version
 # The version should be of the form vxx_yy_zz (e.g. v01_02_03)
-parent geant4reweight v01_08_02
-defaultqual s111:e20
+parent geant4reweight v01_08_03
+defaultqual s112:e20
 
 # These optional lines define the installed directories where headers,
 # libraries, and executables will be found.
@@ -32,119 +32,40 @@ fcldir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
+nug4            v1_09_04  s112
 nug4            v1_09_03  s111
 nug4            v1_09_01  s109
 nug4            v1_09_00  s108
-nug4            v1_08_00  s107
-nug4            v1_07_00  s106
-nug4            v1_05_04  s102
-nug4            v1_04_04  s97
-nug4            v1_04_02  s96
-nug4            v1_04_01  s95
-nug4            v1_04_00  s94
-nug4            v1_03_01  s93
-nug4            v1_02_02_01  s85
-nutools         v2_27_06  s78
-cetbuildtools   v8_10_01  -    only_for_build
+cetbuildtools   v8_11_02  -    only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes".
-qualifier          nug4           nutools       notes
-s111:e20:debug      e20:debug      -
-s111:e20:prof       e20:prof       -
-s111:e19:debug      e19:debug      -
-s111:e19:prof       e19:prof       -
-s111:c7:debug       c7:debug       -
-s111:c7:prof        c7:prof        -
-s109:e20:debug      e20:debug      -
-s109:e20:prof       e20:prof       -
-s109:e19:debug      e19:debug      -
-s109:e19:prof       e19:prof       -
-s109:c7:debug       c7:debug       -
-s109:c7:prof        c7:prof        -
-s108:e20:debug      e20:debug      -
-s108:e20:prof       e20:prof       -
-s108:e19:debug      e19:debug      -
-s108:e19:prof       e19:prof       -
-s108:c7:debug       c7:debug       -
-s108:c7:prof        c7:prof        -
-s107:e20:debug      e20:debug      -
-s107:e20:prof       e20:prof       -
-s107:e19:debug      e19:debug      -
-s107:e19:prof       e19:prof       -
-s107:c7:debug       c7:debug       -
-s107:c7:prof        c7:prof        -
-s106:e20:debug      e20:debug      -
-s106:e20:prof       e20:prof       -
-s106:e19:debug      e19:debug      -
-s106:e19:prof       e19:prof       -
-s106:c7:debug       c7:debug       -
-s106:c7:prof        c7:prof        -
-s102:e19:py2:debug  e19:py2:debug  -
-s102:e19:py2:prof   e19:py2:prof   -
-s102:e19:debug      e19:debug      -
-s102:e19:prof       e19:prof       -
-s102:c7:py2:debug   c7:py2:debug   -
-s102:c7:py2:prof    c7:py2:prof    -
-s102:c7:debug       c7:debug       -
-s102:c7:prof        c7:prof        -
-s97:e19:py2:debug  e19:py2:debug  -
-s97:e19:py2:prof   e19:py2:prof   -
-s97:e19:debug      e19:debug      -
-s97:e19:prof       e19:prof       -
-s97:c7:py2:debug   c7:py2:debug   -
-s97:c7:py2:prof    c7:py2:prof    -
-s97:c7:debug       c7:debug       -
-s97:c7:prof        c7:prof        -
-s96:e19:py2:debug  e19:py2:debug  -
-s96:e19:py2:prof   e19:py2:prof   -
-s96:e19:debug      e19:debug      -
-s96:e19:prof       e19:prof       -
-s96:c7:py2:debug   c7:py2:debug   -
-s96:c7:py2:prof    c7:py2:prof    -
-s96:c7:debug       c7:debug       -
-s96:c7:prof        c7:prof        -
-s95:e19:py2:debug  e19:py2:debug  -
-s95:e19:py2:prof   e19:py2:prof   -
-s95:e19:debug      e19:debug      -
-s95:e19:prof       e19:prof       -
-s95:c7:py2:debug   c7:py2:debug   -
-s95:c7:py2:prof    c7:py2:prof    -
-s95:c7:debug       c7:debug       -
-s95:c7:prof        c7:prof        -
-s94:e19:py2:debug  e19:py2:debug  -
-s94:e19:py2:prof   e19:py2:prof   -
-s94:e19:debug      e19:debug      -
-s94:e19:prof       e19:prof       -
-s94:c7:py2:debug   c7:py2:debug   -
-s94:c7:py2:prof    c7:py2:prof    -
-s94:c7:debug       c7:debug       -
-s94:c7:prof        c7:prof        -
-s93:e19:py3:debug  e19:py3:debug  -
-s93:e19:py3:prof   e19:py3:prof   -
-s93:e19:debug      e19:debug      -
-s93:e19:prof       e19:prof       -
-s93:e17:py3:debug  e17:py3:debug  -
-s93:e17:py3:prof   e17:py3:prof   -
-s93:e17:debug      e17:debug      -
-s93:e17:prof       e17:prof       -
-s93:c7:py3:debug   c7:py3:debug   -
-s93:c7:py3:prof    c7:py3:prof    -
-s93:c7:debug       c7:debug       -
-s93:c7:prof        c7:prof        -
-s93:c2:py3:debug   c2:py3:debug   -
-s93:c2:py3:prof    c2:py3:prof    -
-s93:c2:debug       c2:debug       -
-s93:c2:prof        c2:prof        -
-s85:e17:debug      e17:debug      -
-s85:e17:prof       e17:prof       -
-s85:c2:debug       c2:debug       -
-s85:c2:prof        c2:prof        -
-s78:e17:debug      -              e17:debug
-s78:e17:prof       -              e17:prof
-s78:c2:debug       -              c2:debug
-s78:c2:prof        -              c2:prof
+qualifier           nug4           notes
+s112:e20:debug      e20:debug
+s112:e20:prof       e20:prof
+s112:e19:debug      e19:debug
+s112:e19:prof       e19:prof
+s112:c7:debug       c7:debug
+s112:c7:prof        c7:prof
+s111:e20:debug      e20:debug
+s111:e20:prof       e20:prof
+s111:e19:debug      e19:debug
+s111:e19:prof       e19:prof
+s111:c7:debug       c7:debug
+s111:c7:prof        c7:prof
+s109:e20:debug      e20:debug
+s109:e20:prof       e20:prof
+s109:e19:debug      e19:debug
+s109:e19:prof       e19:prof
+s109:c7:debug       c7:debug
+s109:c7:prof        c7:prof
+s108:e20:debug      e20:debug
+s108:e20:prof       e20:prof
+s108:e19:debug      e19:debug
+s108:e19:prof       e19:prof
+s108:c7:debug       c7:debug
+s108:c7:prof        c7:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

@@ -19,8 +19,8 @@ We use branches to manage different required versions of art and geant4.
 Branches for NOvA will be nova_vXX_YY_br.
 Since the head of the development is primarily used for LArSoft work, branches for LArSoft releases will only be made when necessary and will be of the form vXX_YY_br.
 
-# Latest stable releases
+## Latest NOvA releases
 
-- LArSoft: v01_06_08 on v01_06_br
+- NOvA: v01_09_01 on nova_v01_09_br
 - NOvA: v01_04_03 on nova_v01_04_br
 

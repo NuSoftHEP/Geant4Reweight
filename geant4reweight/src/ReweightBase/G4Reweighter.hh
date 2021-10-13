@@ -28,6 +28,7 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronCaptureProcess.hh"
 #include "Geant4/G4String.hh"
 #include "Geant4/G4hIonisation.hh"
 #include "Geant4/G4hPairProduction.hh"
@@ -68,6 +69,7 @@ class G4Reweighter{
     void SetMomentum(double p);
     double GetDecayMFP(double p);
     double GetCoulMFP(double p);
+    double GetCaptureMFP(double p);
     double GetNominalMFP(double p);
     double GetBiasedMFP(double p);
     double GetNominalElasticMFP(double p);
@@ -119,6 +121,7 @@ class G4Reweighter{
     G4HadronElasticProcess * elastic_proc;
     G4HadronInelasticProcess * inelastic_proc;
     G4CoulombScattering * coul_proc;
+    G4HadronCaptureProcess * cap_proc = 0x0;
 
     void SetupProcesses();
     //virtual void DefineParticle() = 0;

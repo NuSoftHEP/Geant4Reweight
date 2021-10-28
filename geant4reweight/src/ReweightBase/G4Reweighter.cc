@@ -49,12 +49,12 @@ void G4Reweighter::SetupWorld() {
   std::vector<fhicl::ParameterSet> MaterialComponents
   = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
 
-  Density = MaterialParameters.get<double>("Density");
+  double Density = MaterialParameters.get<double>("Density");
 
 
   if(MaterialComponents.size() == 1){
     int MaterialZ = MaterialComponents[0].get<int>("Z");
-
+    double Mass = MaterialComponents[0].get<double>("Mass");
     testMaterial = new G4Material(MaterialName,
                                   MaterialZ,
                                   Mass*g/mole,
@@ -107,7 +107,6 @@ void G4Reweighter::SetupWorld() {
 }
 
 void G4Reweighter::SetupParticle() {
-  Density = MaterialParameters.get<double>("Density");
 
   std::string material_name = MaterialParameters.get<std::string>("Name");
 

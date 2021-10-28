@@ -99,9 +99,6 @@ class G4Reweighter{
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
     std::string fInelastic/* = "pi+Inelastic"*/;
 
-    double Mass;
-    double Density;
-
     G4RunManager * rm;
     G4Track * testTrack;
     G4Step * testStep;

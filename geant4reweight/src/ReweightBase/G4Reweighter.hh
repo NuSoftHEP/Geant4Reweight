@@ -49,7 +49,6 @@
 
 
 class G4ReweightTraj;
-//class G4ReweightStep;
 
 class G4Reweighter{
   public:
@@ -63,7 +62,6 @@ class G4Reweighter{
     virtual ~G4Reweighter();
 
     double GetWeight(const G4ReweightTraj * theTraj);
-    double GetAlternateWeight(const G4ReweightTraj * theTraj);
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);
@@ -121,7 +119,6 @@ class G4Reweighter{
     G4HadronCaptureProcess * cap_proc = 0x0;
 
     void SetupProcesses();
-    //virtual void DefineParticle() = 0;
     void SetupWorld();
     void SetupParticle();
 

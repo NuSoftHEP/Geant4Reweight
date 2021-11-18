@@ -29,28 +29,28 @@ class G4MultiReweighter{
                     size_t nThrows = 100, int seed = 0);
 
   
-  double GetWeightFromNominal(G4ReweightTraj & traj,
-                              bool alternate_weight = false);
+  double GetWeightFromNominal(G4ReweightTraj & traj/*,
+                              bool alternate_weight = false*/);
 
-  double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow,
-                              bool alternate_weight = false);
-  std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj,
-                                               bool alternate_weight = false);
+  double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow/*,
+                              bool alternate_weight = false*/);
+  std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj/*,
+                                               bool alternate_weight = false*/);
 
   std::pair<double, double> GetPlusMinusSigmaParWeight(
-      G4ReweightTraj & traj, size_t iPar, bool alternate_weight = false);
+      G4ReweightTraj & traj, size_t iPar/*, bool alternate_weight = false*/);
 
-  double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow,
-                                      bool alternate_weight = false);
-  std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj,
-                                                       bool alternate_weight = false);
+  double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow/*,
+                                      bool alternate_weight = false*/);
+  std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj/*,
+                                                       bool alternate_weight = false*/);
 
   bool CheckDecompSuccess() {return decompSuccess;};
 
   bool SetParameterValue(size_t iPar, double value); 
   bool SetAllParameterValues(std::vector<double> values);
-  double GetWeightFromSetParameters(G4ReweightTraj & traj,
-                                    bool alternate_weight = false);
+  double GetWeightFromSetParameters(G4ReweightTraj & traj/*,
+                                    bool alternate_weight = false*/);
 
   /*
   std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();

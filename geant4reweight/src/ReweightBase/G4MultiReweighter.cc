@@ -86,8 +86,7 @@ void G4MultiReweighter::GenerateThrows() {
   }
 }
 
-double G4MultiReweighter::GetWeightFromNominal(G4ReweightTraj & traj,
-                                               bool alternate_weight) {
+double G4MultiReweighter::GetWeightFromNominal(G4ReweightTraj & traj) {
   //Build the map with the nominal vals
   std::map<std::string, double> paramMap;
   for (size_t i = 0; i < paramNames.size(); ++i) {
@@ -101,14 +100,11 @@ double G4MultiReweighter::GetWeightFromNominal(G4ReweightTraj & traj,
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
   
   //Get the weight from the trajectory
-  return (alternate_weight ?
-          reweighter->GetAlternateWeight(&traj) :
-          reweighter->GetWeight(&traj));
+  return reweighter->GetWeight(&traj);
 }
 
 double G4MultiReweighter::GetWeightFrom1DThrow(G4ReweightTraj & traj,
-                                               size_t iThrow,
-                                               bool alternate_weight) {
+                                               size_t iThrow) {
   if (iThrow+1 > numberOfThrows) {
     std::cerr << "Requested throw out of bounds" << std::endl;
     return -1.; 
@@ -131,24 +127,21 @@ double G4MultiReweighter::GetWeightFrom1DThrow(G4ReweightTraj & traj,
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
   
   //Get the weight from the trajectory
-  return (alternate_weight ?
-          reweighter->GetAlternateWeight(&traj) :
-          reweighter->GetWeight(&traj));
+  return reweighter->GetWeight(&traj);
 }
 
 std::vector<double> G4MultiReweighter::GetWeightFromAll1DThrows(
-    G4ReweightTraj & traj, bool alternate_weight) {
+    G4ReweightTraj & traj) {
 
   std::vector<double> results;
   for (size_t i = 0; i < numberOfThrows; ++i) {
-    results.push_back(GetWeightFrom1DThrow(traj, i, alternate_weight));
+    results.push_back(GetWeightFrom1DThrow(traj, i));
   }
   return results;
 }
 
 double G4MultiReweighter::GetWeightFromCorrelatedThrow(G4ReweightTraj & traj,
-                                                       size_t iThrow,
-                                                       bool alternate_weight) {
+                                                       size_t iThrow) {
   if (!decompSuccess) {
     std::cerr << "Cholesky decomposition was not formed." <<
                  "Returning weight of 1." << std::endl;
@@ -183,13 +176,11 @@ double G4MultiReweighter::GetWeightFromCorrelatedThrow(G4ReweightTraj & traj,
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
   
   //Get the weight from the trajectory
-  return (alternate_weight ?
-          reweighter->GetAlternateWeight(&traj) :
-          reweighter->GetWeight(&traj));
+  return reweighter->GetWeight(&traj);
 }
 
 std::vector<double> G4MultiReweighter::GetWeightFromAllCorrelatedThrows(
-    G4ReweightTraj & traj, bool alternate_weight) {
+    G4ReweightTraj & traj) {
   std::vector<double> results;
 
   if (!decompSuccess) {
@@ -199,14 +190,14 @@ std::vector<double> G4MultiReweighter::GetWeightFromAllCorrelatedThrows(
   }
 
   for (size_t i = 0; i < numberOfThrows; ++i) {
-    results.push_back(GetWeightFromCorrelatedThrow(traj, i, alternate_weight));
+    results.push_back(GetWeightFromCorrelatedThrow(traj, i));
   }
   return results; 
 }
 
 std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
     G4ReweightTraj & traj,
-    size_t iPar, bool alternate_weight) {
+    size_t iPar) {
 
   if (iPar+1 > paramNames.size()) {
     std::cerr << "Requested parameter index out of bounds" << std::endl;
@@ -226,9 +217,7 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   parMaker.SetNewVals(paramMap);
   reweighter->SetNewHists(parMaker.GetFSHists());
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
-  double plus_weight = (alternate_weight ?
-                        reweighter->GetAlternateWeight(&traj) :
-                        reweighter->GetWeight(&traj));
+  double plus_weight = reweighter->GetWeight(&traj);
 
   //Do the same for the -1 sigma variation
   //-2 to account for +1
@@ -240,9 +229,7 @@ std::pair<double, double> G4MultiReweighter::GetPlusMinusSigmaParWeight(
   parMaker.SetNewVals(paramMap);
   reweighter->SetNewHists(parMaker.GetFSHists());
   reweighter->SetNewElasticHists(parMaker.GetElasticHist());
-  double minus_weight = (alternate_weight ?
-                         reweighter->GetAlternateWeight(&traj) :
-                         reweighter->GetWeight(&traj));
+  double minus_weight = reweighter->GetWeight(&traj);
 
   return {plus_weight, minus_weight};
 }
@@ -285,9 +272,6 @@ bool G4MultiReweighter::SetAllParameterValues(std::vector<double> values) {
   return true;
 }
 
-double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj,
-                                                     bool alternate_weight) {
-  return (alternate_weight ?
-          reweighter->GetAlternateWeight(&traj) :
-          reweighter->GetWeight(&traj));
+double G4MultiReweighter::GetWeightFromSetParameters(G4ReweightTraj & traj) {
+  return reweighter->GetWeight(&traj);
 }

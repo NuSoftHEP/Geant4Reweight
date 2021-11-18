@@ -189,8 +189,8 @@ double G4Reweighter::GetCoulMFP(double p) {
 double G4Reweighter::GetInelasticXSec(double p) {
   SetMomentum(p);
 
-  return ( inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
-             dynamic_part, testMaterial) *cm );
+  return (inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+              dynamic_part, testMaterial)*cm*fInelasticPreBias);
 }
 
 double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
@@ -200,8 +200,8 @@ double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
 double G4Reweighter::GetElasticXSec(double p) {
   SetMomentum(p);
 
-  return ( elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
-            dynamic_part, testMaterial) *cm );
+  return (elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+              dynamic_part, testMaterial)*cm*fElasticPreBias);
 }
 
 double G4Reweighter::GetNominalMFP(double p) {

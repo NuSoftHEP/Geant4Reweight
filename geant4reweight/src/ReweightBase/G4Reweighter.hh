@@ -85,6 +85,9 @@ class G4Reweighter{
     void SetNewHists(const std::map< std::string, TH1D* > &FSScales);
     void SetNewElasticHists(TH1D * inputElasticBiasHist);
 
+    void SetInelasticPreBias(double bias) {fInelasticPreBias = bias;};
+    void SetElasticPreBias(double bias) {fElasticPreBias = bias;};
+
   protected:
 
     bool fix_total = false;
@@ -117,13 +120,16 @@ class G4Reweighter{
     G4DecayHook * decay_hook;
     G4HadronElasticProcess * elastic_proc;
     G4HadronInelasticProcess * inelastic_proc;
-    G4CoulombScattering * coul_proc;
+    G4CoulombScattering * coul_proc = 0x0;
     G4HadronCaptureProcess * cap_proc = 0x0;
 
     void SetupProcesses();
     //virtual void DefineParticle() = 0;
     void SetupWorld();
     void SetupParticle();
+
+    double fInelasticPreBias = 1.;
+    double fElasticPreBias = 1.;
 
 };
 

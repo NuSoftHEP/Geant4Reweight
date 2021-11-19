@@ -15,9 +15,11 @@ Note: when sourcing the geant4reweight setup file, the first flag should
 # Important information about branches.
 
 This repository serves both LArSoft and NOvA.
+
 We use branches to manage different required versions of art and geant4.
 
 Branches for NOvA will be nova_vXX_YY_br.
+
 Since the head of the development is primarily used for LArSoft work, branches for LArSoft releases will only be made when necessary and will be of the form lar_vXX_YY_br.
 
 ## Latest LArSoft releases

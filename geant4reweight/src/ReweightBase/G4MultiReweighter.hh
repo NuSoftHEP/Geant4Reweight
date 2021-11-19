@@ -52,6 +52,9 @@ class G4MultiReweighter{
   double GetWeightFromSetParameters(G4ReweightTraj & traj,
                                     bool alternate_weight = false);
 
+  void SetInelasticPreBias(double bias) {reweighter->SetInelasticPreBias(bias);};
+  void SetElasticPreBias(double bias) {reweighter->SetElasticPreBias(bias);};
+
   /*
   std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();
   std::map<std::string, double> GetNominalVar();

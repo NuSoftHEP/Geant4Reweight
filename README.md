@@ -17,10 +17,9 @@ This repository serves both LArSoft and NOvA.
 We use branches to manage different required versions of art and geant4.
 
 Branches for NOvA will be nova_vXX_YY_br.
-Since the head of the development is primarily used for LArSoft work, branches for LArSoft releases will only be made when necessary and will be of the form vXX_YY_br.
+Since the head of the development is primarily used for LArSoft work, branches for LArSoft releases will only be made when necessary and will be of the form lar_vXX_YY_br.
 
 ## Latest LArSoft releases
 
-- v01_08_03 (for art 3.09)
-- v01_06_08 on v01_06_br (for art 3.06)
+- v01_08_07 (for art 3.09)
 

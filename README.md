@@ -23,3 +23,7 @@ Since the head of the development is primarily used for LArSoft work, branches f
 
 - v01_08_07 (for art 3.09)
 
+## Latest NOvA release
+
+- v01_09_01 (for art 3.05.01)
+

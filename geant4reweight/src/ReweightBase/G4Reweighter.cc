@@ -129,7 +129,6 @@ void G4Reweighter::SetupParticle() {
 
 void G4Reweighter::SetupProcesses() {
   SetupParticle();
-  decay_hook = new G4DecayHook();
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
 
@@ -142,12 +141,7 @@ void G4Reweighter::SetupProcesses() {
     else if( theName == fInelastic ){
       inelastic_proc = (G4HadronInelasticProcess*)proc;
     }
-    else if (theName == "CoulombScat") {
-      coul_proc = (G4CoulombScattering*)proc;
-    }
-    else if (theName == "nCapture") {
-      cap_proc = (G4HadronCaptureProcess*)proc;
-    }
+
     else {
       std::cout << theName << std::endl;
     }
@@ -164,26 +158,6 @@ void G4Reweighter::SetMomentum(double p) {
   double KE = sqrt(p*p + std::pow(part_def->GetPDGMass(), 2))
               - part_def->GetPDGMass();
   dynamic_part->SetKineticEnergy(KE);
-}
-
-double G4Reweighter::GetDecayMFP(double p) {
-  SetMomentum(p);
-  return decay_hook->GetMFP(*testTrack);
-}
-
-
-double G4Reweighter::GetCaptureMFP(double p) {
-  SetMomentum(p);
-  return cap_proc->GetMeanFreePath(*testTrack, 0., 0x0);
-}
-
-double G4Reweighter::GetCoulMFP(double p) {
-  SetMomentum(p);
-  double mfp = coul_proc->MeanFreePath(*testTrack);
-  if (mfp == DBL_MAX) {
-    return 0.;
-  }
-  return mfp;
 }
 
 double G4Reweighter::GetInelasticXSec(double p) {

@@ -40,7 +40,6 @@
 
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-#include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
 #include "G4ReweightManager.hh"
 
 #include "fhiclcpp/make_ParameterSet.h"
@@ -65,9 +64,6 @@ class G4Reweighter{
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);
-    double GetDecayMFP(double p);
-    double GetCoulMFP(double p);
-    double GetCaptureMFP(double p);
     double GetNominalMFP(double p);
     double GetBiasedMFP(double p);
     double GetNominalElasticMFP(double p);
@@ -115,11 +111,8 @@ class G4Reweighter{
     G4ParticleDefinition * part_def;
     G4DynamicParticle * dynamic_part;
 
-    G4DecayHook * decay_hook;
     G4HadronElasticProcess * elastic_proc;
     G4HadronInelasticProcess * inelastic_proc;
-    G4CoulombScattering * coul_proc = 0x0;
-    G4HadronCaptureProcess * cap_proc = 0x0;
 
     void SetupProcesses();
     void SetupWorld();

@@ -160,21 +160,29 @@ void G4Reweighter::SetMomentum(double p) {
   dynamic_part->SetKineticEnergy(KE);
 }
 
-double G4Reweighter::GetInelasticXSec(double p) {
+double G4Reweighter::GetInelasticXSec(double p, bool mb_units) {
   SetMomentum(p);
 
-  return (inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+  double scale = (mb_units ?
+                  (1.e24/(*testMaterial->GetAtomicNumDensityVector())) :
+                  1.);
+
+  return scale*(inelastic_proc->GetCrossSectionDataStore()->GetCrossSection(
               dynamic_part, testMaterial)*cm*fInelasticPreBias);
 }
 
-double G4Reweighter::GetExclusiveXSec(double p, std::string cut) {
-  return (exclusiveFracs[cut]->Eval(p)*GetInelasticXSec(p));
+double G4Reweighter::GetExclusiveXSec(double p, std::string cut, bool mb_units) {
+  return (exclusiveFracs[cut]->Eval(p)*GetInelasticXSec(p, mb_units));
 }
 
-double G4Reweighter::GetElasticXSec(double p) {
+double G4Reweighter::GetElasticXSec(double p, bool mb_units) {
   SetMomentum(p);
 
-  return (elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
+  double scale = (mb_units ?
+                  (1.e24/(*testMaterial->GetAtomicNumDensityVector())) :
+                  1.);
+
+  return scale*(elastic_proc->GetCrossSectionDataStore()->GetCrossSection(
               dynamic_part, testMaterial)*cm*fElasticPreBias);
 }
 

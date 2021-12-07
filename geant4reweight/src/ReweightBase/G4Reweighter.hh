@@ -72,9 +72,9 @@ class G4Reweighter{
     double GetElasticBias(double p);
     double GetExclusiveFactor(double p, std::string cut);
 
-    double GetInelasticXSec(double p);
-    double GetExclusiveXSec(double p, std::string cut);
-    double GetElasticXSec(double p);
+    double GetInelasticXSec(double p, bool mb_units = false);
+    double GetExclusiveXSec(double p, std::string cut, bool mb_units = false);
+    double GetElasticXSec(double p, bool mb_units = false);
 
     void SetNewHists(const std::map< std::string, TH1D* > &FSScales);
     void SetNewElasticHists(TH1D * inputElasticBiasHist);

@@ -90,7 +90,7 @@ void G4ReweightManager::SetupWorld() {
       logicWorld = new G4LogicalVolume(solidWorld, testMaterial, "World");
       physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0,
                                     false, 0, true);
-      double center = -.5*total_length + 2.5*cm * i*5.*cm;
+      double center = -.5*total_length + 2.5*cm + i*5.*cm;
       fCenters[MaterialName] = center;
       fVolumes[MaterialName] = physWorld;
     }
@@ -98,7 +98,7 @@ void G4ReweightManager::SetupWorld() {
       G4LogicalVolume * logicSubBox = new G4LogicalVolume(subBox, testMaterial,
                                                           MaterialName);
 
-      double center = -.5*total_length + 2.5*cm * i*5.*cm;
+      double center = -.5*total_length + 2.5*cm + i*5.*cm;
       fCenters[MaterialName] = center;
       physSubBoxes.push_back(
           new G4PVPlacement(0, G4ThreeVector(0., 0., center), logicSubBox,

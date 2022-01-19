@@ -29,22 +29,31 @@ class G4MultiReweighter{
                     size_t nThrows = 100, int seed = 0);
 
   
-  double GetWeightFromNominal(G4ReweightTraj & traj);
+  double GetWeightFromNominal(G4ReweightTraj & traj/*,
+                              bool alternate_weight = false*/);
 
-  double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow);
-  std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj);
+  double GetWeightFrom1DThrow(G4ReweightTraj & traj, size_t iThrow/*,
+                              bool alternate_weight = false*/);
+  std::vector<double> GetWeightFromAll1DThrows(G4ReweightTraj & traj/*,
+                                               bool alternate_weight = false*/);
 
-  std::pair<double, double> GetPlusMinusSigmaParWeight(G4ReweightTraj & traj,
-                                                       size_t iPar);
+  std::pair<double, double> GetPlusMinusSigmaParWeight(
+      G4ReweightTraj & traj, size_t iPar/*, bool alternate_weight = false*/);
 
-  double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow);
-  std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj);
+  double GetWeightFromCorrelatedThrow(G4ReweightTraj & traj, size_t iThrow/*,
+                                      bool alternate_weight = false*/);
+  std::vector<double> GetWeightFromAllCorrelatedThrows(G4ReweightTraj & traj/*,
+                                                       bool alternate_weight = false*/);
 
   bool CheckDecompSuccess() {return decompSuccess;};
 
   bool SetParameterValue(size_t iPar, double value); 
   bool SetAllParameterValues(std::vector<double> values);
-  double GetWeightFromSetParameters(G4ReweightTraj & traj);
+  double GetWeightFromSetParameters(G4ReweightTraj & traj/*,
+                                    bool alternate_weight = false*/);
+
+  void SetInelasticPreBias(double bias) {reweighter->SetInelasticPreBias(bias);};
+  void SetElasticPreBias(double bias) {reweighter->SetElasticPreBias(bias);};
 
   /*
   std::map<std::string, std::pair<double, double>> GetPlusMinusSigmaWeights();

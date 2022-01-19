@@ -283,7 +283,7 @@ void G4ReweightFitter::GetMCValsWithCov(
     if (cut_name == "reac") {
       for (size_t i = 0; i < xs.size(); ++i) {
         double x = xs[i];
-        ys.push_back(theReweighter->GetInelasticXSec(x)*
+        ys.push_back(theReweighter->GetInelasticXSec(x, true)*
                      theReweighter->GetInelasticBias(x));
 
         //if no cov or position specified, just use central values
@@ -297,7 +297,7 @@ void G4ReweightFitter::GetMCValsWithCov(
     else if (cut_name == "elast") {
       for (size_t i = 0; i < xs.size(); ++i) {
         double x = xs[i];
-        ys.push_back(theReweighter->GetElasticXSec(x)*
+        ys.push_back(theReweighter->GetElasticXSec(x, true)*
                      theReweighter->GetElasticBias(x));
 
         if (cov && position != "CV") {
@@ -310,9 +310,9 @@ void G4ReweightFitter::GetMCValsWithCov(
     else if (cut_name == "total") {
       for (size_t i = 0; i < xs.size(); ++i) {
         double x = xs[i];
-        ys.push_back((theReweighter->GetElasticXSec(x)*
+        ys.push_back((theReweighter->GetElasticXSec(x, true)*
                       theReweighter->GetElasticBias(x)) +
-                     (theReweighter->GetInelasticXSec(x)*
+                     (theReweighter->GetInelasticXSec(x, true)*
                       theReweighter->GetInelasticBias(x)));
 
         if (cov && position != "CV") {
@@ -327,9 +327,9 @@ void G4ReweightFitter::GetMCValsWithCov(
         double x = xs[i];
         ys.push_back(
             (theReweighter->GetExclusiveFactor(x, "abs")*
-             theReweighter->GetExclusiveXSec(x, "abs")) +
+             theReweighter->GetExclusiveXSec(x, "abs", true)) +
             (theReweighter->GetExclusiveFactor(x, "cex")*
-             theReweighter->GetExclusiveXSec(x, "cex")));
+             theReweighter->GetExclusiveXSec(x, "cex", true)));
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
@@ -343,7 +343,7 @@ void G4ReweightFitter::GetMCValsWithCov(
         double x = xs[i];
         ys.push_back(
             (theReweighter->GetExclusiveFactor(x, cut_name)*
-             theReweighter->GetExclusiveXSec(x, cut_name)));
+             theReweighter->GetExclusiveXSec(x, cut_name, true)));
 
         if (cov && position != "CV") {
           //new method to get +/- 1 sigma variations
@@ -490,52 +490,52 @@ double G4ReweightFitter::SigmaWithCov(
   
   //Just do the elastic error. simple
   if (cut == "elast") {
-    return (std::pow(theReweighter->GetElasticXSec(x), 2)*cov_map_cuts[{cut, cut}]);
+    return (std::pow(theReweighter->GetElasticXSec(x, true), 2)*cov_map_cuts[{cut, cut}]);
   }
   else if (cut != "reac" && cut != "total" && cut != "abscx") {
     return ((std::pow(par_vals[cut]*
-                      theReweighter->GetExclusiveXSec(x, cut), 2)*
+                      theReweighter->GetExclusiveXSec(x, cut, true), 2)*
              cov_map_cuts[{"reac", "reac"}]) +
             (std::pow(par_vals["reac"]*
-                      theReweighter->GetExclusiveXSec(x, cut), 2)*
+                      theReweighter->GetExclusiveXSec(x, cut, true), 2)*
              cov_map_cuts[{cut, cut}]) +
             (2*par_vals["reac"]*
              par_vals[cut]*
-             std::pow(theReweighter->GetExclusiveXSec(x, cut), 2)*
+             std::pow(theReweighter->GetExclusiveXSec(x, cut, true), 2)*
              cov_map_cuts[{cut, "reac"}]));
   }
   else if (cut == "abscx") {
     //reac term
     double variance = std::pow((par_vals["abs"]*
-                                theReweighter->GetExclusiveXSec(x, "abs")) +
+                                theReweighter->GetExclusiveXSec(x, "abs", true)) +
                                (par_vals["cex"]*
-                                theReweighter->GetExclusiveXSec(x, "cex")), 2)*
+                                theReweighter->GetExclusiveXSec(x, "cex", true)), 2)*
                       cov_map_cuts[{"reac", "reac"}];
 
     //abs term
-    variance += std::pow(theReweighter->GetExclusiveXSec(x, "abs")*par_vals["reac"], 2)*
+    variance += std::pow(theReweighter->GetExclusiveXSec(x, "abs", true)*par_vals["reac"], 2)*
                 cov_map_cuts[{"abs", "abs"}];
 
     //cex term
-    variance += std::pow(theReweighter->GetExclusiveXSec(x, "cex")*par_vals["reac"], 2)*
+    variance += std::pow(theReweighter->GetExclusiveXSec(x, "cex", true)*par_vals["reac"], 2)*
                 cov_map_cuts[{"cex", "cex"}];
 
     //cross terms: abs/cex with reac
     variance += 2*((par_vals["abs"]*
-                    theReweighter->GetExclusiveXSec(x, "abs")) +
+                    theReweighter->GetExclusiveXSec(x, "abs", true)) +
                    (par_vals["cex"]*
-                    theReweighter->GetExclusiveXSec(x, "cex")))*
+                    theReweighter->GetExclusiveXSec(x, "cex", true)))*
                   ((par_vals["reac"]*
-                    theReweighter->GetExclusiveXSec(x, "abs")*
+                    theReweighter->GetExclusiveXSec(x, "abs", true)*
                     cov_map_cuts[{"abs", "reac"}]) +
                    (par_vals["reac"]*
-                    theReweighter->GetExclusiveXSec(x, "cex")*
+                    theReweighter->GetExclusiveXSec(x, "cex", true)*
                     cov_map_cuts[{"cex", "reac"}]));
 
     //cross term: abs with cex
     variance += 2*std::pow(par_vals["reac"], 2)*
-                theReweighter->GetExclusiveXSec(x, "abs")*
-                theReweighter->GetExclusiveXSec(x, "cex")*
+                theReweighter->GetExclusiveXSec(x, "abs", true)*
+                theReweighter->GetExclusiveXSec(x, "cex", true)*
                 cov_map_cuts[{"abs", "cex"}];
     return variance;
   }
@@ -546,7 +546,7 @@ double G4ReweightFitter::SigmaWithCov(
     for (size_t i = 0; i < all_cuts.size(); ++i) {
       if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
       reac_term += (par_vals[all_cuts[i]]*
-                  theReweighter->GetExclusiveXSec(x, all_cuts[i]));
+                  theReweighter->GetExclusiveXSec(x, all_cuts[i], true));
     }
     double variance = reac_term*reac_term*cov_map_cuts[{"reac", "reac"}];
 
@@ -554,7 +554,7 @@ double G4ReweightFitter::SigmaWithCov(
     for (size_t i = 0; i < all_cuts.size(); ++i) {
       if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
       variance += cov_map_cuts[{all_cuts[i], all_cuts[i]}]*
-                  std::pow(theReweighter->GetExclusiveXSec(x, all_cuts[i]), 2)*
+                  std::pow(theReweighter->GetExclusiveXSec(x, all_cuts[i], true), 2)*
                   par_vals["reac"]*par_vals["reac"];
     }
 
@@ -563,7 +563,7 @@ double G4ReweightFitter::SigmaWithCov(
 
     for (size_t i = 0; i < all_cuts.size(); ++i) {
       if (all_cuts[i] == "elast" || all_cuts[i] == "reac") continue;
-      variance += sub_var*theReweighter->GetExclusiveXSec(x, all_cuts[i])*
+      variance += sub_var*theReweighter->GetExclusiveXSec(x, all_cuts[i], true)*
                   cov_map_cuts[{"reac", all_cuts[i]}];
     }
 
@@ -574,8 +574,8 @@ double G4ReweightFitter::SigmaWithCov(
         if ((i == j) || (all_cuts[j] == "elast") || (all_cuts[j] == "reac"))
           continue;
         variance += par_vals["reac"]*par_vals["reac"]*
-                    theReweighter->GetExclusiveXSec(x, all_cuts[i])*
-                    theReweighter->GetExclusiveXSec(x, all_cuts[j])*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[i], true)*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[j], true)*
                     cov_map_cuts[{all_cuts[i], all_cuts[j]}];
       }
     }
@@ -583,7 +583,7 @@ double G4ReweightFitter::SigmaWithCov(
     //If total, add in terms proportional to elast
     if (cut == "total") {
       //Elast term
-      variance += std::pow(theReweighter->GetElasticXSec(x), 2)*
+      variance += std::pow(theReweighter->GetElasticXSec(x, true), 2)*
                   cov_map_cuts[{"elast", "elast"}];
       
       //Cross term: elast with reac
@@ -592,8 +592,8 @@ double G4ReweightFitter::SigmaWithCov(
       //Cross term: elast with exclusive
       for (size_t i = 0; i < all_cuts.size(); ++i) {
         if (all_cuts[i] == "reac" || all_cuts[i] == "elast") continue;
-        variance += 2.*theReweighter->GetElasticXSec(x)*par_vals["reac"]*
-                    theReweighter->GetExclusiveXSec(x, all_cuts[i])*
+        variance += 2.*theReweighter->GetElasticXSec(x, true)*par_vals["reac"]*
+                    theReweighter->GetExclusiveXSec(x, all_cuts[i], true)*
                     cov_map_cuts[{"elast", all_cuts[i]}];
       }
     }

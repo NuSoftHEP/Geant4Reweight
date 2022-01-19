@@ -28,6 +28,7 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronCaptureProcess.hh"
 #include "Geant4/G4String.hh"
 #include "Geant4/G4hIonisation.hh"
 #include "Geant4/G4hPairProduction.hh"
@@ -39,7 +40,6 @@
 
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-#include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
 #include "G4ReweightManager.hh"
 
 #include "fhiclcpp/make_ParameterSet.h"
@@ -48,7 +48,6 @@
 
 
 class G4ReweightTraj;
-//class G4ReweightStep;
 
 class G4Reweighter{
   public:
@@ -65,8 +64,6 @@ class G4Reweighter{
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);
-    double GetDecayMFP(double p);
-    double GetCoulMFP(double p);
     double GetNominalMFP(double p);
     double GetBiasedMFP(double p);
     double GetNominalElasticMFP(double p);
@@ -75,12 +72,15 @@ class G4Reweighter{
     double GetElasticBias(double p);
     double GetExclusiveFactor(double p, std::string cut);
 
-    double GetInelasticXSec(double p);
-    double GetExclusiveXSec(double p, std::string cut);
-    double GetElasticXSec(double p);
+    double GetInelasticXSec(double p, bool mb_units = false);
+    double GetExclusiveXSec(double p, std::string cut, bool mb_units = false);
+    double GetElasticXSec(double p, bool mb_units = false);
 
     void SetNewHists(const std::map< std::string, TH1D* > &FSScales);
     void SetNewElasticHists(TH1D * inputElasticBiasHist);
+
+    void SetInelasticPreBias(double bias) {fInelasticPreBias = bias;};
+    void SetElasticPreBias(double bias) {fElasticPreBias = bias;};
 
   protected:
 
@@ -95,9 +95,6 @@ class G4Reweighter{
 
     // These should be set in the constructor of the actual reweighter you use (e.g. G4PiPlusReweighter/G4PiMinusReweighter/G4ProtonReweighter)
     std::string fInelastic/* = "pi+Inelastic"*/;
-
-    double Mass;
-    double Density;
 
     G4RunManager * rm;
     G4Track * testTrack;
@@ -114,15 +111,15 @@ class G4Reweighter{
     G4ParticleDefinition * part_def;
     G4DynamicParticle * dynamic_part;
 
-    G4DecayHook * decay_hook;
     G4HadronElasticProcess * elastic_proc;
     G4HadronInelasticProcess * inelastic_proc;
-    G4CoulombScattering * coul_proc;
 
     void SetupProcesses();
-    //virtual void DefineParticle() = 0;
     void SetupWorld();
     void SetupParticle();
+
+    double fInelasticPreBias = 1.;
+    double fElasticPreBias = 1.;
 
 };
 

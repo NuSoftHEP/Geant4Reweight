@@ -2,9 +2,14 @@ BEGIN_PROLOG
 
 LAr: {
   Name: "liquidArgon"
-  Z:    18
-  Mass: 39.95
   Density: 1.390
+  Components: [
+    {
+      Z:    18
+      Mass: 39.948
+      Fraction: 1.
+    }
+  ]
 }
 
 C: {

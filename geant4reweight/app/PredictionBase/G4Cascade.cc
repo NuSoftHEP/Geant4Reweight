@@ -83,7 +83,7 @@ struct CascadeConfig{
         = pset.get<std::vector<std::pair<int, double>>>("Thresholds");
     thresholds = std::map<int, double>(temp_vec.begin(), temp_vec.end());
     
-
+    npi0 = pset.get<bool>("NPi0_Cex");
   };
 
   size_t nCascades;
@@ -99,6 +99,8 @@ struct CascadeConfig{
 
 
   std::map<int, double> thresholds;
+
+  bool npi0;
 
   bool AboveThreshold(int pdg, double p) {
     if (thresholds.find(pdg) == thresholds.end()) {
@@ -373,15 +375,27 @@ int main(int argc, char * argv[]){
   //These can be made FHiCL-able
   if( theConfig.type == 211 ){
     cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
-    cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
-    cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+    if (!theConfig.npi0) {
+      cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
+      cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+    }
+    else {
+      cuts["prod"] = "((nPiPlus + nPiMinus) > 1) || (nPi0 > 0 && ((nPiPlus + nPiMinus) > 0))";
+      cuts["cex"] = "nPi0 > 0 && nPiPlus == 0 && nPiMinus == 0";
+    }
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
   }
   else if( theConfig.type == -211 ){
     cuts["abs"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 0";
-    cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
-    cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+    if (!theConfig.npi0) {
+      cuts["prod"] = " (nPi0 + nPiPlus + nPiMinus) > 1";
+      cuts["cex"] = "nPi0 == 1 && nPiPlus == 0 && nPiMinus == 0";
+    }
+    else {
+      cuts["prod"] = "((nPiPlus + nPiMinus) > 1) || (nPi0 > 0 && ((nPiPlus + nPiMinus) > 0))";
+      cuts["cex"] = "nPi0 > 0 && nPiPlus == 0 && nPiMinus == 0";
+    }
     cuts["inel"] = "nPi0 == 0 && nPiPlus == 0 && nPiMinus == 1";
     cuts["dcex"] = "nPi0 == 0 && nPiPlus == 1 && nPiMinus == 0";
   }

@@ -16,7 +16,7 @@
 # use cmake 3.11 or later
 cmake_minimum_required (VERSION 3.11)
 
-project(geant4reweight VERSION 01.12.00)
+project(geant4reweight VERSION 01.13.00)
 
 # cetbuildtools contains our cmake modules
 #find_package(cetbuildtools REQUIRED)
@@ -84,14 +84,15 @@ project(geant4reweight VERSION 01.12.00)
 #else()
   #message( FATAL_ERROR "NOT USING ART" )
 
-  if(NOT "${CMAKE_CXX_STANDARD}")
-    set(CMAKE_CXX_STANDARD 17)
-  endif()
-  
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_EXTENSIONS OFF)
-  
   find_package(cetbuildtools REQUIRED)
+
+  #LG if(NOT "${CMAKE_CXX_STANDARD}")
+  #LG   set(CMAKE_CXX_STANDARD 17)
+  #LG endif()
+  
+  #LG set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  #LG set(CMAKE_CXX_EXTENSIONS OFF)
+  
   include(CetCMakeEnv)
   cet_cmake_env()
   
@@ -104,36 +105,15 @@ project(geant4reweight VERSION 01.12.00)
   
   cet_report_compiler_flags()
   
-  find_ups_product( cetbuildtools ) # LIBRARY_OUTPUT_DIRECTORY, etc.
-  
   #new
-  find_ups_product(clhep)
-  cet_find_library( CLHEP NAMES CLHEP PATHS $ENV{CLHEP_LIB_DIR} NO_DEFAULT_PATH)
-  if( NOT CLHEP )
-    message( FATAL_ERROR "CLHEP library not found" )
-  endif()
-  message("CLHEP? " ${CLHEP} )
-
-  cet_find_library( CETBUILD_EXCEPT NAMES cetlib_except PATHS $ENV{CETLIB_EXCEPT_LIB} )
-  message("CETBUILD_EXCEPT? " ${CETBUILD_EXCEPT} )
-  cet_find_library( CETBUILD NAMES cetlib PATHS $ENV{CETLIB_LIB} )
-  message("CETBUILD? " ${CETBUILD} )
+  find_package(cetlib REQUIRED)
+  find_package(cetlib_except REQUIRED)
+  find_package(CLHEP REQUIRED)
+  find_package(fhiclcpp REQUIRED PUBLIC)
 
   find_ups_geant4( )
   find_ups_root()
-  find_ups_product( fhiclcpp)
-
-  #find_library( CETLIB NAMES cetlib PATHS $ENV{CETLIB_LIB} ) 
-  #find_library( CETLIB_EXCEPT NAMES cetlib_except PATHS $ENV{CETLIB_EXCEPT_LIB} ) 
-  #find_library( CLHEP NAMES CLHEP PATHS $ENV{CLHEP_LIB_DIR} ) 
-
-  #list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
   #find_package(ROOT REQUIRED COMPONENTS RIO Net)
-
-  #set(FHICL_INCLUDE_DIR $ENV{FHICLCPP_INC})
-  #set(CETLIB_EXCEPT_INCLUDE_DIR $ENV{CETLIB_EXCEPT_INC})
-  #set(CETLIB_INCLUDE_DIR $ENV{CETLIB_INC})
-  #file(GLOB FHICLCPP_LIBS $ENV{FHICLCPP_LIB}/*.so)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)

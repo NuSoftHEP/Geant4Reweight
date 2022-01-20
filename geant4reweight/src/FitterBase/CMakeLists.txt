@@ -6,8 +6,9 @@
       G4ReweightFitManager.cc
       G4ReweightPionFitManager.cc
     LIBRARIES
-      ${FHICLCPP}
-      ${CETLIB} ${CETLIB_EXCEPT}
+      fhiclcpp::fhiclcpp
+      cetlib::cetlib
+      cetlib_except::cetlib_except
       ${ROOT_BASIC_LIB_LIST}
       PropBaseLib
       ReweightBaseLib
@@ -35,8 +36,8 @@
 #  
 #  install(TARGETS FitterBaseLib DESTINATION lib)
 #  
-#  #target_link_libraries(FitterBaseLib cetlib cetlib_except ${ROOT_LIBRARIES})
-#  target_link_libraries(FitterBaseLib ${CETLIB} ${CETLIB_EXCEPT} ${ROOT_LIBRARIES})
+#  #target_link_libraries(FitterBaseLib cetlib::cetlib cetlib_except ${ROOT_LIBRARIES})
+#  target_link_libraries(FitterBaseLib cetlib::cetlib cetlib_except::cetlib_except ${ROOT_LIBRARIES})
 #  
 #  #if(NOT DEFINED USE_FHICL OR NOT USE_FHICL) 
 #    target_link_libraries(FitterBaseLib ${FHICLCPP_LIBS}) 

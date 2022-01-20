@@ -3,8 +3,9 @@ cet_make_library( LIBRARY_NAME PropBaseLib
     G4ReweightParameterMaker.cc
     G4ReweightThrowManager.cc
   LIBRARIES
-    ${FHICLCPP}
-    ${CETLIB} ${CETLIB_EXCEPT}
+    fhiclcpp::fhiclcpp
+    cetlib::cetlib
+    cetlib_except::cetlib_except
     ${ROOT_BASIC_LIB_LIST}
 )
 install_headers()

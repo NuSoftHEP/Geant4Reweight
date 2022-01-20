@@ -7,8 +7,9 @@ foreach(appname ${FITTER_APPS})
     SOURCE 
       ${appname}.cc
     LIBRARIES
-      ${FHICLCPP}
-      ${CETLIB} ${CETLIB_EXCEPT}
+      fhiclcpp::fhiclcpp
+      cetlib::cetlib
+      cetlib_except::cetlib_except
       ${ROOT_BASIC_LIB_LIST}
       FitterBaseLib
       ReweightBaseLib

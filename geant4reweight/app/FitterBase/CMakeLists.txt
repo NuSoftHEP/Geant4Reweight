@@ -17,3 +17,5 @@ foreach(appname ${FITTER_APPS})
   )
 
 endforeach()
+
+install_fhicl()

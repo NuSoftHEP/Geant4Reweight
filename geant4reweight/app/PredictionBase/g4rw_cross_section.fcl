@@ -1,4 +1,4 @@
-#include "material.fcl"
+#include "g4rw_material.fcl"
 Type: 211
 Range: [10., 8000.]
 NDivisions: 7989

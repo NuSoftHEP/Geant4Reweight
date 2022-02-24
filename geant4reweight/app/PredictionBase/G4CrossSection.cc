@@ -165,10 +165,47 @@ int main(int argc, char * argv[]){
   //
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
-  int MaterialZ = MaterialParameters.get< int >( "Z" );
-  double MaterialMass = MaterialParameters.get< double >( "Mass" );
+  //int MaterialZ = MaterialParameters.get< int >( "Z" );
+  //double MaterialMass = MaterialParameters.get< double >( "Mass" );
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
-  G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  //G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
+  G4Material * theMaterial = 0x0;
+  
+  std::vector<fhicl::ParameterSet> MaterialComponents
+      = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
+  if (MaterialComponents.size() == 1) {
+    int MaterialZ = MaterialComponents[0].get<int>("Z");
+    double MaterialMass = MaterialComponents[0].get<double>("Mass");
+    theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole,
+                                 MaterialDensity*g/cm3);
+  }
+  else {
+
+    double sum = 0.0;
+    for (auto s : MaterialComponents) {
+      double frac = s.get<double>("Fraction");
+      sum += frac;
+    }
+    if(sum < 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "Fractions will be divided by this factor to normalize \n";
+    }
+    else if(sum > 1.0){
+      std::cout << "Sum of all element fractions equals " << sum << "\n";
+      std::cout << "This is greater than 1.0 - something is wrong here \n";
+      abort();
+    }
+
+    theMaterial = new G4Material(MaterialName, MaterialDensity*g/cm3, MaterialComponents.size());
+    for (auto s : MaterialComponents) {
+      int MaterialZ = s.get<int>("Z");
+      double MaterialMass = s.get<double>("Mass");
+      std::string name = s.get<std::string>("Name");
+      double frac = s.get<double>("Fraction");
+      G4Element * element = new G4Element(name, " ", MaterialZ, MaterialMass*g/mole);
+      theMaterial->AddElement(element, frac/sum);
+    }
+  }
 
   //G4Material * LAr = new G4Material("liquidArgon", 18., 39.95*g/mole, 1.390*g/cm3);
   G4Box * solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
@@ -460,8 +497,8 @@ int main(int argc, char * argv[]){
   cap_mfp_momentum.Write("cap_mfp_momentum");
   fis_mfp_momentum.Write("fis_mfp_momentum");
   TVectorD m_vec(1);
-  m_vec[0] = MaterialMass;
-  m_vec.Write("Mass");
+  //m_vec[0] = MaterialMass;
+  //m_vec.Write("Mass");
 
   TVectorD d_vec(1);
   d_vec[0] = MaterialDensity;

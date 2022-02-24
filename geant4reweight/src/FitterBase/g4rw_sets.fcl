@@ -1,4 +1,4 @@
-#include "material.fcl"
+#include "g4rw_material.fcl"
 
 
 BEGIN_PROLOG

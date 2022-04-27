@@ -7,7 +7,7 @@ NDivisions: 1
 Outfile: "cascade_out.root"
 
 Material: @local::LAr
-NPi0_Cex: false 
+NPi0_Cex: true 
 
 Thresholds: [
   [211, 150.],

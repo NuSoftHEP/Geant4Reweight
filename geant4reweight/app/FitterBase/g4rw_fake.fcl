@@ -1,6 +1,6 @@
-#include "sets.fcl"
-#include "parameters.fcl"
-#include "Fake_experiments.fcl"
+#include "g4rw_sets.fcl"
+#include "g4rw_parameters.fcl"
+#include "g4rw_Fake_experiments.fcl"
 
 OutputFile: "fake_curveFitter_try.root"
 

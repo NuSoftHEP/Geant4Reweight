@@ -43,6 +43,12 @@ end_product_list
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes".
 qualifier           nug4           notes
+s117:e20:debug      e20:debug
+s117:e20:prof       e20:prof
+s117:e19:debug      e19:debug
+s117:e19:prof       e19:prof
+s117:c7:debug       c7:debug
+s117:c7:prof        c7:prof
 s112:e20:debug      e20:debug
 s112:e20:prof       e20:prof
 s112:e19:debug      e19:debug

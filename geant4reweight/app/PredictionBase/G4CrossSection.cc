@@ -14,8 +14,8 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4HadronCaptureProcess.hh"
-#include "Geant4/G4HadronFissionProcess.hh"
+#include "Geant4/G4NeutronCaptureProcess.hh"
+#include "Geant4/G4NeutronFissionProcess.hh"
 #include "Geant4/G4String.hh"
 #include "Geant4/G4hIonisation.hh"
 #include "Geant4/G4hPairProduction.hh"
@@ -415,7 +415,7 @@ int main(int argc, char * argv[]){
         //std::cout << coul->LambdaTablePrim() << std::endl;
       }
       else if (theName == "nCapture") {
-        G4HadronCaptureProcess * cap = (G4HadronCaptureProcess*)proc;
+        G4NeutronCaptureProcess * cap = (G4NeutronCaptureProcess*)proc;
         if (cap->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
           cap_mfps.push_back(cap->GetMeanFreePath(*theTrack, 0., 0x0));
         }
@@ -424,7 +424,7 @@ int main(int argc, char * argv[]){
         }
       }
       else if (theName == "nFission") {
-        G4HadronFissionProcess * fis = (G4HadronFissionProcess*)proc;
+        G4NeutronFissionProcess * fis = (G4NeutronFissionProcess*)proc;
         if (fis->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
           fis_mfps.push_back(fis->GetMeanFreePath(*theTrack, 0., 0x0));
         }

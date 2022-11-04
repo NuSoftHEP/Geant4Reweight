@@ -28,7 +28,6 @@
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4HadronCaptureProcess.hh"
 #include "Geant4/G4String.hh"
 #include "Geant4/G4hIonisation.hh"
 #include "Geant4/G4hPairProduction.hh"

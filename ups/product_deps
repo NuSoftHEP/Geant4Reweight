@@ -3,7 +3,7 @@
 # The *parent* line must the first non-commented line and defines this product and version
 # The version should be of the form vxx_yy_zz (e.g. v01_02_03)
 parent geant4reweight
-defaultqual s117:e20
+defaultqual s120:e20
 
 # These optional lines define the installed directories where headers,
 # libraries, and executables will be found.
@@ -32,17 +32,26 @@ fcldir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
+nug4            v1_15_00  s120
 nug4            v1_13_03  s117
 nug4            v1_12_02  s112
 nug4            v1_09_03  s111
 nug4            v1_09_01  s109
 nug4            v1_09_00  s108
-cetbuildtools   v8_19_01  -    only_for_build
+cetbuildtools   v8_20_00  -    only_for_build
 end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes".
 qualifier           nug4           notes
+s120:e26:debug      e26:debug
+s120:e20:prof       e20:prof
+s120:e20:debug      e20:debug
+s120:e20:prof       e20:prof
+s120:c14:debug      c14:debug
+s120:c14:prof       c14:prof
+s120:c7:debug       c7:debug
+s120:c7:prof        c7:prof
 s117:e20:debug      e20:debug
 s117:e20:prof       e20:prof
 s117:e19:debug      e19:debug

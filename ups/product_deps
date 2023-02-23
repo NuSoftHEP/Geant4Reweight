@@ -45,7 +45,7 @@ end_product_list
 # Make a table by adding columns before "notes".
 qualifier           nug4           notes
 s120:e26:debug      e26:debug
-s120:e20:prof       e20:prof
+s120:e26:prof       e26:prof
 s120:e20:debug      e20:debug
 s120:e20:prof       e20:prof
 s120:c14:debug      c14:debug

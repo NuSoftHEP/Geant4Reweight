@@ -14,8 +14,9 @@
 
 
 # use cmake 3.11 or later
-cmake_minimum_required (VERSION 3.11)
+cmake_minimum_required (VERSION 3.20 FATAL_ERROR)
 
+find_package(cetmodules REQUIRED)
 project(geant4reweight VERSION 01.14.04)
 
 # cetbuildtools contains our cmake modules
@@ -84,7 +85,6 @@ project(geant4reweight VERSION 01.14.04)
 #else()
   #message( FATAL_ERROR "NOT USING ART" )
 
-  find_package(cetbuildtools REQUIRED)
 
   #LG if(NOT "${CMAKE_CXX_STANDARD}")
   #LG   set(CMAKE_CXX_STANDARD 17)
@@ -103,17 +103,18 @@ project(geant4reweight VERSION 01.14.04)
     EXTRA_CXX_FLAGS -Wno-unused-local-typedefs
   )
   
-  cet_report_compiler_flags()
+  cet_report_compiler_flags(REPORT_THRESHOLD VERBOSE)
   
   #new
   find_package(cetlib REQUIRED)
   find_package(cetlib_except REQUIRED)
   find_package(CLHEP REQUIRED)
-  find_package(fhiclcpp REQUIRED PUBLIC)
+  find_package(fhiclcpp REQUIRED EXPORT)
 
-  find_ups_geant4( )
-  find_ups_root()
+  find_package( Geant4 REQUIRED )
+  find_package(ROOT REQUIRED COMPONENTS Hist Tree Core Gpad)
   #find_package(ROOT REQUIRED COMPONENTS RIO Net)
+  #message(STATUS "ROOT_BASIC_LIB_LIST: ${ROOT_BASIC_LIB_LIST}")
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)
@@ -121,7 +122,6 @@ project(geant4reweight VERSION 01.14.04)
   add_subdirectory(test)
   # ups - table and config files
   # must be AFTER all other subdirectories
-  add_subdirectory(ups)
   
-  include(UseCPack) 
 #endif()
+cet_cmake_config()

@@ -10,7 +10,6 @@ foreach(appname ${FITTER_APPS})
       fhiclcpp::fhiclcpp
       cetlib::cetlib
       cetlib_except::cetlib_except
-      ${ROOT_BASIC_LIB_LIST}
       FitterBaseLib
       ReweightBaseLib
       PropBaseLib    

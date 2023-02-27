@@ -30,7 +30,6 @@ cet_make_library( LIBRARY_NAME ReweightBaseLib
     Geant4::G4global
     Geant4::G4persistency
     Geant4::G4physicslists
-    ${ROOT_BASIC_LIB_LIST}
     PropBaseLib
     PredictionBaseLib    
 )

@@ -6,7 +6,10 @@ cet_make_library( LIBRARY_NAME PropBaseLib
     fhiclcpp::fhiclcpp
     cetlib::cetlib
     cetlib_except::cetlib_except
-    ${ROOT_BASIC_LIB_LIST}
+    ROOT::Tree
+    ROOT::Gpad
+    ROOT::Hist
+    ROOT::Core
 )
 install_headers()
 install_source()

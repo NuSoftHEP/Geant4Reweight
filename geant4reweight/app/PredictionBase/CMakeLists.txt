@@ -6,7 +6,7 @@ SET(PREDICTION_APPS
 
 
 foreach(appname ${PREDICTION_APPS})
-  cet_make_exec( ${appname} 
+  cet_make_exec(NAME ${appname}
     SOURCE 
       ${appname}.cc
     LIBRARIES

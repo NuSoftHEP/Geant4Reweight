@@ -3,7 +3,7 @@ SET(FITTER_APPS
 )
 
 foreach(appname ${FITTER_APPS})
-  cet_make_exec( ${appname} 
+  cet_make_exec( NAME ${appname}
     SOURCE 
       ${appname}.cc
     LIBRARIES

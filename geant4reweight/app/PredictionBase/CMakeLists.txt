@@ -6,7 +6,7 @@ SET(PREDICTION_APPS
 
 
 foreach(appname ${PREDICTION_APPS})
-  cet_make_exec( ${appname} 
+  cet_make_exec(NAME ${appname}
     SOURCE 
       ${appname}.cc
     LIBRARIES
@@ -27,8 +27,9 @@ foreach(appname ${PREDICTION_APPS})
       Geant4::G4global
       Geant4::G4persistency
       Geant4::G4physicslists
-      ${ROOT_BASIC_LIB_LIST}
       PredictionBaseLib
+      ROOT::Tree
+      ROOT::Hist
   )
 
 endforeach()

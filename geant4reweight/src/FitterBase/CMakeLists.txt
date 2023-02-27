@@ -8,7 +8,6 @@ cet_make_library( LIBRARY_NAME FitterBaseLib
     fhiclcpp::fhiclcpp
     cetlib::cetlib
     cetlib_except::cetlib_except
-    ${ROOT_BASIC_LIB_LIST}
     PropBaseLib
     ReweightBaseLib
 )

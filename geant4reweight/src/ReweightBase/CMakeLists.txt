@@ -12,11 +12,9 @@ cet_make_library( LIBRARY_NAME ReweightBaseLib
     G4NeutronReweighter.cc
     G4ReweighterFactory.cc
     G4MultiReweighter.cc
-  LIBRARIES
-    fhiclcpp::fhiclcpp
-    cetlib::cetlib
-    cetlib_except::cetlib_except
-    CLHEP::CLHEP
+  LIBRARIES PUBLIC
+    geant4reweight::PropBaseLib
+    geant4reweight::PredictionBaseLib
     Geant4::G4event
     Geant4::G4intercoms
     Geant4::G4interfaces
@@ -30,8 +28,11 @@ cet_make_library( LIBRARY_NAME ReweightBaseLib
     Geant4::G4global
     Geant4::G4persistency
     Geant4::G4physicslists
-    PropBaseLib
-    PredictionBaseLib    
+  LIBRARIES PRIVATE
+    fhiclcpp::fhiclcpp
+    cetlib::cetlib
+    cetlib_except::cetlib_except
+    CLHEP::CLHEP
 )
 install_headers()
 install_source()

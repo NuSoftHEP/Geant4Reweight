@@ -34,7 +34,7 @@ project(geant4reweight VERSION 01.17.00)
   find_package(CLHEP REQUIRED)
   find_package(fhiclcpp REQUIRED EXPORT)
 
-  find_package( Geant4 REQUIRED )
+  find_package( Geant4 REQUIRED EXPORT)
   find_package(ROOT REQUIRED COMPONENTS Hist Tree Core Gpad)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE

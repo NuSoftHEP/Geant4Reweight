@@ -10,9 +10,9 @@ foreach(appname ${FITTER_APPS})
       fhiclcpp::fhiclcpp
       cetlib::cetlib
       cetlib_except::cetlib_except
-      FitterBaseLib
-      ReweightBaseLib
-      PropBaseLib    
+      geant4reweight::FitterBaseLib
+      geant4reweight::ReweightBaseLib
+      geant4reweight::PropBaseLib
   )
 
 endforeach()

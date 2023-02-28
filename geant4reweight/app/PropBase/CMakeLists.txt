@@ -11,7 +11,7 @@ foreach(appname ${PROP_APPS})
       fhiclcpp::fhiclcpp
       cetlib::cetlib
       cetlib_except::cetlib_except
-      PropBaseLib    
+      geant4reweight::PropBaseLib
   )
 
 endforeach()

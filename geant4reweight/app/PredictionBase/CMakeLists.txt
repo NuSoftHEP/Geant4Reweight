@@ -27,7 +27,7 @@ foreach(appname ${PREDICTION_APPS})
       Geant4::G4global
       Geant4::G4persistency
       Geant4::G4physicslists
-      PredictionBaseLib
+      geant4reweight::PredictionBaseLib
       ROOT::Tree
       ROOT::Hist
   )

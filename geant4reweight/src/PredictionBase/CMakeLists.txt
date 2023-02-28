@@ -3,7 +3,7 @@ cet_make_library( LIBRARY_NAME PredictionBaseLib
     G4CascadeDetectorConstruction.cc
     G4CascadePhysicsList.cc
     G4DecayHook.cc
-  LIBRARIES
+  LIBRARIES PRIVATE
     fhiclcpp::fhiclcpp
     cetlib::cetlib
     cetlib_except::cetlib_except

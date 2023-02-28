@@ -6,7 +6,7 @@ foreach(appname ${FITTER_APPS})
   cet_make_exec( NAME ${appname}
     SOURCE 
       ${appname}.cc
-    LIBRARIES
+    LIBRARIES PRIVATE
       fhiclcpp::fhiclcpp
       cetlib::cetlib
       cetlib_except::cetlib_except

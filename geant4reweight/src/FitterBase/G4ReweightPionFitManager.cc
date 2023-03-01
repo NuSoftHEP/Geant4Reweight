@@ -1,4 +1,7 @@
-#include "G4ReweightPionFitManager.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
+
+#include <string>
+#include <vector>
 
 void G4ReweightPionFitManager::SetExclusiveChannels(){
   AllExclChannels = {"total","elast","reac","abscx","cex","inel","dcex","abs","prod"};

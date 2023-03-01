@@ -1,15 +1,14 @@
 #ifndef G4ReweightParameterMaker_h
 #define G4ReweightParameterMaker_h
 
-#include "TH1D.h"
-
-#include <map>
-#include <vector>
+#include "geant4reweight/src/FitterBase/FitParameter.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "geant4reweight/src/FitterBase/FitParameter.hh"
+class TH1D;
 
+#include <map>
+#include <vector>
 
 class G4ReweightParameterMaker{
 

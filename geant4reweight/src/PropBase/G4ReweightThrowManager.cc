@@ -1,4 +1,9 @@
-#include "G4ReweightThrowManager.hh"
+#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
+
+#include "TFile.h"
+#include "TH1D.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 
 #include <iostream>
 

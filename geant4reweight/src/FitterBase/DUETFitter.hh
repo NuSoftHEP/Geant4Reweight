@@ -1,20 +1,10 @@
 #ifndef DUETFitter_h
 #define DUETFitter_h
 
-#include "G4ReweightFitter.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightFitter.hh"
 
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TMatrixD.h"
-#include "TGraphErrors.h"
-#include "TGraph.h"
 #include "TFile.h"
-#include "TTree.h"
-
+#include "TMatrixDfwd.h"
 
 class DUETFitter : public G4ReweightFitter { 
   public:

@@ -2,11 +2,9 @@
 #define G4ReweightThrowManager_h
 
 #include "TDecompChol.h"
-#include "TFile.h"
-#include "TH1D.h"
-#include "TMatrixD.h"
 #include "TRandom3.h"
-#include "TVectorD.h"
+
+class TFile;
 
 #include <string>
 #include <vector>

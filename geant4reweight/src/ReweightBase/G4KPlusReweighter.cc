@@ -1,4 +1,6 @@
-#include "G4KPlusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4KPlusReweighter.hh"
+
+#include "Geant4/G4KaonPlus.hh"
 
 G4KPlusReweighter::G4KPlusReweighter(
     TFile * FSInput,

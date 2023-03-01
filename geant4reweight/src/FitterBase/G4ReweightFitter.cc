@@ -1,16 +1,19 @@
-#include "G4ReweightFitter.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightFitter.hh"
 
-#include <vector>
-#include <map>
-#include <iomanip>
-#include <sstream>
+#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 
+#include "TDirectory.h"
+#include "TFile.h"
+#include "TGraphErrors.h"
 #include "TH1D.h"
-#include "TCanvas.h"
+#include "TH2D.h"
 #include "TVectorD.h"
 
-#include "TMatrixD.h"
-
+#include <map>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 G4ReweightFitter::G4ReweightFitter(TFile * output_file,
                                    fhicl::ParameterSet exp,

@@ -1,16 +1,11 @@
 #ifndef G4ReweightTraj_h
 #define G4ReweightTraj_h 1
 
-#include "G4Reweighter.hh"
+class G4ReweightStep;
 
-#include <vector>
 #include <string>
-#include <map>
-#include <utility>
-#include <iostream>
-
-#include "TH1F.h"
-#include "TGraph.h" 
+#include <utility> // std::pair
+#include <vector>
 
 // Functor for deleting pointers in vector.
 template<class T> class DeleteVector
@@ -24,10 +19,6 @@ template<class T> class DeleteVector
       return true;
     }
 };
-//Forward Declaration to let Traj know of step
-class G4ReweightStep;
-
-class G4Reweighter;
 
 class G4ReweightTraj{
 

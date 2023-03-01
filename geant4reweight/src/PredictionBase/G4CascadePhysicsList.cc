@@ -1,4 +1,4 @@
-#include "G4CascadePhysicsList.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
 #include "Geant4/G4DecayPhysics.hh"
 #include "Geant4/G4RadioactiveDecayPhysics.hh"

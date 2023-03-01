@@ -1,6 +1,10 @@
-#include "G4MultiReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4MultiReweighter.hh"
+
+#include "TFile.h"
+#include "TH1D.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
+
 #include <iostream>
 
 G4MultiReweighter::G4MultiReweighter(

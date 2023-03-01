@@ -1,17 +1,8 @@
-SET(PROP_APPS
-  parMaker 
+cet_make_exec(NAME parMaker
+  LIBRARIES PRIVATE
+  geant4reweight::PropBaseLib
+  ROOT::Hist
+  ROOT::RIO
+  fhiclcpp::fhiclcpp
+  cetlib::cetlib
 )
-
-
-foreach(appname ${PROP_APPS})
-  cet_make_exec(NAME ${appname}
-    SOURCE 
-      ${appname}.cc
-    LIBRARIES PRIVATE
-      fhiclcpp::fhiclcpp
-      cetlib::cetlib
-      cetlib_except::cetlib_except
-      geant4reweight::PropBaseLib
-  )
-
-endforeach()

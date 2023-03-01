@@ -1,4 +1,7 @@
-#include "G4PiPlusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+
+#include "Geant4/G4PionPlus.hh"
 
 G4PiPlusReweighter::G4PiPlusReweighter(
     TFile * FSInput,

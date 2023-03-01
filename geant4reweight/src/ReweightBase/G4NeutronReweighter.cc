@@ -1,4 +1,6 @@
-#include "G4NeutronReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4NeutronReweighter.hh"
+
+#include "Geant4/G4Neutron.hh"
 
 G4NeutronReweighter::G4NeutronReweighter(
     TFile * FSInput,

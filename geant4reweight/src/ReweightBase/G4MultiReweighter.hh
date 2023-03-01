@@ -1,15 +1,24 @@
 #ifndef G4MultiReweighter_hh
 #define G4MultiReweighter_hh
 
-#include "TFile.h"
+#include "fhiclcpp/ParameterSet.h"
+
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweighterFactory.hh"
+
+class G4ReweightManager;
+class G4ReweightTraj;
+
 #include "TDecompChol.h"
 #include "TRandom3.h"
 
-#include "G4Reweighter.hh"
-#include "G4ReweightTraj.hh"
-#include "G4ReweighterFactory.hh"
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
-#include "fhiclcpp/ParameterSet.h"
+class TFile;
+
+#include <map>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 class G4MultiReweighter{
  public:

@@ -1,15 +1,15 @@
-#include "G4ReweightManager.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Material.hh"
-#include "Geant4/G4SystemOfUnits.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
+
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
 #include "Geant4/G4Box.hh"
 #include "Geant4/G4LogicalVolume.hh"
-
-
-//#include "fhiclcpp/make_ParameterSet.h"
-
-
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4PVPlacement.hh"
+#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ThreeVector.hh"
 
 G4ReweightManager::G4ReweightManager(
     std::vector<fhicl::ParameterSet> material_sets) {

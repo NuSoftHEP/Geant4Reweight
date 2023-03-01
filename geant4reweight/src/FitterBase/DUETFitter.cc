@@ -1,5 +1,9 @@
 #include "DUETFitter.hh"
 
+#include "TDirectory.h"
+#include "TGraphErrors.h"
+#include "TMatrixD.h"
+
 DUETFitter::DUETFitter(TFile * output_file,
                        fhicl::ParameterSet exp,
                        std::string frac_file_name,

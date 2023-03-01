@@ -1,7 +1,9 @@
 #ifndef G4NeutronReweighter_h
 #define G4NeutronReweighter_h
 
-#include "G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+
+class G4Neutron;
 
 class G4NeutronReweighter : public G4Reweighter {
   public:

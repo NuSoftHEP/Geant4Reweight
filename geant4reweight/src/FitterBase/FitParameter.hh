@@ -2,6 +2,7 @@
 #define FitParameter_h 1
 
 #include <string>
+#include <utility> // std::pair
 
 struct FitParameter{
   std::string Name;

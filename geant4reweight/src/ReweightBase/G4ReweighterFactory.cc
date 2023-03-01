@@ -1,4 +1,14 @@
-#include "G4ReweighterFactory.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweighterFactory.hh"
+
+#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4PiMinusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ProtonReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4NeutronReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4KPlusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4KMinusReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+
+#include <iostream>
 
 G4Reweighter * G4ReweighterFactory::BuildReweighter(
     int PDG, TFile * FSInput,

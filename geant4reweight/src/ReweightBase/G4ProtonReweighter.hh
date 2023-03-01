@@ -1,8 +1,22 @@
 #ifndef G4ProtonReweighter_h
 #define G4ProtonReweighter_h
 
-#include "Geant4/G4Proton.hh"
-#include "G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+
+class G4ReweightManager;
+class G4ReweightTraj;
+
+namespace fhicl {
+  class ParameterSet;
+}
+
+class G4Proton;
+
+class TFile;
+class TH1D;
+
+#include <map>
+#include <string>
 
 class G4ProtonReweighter : public G4Reweighter {
   public:

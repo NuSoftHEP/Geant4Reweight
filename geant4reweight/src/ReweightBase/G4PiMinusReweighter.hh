@@ -1,8 +1,9 @@
 #ifndef G4PiMinusReweighter_h
 #define G4PiMinusReweighter_h
 
-#include "G4Reweighter.hh"
-#include "Geant4/G4PionMinus.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+
+class G4PionMinus;
 
 class G4PiMinusReweighter : public G4Reweighter {
   public:

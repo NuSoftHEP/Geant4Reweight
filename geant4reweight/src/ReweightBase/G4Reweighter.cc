@@ -1,14 +1,40 @@
-#include "G4Reweighter.hh"
-#include "G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
 
-#include <utility>
-#include <algorithm>
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
+
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+
+#include "cetlib_except/exception.h"
+
+#include "Geant4/G4Box.hh"
+#include "Geant4/G4DynamicParticle.hh"
+#include "Geant4/G4Element.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4LogicalVolume.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4ProcessVector.hh"
+#include "Geant4/G4Step.hh"
+#include "Geant4/G4StepPoint.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4Track.hh"
+#include "Geant4/G4PVPlacement.hh"
+#include "Geant4/G4VProcess.hh"
+
+#include "TFile.h"
+#include "TGraph.h"
+#include "TH1D.h"
+
+#include <cmath>
 #include <iostream>
-
-#include "TROOT.h"
-#include "TVectorD.h"
-
-
+#include <map>
+#include <string>
+#include <utility>
 
 G4Reweighter::G4Reweighter(TFile * FSInput,
                            const std::map<std::string, TH1D*> &FSScales,

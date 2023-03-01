@@ -1,4 +1,4 @@
-#include "G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 
 #include "Geant4/G4RunManager.hh"
 #include "Geant4/G4NistManager.hh"

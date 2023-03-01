@@ -1,31 +1,27 @@
 #ifndef G4ReweightFitManager_h
 #define G4ReweightFitManager_h
 
+class G4ReweightFitter;
+class G4ReweightManager;
 
-#include "TGraph.h"
-#include "TGraphErrors.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "Math/Minimizer.h"
-#include "TDirectory.h"
-
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 #include "geant4reweight/src/FitterBase/FitParameter.hh"
-#include "G4ReweightFitter.hh"
-#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
-
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <map>
-#include <string>
-#include <utility>
-#include "Math/Factory.h"
-#include "Math/Functor.h"
-
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 
+#include "Math/Minimizer.h"
+#include "Math/Functor.h"
+#include "TTree.h"
+
+class TDirectory;
+class TFile;
+
+#include <algorithm> // std::find
+#include <map>
+#include <memory> // std::unique_ptr
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 class G4ReweightFitManager{
   public:

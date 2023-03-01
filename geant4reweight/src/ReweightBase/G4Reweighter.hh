@@ -1,53 +1,34 @@
 #ifndef G4Reweighter_h
 #define G4Reweighter_h
 
-#include <string>
-#include <utility>
-
-#include "TFile.h"
-#include "TH1D.h"
-#include "TGraph.h"
-
-#include "G4ReweightTraj.hh"
-
-#include <cmath>
-#include <map>
-#include "TTree.h"
-
-#include <iostream>
-
-#include "Geant4/G4CrossSectionDataStore.hh"
-#include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4ParticleDefinition.hh"
-#include "Geant4/G4DynamicParticle.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Material.hh"
-#include "Geant4/G4SystemOfUnits.hh"
-#include "Geant4/G4ProcessManager.hh"
-#include "Geant4/G4VProcess.hh"
-#include "Geant4/G4RunManager.hh"
-#include "Geant4/G4HadronInelasticProcess.hh"
-#include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4HadronCaptureProcess.hh"
-#include "Geant4/G4String.hh"
-#include "Geant4/G4hIonisation.hh"
-#include "Geant4/G4hPairProduction.hh"
-#include "Geant4/G4hBremsstrahlung.hh"
-#include "Geant4/G4CoulombScattering.hh"
-#include "Geant4/G4Box.hh"
-#include "Geant4/G4LogicalVolume.hh"
-#include "Geant4/G4PVPlacement.hh"
-
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-#include "G4ReweightManager.hh"
-
-#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "cetlib/filepath_maker.h"
 
-
+class G4ReweightManager;
 class G4ReweightTraj;
+
+class G4Box;
+class G4CascadeDetectorConstruction;
+class G4CascadePhysicsList;
+class G4DynamicParticle;
+class G4HadronElasticProcess;
+class G4HadronInelasticProcess;
+class G4LogicalVolume;
+class G4Material;
+class G4ParticleDefinition;
+class G4PionPlus;
+class G4RunManager;
+class G4Step;
+class G4StepPoint;
+class G4Track;
+class G4VPhysicalVolume;
+
+class TFile;
+class TGraph;
+class TH1D;
+
+#include <map>
+#include <string>
+#include <vector>
 
 class G4Reweighter{
   public:

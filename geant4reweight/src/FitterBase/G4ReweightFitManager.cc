@@ -1,17 +1,20 @@
-#include "G4ReweightFitManager.hh"
-#include "DUETFitter.hh"
-#include "TVectorD.h"
-#include "TTree.h"
-#include "TMatrixD.h"
-#include "Math/Factory.h"
-#include "Math/Functor.h"
-#include "TCanvas.h"
-#include "TPad.h"
-#include "TROOT.h"
-#include "TRandom.h"
-#include "util/FitStore.hh"
-#include "TLegend.h"
+#include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/src/FitterBase/DUETFitter.hh"
 
+#include "Math/Factory.h"
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TGraphErrors.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TLegend.h"
+#include "TPad.h"
+#include "TMatrixD.h"
+#include "TROOT.h"
+#include "TVectorD.h"
+
+#include <string>
+#include <vector>
 
 G4ReweightFitManager::G4ReweightFitManager(std::string & fOutFileName, bool do_save,
                                            G4ReweightManager * rw_manager,

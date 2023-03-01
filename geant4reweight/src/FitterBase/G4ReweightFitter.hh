@@ -1,28 +1,27 @@
 #ifndef G4ReweightFitter_h
 #define G4ReweightFitter_h
 
-#include "TMatrixD.h"
-#include "TGraph.h"
-#include "TH1D.h"
-#include "TH2D.h"
-#include "TGraphErrors.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TDirectory.h"
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <map>
-#include <string>
-
-//#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
-#include "geant4reweight/src/ReweightBase/G4PiPlusReweighter.hh"
-#include "geant4reweight/src/FitterBase/FitParameter.hh"
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+class G4PiPlusReweighter;
+class G4ReweightManager;
+class G4ReweightParameterMaker;
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "util/FitStore.hh"
+#include "geant4reweight/src/FitterBase/util/FitStore.hh"
+
+class TDirectory;
+class TFile;
+class TGraph;
+class TGraphErrors;
+class TH2D;
+class TTree;
+
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 // stores elements of covariance matrix produced in fit
 /*

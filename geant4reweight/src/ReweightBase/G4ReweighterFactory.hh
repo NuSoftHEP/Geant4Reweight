@@ -1,20 +1,18 @@
 #ifndef G4ReweighterFactory_h
 #define G4ReweighterFactory_h
 
-#include "G4Reweighter.hh"
-#include "G4ReweightManager.hh"
-#include "G4ProtonReweighter.hh"
-#include "G4PiPlusReweighter.hh"
-#include "G4PiMinusReweighter.hh"
-#include "G4KPlusReweighter.hh"
-#include "G4KMinusReweighter.hh"
-#include "G4NeutronReweighter.hh"
-
-#include "TFile.h"
-#include <map>
-#include "TH1D.h"
-
 class G4Reweighter;
+class G4ReweightManager;
+
+namespace fhicl {
+  class ParameterSet;
+}
+
+class TFile;
+class TH1D;
+
+#include <map>
+#include <string>
 
 class G4ReweighterFactory{
 

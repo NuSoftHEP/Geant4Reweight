@@ -1,4 +1,6 @@
-#include "G4ProtonReweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ProtonReweighter.hh"
+
+#include "Geant4/G4Proton.hh"
 
 G4ProtonReweighter::G4ProtonReweighter(
     TFile * FSInput,

@@ -1,13 +1,8 @@
 #ifndef G4ReweightStep_h
 #define G4ReweightStep_h
 
-#include <vector>
-#include <string>
-#include <utility>
-
 #include <cmath>
-
-class G4ReweightTraj;
+#include <string>
 
 class G4ReweightStep{
  public:

@@ -1,10 +1,11 @@
 #ifndef _G4ReweightPionFitManager_h
 #define _G4ReweightPionFitManager_h
 
-#include "G4ReweightFitManager.hh"
+#include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
 
+#include <string>
 
-class G4ReweightPionFitManager : public  G4ReweightFitManager {
+class G4ReweightPionFitManager : public G4ReweightFitManager {
 
  using G4ReweightFitManager::G4ReweightFitManager; 
 

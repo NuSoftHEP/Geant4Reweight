@@ -1,5 +1,5 @@
-#include "G4ReweightTraj.hh"
-#include "G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
 
 #include <iostream>
 #include <math.h>

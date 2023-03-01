@@ -1,7 +1,16 @@
-#include "G4ReweightTreeParser.hh"
-#include <iostream>
-#include <algorithm>
+#include "geant4reweight/src/ReweightBase/G4ReweightTreeParser.hh"
+
+#include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+
+#include "TFile.h"
 #include "TH1D.h"
+#include "TTree.h"
+
+#include <iostream>
+#include <map>
+#include <utility> // std::pair
+#include <vector>
 
 G4ReweightTreeParser::G4ReweightTreeParser(std::string fInputFileName, std::string fOutputFileName){
   OpenNewInput( fInputFileName );
@@ -872,5 +881,11 @@ std::vector< std::pair<double, int> > G4ReweightTreeParser::ThinSliceBetheBlochI
   return result;
 }
 
-
-
+void G4ReweightTreeParser::CloseAndSaveOutput()
+{
+  fout->cd();
+  tree->Write();
+  delete tree;
+  fout->Delete("tree");
+  fout->Close();
+}

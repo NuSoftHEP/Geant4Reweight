@@ -1,14 +1,17 @@
 #ifndef G4ReweightManger_h
 #define G4ReweightManger_h
 
-#include "Geant4/G4PVPlacement.hh"
-#include "Geant4/G4RunManager.hh"
-
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-
 #include "fhiclcpp/ParameterSet.h"
-#include "cetlib/filepath_maker.h"
+
+class G4CascadeDetectorConstruction;
+class G4CascadePhysicsList;
+
+class G4RunManager;
+class G4VPhysicalVolume;
+
+#include <map>
+#include <string>
+#include <vector>
 
 class G4ReweightManager {
  public:

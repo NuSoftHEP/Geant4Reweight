@@ -1,46 +1,44 @@
-#include "Geant4/G4HadronInelasticProcess.hh"
-#include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4PionMinus.hh"
-#include "Geant4/G4Proton.hh"
-#include "Geant4/G4ParticleDefinition.hh"
-#include "Geant4/G4DynamicParticle.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Track.hh"
-#include "Geant4/G4Step.hh"
-#include "Geant4/G4StepPoint.hh"
-#include "Geant4/G4Material.hh"
-#include "Geant4/G4SystemOfUnits.hh"
-#include "Geant4/G4ProcessVector.hh"
-#include "Geant4/G4ProcessManager.hh"
-#include "Geant4/G4RunManager.hh"
-#include "Geant4/G4SteppingManager.hh"
-#include "Geant4/G4VParticleChange.hh"
-
-///Testing
-#include "Geant4/G4TrackStatus.hh"
-#include "Geant4/G4HadProjectile.hh"
-//////////
-
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
-#include <utility>
-#include <iostream>
-#include <fstream>
+#include "Geant4/G4DynamicParticle.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4Neutron.hh"
+#include "Geant4/G4ParticleChange.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4ProcessVector.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4Step.hh"
+#include "Geant4/G4StepPoint.hh"
+#include "Geant4/G4SteppingManager.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Track.hh"
+#include "Geant4/G4VProcess.hh"
 
-#include "TH1F.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TGraph.h"
-#include "TVectorD.h"
+///Testing
+// #include "Geant4/G4TrackStatus.hh"
+// #include "Geant4/G4HadProjectile.hh"
+//////////
 
-//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-//#endif
+
+#include "TFile.h"
+#include "TTree.h"
+#include "TVectorD.h"
+
+#include <iostream>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 std::string fcl_file;
 

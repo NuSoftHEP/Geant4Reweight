@@ -1,18 +1,18 @@
 #ifndef G4ReweightTreeParser_hh 
 #define G4ReweightTreeParser_hh 1
 
-#include "G4ReweightStep.hh"
-#include "G4ReweightTraj.hh"
-#include "G4Reweighter.hh"
+class G4ReweightParameterMaker;
+class G4ReweightThrowManager;
+class G4ReweightTraj;
+class G4Reweighter;
 
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
-#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
+class TFile;
+class TTree;
 
-//#include "G4RunManager.hh"
-
-#include "TFile.h"
-#include "TTree.h"
-#include "TH1F.h"
+#include <map>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 enum interactionType {
       kNoInt,
@@ -41,7 +41,7 @@ class G4ReweightTreeParser{
     void ClearCollection();
     void OpenNewInput( std::string );
     void CloseInput();
-    void CloseAndSaveOutput(){ fout->cd(); tree->Write(); delete tree; fout->Delete("tree"); fout->Close(); };
+    void CloseAndSaveOutput();
     void GetInteractionType(int);
 
     TTree * GetTree(){ return tree; };

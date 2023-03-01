@@ -1,4 +1,10 @@
-#include "G4ReweightParameterMaker.hh"
+#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
+
+#include "TH1D.h"
+
+#include <algorithm>
+#include <exception>
+#include <vector>
 
 G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars ) :
   FullParameterSet( pars ), nParameters(0) {

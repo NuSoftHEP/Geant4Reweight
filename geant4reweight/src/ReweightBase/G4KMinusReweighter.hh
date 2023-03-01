@@ -1,8 +1,9 @@
 #ifndef G4KMinusReweighter_h
 #define G4KMinusReweighter_h
 
-#include "G4Reweighter.hh"
-#include "Geant4/G4KaonMinus.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+
+class G4KaonMinus;
 
 class G4KMinusReweighter : public G4Reweighter {
   public:

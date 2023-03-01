@@ -1,6 +1,6 @@
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-#include "geant4reweight/src/PredictionBase/G4DecayHook.hh"
+#include "geant4reweight/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/PredictionBase/G4CascadePhysicsList.hh"
+#include "geant4reweight/PredictionBase/G4DecayHook.hh"
 
 #include "Geant4/G4Box.hh"
 #include "Geant4/G4CoulombScattering.hh"

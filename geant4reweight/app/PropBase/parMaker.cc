@@ -1,5 +1,5 @@
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
-#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
+#include "geant4reweight/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/PropBase/G4ReweightThrowManager.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 

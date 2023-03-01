@@ -1,5 +1,5 @@
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
+#include "geant4reweight/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/PredictionBase/G4CascadePhysicsList.hh"
 
 #include "Geant4/G4DynamicParticle.hh"
 #include "Geant4/G4HadronElasticProcess.hh"

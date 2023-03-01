@@ -164,7 +164,7 @@ int main(int argc, char * argv[]){
   //double MaterialMass = MaterialParameters.get< double >( "Mass" );
   double MaterialDensity = MaterialParameters.get< double >( "Density" );
   //G4Material * theMaterial = new G4Material(MaterialName, MaterialZ, MaterialMass*g/mole, MaterialDensity*g/cm3);
-  G4Material * theMaterial = 0x0;
+  G4Material * theMaterial = nullptr;
   
   std::vector<fhicl::ParameterSet> MaterialComponents
       = MaterialParameters.get<std::vector<fhicl::ParameterSet>>("Components");
@@ -218,13 +218,13 @@ int main(int argc, char * argv[]){
   std::cout << "MCC: " << physWorld->GetLogicalVolume()->GetMaterialCutsCouple() << std::endl;
   /////
 
-  G4PionPlus  * piplus = 0x0;
-  G4PionMinus * piminus = 0x0;
-  G4MuonPlus  * muonplus = 0x0;
-  G4MuonMinus * muonminus = 0x0;
-  G4Proton  * proton = 0x0;
-  G4Neutron * neutron = 0x0;
-  G4ParticleDefinition * part_def = 0x0;
+  G4PionPlus  * piplus = nullptr;
+  G4PionMinus * piminus = nullptr;
+  G4MuonPlus  * muonplus = nullptr;
+  G4MuonMinus * muonminus = nullptr;
+  G4Proton  * proton = nullptr;
+  G4Neutron * neutron = nullptr;
+  G4ParticleDefinition * part_def = nullptr;
   G4String inel_name;
   if( type == 211 ){
     std::cout << "Chose PiPlus" << std::endl;
@@ -317,8 +317,8 @@ int main(int argc, char * argv[]){
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  G4HadronElasticProcess   * elastic_proc = 0x0;
-  G4HadronInelasticProcess * inelastic_proc = 0x0;
+  G4HadronElasticProcess   * elastic_proc = nullptr;
+  G4HadronInelasticProcess * inelastic_proc = nullptr;
 
   //for( int i = 0; i < pv->size(); ++i ){
   for( size_t i = 0; i < (size_t)pv->size(); ++i ){
@@ -411,8 +411,8 @@ int main(int argc, char * argv[]){
       }
       else if (theName == "nCapture") {
         G4HadronCaptureProcess * cap = (G4HadronCaptureProcess*)proc;
-        if (cap->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
-          cap_mfps.push_back(cap->GetMeanFreePath(*theTrack, 0., 0x0));
+        if (cap->GetMeanFreePath(*theTrack, 0., nullptr) != DBL_MAX) {
+          cap_mfps.push_back(cap->GetMeanFreePath(*theTrack, 0., nullptr));
         }
         else {
           cap_mfps.push_back(0.);
@@ -420,8 +420,8 @@ int main(int argc, char * argv[]){
       }
       else if (theName == "nFission") {
         G4HadronFissionProcess * fis = (G4HadronFissionProcess*)proc;
-        if (fis->GetMeanFreePath(*theTrack, 0., 0x0) != DBL_MAX) {
-          fis_mfps.push_back(fis->GetMeanFreePath(*theTrack, 0., 0x0));
+        if (fis->GetMeanFreePath(*theTrack, 0., nullptr) != DBL_MAX) {
+          fis_mfps.push_back(fis->GetMeanFreePath(*theTrack, 0., nullptr));
         }
         else {
           fis_mfps.push_back(0.);
@@ -432,7 +432,7 @@ int main(int argc, char * argv[]){
     tree->Fill();
     if( verbose && !( n % 100) ){
       std::cout << "Inelastic XSec at " << KE << " MeV " <<  inelastic_xsec << std::endl;
-      std::cout << "MFP: " << inelastic_proc->GetMeanFreePath(*theTrack, 0., 0x0) << std::endl;
+      std::cout << "MFP: " << inelastic_proc->GetMeanFreePath(*theTrack, 0., nullptr) << std::endl;
       std::cout << "Elastic XSec at " << KE << " MeV " <<  elastic_xsec << std::endl;
       std::cout << std::endl;
     }

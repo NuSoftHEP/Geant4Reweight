@@ -32,7 +32,7 @@ void G4ReweightManager::SetupWorld() {
   double total_length = fMaterialSets.size() * 5. *cm;
   G4Box * solidWorld = new G4Box("World", 5.*cm, 5.*cm, total_length);
   G4Box * subBox = new G4Box("SubBox", 5.*cm, 5.*cm, 5.*cm);
-  G4LogicalVolume * logicWorld = 0x0;
+  G4LogicalVolume * logicWorld = nullptr;
   for (size_t i = 0; i < fMaterialSets.size(); ++i) {
     const fhicl::ParameterSet & material_set = fMaterialSets[i];
 
@@ -43,7 +43,7 @@ void G4ReweightManager::SetupWorld() {
     std::string MaterialName = material_set.get<std::string>("Name");
 
 
-    G4Material* testMaterial = 0x0;
+    G4Material* testMaterial = nullptr;
 
     if(MaterialComponents.size() == 1){
       int MaterialZ = MaterialComponents[0].get<int>("Z");

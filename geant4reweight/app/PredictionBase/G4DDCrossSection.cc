@@ -217,12 +217,12 @@ std::cout << "starting" << std::endl;
 
   std::cout << "Initialized" << std::endl;
 
-  G4PionPlus  * piplus = 0x0;
-  G4PionMinus * piminus = 0x0;
-  G4Proton    * proton = 0x0;
-  G4Neutron   * neutron = 0x0;
-  G4ParticleDefinition * part_def = 0x0;
-  G4ParticleDefinition * part_def_elast = 0x0;  
+  G4PionPlus  * piplus = nullptr;
+  G4PionMinus * piminus = nullptr;
+  G4Proton    * proton = nullptr;
+  G4Neutron   * neutron = nullptr;
+  G4ParticleDefinition * part_def = nullptr;
+  G4ParticleDefinition * part_def_elast = nullptr;
   std::string inel_name = "";
   std::string el_name = ""; 
 
@@ -293,10 +293,10 @@ std::cout << "starting" << std::endl;
       return 0;
   }
 
-  //G4HadronInelasticProcess * inelastic_proc = 0x0;
+  //G4HadronInelasticProcess * inelastic_proc = nullptr;
   //G4HadronElasticProcess   * elastic_proc = getElasticProc(part_def , el_name);
   //std::cout << "inelastic_proc: " << inelastic_proc << std::endl;
-  //G4HadronInelasticProcess * inelastic_proc = 0x0;
+  //G4HadronInelasticProcess * inelastic_proc = nullptr;
   //std::cout << "Elastic: " << elastic_proc << std::endl;
 
   /*
@@ -598,7 +598,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
       return (G4HadronInelasticProcess*)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 
@@ -617,7 +617,7 @@ G4HadronElasticProcess * getElasticProc( G4ParticleDefinition * part_def, std::s
       return (G4HadronElasticProcess*)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 */
 
@@ -636,7 +636,7 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::st
       return dynamic_cast<G4HadronElasticProcess *>(proc);
     }
   }
-  return 0x0;
+  return nullptr;
 }
       
 

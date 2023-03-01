@@ -57,9 +57,9 @@ class G4ReweightFitter{
                           G4ReweightParameterMaker & parMaker,
                           /*const fhicl::ParameterSet & material,
                           G4ReweightManager * rw_manager,*/
-                          bool fSave = false, TH2D/*TMatrixD*/ * cov = 0x0,
+                          bool fSave = false, TH2D/*TMatrixD*/ * cov = nullptr,
                           std::string position = "CV", bool doFullRange = false,
-                          std::vector<std::string> * channels = 0x0);
+                          std::vector<std::string> * channels = nullptr);
     double SigmaWithCov(
         double x, std::string cut, /*TH2D * cov,*/
         std::map<std::pair<std::string, std::string>, double> & cov_vals_map,

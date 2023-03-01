@@ -17,7 +17,7 @@ class G4CascadeDetectorConstruction : public G4VUserDetectorConstruction{
 
 
   protected:
-    G4VPhysicalVolume * fPhysicalVol = 0x0;
+    G4VPhysicalVolume * fPhysicalVol = nullptr;
 };
 
 #endif

@@ -11,13 +11,13 @@ class G4NeutronReweighter : public G4Reweighter {
     G4NeutronReweighter(TFile *, const std::map<std::string, TH1D*> &,
                         const fhicl::ParameterSet &,
                         G4ReweightManager * rw_manager,
-                        TH1D * inputElasticBiasHist = 0x0, bool fix = false);
+                        TH1D * inputElasticBiasHist = nullptr, bool fix = false);
     virtual ~G4NeutronReweighter();
     std::string GetInteractionSubtype (const G4ReweightTraj &) override;
     //void SetCaptureGraph( TFile *); //set neutron capture graph for neutrons
   protected:
     G4Neutron * neutron;
-    TGraph * nCaptureGraph = 0x0; //stores neutron capture cross section
+    TGraph * nCaptureGraph = nullptr; //stores neutron capture cross section
     std::string fCapture="FakeProcess"; // Name of neutron capture process - 
     //FakeProcess -  placeholder to prevent any particles that aren't neutrons from trying to look up capture cross section
 };

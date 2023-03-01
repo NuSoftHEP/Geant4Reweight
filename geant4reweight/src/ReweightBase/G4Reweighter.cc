@@ -68,7 +68,7 @@ void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist) {
 
 void G4Reweighter::SetupWorld() {
 
-  testMaterial = 0x0;
+  testMaterial = nullptr;
 
   std::string MaterialName = MaterialParameters.get<std::string>("Name");
 

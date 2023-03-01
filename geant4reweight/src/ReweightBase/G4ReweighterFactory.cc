@@ -56,7 +56,7 @@ G4Reweighter * G4ReweighterFactory::BuildReweighter(
     }
     default:
       std::cerr << "Error: Reweighter for PDG code " << PDG << " is not implemented" << std::endl;
-      return 0x0;
+      return nullptr;
   }
 
 }

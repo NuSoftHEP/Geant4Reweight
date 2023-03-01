@@ -23,7 +23,7 @@ class G4ReweighterFactory{
         const std::map<std::string, TH1D*> & FSScales,
         const fhicl::ParameterSet & material_pars,
         G4ReweightManager * rw_manager,
-        TH1D * inputElasticBiasHist=0x0, bool fix_total=false);
+        TH1D * inputElasticBiasHist=nullptr, bool fix_total=false);
     
 };
 

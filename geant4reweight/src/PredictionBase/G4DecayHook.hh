@@ -7,7 +7,7 @@ class G4Track;
 class G4DecayHook : public G4Decay {
  public:
    double GetMFP(const G4Track& aTrack) /*{
-     return this->GetMFP(aTrack, 0., 0x0);
+     return this->GetMFP(aTrack, 0., nullptr);
    }*/;
 };
 #endif

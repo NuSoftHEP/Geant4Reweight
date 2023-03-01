@@ -149,7 +149,7 @@ void G4ReweightFitManager::DefineFCN(){
           //////////////////////////////////////////////////////
 
           //Saving Extra Information//////////////////////////
-          TDirectory * outdir = 0x0;
+          TDirectory * outdir = nullptr;
           if( fSave ){
             if( !out->Get( dir_name.c_str() ) ){
               outdir = out->mkdir( dir_name.c_str() );
@@ -491,7 +491,7 @@ void G4ReweightFitManager::DrawFitResults(){
   TDirectory * fitdir = (TDirectory*)out->mkdir("Fit");
   fitdir->cd();
 
-  TLegend * leg = 0x0;
+  TLegend * leg = nullptr;
   for( auto itType = types.begin(); itType != types.end(); ++itType ){
 
     TDirectory * typedir = (TDirectory*)fitdir->mkdir( (*itType).c_str() );

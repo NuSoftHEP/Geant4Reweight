@@ -256,8 +256,8 @@ void G4ReweightFitter::GetMCValsWithCov(
     }
   }
 
-  auto itCut = (channels == 0x0 ? cuts.begin() : channels->begin());
-  auto endCut = (channels == 0x0 ? cuts.end() : channels->end());
+  auto itCut = (channels == nullptr ? cuts.begin() : channels->begin());
+  auto endCut = (channels == nullptr ? cuts.end() : channels->end());
   for (; itCut != endCut; ++itCut) {
     std::string cut_name = *itCut;
 

@@ -182,11 +182,11 @@ int main(int argc, char * argv[]){
 
   std::cout << "Initialized" << std::endl;
 
-  G4PionPlus  * piplus = 0x0;
-  G4PionMinus * piminus = 0x0;
-  G4Proton    * proton = 0x0;
-  G4Neutron   * neutron = 0x0;
-  G4ParticleDefinition * part_def = 0x0;
+  G4PionPlus  * piplus = nullptr;
+  G4PionMinus * piminus = nullptr;
+  G4Proton    * proton = nullptr;
+  G4Neutron   * neutron = nullptr;
+  G4ParticleDefinition * part_def = nullptr;
   std::string inel_name = "";
   switch( theConfig.type ){
     case 211:
@@ -486,7 +486,7 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def,
       return (G4HadronElasticProcess *)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 
@@ -505,7 +505,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
       return (G4HadronInelasticProcess*)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 void CheckAllProcs(G4ParticleDefinition * part_def) {

@@ -28,6 +28,8 @@ project(geant4reweight VERSION 01.14.04)
   
   cet_report_compiler_flags(REPORT_THRESHOLD VERBOSE)
 
+  option(WANT_G4DDCrossSection "Build the optional G4DDCrossSection application" NO)
+
   find_package(Geant4 REQUIRED EXPORT)
   find_package(ROOT COMPONENTS Gpad Hist MathCore Matrix RIO Tree REQUIRED EXPORT)
   find_package(cetlib REQUIRED EXPORT)

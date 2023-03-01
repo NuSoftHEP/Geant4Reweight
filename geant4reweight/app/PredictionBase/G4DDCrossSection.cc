@@ -1,49 +1,41 @@
-#include "Geant4/G4HadronInelasticProcess.hh"
-#include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4PionMinus.hh"
-#include "Geant4/G4Proton.hh"
-#include "Geant4/G4ParticleDefinition.hh"
-#include "Geant4/G4DynamicParticle.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Track.hh"
-#include "Geant4/G4Step.hh"
-#include "Geant4/G4StepPoint.hh"
-#include "Geant4/G4Material.hh"
-#include "Geant4/G4SystemOfUnits.hh"
-#include "Geant4/G4ProcessVector.hh"
-#include "Geant4/G4ProcessManager.hh"
-#include "Geant4/G4RunManager.hh"
-#include "Geant4/G4VParticleChange.hh"
-//#include "Geant/G4bool.hh"
-
-#include "Geant4/G4SteppingManager.hh"
-
-
 #include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
 #include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
 
-#include <utility>
-#include <iostream>
-#include <fstream>
+#include "Geant4/G4DynamicParticle.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4Neutron.hh"
+#include "Geant4/G4ParticleChange.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4ProcessVector.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4Step.hh"
+#include "Geant4/G4StepPoint.hh"
+#include "Geant4/G4SteppingManager.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Track.hh"
+#include "Geant4/G4VParticleChange.hh"
+#include "Geant4/G4VProcess.hh"
 
-#include "TH1F.h"
 #include "TFile.h"
-#include "TTree.h"
 #include "TGraph.h"
+#include "TH2D.h"
+#include "TMath.h"
 #include "TVectorD.h"
 
-#include "TMath.h"
-
-
-#include "TH2D.h"
-
-#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-//#endif
+
+#include <iostream>
+#include <string>
+#include <vector>
 
 std::string fcl_file;
 
@@ -571,7 +563,7 @@ void makeFCLParameterSet( fhicl::ParameterSet & pset){
 
   cet::filepath_first_absolute_or_lookup_with_dot lookupPolicy{search_path};
 
-  fhicl::make_ParameterSet(fcl_file, lookupPolicy, pset);
+  pset = fhicl::ParameterSet::make(fcl_file, lookupPolicy);
 }
 
 /*void getInelasticProc( G4HadronInelasticProcess * inelastic_proc, G4ParticleDefinition * part_def, std::string inel_name ){
@@ -597,7 +589,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
   
-  for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;
@@ -634,7 +626,7 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def, std::st
 
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
-  for( int i = 0; i < pv->size(); ++i ){
+  for( size_t i = 0; i < pv->size(); ++i ){
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;
@@ -718,7 +710,7 @@ void CheckAllProcs(G4ParticleDefinition * part_def) {
   G4ProcessManager * pm = part_def->GetProcessManager();
   G4ProcessVector  * pv = pm->GetProcessList();
 
-  for (int i = 0; i < pv->size(); ++i) {
+  for (size_t i = 0; i < pv->size(); ++i) {
     G4VProcess * proc = (*pv)(i);
     std::string theName = proc->GetProcessName();
     std::cout <<  theName << std::endl;

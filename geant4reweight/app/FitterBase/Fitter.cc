@@ -1,7 +1,7 @@
-#include "geant4reweight/src/FitterBase/G4ReweightFitManager.hh"
-#include "geant4reweight/src/FitterBase/G4ReweightPionFitManager.hh"
-#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
-#include "geant4reweight/src/FitterBase/FitParameter.hh"
+#include "geant4reweight/FitterBase/G4ReweightFitManager.hh"
+#include "geant4reweight/FitterBase/G4ReweightPionFitManager.hh"
+#include "geant4reweight/ReweightBase/G4ReweightManager.hh"
+#include "geant4reweight/FitterBase/FitParameter.hh"
 #include <vector>
 #include <string>
 #include "TVectorD.h"

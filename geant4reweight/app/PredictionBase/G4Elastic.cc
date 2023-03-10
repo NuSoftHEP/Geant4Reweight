@@ -1,46 +1,44 @@
-#include "Geant4/G4HadronInelasticProcess.hh"
-#include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4PionMinus.hh"
-#include "Geant4/G4Proton.hh"
-#include "Geant4/G4ParticleDefinition.hh"
+#include "geant4reweight/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/PredictionBase/G4CascadePhysicsList.hh"
+
 #include "Geant4/G4DynamicParticle.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Track.hh"
+#include "Geant4/G4HadronElasticProcess.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4Neutron.hh"
+#include "Geant4/G4ParticleChange.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4ProcessVector.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4RunManager.hh"
 #include "Geant4/G4Step.hh"
 #include "Geant4/G4StepPoint.hh"
-#include "Geant4/G4Material.hh"
-#include "Geant4/G4SystemOfUnits.hh"
-#include "Geant4/G4ProcessVector.hh"
-#include "Geant4/G4ProcessManager.hh"
-#include "Geant4/G4RunManager.hh"
 #include "Geant4/G4SteppingManager.hh"
-#include "Geant4/G4VParticleChange.hh"
+#include "Geant4/G4SystemOfUnits.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Track.hh"
+#include "Geant4/G4VProcess.hh"
 
 ///Testing
-#include "Geant4/G4TrackStatus.hh"
-#include "Geant4/G4HadProjectile.hh"
+// #include "Geant4/G4TrackStatus.hh"
+// #include "Geant4/G4HadProjectile.hh"
 //////////
 
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
-
-#include <utility>
-#include <iostream>
-#include <fstream>
-
-#include "TH1F.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TGraph.h"
-#include "TVectorD.h"
-
-//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-//#endif
+
+#include "TFile.h"
+#include "TTree.h"
+#include "TVectorD.h"
+
+#include <iostream>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 std::string fcl_file;
 
@@ -184,11 +182,11 @@ int main(int argc, char * argv[]){
 
   std::cout << "Initialized" << std::endl;
 
-  G4PionPlus  * piplus = 0x0;
-  G4PionMinus * piminus = 0x0;
-  G4Proton    * proton = 0x0;
-  G4Neutron   * neutron = 0x0;
-  G4ParticleDefinition * part_def = 0x0;
+  G4PionPlus  * piplus = nullptr;
+  G4PionMinus * piminus = nullptr;
+  G4Proton    * proton = nullptr;
+  G4Neutron   * neutron = nullptr;
+  G4ParticleDefinition * part_def = nullptr;
   std::string inel_name = "";
   switch( theConfig.type ){
     case 211:
@@ -488,7 +486,7 @@ G4HadronElasticProcess * getElasticProc(G4ParticleDefinition * part_def,
       return (G4HadronElasticProcess *)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 
@@ -507,7 +505,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
       return (G4HadronInelasticProcess*)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 void CheckAllProcs(G4ParticleDefinition * part_def) {

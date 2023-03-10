@@ -1,0 +1,34 @@
+cet_make_library(LIBRARY_NAME ReweightBaseLib
+  SOURCE
+  G4ReweightStep.cc
+  G4ReweightTraj.cc
+  G4ReweightManager.cc
+  G4Reweighter.cc
+  G4PiPlusReweighter.cc
+  G4PiMinusReweighter.cc
+  G4KPlusReweighter.cc
+  G4KMinusReweighter.cc
+  G4ProtonReweighter.cc
+  G4NeutronReweighter.cc
+  G4ReweighterFactory.cc
+  G4MultiReweighter.cc
+  LIBRARIES
+  PUBLIC
+  geant4reweight::PropBaseLib
+  geant4reweight::PredictionBaseLib
+  fhiclcpp::fhiclcpp
+  ROOT::MathCore
+  ROOT::Matrix
+  PRIVATE
+  Geant4::G4geometry
+  Geant4::G4global
+  Geant4::G4materials
+  Geant4::G4particles
+  Geant4::G4processes
+  Geant4::G4track
+  ROOT::RIO
+  ROOT::Hist
+)
+
+install_headers()
+install_source()

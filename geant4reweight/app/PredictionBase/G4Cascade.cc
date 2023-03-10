@@ -1,39 +1,38 @@
-#include "Geant4/G4HadronInelasticProcess.hh"
-#include "Geant4/G4PionPlus.hh"
-#include "Geant4/G4PionMinus.hh"
-#include "Geant4/G4Proton.hh"
-#include "Geant4/G4ParticleDefinition.hh"
+#include "geant4reweight/PredictionBase/G4CascadeDetectorConstruction.hh"
+#include "geant4reweight/PredictionBase/G4CascadePhysicsList.hh"
+
 #include "Geant4/G4DynamicParticle.hh"
-#include "Geant4/G4ThreeVector.hh"
-#include "Geant4/G4Track.hh"
+#include "Geant4/G4Element.hh"
+#include "Geant4/G4HadronInelasticProcess.hh"
+#include "Geant4/G4Material.hh"
+#include "Geant4/G4ParticleDefinition.hh"
+#include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4ProcessManager.hh"
+#include "Geant4/G4ProcessVector.hh"
+#include "Geant4/G4Proton.hh"
+#include "Geant4/G4RunManager.hh"
 #include "Geant4/G4Step.hh"
 #include "Geant4/G4StepPoint.hh"
-#include "Geant4/G4Material.hh"
 #include "Geant4/G4SystemOfUnits.hh"
-#include "Geant4/G4ProcessVector.hh"
-#include "Geant4/G4ProcessManager.hh"
-#include "Geant4/G4RunManager.hh"
+#include "Geant4/G4ThreeVector.hh"
+#include "Geant4/G4Track.hh"
 #include "Geant4/G4VParticleChange.hh"
 
-#include "geant4reweight/src/PredictionBase/G4CascadeDetectorConstruction.hh"
-#include "geant4reweight/src/PredictionBase/G4CascadePhysicsList.hh"
+#include "fhiclcpp/ParameterSet.h"
 
-#include <utility>
-#include <iostream>
-#include <fstream>
+#include "cetlib/filepath_maker.h"
 
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
-#include "TVectorD.h"
 
-//#include "fhiclcpp/make_ParameterSet.h"
-#include "fhiclcpp/ParameterSet.h"
-
-//#ifdef FNAL_FHICL
-#include "cetlib/filepath_maker.h"
-//#endif
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility> // std::pair
+#include <vector>
 
 std::string fcl_file;
 
@@ -169,11 +168,11 @@ int main(int argc, char * argv[]){
   initRunMan( rm );
   ////
 
-  G4PionPlus  * piplus = 0x0;
-  G4PionMinus * piminus = 0x0;
-  G4Proton    * proton = 0x0;
-  G4Neutron   * neutron = 0x0;
-  G4ParticleDefinition * part_def = 0x0;
+  G4PionPlus  * piplus = nullptr;
+  G4PionMinus * piminus = nullptr;
+  G4Proton    * proton = nullptr;
+  G4Neutron   * neutron = nullptr;
+  G4ParticleDefinition * part_def = nullptr;
   std::string inel_name = "";
   switch( theConfig.type ){
     case 211:
@@ -252,7 +251,7 @@ int main(int argc, char * argv[]){
 
   }
 
-  //G4HadronInelasticProcess * inelastic_proc = 0x0;
+  //G4HadronInelasticProcess * inelastic_proc = nullptr;
   G4HadronInelasticProcess * inelastic_proc = getInelasticProc( /*inelastic_proc, */part_def, inel_name );
 
   std::cout << "inelastic_proc: " << inelastic_proc << std::endl;
@@ -262,7 +261,7 @@ int main(int argc, char * argv[]){
     return 0;
   }
 
-  G4Material * theMaterial = 0x0;
+  G4Material * theMaterial = nullptr;
   if (theConfig.MaterialComponents.size() == 1) {
     int MaterialZ = theConfig.MaterialComponents[0].get<int>("Z");
     double MaterialMass = theConfig.MaterialComponents[0].get<double>("Mass");
@@ -582,7 +581,7 @@ G4HadronInelasticProcess * getInelasticProc( G4ParticleDefinition * part_def, st
       return (G4HadronInelasticProcess*)proc;
     }
   }
-  return 0x0;
+  return nullptr;
 }
 
 

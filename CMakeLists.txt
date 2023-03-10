@@ -27,15 +27,14 @@ project(geant4reweight VERSION 01.14.04)
   )
   
   cet_report_compiler_flags(REPORT_THRESHOLD VERBOSE)
-  
-  #new
-  find_package(cetlib REQUIRED)
-  find_package(cetlib_except REQUIRED)
-  find_package(CLHEP REQUIRED)
-  find_package(fhiclcpp REQUIRED EXPORT)
 
-  find_package( Geant4 REQUIRED EXPORT)
-  find_package(ROOT REQUIRED COMPONENTS Hist Tree Core Gpad)
+  option(WANT_G4DDCrossSection "Build the optional G4DDCrossSection application" NO)
+
+  find_package(Geant4 REQUIRED EXPORT)
+  find_package(ROOT COMPONENTS Gpad Hist MathCore Matrix RIO Tree REQUIRED EXPORT)
+  find_package(cetlib REQUIRED EXPORT)
+  find_package(cetlib_except REQUIRED EXPORT)
+  find_package(fhiclcpp REQUIRED EXPORT)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)

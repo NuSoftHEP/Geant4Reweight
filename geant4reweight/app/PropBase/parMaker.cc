@@ -1,18 +1,17 @@
-#include "geant4reweight/src/PropBase/G4ReweightParameterMaker.hh"
-#include "geant4reweight/src/PropBase/G4ReweightThrowManager.hh"
-#include "geant4reweight/src/FitterBase/FitParameter.hh"
+#include "geant4reweight/PropBase/G4ReweightParameterMaker.hh"
+#include "geant4reweight/PropBase/G4ReweightThrowManager.hh"
 
-#include "TFile.h"
-
-#include <string>
-#include <map>
-
-//#include "fhiclcpp/make_ParameterSet.h"
 #include "fhiclcpp/ParameterSet.h"
 
-//#ifdef FNAL_FHICL
 #include "cetlib/filepath_maker.h"
-//#endif
+
+#include "TFile.h"
+#include "TH1D.h"
+
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 int main( int argc, char ** argv ){
 

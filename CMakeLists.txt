@@ -15,7 +15,7 @@
 cmake_minimum_required (VERSION 3.20 FATAL_ERROR)
 
 find_package(cetmodules REQUIRED)
-project(geant4reweight VERSION 01.14.04)
+project(geant4reweight VERSION 01.18.00)
 
   include(CetCMakeEnv)
   cet_cmake_env()

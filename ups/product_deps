@@ -87,7 +87,7 @@
 #>  define_pythonpath
 ####################################
 parent		geant4reweight
-defaultqual	e20:s117
+defaultqual	e20:s120
 ####################################
 
 ####################################

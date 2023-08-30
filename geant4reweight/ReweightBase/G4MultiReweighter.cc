@@ -56,6 +56,29 @@ G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet,
     const fhicl::ParameterSet & material,
+    G4Reweighter * rwer,
+    size_t nThrows, int seed)
+    : parMaker(parSet, false, pdg),
+      reweighter(rwer),
+      numberOfThrows(nThrows),
+      rng(seed) {
+
+  SetParams(parSet);
+  /*for (size_t i = 0; i < parSet.size(); ++i) {
+    paramNames.push_back(parSet[i].get<std::string>("Name"));
+    paramNominalVals.push_back(parSet[i].get<double>("Nominal"));
+    paramSigmas.push_back(parSet[i].get<double>("Sigma"));
+    paramRandomVals.push_back(std::vector<double>()); 
+    paramVals[paramNames.back()] = paramNominalVals.back();
+  }*/
+
+  GenerateThrows();
+}
+
+G4MultiReweighter::G4MultiReweighter(
+    int pdg, TFile & fracsFile,
+    const std::vector<fhicl::ParameterSet> & parSet,
+    const fhicl::ParameterSet & material,
     G4ReweightManager * rw_manager,
     size_t nThrows, int seed)
     : parMaker(parSet, false, pdg),
@@ -67,7 +90,14 @@ G4MultiReweighter::G4MultiReweighter(
       numberOfThrows(nThrows),
       rng(seed) {
 
-  //Get the parameters and set the values
+  SetParams(parSet);
+
+  GenerateThrows();
+}
+
+//Get the parameters and set the values
+void G4MultiReweighter::SetParams(
+    const std::vector<fhicl::ParameterSet> & parSet) {
   for (size_t i = 0; i < parSet.size(); ++i) {
     paramNames.push_back(parSet[i].get<std::string>("Name"));
     paramNominalVals.push_back(parSet[i].get<double>("Nominal"));
@@ -75,11 +105,7 @@ G4MultiReweighter::G4MultiReweighter(
     paramRandomVals.push_back(std::vector<double>()); 
     paramVals[paramNames.back()] = paramNominalVals.back();
   }
-
-  GenerateThrows();
 }
-
-
 
 void G4MultiReweighter::GenerateThrows() {
   //Generate the random numbers used for the throws 

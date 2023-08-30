@@ -36,8 +36,15 @@ class G4MultiReweighter{
                     const fhicl::ParameterSet & material,
                     G4ReweightManager * rw_manager,
                     size_t nThrows = 100, int seed = 0);
+  G4MultiReweighter(int pdg,
+                    TFile & fracsFile,
+                    const std::vector<fhicl::ParameterSet> & parSet,
+                    const fhicl::ParameterSet & material,
+                    G4Reweighter * rwer,
+                    size_t nThrows = 100, int seed = 0);
 
   
+  void SetParams(const std::vector<fhicl::ParameterSet> & parSet);
   double GetWeightFromNominal(G4ReweightTraj & traj/*,
                               bool alternate_weight = false*/);
 

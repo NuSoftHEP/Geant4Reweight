@@ -55,10 +55,11 @@ G4MultiReweighter::G4MultiReweighter(
 G4MultiReweighter::G4MultiReweighter(
     int pdg, TFile & fracsFile,
     const std::vector<fhicl::ParameterSet> & parSet,
+    const G4ReweightParameterMaker & par_maker,
     const fhicl::ParameterSet & material,
     G4Reweighter * rwer,
     size_t nThrows, int seed)
-    : parMaker(parSet, false, pdg),
+    : parMaker(par_maker),
       reweighter(rwer),
       numberOfThrows(nThrows),
       rng(seed) {

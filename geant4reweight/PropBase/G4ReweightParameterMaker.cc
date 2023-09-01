@@ -12,9 +12,9 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::map< std::string,
   BuildHistsFromPars();
 }
 
-G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, bool check_overlap, int pdg){
+G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector<fhicl::ParameterSet> & FitParSets, bool check_overlap, int pdg){
 
-  std::vector< std::string > all_cuts;
+  std::vector<std::string> all_cuts;
   switch (pdg) {
     case 211: {
       all_cuts = {"abs", "cex", "dcex", "prod", "inel", "reac"};
@@ -52,6 +52,135 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     }
   }
 
+  BuildParameters(all_cuts, FitParSets);
+/*  for( size_t i = 0; i < all_cuts.size(); ++i ){
+    FullParameterSet[ all_cuts[i] ] = std::vector< FitParameter >();
+  }
+
+  for( size_t i = 0; i < FitParSets.size(); ++i ){
+    fhicl::ParameterSet theSet = FitParSets.at(i);
+    std::string theCut = theSet.get< std::string >("Cut");
+
+    if( theCut != "elast" && std::find( all_cuts.begin(), all_cuts.end(), theCut ) == all_cuts.end() ){
+      std::cout << "Error: found parameter with bad cut " << theCut << std::endl;
+      std::exception e;
+      throw e;
+    }
+
+    if( theCut != "elast" ) ++nParameters;
+    else ++nElastParameters;
+
+    std::string theName = theSet.get< std::string >("Name");
+
+    std::pair< double, double > theRange = theSet.get< std::pair< double, double > >("Range");
+
+    double nominal = theSet.get< double >("Nominal",1.);
+
+    FitParameter par;
+    par.Name = theName;
+    par.Cut = theCut;
+    par.Dummy = false;
+    par.Value = nominal;
+    par.Range = theRange;
+
+    double scan_start = theSet.get< double >("ScanStart", 1.);
+    int    nsteps =     theSet.get< int >("NScanSteps", 2);
+    double scan_delta = theSet.get< double >("ScanDelta", .1);
+
+    par.ScanStart = scan_start;
+    par.ScanSteps = nsteps;
+    par.ScanDelta = scan_delta;
+
+    ///////Add into the parameters themselves
+    if( theCut == "elast" ){
+      ElasticParameterSet.push_back( par );
+    }
+    else {
+      FullParameterSet[ theCut ].push_back( par );
+    }
+  }
+
+  for( auto itPar = FullParameterSet.begin(); itPar != FullParameterSet.end(); ++itPar){
+    if( !( itPar->second.size() ) ){
+      FitParameter dummyPar;
+
+      dummyPar.Name = "dummy";
+      dummyPar.Cut = itPar->first;
+      dummyPar.Value = 1.;
+      dummyPar.Range = std::make_pair( 0., 0.);
+      dummyPar.Dummy = true;
+
+      FullParameterSet[ itPar->first ].push_back( dummyPar );
+    }
+  }*/
+
+  //Check range here
+  if (check_overlap) {
+    CheckOverlap();
+    /*for (auto it = FullParameterSet.begin();
+         it != FullParameterSet.end(); ++it) {
+      for (size_t i = 0; i < it->second.size(); ++i) {
+        std::string i_name = it->second.at(i).Name;
+        std::pair<double, double> i_range = it->second.at(i).Range;
+        for (size_t j = 0; j < it->second.size(); ++j) {
+          if (i == j) continue;
+          std::pair<double, double> j_range = it->second.at(j).Range;
+          std::string j_name = it->second.at(j).Name;
+          if ((i_range.first >= j_range.first) &&
+              (i_range.first < j_range.second)) {
+            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                      << i_range.first << ", " << i_range.second << ")" << "\n"
+                      << j_name << " (" << j_range.first << ", "
+                      << j_range.second << ")" << std::endl;
+            std::exception e;
+            throw e;
+          }
+          if ((i_range.second <= j_range.second) &&
+              (i_range.second > j_range.first)) {
+            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                      << i_range.first << ", " << i_range.second << ")" << "\n"
+                      << j_name << " (" << j_range.first << ", "
+                      << j_range.second << ")" << std::endl;
+            std::exception e;
+            throw e;
+          }
+        }
+      }
+    }*/
+  }
+
+  BuildHistsFromPars();
+  BuildElasticHist();
+}
+
+G4ReweightParameterMaker::G4ReweightParameterMaker(
+    const std::vector<fhicl::ParameterSet> & FitParSets,
+    const std::vector<std::string> & all_cuts,
+    bool check_overlap) {
+
+  BuildParameters(all_cuts, FitParSets);
+  if (check_overlap) {
+    CheckOverlap();
+  }
+  BuildHistsFromPars();
+  BuildElasticHist();
+}
+
+G4ReweightParameterMaker::G4ReweightParameterMaker(
+  const G4ReweightParameterMaker & rh) {
+  FSHists = rh.FSHists;
+  dummyHist = rh.dummyHist;
+  FullParameterSet = rh.FullParameterSet;
+  ElasticParameterSet = rh.ElasticParameterSet;
+
+  ElasticHist = rh.ElasticHist;
+  nParameters = rh.nParameters;
+  nElastParameters = rh.nElastParameters;
+}
+
+void G4ReweightParameterMaker::BuildParameters(
+    const std::vector<std::string> & all_cuts,
+    const std::vector<fhicl::ParameterSet> & FitParSets) {
   for( size_t i = 0; i < all_cuts.size(); ++i ){
     FullParameterSet[ all_cuts[i] ] = std::vector< FitParameter >();
   }
@@ -113,44 +242,40 @@ G4ReweightParameterMaker::G4ReweightParameterMaker( const std::vector< fhicl::Pa
     }
   }
 
-  //Check range here
-  if (check_overlap) {
-    for (auto it = FullParameterSet.begin();
-         it != FullParameterSet.end(); ++it) {
-      for (size_t i = 0; i < it->second.size(); ++i) {
-        std::string i_name = it->second.at(i).Name;
-        std::pair<double, double> i_range = it->second.at(i).Range;
-        for (size_t j = 0; j < it->second.size(); ++j) {
-          if (i == j) continue;
-          std::pair<double, double> j_range = it->second.at(j).Range;
-          std::string j_name = it->second.at(j).Name;
-          if ((i_range.first >= j_range.first) &&
-              (i_range.first < j_range.second)) {
-            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
-                      << i_range.first << ", " << i_range.second << ")" << "\n"
-                      << j_name << " (" << j_range.first << ", "
-                      << j_range.second << ")" << std::endl;
-            std::exception e;
-            throw e;
-          }
-          if ((i_range.second <= j_range.second) &&
-              (i_range.second > j_range.first)) {
-            std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
-                      << i_range.first << ", " << i_range.second << ")" << "\n"
-                      << j_name << " (" << j_range.first << ", "
-                      << j_range.second << ")" << std::endl;
-            std::exception e;
-            throw e;
-          }
+}
+
+void G4ReweightParameterMaker::CheckOverlap() {
+  for (auto it = FullParameterSet.begin();
+       it != FullParameterSet.end(); ++it) {
+    for (size_t i = 0; i < it->second.size(); ++i) {
+      std::string i_name = it->second.at(i).Name;
+      std::pair<double, double> i_range = it->second.at(i).Range;
+      for (size_t j = 0; j < it->second.size(); ++j) {
+        if (i == j) continue;
+        std::pair<double, double> j_range = it->second.at(j).Range;
+        std::string j_name = it->second.at(j).Name;
+        if ((i_range.first >= j_range.first) &&
+            (i_range.first < j_range.second)) {
+          std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                    << i_range.first << ", " << i_range.second << ")" << "\n"
+                    << j_name << " (" << j_range.first << ", "
+                    << j_range.second << ")" << std::endl;
+          std::exception e;
+          throw e;
+        }
+        if ((i_range.second <= j_range.second) &&
+            (i_range.second > j_range.first)) {
+          std::cerr << "Error: found overlapping parameters\n" << i_name << " ("
+                    << i_range.first << ", " << i_range.second << ")" << "\n"
+                    << j_name << " (" << j_range.first << ", "
+                    << j_range.second << ")" << std::endl;
+          std::exception e;
+          throw e;
         }
       }
     }
   }
-
-  BuildHistsFromPars();
-  BuildElasticHist();
 }
-
 
 void G4ReweightParameterMaker::BuildElasticHist(){
 

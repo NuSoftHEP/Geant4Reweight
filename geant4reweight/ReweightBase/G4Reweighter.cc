@@ -277,6 +277,8 @@ std::string G4Reweighter::GetInteractionSubtype( const G4ReweightTraj & theTraj 
 
 double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
+
+  if (theTraj->GetPDG() != dynamic_part->GetPDGcode()) return 1.;
   double total = 0.;
   double bias_total = 0.;
   double weight = 1.;

@@ -49,49 +49,24 @@ G4CascadePhysicsList::G4CascadePhysicsList(fhicl::ParameterSet pars)
   RegisterPhysics(new G4DecayPhysics);
   RegisterPhysics(new G4RadioactiveDecayPhysics);
 
-  auto em_phys = pars.get<std::string>("EMPhysics", ""); //TODO -- add default
-  /*if (!G4PhysicsConstructorRegistry::Instance()->IsKnownPhysicsConstructor(
-   *        em_phys)) {
-    //TODO -- throw an exception?
-  }*/
+  auto em_phys = pars.get<std::string>(
+      "EMPhysics", "G4EmStandardPhysics");
   RegisterPhysics(
       G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
           em_phys));
-  //RegisterPhysics(new G4EmStandardPhysics);
 
-  auto inelastic_phys = pars.get<std::string>("InelasticPhysics", "");//TODO -- add default
-  //TODO -- check
+  auto inelastic_phys = pars.get<std::string>(
+      "InelasticPhysics", "G4HadronPhysicsQGSP_BERT");
   RegisterPhysics(
       G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
           inelastic_phys));
 
-  auto elastic_phys = pars.get<std::string>("ElasticPhysics", "");//TODO -- add default
+  auto elastic_phys = pars.get<std::string>(
+      "ElasticPhysics", "G4HadronElasticPhysics");
   RegisterPhysics(
       G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
           elastic_phys));
 
-  /*switch (list) {
-    case 0: {
-      RegisterPhysics(new G4HadronPhysicsQGSP_BERT());
-      RegisterPhysics(new G4HadronElasticPhysics());
-      break;
-    }
-    case 1: {
-      RegisterPhysics(new G4HadronPhysicsFTFP_BERT());
-      RegisterPhysics(new G4HadronElasticPhysics());
-      break;
-    }
-    case 2: {
-      RegisterPhysics(new G4HadronPhysicsQGSP_BERT_HP());
-      RegisterPhysics(new G4HadronElasticPhysicsHP());
-      break;
-    }
-    default: {
-      RegisterPhysics(new G4HadronPhysicsQGSP_BERT());
-      RegisterPhysics(new G4HadronElasticPhysics());
-      break;
-    }
-  }*/
 }
 
 G4CascadePhysicsList::~G4CascadePhysicsList(){}

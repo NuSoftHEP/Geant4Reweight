@@ -15,7 +15,12 @@ class G4ReweightParameterMaker{
   public:
     G4ReweightParameterMaker(){};
     G4ReweightParameterMaker( const std::map< std::string, std::vector< FitParameter > > & pars );
-    G4ReweightParameterMaker( const std::vector< fhicl::ParameterSet > & FitParSets, bool check_overlap = false, int pdg = 211);
+    G4ReweightParameterMaker(const std::vector<fhicl::ParameterSet> & FitParSets, bool check_overlap = false, int pdg = 211);
+    G4ReweightParameterMaker(const std::vector<fhicl::ParameterSet> & FitParSets,
+                             const std::vector<std::string> & all_cuts,
+                             bool check_overlap = false);
+
+    G4ReweightParameterMaker(const G4ReweightParameterMaker & rh);
     void SetNewVals( const std::vector< std::pair< std::string, double > > & input );
     void SetNewVals( const std::map< std::string, double > & input );
     void SetNewValsWithElast(const std::vector<std::pair<std::string,double>> &input  , const std::vector<std::pair<std::string,double>> &input_elast );
@@ -97,6 +102,11 @@ class G4ReweightParameterMaker{
     TH1D * dummyHist;
     std::map< std::string, std::vector< FitParameter > > FullParameterSet;
     std::vector< FitParameter > ElasticParameterSet;
+
+    void BuildParameters(
+        const std::vector<std::string> & all_cuts,
+        const std::vector<fhicl::ParameterSet> & FitParSets);
+    void CheckOverlap();
 
     TH1D* ElasticHist;
     int nParameters;

@@ -155,12 +155,78 @@ int main(int argc, char * argv[]){
   TTree * tree = new TTree("tree","");
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
+  std::vector<int> c_pdg;
+  std::vector<double> c_momentum;
+  std::vector<double> c_piplus_momentum, c_piminus_momentum, c_proton_momentum,
+                      c_neutron_momentum, c_pi0_momentum;
+  double c_leading_piplus_momentum, c_leading_piminus_momentum, c_leading_proton_momentum,
+         c_leading_neutron_momentum, c_leading_pi0_momentum;
+  std::vector<double> c_piplus_costheta, c_piminus_costheta, c_proton_costheta,
+                      c_neutron_costheta, c_pi0_costheta;
+  double c_leading_piplus_costheta, c_leading_piminus_costheta, c_leading_proton_costheta,
+         c_leading_neutron_costheta, c_leading_pi0_costheta;
   tree->Branch( "nPi0", &nPi0 );
   tree->Branch( "nPiPlus", &nPiPlus );
   tree->Branch( "nPiMinus", &nPiMinus );
   tree->Branch( "nProton", &nProton );
   tree->Branch( "nNeutron", &nNeutron );
   tree->Branch( "momentum", &momentum );
+  tree->Branch( "c_pdg", &c_pdg );
+  tree->Branch( "c_momentum", &c_momentum );
+  tree->Branch( "c_piplus_momentum", &c_piplus_momentum );
+  tree->Branch( "c_piminus_momentum", &c_piminus_momentum );
+  tree->Branch( "c_pi0_momentum", &c_pi0_momentum );
+  tree->Branch( "c_proton_momentum", &c_proton_momentum );
+  tree->Branch( "c_neutron_momentum", &c_neutron_momentum );
+
+  tree->Branch( "c_piplus_costheta", &c_piplus_costheta );
+  tree->Branch( "c_piminus_costheta", &c_piminus_costheta );
+  tree->Branch( "c_pi0_costheta", &c_pi0_costheta );
+  tree->Branch( "c_proton_costheta", &c_proton_costheta );
+  tree->Branch( "c_neutron_costheta", &c_neutron_costheta );
+
+
+  tree->Branch( "c_leading_piplus_momentum", &c_leading_piplus_momentum );
+  tree->Branch( "c_leading_piminus_momentum", &c_leading_piminus_momentum );
+  tree->Branch( "c_leading_pi0_momentum", &c_leading_pi0_momentum );
+  tree->Branch( "c_leading_proton_momentum", &c_leading_proton_momentum );
+  tree->Branch( "c_leading_neutron_momentum", &c_leading_neutron_momentum );
+
+  tree->Branch( "c_leading_piplus_costheta", &c_leading_piplus_costheta );
+  tree->Branch( "c_leading_piminus_costheta", &c_leading_piminus_costheta );
+  tree->Branch( "c_leading_pi0_costheta", &c_leading_pi0_costheta );
+  tree->Branch( "c_leading_proton_costheta", &c_leading_proton_costheta );
+  tree->Branch( "c_leading_neutron_costheta", &c_leading_neutron_costheta );
+
+  std::map<int, std::vector<double>*> map_to_momentums = {
+    {211, &c_piplus_momentum},
+    {-211, &c_piminus_momentum},
+    {111, &c_pi0_momentum},
+    {2212, &c_proton_momentum},
+    {2112, &c_neutron_momentum}
+  };
+  std::map<int, std::vector<double>*> map_to_costhetas = {
+    {211, &c_piplus_costheta},
+    {-211, &c_piminus_costheta},
+    {111, &c_pi0_costheta},
+    {2212, &c_proton_costheta},
+    {2112, &c_neutron_costheta}
+  };
+
+  std::map<int, double*> map_to_leading_momentums = {
+    {211, &c_leading_piplus_momentum},
+    {-211, &c_leading_piminus_momentum},
+    {111, &c_leading_pi0_momentum},
+    {2212, &c_leading_proton_momentum},
+    {2112, &c_leading_neutron_momentum}
+  };
+  std::map<int, double*> map_to_leading_costhetas = {
+    {211, &c_leading_piplus_costheta},
+    {-211, &c_leading_piminus_costheta},
+    {111, &c_leading_pi0_costheta},
+    {2212, &c_leading_proton_costheta},
+    {2112, &c_leading_neutron_costheta}
+  };
 
   std::cout << "Initializing" << std::endl;
   //Initializing
@@ -318,12 +384,29 @@ int main(int argc, char * argv[]){
       nProton = 0;
       nNeutron = 0;
       momentum = dynamic_part->GetTotalMomentum();
+      for (auto m : map_to_costhetas) m.second->clear();
+      for (auto m : map_to_momentums) m.second->clear();
+      c_pdg.clear();
+      c_momentum.clear();
+      /*c_piplus_momentum.clear();
+      c_piminus_momentum.clear();
+      c_pi0_momentum.clear();
+      c_neutron_momentum.clear();
+      c_proton_momentum.clear();*/
       G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
 
       size_t nSecondaries = thePC->GetNumberOfSecondaries();
       for( size_t i = 0; i < nSecondaries; ++i ){
         auto part = thePC->GetSecondary(i)->GetDynamicParticle();
 
+        if (map_to_momentums.find(part->GetPDGcode()) !=
+            map_to_momentums.end()) {
+          map_to_momentums[part->GetPDGcode()]->push_back(part->GetTotalMomentum());
+
+          map_to_costhetas[part->GetPDGcode()]->push_back(
+            part->GetMomentumDirection().dot(
+                dynamic_part->GetMomentumDirection()));
+        }
         switch( part->GetPDGcode() ){
           case( 211 ):
             if (theConfig.AboveThreshold(
@@ -353,6 +436,20 @@ int main(int argc, char * argv[]){
             break;
           default:
             break;
+        }
+      }
+
+      for (auto m : map_to_momentums) {
+        int the_pdg = m.first;
+        //reset first
+        (*map_to_leading_momentums[the_pdg]) = -999;
+        (*map_to_leading_costhetas[the_pdg]) = -999;
+
+        for (size_t j = 0; j < m.second->size(); ++j) {
+          if ((*map_to_leading_momentums[the_pdg]) < map_to_momentums[the_pdg]->at(j)) {
+            (*map_to_leading_momentums[the_pdg]) = map_to_momentums[the_pdg]->at(j);
+            (*map_to_leading_costhetas[the_pdg]) = map_to_costhetas[the_pdg]->at(j);
+          }
         }
       }
 

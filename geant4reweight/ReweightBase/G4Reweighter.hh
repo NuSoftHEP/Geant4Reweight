@@ -41,7 +41,7 @@ class G4Reweighter{
                  TH1D * inputElasticBiasHist = nullptr, bool fix = false);
     virtual ~G4Reweighter();
 
-    double GetWeight(const G4ReweightTraj * theTraj);
+    virtual double GetWeight(const G4ReweightTraj * theTraj);
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);

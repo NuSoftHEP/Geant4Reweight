@@ -1,7 +1,9 @@
 import ROOT as RT
 from array import array
-import sys
+#import sys
 import math
+
+from argparse import ArgumentParser as ap
 
 
 def mom_to_ke( grin ):
@@ -11,44 +13,56 @@ def mom_to_ke( grin ):
   grout = RT.TGraph( len(xs), array("d", xs), array("d", ys) )
   return grout
 
-fout = RT.TFile(sys.argv[3], "RECREATE")
 
-total_file = RT.TFile(sys.argv[1], "OPEN")
-frac_file  = RT.TFile(sys.argv[2], "OPEN")
+if __name__ == '__main__':
+  parser = ap()
+  parser.add_argument('-t', help='Total xsec file', required=True)
+  parser.add_argument('-f', help='Exclusive fractions file', required=True)
+  parser.add_argument('-o', help='Output file', required=True)
+  parser.add_argument('--cuts', help='Which cuts', nargs='+',
+                      default=["abs","inel","cex","dcex","prod"])
+  args = parser.parse_args()
 
-
-grabs = ["momentum", "KE"]
-
-for grab in grabs:
-  total_inel = total_file.Get("inel_" + grab)
-  total_xs = [ total_inel.GetX()[i] for i in range(0,total_inel.GetN()) ]
-  total_ys = [ total_inel.GetY()[i] for i in range(0,total_inel.GetN()) ]
+  #fout = RT.TFile(sys.argv[3], "RECREATE")
+  #total_file = RT.TFile(sys.argv[1], "OPEN")
+  #frac_file  = RT.TFile(sys.argv[2], "OPEN")
   
-  cuts = ["abs","inel","cex","dcex","prod"]
+  fout = RT.TFile(args.o, "RECREATE")
+  total_file = RT.TFile.Open(args.t)
+  frac_file  = RT.TFile.Open(args.f)
   
-  fracs = dict()
-  xsecs = dict()
-  for cut in cuts:
-    if( grab == "momentum" ): frac = frac_file.Get( cut )
-    elif( grab == "KE" ): frac = mom_to_ke( frac_file.Get( cut ) )
-    xsec_xs = []
-    xsec_ys = []
+  grabs = ["momentum", "KE"]
   
-    for x,y in zip(total_xs,total_ys): 
-      if( x > frac.GetX()[frac.GetN() - 1] ): break
-      if( x < frac.GetX()[0] ): continue
-      xsec_xs.append( x )
-      if( y < 0. ): print("warning", x,y)
-      if( frac.Eval( x ) < 0. ): print("eval", x,frac.Eval( x ))
-      xsec_ys.append( y * frac.Eval( x ) )
-    print(xsec_xs[-1])
-    xsecs[ cut ] = RT.TGraph(len(xsec_xs), array("d", xsec_xs), array("d", xsec_ys))
-    fout.cd()
-    xsecs[ cut ].Write( cut + "_" + grab)
+  for grab in grabs:
+    total_inel = total_file.Get("inel_" + grab)
+    total_xs = [ total_inel.GetX()[i] for i in range(0,total_inel.GetN()) ]
+    total_ys = [ total_inel.GetY()[i] for i in range(0,total_inel.GetN()) ]
     
+    #cuts = ["abs","inel","cex","dcex","prod"]
+    
+    fracs = dict()
+    xsecs = dict()
+    for cut in args.cuts:
+      if( grab == "momentum" ): frac = frac_file.Get( cut )
+      elif( grab == "KE" ): frac = mom_to_ke( frac_file.Get( cut ) )
+      xsec_xs = []
+      xsec_ys = []
+    
+      for x,y in zip(total_xs,total_ys): 
+        if( x > frac.GetX()[frac.GetN() - 1] ): break
+        if( x < frac.GetX()[0] ): continue
+        xsec_xs.append( x )
+        if( y < 0. ): print("warning", x,y)
+        if( frac.Eval( x ) < 0. ): print("eval", x,frac.Eval( x ))
+        xsec_ys.append( y * frac.Eval( x ) )
+      print(xsec_xs[-1])
+      xsecs[ cut ] = RT.TGraph(len(xsec_xs), array("d", xsec_xs), array("d", xsec_ys))
+      fout.cd()
+      xsecs[ cut ].Write( cut + "_" + grab)
+      
+    
+    fout.cd()
+    total_inel.Write("total_inel_" + grab)
+  fout.Close()
   
-  fout.cd()
-  total_inel.Write("total_inel_" + grab)
-fout.Close()
-
-  
+    

@@ -9,6 +9,8 @@
 #include "Geant4/G4HadronElasticPhysics.hh"
 #include "Geant4/G4HadronElasticPhysicsHP.hh"
 
+#include "Geant4/G4PhysicsConstructorRegistry.hh"
+
 G4CascadePhysicsList::G4CascadePhysicsList(int list) : G4VModularPhysicsList(){
   SetVerboseLevel(0);
 
@@ -38,6 +40,39 @@ G4CascadePhysicsList::G4CascadePhysicsList(int list) : G4VModularPhysicsList(){
       break;
     }
   }
+}
+
+G4CascadePhysicsList::G4CascadePhysicsList(fhicl::ParameterSet pars)
+    : G4VModularPhysicsList() {
+  SetVerboseLevel(0);
+
+  RegisterPhysics(new G4DecayPhysics);
+  RegisterPhysics(new G4RadioactiveDecayPhysics);
+
+  auto em_phys = pars.get<std::string>(
+      "EMPhysics", "G4EmStandardPhysics");
+  RegisterPhysics(
+      G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
+          em_phys));
+
+  auto inelastic_phys = pars.get<std::string>(
+      "InelasticPhysics", "G4HadronPhysicsQGSP_BERT");
+  RegisterPhysics(
+      G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
+          inelastic_phys));
+
+  auto elastic_phys = pars.get<std::string>(
+      "ElasticPhysics", "G4HadronElasticPhysics");
+  RegisterPhysics(
+      G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
+          elastic_phys));
+  
+  std::cout << "Physics list \n";
+  std::cout << "------------ \n";
+  std::cout << "EM: " << em_phys << "\n";
+  std::cout << "Hadron inelastic: " << inelastic_phys << "\n";
+  std::cout << "Hadron elastic: " << elastic_phys << "\n";
+  std::cout << "------------ \n";
 }
 
 G4CascadePhysicsList::~G4CascadePhysicsList(){}

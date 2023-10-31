@@ -17,6 +17,23 @@ G4ReweightManager::G4ReweightManager(
 
   rm = new G4RunManager();
   SetupWorld();
+  physList = new G4CascadePhysicsList();
+  rm->SetUserInitialization(detector);
+  rm->SetUserInitialization(physList);
+  rm->Initialize();
+  rm->ConfirmBeamOnCondition();
+  rm->ConstructScoringWorlds();
+  rm->RunInitialization();
+}
+
+G4ReweightManager::G4ReweightManager(
+    std::vector<fhicl::ParameterSet> material_sets,
+    const fhicl::ParameterSet & physics_list_set) {
+  fMaterialSets = material_sets;
+
+  rm = new G4RunManager();
+  SetupWorld();
+  physList = new G4CascadePhysicsList(physics_list_set);
   rm->SetUserInitialization(detector);
   rm->SetUserInitialization(physList);
   rm->Initialize();
@@ -109,5 +126,4 @@ void G4ReweightManager::SetupWorld() {
   }
 
   detector = new G4CascadeDetectorConstruction(physWorld);
-  physList = new G4CascadePhysicsList();
 }

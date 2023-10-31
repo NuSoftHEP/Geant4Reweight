@@ -15,7 +15,9 @@ class G4VPhysicalVolume;
 
 class G4ReweightManager {
  public:
-  G4ReweightManager(std::vector<fhicl::ParameterSet> fMaterialSets);
+  G4ReweightManager(std::vector<fhicl::ParameterSet> material_sets);
+  G4ReweightManager(std::vector<fhicl::ParameterSet> material_sets,
+                    const fhicl::ParameterSet & physics_list_set);
   double GetCenter(std::string name) {return fCenters[name];};
   G4VPhysicalVolume * GetVolume(std::string name) {return fVolumes[name];};
  protected:

@@ -66,7 +66,13 @@ G4CascadePhysicsList::G4CascadePhysicsList(fhicl::ParameterSet pars)
   RegisterPhysics(
       G4PhysicsConstructorRegistry::Instance()->GetPhysicsConstructor(
           elastic_phys));
-
+  
+  std::cout << "Physics list \n";
+  std::cout << "------------ \n";
+  std::cout << "EM: " << em_phys << "\n";
+  std::cout << "Hadron inelastic: " << inelastic_phys << "\n";
+  std::cout << "Hadron elastic: " << elastic_phys << "\n";
+  std::cout << "------------ \n";
 }
 
 G4CascadePhysicsList::~G4CascadePhysicsList(){}

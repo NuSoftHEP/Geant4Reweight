@@ -8,7 +8,7 @@ class G4ReweightTraj;
 
 class G4Box;
 class G4CascadeDetectorConstruction;
-class G4CascadePhysicsList;
+//class G4CascadePhysicsList;
 class G4DynamicParticle;
 class G4HadronElasticProcess;
 class G4HadronInelasticProcess;
@@ -85,8 +85,8 @@ class G4Reweighter{
     G4Box * solidWorld;
     G4LogicalVolume * logicWorld;
     G4VPhysicalVolume * physWorld;
-    G4CascadeDetectorConstruction * detector;
-    G4CascadePhysicsList * physList;
+    //G4CascadeDetectorConstruction * detector;
+    //G4CascadePhysicsList * physList;
 
     G4PionPlus  * piplus;
     G4ParticleDefinition * part_def;
@@ -96,7 +96,7 @@ class G4Reweighter{
     G4HadronInelasticProcess * inelastic_proc;
 
     void SetupProcesses();
-    void SetupWorld();
+    //void SetupWorld();
     void SetupParticle();
 
     double fInelasticPreBias = 1.;

@@ -1,4 +1,5 @@
 #include "g4rw_material.fcl"
+#include "g4rw_physlist.fcl"
 Type: 211
 Range: [10., 8000.]
 NDivisions: 7989
@@ -6,3 +7,5 @@ Verbose: "true"
 Outfile: "cross_section_out.root"
 
 Material: @local::LAr
+
+Physlist: @local::Physlist_default

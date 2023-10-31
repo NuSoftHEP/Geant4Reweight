@@ -7,6 +7,7 @@ cet_make_library(LIBRARY_NAME PredictionBaseLib
   PUBLIC
   Geant4::G4run
   Geant4::G4processes
+  fhiclcpp::fhiclcpp
   PRIVATE
   Geant4::G4physicslists
 )

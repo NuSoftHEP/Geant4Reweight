@@ -76,6 +76,8 @@ struct Config{
   //    outFileName = output_file_override;
   //  }
 
+    pset.get_if_present("Physlist", physlist);
+
     fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
     MaterialName = MaterialParameters.get< std::string >( "Name" );
     MaterialZ = MaterialParameters.get< int >( "Z" );
@@ -97,6 +99,8 @@ CrossSecFile = pset.get<std::string>("CrossSecFile");
 //  std::pair< double, double > range;
 
   std::string outFileName;
+
+  fhicl::ParameterSet physlist;
 
   int MaterialZ;
   double MaterialMass;
@@ -129,7 +133,7 @@ TrackStepPart initTrackAndPart(G4ParticleDefinition * part_def, G4Material * the
 
 
 bool parseArgs(int argc, char* argv[]);
-void initRunMan( G4RunManager & rm );
+void initRunMan( G4RunManager & rm, fhicl::ParameterSet & physlist );
 void makeFCLParameterSet( fhicl::ParameterSet & pset);
 G4HadronInelasticProcess * getInelasticProc( /*G4HadronInelasticProcess * inelastic_proc, */G4ParticleDefinition * part_def, std::string inel_name );
 G4HadronElasticProcess * getElasticProc( /*G4HadronInelasticProcess * inelastic_proc, */G4ParticleDefinition * part_def, std::string el_name );
@@ -210,7 +214,7 @@ std::cout << "starting" << std::endl;
   std::cout << "Initializing" << std::endl;
   //Initializing
   G4RunManager rm;
-  initRunMan( rm );
+  initRunMan( rm, theConfig.physlist );
  
   G4SteppingManager sm;
   G4SteppingManager sm_elast;
@@ -537,9 +541,9 @@ bool parseArgs(int argc, char ** argv){
 
 
 
-void initRunMan( G4RunManager & rm ){
+void initRunMan( G4RunManager & rm, fhicl::ParameterSet & physlist ){
   rm.SetUserInitialization(new G4CascadeDetectorConstruction);
-  rm.SetUserInitialization(new G4CascadePhysicsList);
+  rm.SetUserInitialization(new G4CascadePhysicsList(physlist));
   rm.Initialize();
   rm.ConfirmBeamOnCondition();
   rm.ConstructScoringWorlds();
@@ -655,6 +659,8 @@ Config configure(fhicl::ParameterSet & pset){
    if( output_file_override  != "empty" ){
     theConfig.outFileName = output_file_override;
   }
+
+   pset.get_if_present("Physlist", theConfig.physlist);
 
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   theConfig.MaterialName = MaterialParameters.get< std::string >( "Name" );

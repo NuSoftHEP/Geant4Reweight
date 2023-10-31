@@ -66,7 +66,7 @@ void G4Reweighter::SetNewElasticHists(TH1D * inputElasticBiasHist) {
 }
 
 
-void G4Reweighter::SetupWorld() {
+/*void G4Reweighter::SetupWorld() {
 
   testMaterial = nullptr;
 
@@ -120,17 +120,17 @@ void G4Reweighter::SetupWorld() {
 
 
   //World
-  solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
-  logicWorld = new G4LogicalVolume(solidWorld,
-                                   testMaterial,
-                                   "World");
-  physWorld = new G4PVPlacement(
-      0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
+  //solidWorld = new G4Box("World", 40.*cm, 47.*cm, 90.*cm);
+  //logicWorld = new G4LogicalVolume(solidWorld,
+  //                                 testMaterial,
+  //                                 "World");
+  //physWorld = new G4PVPlacement(
+  //    0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
 
-  detector = new G4CascadeDetectorConstruction(physWorld);
-  physList = new G4CascadePhysicsList();
+  //detector = new G4CascadeDetectorConstruction(physWorld);
+  //physList = new G4CascadePhysicsList();
 
-}
+}*/
 
 void G4Reweighter::SetupParticle() {
 

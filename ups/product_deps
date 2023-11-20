@@ -32,7 +32,7 @@ fcldir  product_dir     fcl
 # Add the dependent product and version
 
 product          version
-nug4            v1_14_03  s117a
+nug4            v1_14_04  s117a
 nug4            v1_14_01  s117
 nug4            v1_12_02  s112
 nug4            v1_09_03  s111

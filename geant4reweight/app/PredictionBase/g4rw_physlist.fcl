@@ -1,0 +1,9 @@
+BEGIN_PROLOG
+
+Physlist_default: {
+  EMPhysics: "G4EmStandardPhysics"
+  InelasticPhysics: "G4HadronPhysicsQGSP_BERT"
+  ElasticPhysics: "G4HadronElasticPhysics"
+}
+
+END_PROLOG

@@ -16,7 +16,7 @@
 # use cmake 3.11 or later
 cmake_minimum_required (VERSION 3.11)
 
-project(geant4reweight VERSION 01.16.04)
+project(geant4reweight VERSION 01.16.05)
 
 # cetbuildtools contains our cmake modules
 #find_package(cetbuildtools REQUIRED)

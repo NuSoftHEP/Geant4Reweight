@@ -163,6 +163,8 @@ int main(int argc, char * argv[]){
 
   //World
   //
+  fhicl::ParameterSet physlist;
+  pset.get_if_present("Physlist", physlist);
   fhicl::ParameterSet MaterialParameters = pset.get< fhicl::ParameterSet >("Material");
   std::string MaterialName = MaterialParameters.get< std::string >( "Name" );
   //int MaterialZ = MaterialParameters.get< int >( "Z" );
@@ -214,7 +216,11 @@ int main(int argc, char * argv[]){
       0, G4ThreeVector(), logicWorld, "World", 0, false, 0, true);
 
   rm->SetUserInitialization(new G4CascadeDetectorConstruction(physWorld));
-  rm->SetUserInitialization(new G4CascadePhysicsList(list));
+  if(list==0) rm->SetUserInitialization(new G4CascadePhysicsList(physlist));
+  else{
+    std::cout << "Not using physics list defined in FCL. \n";
+    rm->SetUserInitialization(new G4CascadePhysicsList(list));
+  }
   rm->Initialize();
   rm->ConfirmBeamOnCondition();
   rm->ConstructScoringWorlds();

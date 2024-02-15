@@ -87,7 +87,7 @@
 #>  define_pythonpath
 ####################################
 parent		geant4reweight
-defaultqual	e26:s120a
+defaultqual	e26:s129
 ####################################
 
 ####################################
@@ -250,6 +250,7 @@ libdir	fq_dir		lib
 #
 ####################################
 product		version		qual	flags		<table_format=2>
+nug4		v1_16_02	s129
 nug4		v1_16_01	s128
 nug4		v1_16_00	s126
 nug4		v1_15_03	s120a
@@ -312,6 +313,10 @@ end_product_list
 #
 ####################################
 qualifier	nug4		notes
+s129:e26:debug	e26:debug
+s129:e26:prof	e26:prof
+s129:c14:debug	c14:debug
+s129:c14:prof	c14:prof
 s128:e26:debug	e26:debug
 s128:e26:prof	e26:prof
 s128:c14:debug	c14:debug

@@ -87,7 +87,7 @@
 #>  define_pythonpath
 ####################################
 parent		geant4reweight
-defaultqual	e26:s120a
+defaultqual	e26:s130
 ####################################
 
 ####################################
@@ -250,11 +250,17 @@ libdir	fq_dir		lib
 #
 ####################################
 product		version		qual	flags		<table_format=2>
-nug4		v1_15_02	s120a
+nug4		v1_16_05	s131
+nug4		v1_16_04	s130
+nug4		v1_16_02	s129
+nug4		v1_16_01	s128
+nug4		v1_16_00	s126
+nug4		v1_15_04	s120b
+nug4		v1_15_03	s120a
 nug4		v1_15_00	s120
 nug4		v1_13_03	s117
 nug4		v1_12_02	s112
-cetmodules	v3_20_00	-	only_for_build
+cetmodules	v3_22_02	-	only_for_build
 end_product_list
 ####################################
 
@@ -310,6 +316,30 @@ end_product_list
 #
 ####################################
 qualifier	nug4		notes
+s131:e26:debug	e26:debug
+s131:e26:prof	e26:prof
+s131:c14:debug	c14:debug
+s131:c14:prof	c14:prof
+s130:e26:debug	e26:debug
+s130:e26:prof	e26:prof
+s130:c14:debug	c14:debug
+s130:c14:prof	c14:prof
+s129:e26:debug	e26:debug
+s129:e26:prof	e26:prof
+s129:c14:debug	c14:debug
+s129:c14:prof	c14:prof
+s128:e26:debug	e26:debug
+s128:e26:prof	e26:prof
+s128:c14:debug	c14:debug
+s128:c14:prof	c14:prof
+s126:e26:debug	e26:debug
+s126:e26:prof	e26:prof
+s126:c14:debug	c14:debug
+s126:c14:prof	c14:prof
+s120b:e26:debug	e26:debug
+s120b:e26:prof	e26:prof
+s120b:c14:debug	c14:debug
+s120b:c14:prof	c14:prof
 s120a:e26:debug	e26:debug
 s120a:e26:prof	e26:prof
 s120a:c14:debug	c14:debug

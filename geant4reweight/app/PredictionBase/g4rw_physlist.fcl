@@ -6,4 +6,6 @@ Physlist_default: {
   ElasticPhysics: "G4HadronElasticPhysics"
 }
 
+Physlist_INCLXX: @local::Physlist_default
+Physlist_INCLXX.InelasticPhysics: "G4HadronPhysicsINCLXX"
 END_PROLOG

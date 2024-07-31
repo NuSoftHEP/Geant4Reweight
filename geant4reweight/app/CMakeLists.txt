@@ -1,3 +1,2 @@
 add_subdirectory(PredictionBase)
-add_subdirectory(PropBase)
 add_subdirectory(FitterBase)

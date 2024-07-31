@@ -24,80 +24,45 @@ class G4ReweightTraj{
 
   public:
 
-    G4ReweightTraj(int,int,int,int,std::pair<int,int>);
-    ~G4ReweightTraj();
+    G4ReweightTraj(int,int,int);
+    //~G4ReweightTraj();
     
-    int GetTrackID()  const {return trackID; };
-    int GetEventNum() const {return eventNum; };
-    int GetPDG()      const {return PDG; };  
-    int GetParID()    const {return parID; };
+    int GetTrackID()  const {return fTrackID; };
+    int GetPDG()      const {return fPDG; }; 
+    int GetParID()    const {return fParentID; };
 
     std::string GetInelasticType() {return fInelastic;};
 
-    double GetEnergy(){return Energy;}; 
-    void SetEnergy( double e ){ Energy = e; };
+    double GetEnergy(){return fEnergy;}; 
+    void SetEnergy( double e ){ fEnergy = e; };
 
-    G4ReweightTraj * GetParent(){return parent;};
-
-    std::pair<int,int> GetStepRange(){return stepRange;};
-
-    void AddStep(G4ReweightStep *); 
+    void AddStep(const G4ReweightStep & step);
     size_t GetNSteps() const;
-    G4ReweightStep * GetStep (size_t is) const;
+    const G4ReweightStep & GetStep (size_t is) const;
   
-    bool SetParent(G4ReweightTraj *);
-    bool AddChild(G4ReweightTraj *);
+    void AddChild(G4ReweightTraj *);
     size_t GetNChilds() const;
     G4ReweightTraj * GetChild(size_t) const;
-    const std::vector<G4ReweightTraj*> & GetChildren() const {return children;};
+    const std::vector<G4ReweightTraj*> & GetChildren() const {return fChildren;};
     std::vector<G4ReweightTraj*> HasChild(int) const; 
 
     std::string GetFinalProc() const;
     
     double GetTotalLength();
-
-
     size_t GetNElastic();
     std::vector<double> GetElastDists();
 
-/*
-    void AddWeight( double w ){
-       weights.push_back(w);
-    };
-
-    double GetWeight( size_t i ){
-      if( i > weights.size() - 1 ){
-        std::cout << "Error: out of weights vector range" << std::endl;
-        return -1;
-      }
-      
-      return weights[i];
-    };
-
-    const std::vector< double > & GetWeights() const{
-      return weights;
-    };
-*/
-
   private:
-    std::vector<G4ReweightStep *> steps;
-    std::vector<G4ReweightTraj *> children;
-
-    std::vector< double > weights;
+    std::vector<G4ReweightStep> fSteps;
+    std::vector<G4ReweightTraj *> fChildren;
 
     std::string fInelastic;
   
-    int trackID;
-    int eventNum;
-    int PDG;
-    int parID;
+    int fTrackID;
+    int fPDG;
+    int fParentID;
 
-    double Energy; 
-
-    std::pair<int,int> stepRange;
-
-    G4ReweightTraj * parent;
-    
+    double fEnergy;
 };
 
 

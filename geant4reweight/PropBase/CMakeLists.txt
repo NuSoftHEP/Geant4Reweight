@@ -1,7 +1,6 @@
 cet_make_library(LIBRARY_NAME PropBaseLib
   SOURCE 
   G4ReweightParameterMaker.cc
-  G4ReweightThrowManager.cc
   LIBRARIES
   PUBLIC
   fhiclcpp::fhiclcpp

@@ -287,20 +287,20 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
 
   for (size_t i = 0; i < nsteps; ++i) {
     auto theStep = theTraj->GetStep(i);
-    double p = theStep->GetFullPreStepP();
+    double p = theStep.GetFullPreStepP();
 
-    total += theStep->GetStepLength()*(
+    total += theStep.GetStepLength()*(
         (GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
         (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) : min));
 
-    bias_total += theStep->GetStepLength() *(
+    bias_total += theStep.GetStepLength() *(
         (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p) : min) +
         (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p) : min));
 
-    if (theStep->GetStepChosenProc() == "hadElastic") {
+    if (theStep.GetStepChosenProc() == "hadElastic") {
       weight *= GetElasticBias(p);
     }
-    else if (theStep->GetStepChosenProc() == fInelastic) {
+    else if (theStep.GetStepChosenProc() == fInelastic) {
       std::string cut = GetInteractionSubtype(*theTraj);
       if (cut == "") {
         return 1.;

@@ -4,8 +4,6 @@
 #include <utility>
 #include <iostream>
 
-//G4ReweightStep::G4ReweightStep(){}
-
 G4ReweightStep::G4ReweightStep(int tid, int pdg, int parid, int eventnum,
                                double preStepP[3], double postStepP[3],
                                double len, std::string chosenProc) 

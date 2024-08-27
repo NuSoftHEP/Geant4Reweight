@@ -3,6 +3,8 @@ cet_make_library(LIBRARY_NAME ReweightBaseLib
   G4ReweightStep.cc
   G4ReweightTraj.cc
   G4ReweightManager.cc
+  G4ReweightVarMap.cc
+  #G4ReweightVars.cc
   G4Reweighter.cc
   G4PiPlusReweighter.cc
   G4PiMinusReweighter.cc

@@ -2,6 +2,8 @@
 #define G4Reweighter_h
 
 #include "fhiclcpp/ParameterSet.h"
+#include "G4ReweightVarMap.hh"
+#include <memory>
 
 class G4ReweightManager;
 class G4ReweightTraj;
@@ -42,13 +44,23 @@ class G4Reweighter{
     virtual ~G4Reweighter();
 
     double GetWeight(const G4ReweightTraj * theTraj);
+    double GetWeight(const G4ReweightTraj & traj, const G4ReweightVarMap & var_map);
     virtual std::string GetInteractionSubtype(const G4ReweightTraj &);
 
     void SetMomentum(double p);
+
     double GetNominalMFP(double p);
     double GetBiasedMFP(double p);
+    double GetBiasedMFP(double p, const G4ReweightVarMap & var_map);
+
     double GetNominalElasticMFP(double p);
     double GetBiasedElasticMFP(double p);
+    double GetBiasedElasticMFP(double p, const G4ReweightVarMap & var_map);
+
+    double GetInelasticBias(double p, const G4ReweightVarMap & var_map);
+    double GetElasticBias(double p, const G4ReweightVarMap & var_map);
+    double GetExclusiveFactor(double p, std::string cut, const G4ReweightVarMap & var_map);
+
     double GetInelasticBias(double p);
     double GetElasticBias(double p);
     double GetExclusiveFactor(double p, std::string cut);

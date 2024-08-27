@@ -155,6 +155,12 @@ double G4Reweighter::GetBiasedMFP(double p){
   return  GetNominalMFP( p ) / b;
 }
 
+double G4Reweighter::GetBiasedMFP(double p, const G4ReweightVarMap & var_map) {
+  double b = GetInelasticBias(p, var_map);
+  return  GetNominalMFP( p ) / b;
+}
+
+
 double G4Reweighter::GetNominalElasticMFP(double p){
   double xsec = GetElasticXSec(p);
   return 1.0 / xsec;
@@ -162,6 +168,10 @@ double G4Reweighter::GetNominalElasticMFP(double p){
 
 double G4Reweighter::GetElasticBias(double p) {
   return elasticBias->GetBinContent(elasticBias->FindBin(p));
+}
+
+double G4Reweighter::GetElasticBias(double p, const G4ReweightVarMap & var_map) {
+  return var_map.GetElasticVar(p);
 }
 
 double G4Reweighter::GetInelasticBias(double p) {
@@ -175,13 +185,38 @@ double G4Reweighter::GetInelasticBias(double p) {
   return bias;
 }
 
+double G4Reweighter::GetInelasticBias(double p,
+                                      const G4ReweightVarMap & var_map) {
+  //Inelastic bias = total_inel_var*(sum over cuts {cut_fraction * cut_variation})
+  // = var_total_xsec / nominal_total_xsec
+
+  double bias = 0.;
+  for (const auto & [name, frac] : exclusiveFracs) {
+    bias += (frac->Eval(p)*
+             var_map.GetExclusiveVar(name, p));
+  }
+
+  return bias*var_map.GetTotalInelVar(p);
+}
+
 double G4Reweighter::GetExclusiveFactor(double p, std::string cut) {
   return inelScales[cut]->GetBinContent(inelScales[cut]->FindBin(p));
+}
+
+double G4Reweighter::GetExclusiveFactor(double p, std::string cut,
+                                        const G4ReweightVarMap & var_map) {
+  return var_map.GetExclusiveVar(cut, p);
 }
 
 double G4Reweighter::GetBiasedElasticMFP( double p ){
   double b = GetElasticBias(p);
   return GetNominalElasticMFP( p ) / b;
+}
+
+double G4Reweighter::GetBiasedElasticMFP(double p,
+                                         const G4ReweightVarMap & var_map) {
+  double b = GetElasticBias(p, var_map);
+  return GetNominalElasticMFP(p)/b;
 }
 
 std::string G4Reweighter::GetInteractionSubtype( const G4ReweightTraj & theTraj ){
@@ -239,6 +274,46 @@ double G4Reweighter::GetWeight( const G4ReweightTraj * theTraj ){
         return 1.;
       }
       weight *= GetExclusiveFactor(p, cut);
+    }
+  }
+
+  weight *= exp(total - bias_total);
+  return weight;
+}
+
+double G4Reweighter::GetWeight(const G4ReweightTraj & traj,
+                               const G4ReweightVarMap & var_map) {
+
+
+  if (traj.GetPDG() != dynamic_part->GetPDGcode()) return 1.;
+  double total = 0.;
+  double bias_total = 0.;
+  double weight = 1.;
+  size_t nsteps = traj.GetNSteps();
+  double min = 1.e-14;
+
+  for (size_t i = 0; i < nsteps; ++i) {
+    auto theStep = traj.GetStep(i);
+    double p = theStep.GetFullPreStepP();
+
+    total += theStep.GetStepLength()*(
+        (GetNominalMFP(p) > min ? 1. / GetNominalMFP(p) : min) +
+        (GetNominalElasticMFP(p) > min ? 1. / GetNominalElasticMFP(p) : min));
+
+    bias_total += theStep.GetStepLength() *(
+        (GetNominalMFP(p) > min ? 1. / GetBiasedMFP(p, var_map) : min) +
+        (GetNominalElasticMFP(p) > min ? 1. / GetBiasedElasticMFP(p, var_map) : min));
+
+    if (theStep.GetStepChosenProc() == "hadElastic") {
+      weight *= var_map.GetElasticVar(p);
+    }
+    else if (theStep.GetStepChosenProc() == fInelastic) {
+      std::string cut = GetInteractionSubtype(traj);
+      if (cut == "") {
+        return 1.;
+      }
+      //Decoupled these two variations from each other
+      weight *= (var_map.GetExclusiveVar(cut, p)*var_map.GetTotalInelVar(p));
     }
   }
 

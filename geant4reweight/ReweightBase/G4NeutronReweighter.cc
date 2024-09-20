@@ -18,6 +18,17 @@ G4NeutronReweighter::G4NeutronReweighter(
   SetupProcesses();
 }
 
+G4NeutronReweighter::G4NeutronReweighter(TFile * fracs_file,
+             const fhicl::ParameterSet & material_pars,
+             G4ReweightManager * rw_manager,
+             std::vector<std::string> the_ints)
+  : G4Reweighter(fracs_file, material_pars, rw_manager,
+                 {"total"}) {
+  part_def = neutron->Definition();
+  fInelastic = "neutronInelastic";
+  SetupProcesses();
+}
+
 std::string G4NeutronReweighter::GetInteractionSubtype(
     const G4ReweightTraj & theTraj) {
   return "total";

@@ -16,6 +16,16 @@ G4KMinusReweighter::G4KMinusReweighter(
   SetupProcesses();
 }
 
+G4KMinusReweighter::G4KMinusReweighter(
+    TFile * fracs_file,
+    const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager)
+  : G4Reweighter(fracs_file, material_pars, rw_manager, {"total"}) {
+  part_def = kaon->Definition();
+  fInelastic = "kaon-Inelastic";
+  SetupProcesses();
+}
+
 std::string G4KMinusReweighter::GetInteractionSubtype(
     const G4ReweightTraj & theTraj) {
   return "total";

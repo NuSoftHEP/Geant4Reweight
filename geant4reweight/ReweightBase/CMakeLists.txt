@@ -14,6 +14,8 @@ cet_make_library(LIBRARY_NAME ReweightBaseLib
   G4NeutronReweighter.cc
   G4ReweighterFactory.cc
   G4MultiReweighter.cc
+  G4ReweightUtilities.cc
+  G4ReweightSuite.cc
   LIBRARIES
   PUBLIC
   geant4reweight::PropBaseLib

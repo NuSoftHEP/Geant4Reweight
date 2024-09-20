@@ -41,6 +41,11 @@ class G4Reweighter{
                  G4ReweightManager * rw_manager,
                  std::vector<std::string> the_ints,
                  TH1D * inputElasticBiasHist = nullptr, bool fix = false);
+    G4Reweighter(TFile * fracs_file,
+                 const fhicl::ParameterSet & material_pars,
+                 G4ReweightManager * rw_manager,
+                 std::vector<std::string> the_ints);
+
     virtual ~G4Reweighter();
 
     double GetWeight(const G4ReweightTraj * theTraj);

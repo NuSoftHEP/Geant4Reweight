@@ -54,6 +54,20 @@ G4Reweighter::G4Reweighter(TFile * FSInput,
   }
 }
 
+
+G4Reweighter::G4Reweighter(TFile * FSInput,
+                           const fhicl::ParameterSet & material_pars,
+                           G4ReweightManager * rw_manager,
+                           std::vector<std::string> the_ints)
+  : MaterialParameters(material_pars),
+    RWManager(rw_manager) {
+
+  for (auto it = the_ints.begin(); it != the_ints.end(); ++it) {
+    std::string name = *it;
+    exclusiveFracs[name] = (TGraph*)FSInput->Get(name.c_str());
+  }
+}
+
 void G4Reweighter::SetNewHists(const std::map<std::string, TH1D*> & FSScales) {
   for (auto it = inelScales.begin(); it != inelScales.end(); ++it) {
     std::string name = it->first;

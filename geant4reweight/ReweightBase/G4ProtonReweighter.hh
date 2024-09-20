@@ -25,6 +25,10 @@ class G4ProtonReweighter : public G4Reweighter {
                        const fhicl::ParameterSet &,
                        G4ReweightManager * rw_manager,
                        TH1D * inputElasticBiasHist = nullptr, bool fix = false);
+    G4ProtonReweighter(TFile * fracs_file,
+                 const fhicl::ParameterSet & material_pars,
+                 G4ReweightManager * rw_manager,
+                 std::vector<std::string> the_ints);
     virtual ~G4ProtonReweighter();
     std::string GetInteractionSubtype( const G4ReweightTraj & ) override;
 

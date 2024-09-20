@@ -12,6 +12,9 @@ class G4KPlusReweighter : public G4Reweighter {
                      const fhicl::ParameterSet &,
                      G4ReweightManager * rw_manager,
                      TH1D * inputElasticBiasHist = nullptr, bool fix = false);
+    G4KPlusReweighter(TFile * fracs_file,
+                 const fhicl::ParameterSet & material_pars,
+                 G4ReweightManager * rw_manager);
     virtual ~G4KPlusReweighter();
     std::string GetInteractionSubtype(const G4ReweightTraj &) override;
 

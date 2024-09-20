@@ -18,6 +18,19 @@ G4PiMinusReweighter::G4PiMinusReweighter(
   SetupProcesses();
 }
 
+G4PiMinusReweighter::G4PiMinusReweighter(
+    TFile * fracs_file,
+    const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager,
+    std::vector<std::string> the_ints)
+  : G4Reweighter(fracs_file, material_pars, rw_manager,
+                 {"inel", "cex", "abs", "dcex", "prod"}) {
+  part_def = piminus->Definition();
+  fInelastic = "pi-Inelastic";
+  SetupProcesses();
+}
+
+
 std::string G4PiMinusReweighter::GetInteractionSubtype(
     const G4ReweightTraj & theTraj) {
   int nPi0     = theTraj.HasChild(111).size();

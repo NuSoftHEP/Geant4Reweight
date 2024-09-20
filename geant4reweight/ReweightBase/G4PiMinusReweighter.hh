@@ -14,8 +14,7 @@ class G4PiMinusReweighter : public G4Reweighter {
                         TH1D * inputElasticBiasHist = nullptr, bool fix = false);
     G4PiMinusReweighter(TFile * fracs_file,
                  const fhicl::ParameterSet & material_pars,
-                 G4ReweightManager * rw_manager,
-                 std::vector<std::string> the_ints);
+                 G4ReweightManager * rw_manager);
     virtual ~G4PiMinusReweighter();
     std::string GetInteractionSubtype(const G4ReweightTraj &) override;
 

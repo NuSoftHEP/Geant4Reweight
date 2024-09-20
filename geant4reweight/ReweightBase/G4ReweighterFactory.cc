@@ -60,3 +60,45 @@ G4Reweighter * G4ReweighterFactory::BuildReweighter(
   }
 
 }
+
+G4Reweighter * G4ReweighterFactory::BuildReweighter(
+    int PDG, TFile * FSInput,
+    const fhicl::ParameterSet & material_pars,
+    G4ReweightManager * rw_manager){
+  switch (PDG) {
+    case 211:
+    {
+      return new G4PiPlusReweighter(FSInput, material_pars,
+                                    rw_manager);
+    }
+    case -211:
+    {
+      return new G4PiMinusReweighter(FSInput, material_pars,
+                                     rw_manager);
+    }
+    case 2212:
+    {
+      return new G4ProtonReweighter(FSInput, material_pars,
+                                    rw_manager);
+    }
+    case 2112:
+    {
+      return new G4NeutronReweighter(FSInput, material_pars,
+                                     rw_manager);
+    }   
+    case 321:
+    {
+      return new G4KPlusReweighter(FSInput, material_pars,
+                                   rw_manager);
+    }
+    case -321:
+    {
+      return new G4KMinusReweighter(FSInput, material_pars,
+                                   rw_manager);
+    }
+    default:
+      std::cerr << "Error: Reweighter for PDG code " << PDG << " is not implemented" << std::endl;
+      return nullptr;
+  }
+
+}

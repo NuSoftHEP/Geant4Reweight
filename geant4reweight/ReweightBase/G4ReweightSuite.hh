@@ -3,18 +3,21 @@
 
 #include "TFile.h"
 
-#include "geant4reweight/ReweightBase/G4ReweightManager.hh"
-#include "geant4reweight/ReweightBase/G4MultiReweighter.hh"
-#include "geant4reweight/ReweightBase/G4ReweightTraj.hh"
-#include "geant4reweight/ReweightBase/G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightManager.hh"
+#include "geant4reweight/src/ReweightBase/G4Reweighter.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweighterFactory.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightTraj.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightStep.hh"
+#include "geant4reweight/src/ReweightBase/G4ReweightVarMap.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 
 using PartMat_t = std::pair<int, std::string>;
 using ParameterMap_t = std::map<PartMat_t, std::vector<fhicl::ParameterSet>>;
-using ReweighterMap_t = std::map<PartMat_t, G4MultiReweighter*>;
+using ReweighterMap_t = std::map<PartMat_t, G4Reweighter*>;
 using FracsFileMap_t = std::map<PartMat_t, TFile*>;
 using NParMap_t = std::map<PartMat_t, size_t>;
+using VarMapMap_t = std::map<PartMat_t, G4ReweightVarMap>;
 
 using ParNameMap_t = std::map<PartMat_t, std::vector<std::string>>;
 
@@ -47,6 +50,7 @@ class G4ReweightSuite {
     return fNParameters.at(part_mat);
   };
  private:
+  G4ReweighterFactory factory;
   G4ReweightManager * fManager;
   ReweighterMap_t fReweighters;
   FracsFileMap_t fFracsFiles;
@@ -54,6 +58,7 @@ class G4ReweightSuite {
   NParMap_t fNParameters;
   ParNameMap_t fParameterNames;
   std::vector<PartMat_t> fPartMats;
+  VarMapMap_t fVarMaps;
 };
 
 #endif

@@ -20,8 +20,7 @@ G4ProtonReweighter::G4ProtonReweighter(
 G4ProtonReweighter::G4ProtonReweighter(
     TFile * fracs_file,
     const fhicl::ParameterSet & material_pars,
-    G4ReweightManager * rw_manager,
-    std::vector<std::string> the_ints)
+    G4ReweightManager * rw_manager)
   : G4Reweighter(fracs_file,material_pars, rw_manager,
                  {"total"}) {
   part_def = proton->Definition();

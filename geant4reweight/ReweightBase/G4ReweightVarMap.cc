@@ -2,6 +2,21 @@
 #include <stdexcept>
 #include <map>
 
+
+G4ReweightVarMap::G4ReweightVarMap(
+    const std::vector<fhicl::ParameterSet> & pars) {
+  BuildFromPars(pars);
+}
+
+void G4ReweightVarMap::BuildFromPars(
+    const std::vector<fhicl::ParameterSet> & pars) {
+  std::vector<G4ReweightPar> rw_pars;
+  for (const auto & par : pars) {
+    rw_pars.push_back(G4ReweightPar(par));
+  }
+  BuildFromPars(rw_pars);
+}
+
 void G4ReweightVarMap::BuildFromPars(const std::vector<G4ReweightPar> & pars) {
 
   //Iterate over the incoming parameters
@@ -66,6 +81,12 @@ void G4ReweightVarMap::Set(size_t index, double val) {
 
   auto & key = fIndexToKeys[index];
   fVarMap[key.first][key.second].Value = val;
+}
+
+void G4ReweightVarMap::Reset() {
+  for (auto & [cut, vec] : fVarMap) {
+    for (auto & v : vec) v.Value = 1.;
+  }
 }
 
 double G4ReweightVarMap::GetFromPars(const std::vector<G4ReweightPar> & pars,

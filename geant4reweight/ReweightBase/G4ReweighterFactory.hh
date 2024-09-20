@@ -25,6 +25,11 @@ class G4ReweighterFactory{
         G4ReweightManager * rw_manager,
         TH1D * inputElasticBiasHist=nullptr, bool fix_total=false);
     
+    G4Reweighter * BuildReweighter (
+        int PDG, TFile * FSInput,
+        const fhicl::ParameterSet & material_pars,
+        G4ReweightManager * rw_manager);
+
 };
 
 #endif

@@ -41,9 +41,11 @@ G4ReweightSuite::G4ReweightSuite(fhicl::ParameterSet & pset) {
 
     fNParameters[this_part_mat] = parameter_set.size();
     fFracsFiles[this_part_mat] = g4rwutils::OpenFile(fracs_file);
-    fReweighters[this_part_mat] = new G4MultiReweighter(
-        pdg, *fFracsFiles[this_part_mat], parameter_set, this_material,
-        fManager);
+    fReweighters[this_part_mat] = factory.BuildReweighter(pdg, fFracsFiles[this_part_mat],
+                                         this_material,
+                                         fManager);
+    fVarMaps[this_part_mat] = G4ReweightVarMap(parameter_set);
+
     for (const auto & par: parameter_set) {
       fParameterNames[this_part_mat].push_back(par.get<std::string>("Name"));
     }
@@ -80,24 +82,34 @@ std::vector<double> G4ReweightSuite::Scan(
 
   //TODO -- check param_number, start < end etc.
   auto * the_reweighter = fReweighters[part_mat];
-  size_t npars = fNParameters[part_mat];
+  //size_t npars = fNParameters[part_mat];
   double delta = (end - start)/(nsteps-1);
 
   //If nsteps == 0, just return 1 weight at start
   if (nsteps == 0) {
-    std::vector<double> pars(npars, 1.);
-    pars[param_number] = start;//Set the specific parameter
-    the_reweighter->SetAllParameterValues({pars});
-    return {the_reweighter->GetWeightFromSetParameters(traj)};
+    //std::vector<double> pars(npars, 1.);
+    //pars[param_number] = start;//Set the specific parameter
+    //the_reweighter->SetAllParameterValues({pars});
+    fVarMaps[part_mat].Reset();
+    fVarMaps[part_mat].Set(param_number, start);
+    return {
+      the_reweighter->GetWeight(traj, fVarMaps[part_mat])
+    };
   }
 
   //If not, scan over the full range
   std::vector<double> weights;
   for (size_t i = 0; i < nsteps; ++i) {
-    std::vector<double> pars(npars, 1.);
-    pars[param_number] = start + i*delta;//Set the specific parameter
-    the_reweighter->SetAllParameterValues({pars});
-    weights.push_back(the_reweighter->GetWeightFromSetParameters(traj));
+    //std::vector<double> pars(npars, 1.);
+    //pars[param_number] = start + i*delta;//Set the specific parameter
+    //the_reweighter->SetAllParameterValues({pars});
+
+
+    double value = start + i*delta;
+    fVarMaps[part_mat].Reset();
+    fVarMaps[part_mat].Set(param_number, value);
+
+    weights.push_back(the_reweighter->GetWeight(traj, fVarMaps[part_mat]));
   }
   return weights;
 }

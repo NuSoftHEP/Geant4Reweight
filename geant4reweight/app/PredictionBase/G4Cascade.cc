@@ -7,6 +7,7 @@
 #include "Geant4/G4Material.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4KaonMinus.hh"
 #include "Geant4/G4PionPlus.hh"
 #include "Geant4/G4ProcessManager.hh"
 #include "Geant4/G4ProcessVector.hh"
@@ -174,6 +175,8 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus = nullptr;
   G4PionMinus * piminus = nullptr;
+  G4KaonMinus * kminus = nullptr;
+  G4KaonPlus  * kplus = nullptr;
   G4Proton    * proton = nullptr;
   G4Neutron   * neutron = nullptr;
   G4ParticleDefinition * part_def = nullptr;
@@ -190,6 +193,20 @@ int main(int argc, char * argv[]){
       part_def = piminus->Definition();
       inel_name = "pi-Inelastic";
       break;
+
+    case 321:
+      std::cout << "Chose KPlus" << std::endl;
+      part_def = kplus->Definition();
+      inel_name = "kaon+Inelastic";
+      break;
+
+
+    case -321:
+      std::cout << "Chose KMinus" << std::endl;
+      part_def = kminus->Definition();
+      inel_name = "kaon-Inelastic";
+      break;
+
 
     case 2212:
     {

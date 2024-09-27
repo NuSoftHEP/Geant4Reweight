@@ -51,7 +51,7 @@ int ndiv_override = 0;
 int type_override = -999;
 bool single_momentum_override = false;
 bool varied_params = false;
-bool is_static = false;
+bool is_static = true; //false;
 double set_radius_trailing = 0.;
 
 

@@ -246,7 +246,7 @@ int main(int argc, char * argv[]){
     part_def = piminus->Definition();
     inel_name = "pi-Inelastic";
   }
-  if( type == 321 ){
+  else if( type == 321 ){
     std::cout << "Chose KPlus" << std::endl;
     part_def = kaonplus->Definition();
     inel_name = "kaon+Inelastic";

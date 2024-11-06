@@ -250,7 +250,7 @@ libdir	fq_dir		lib
 #
 ####################################
 product		version		qual	flags		<table_format=2>
-nug4		v1_16_06	s131
+nug4		v1_17_00	s131
 nug4		v1_16_04	s130
 nug4		v1_16_02	s129
 nug4		v1_16_01	s128

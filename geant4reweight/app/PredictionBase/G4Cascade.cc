@@ -33,6 +33,7 @@
 #include "TRandom3.h"
 
 #include <iostream>
+#include <ctime>
 #include <map>
 #include <string>
 #include <utility> // std::pair
@@ -161,6 +162,9 @@ int main(int argc, char * argv[]){
     return 0;
   }
 
+  auto now = static_cast<int>(std::time(0x0));
+  G4Random::setTheSeed(now, 1);
+
   std::vector< double > momenta = fillMomenta( theConfig );
 
   TFile * fout = new TFile( theConfig.outFileName.c_str(), "RECREATE");
@@ -255,7 +259,7 @@ int main(int argc, char * argv[]){
   const auto * cascade_pars = G4CascadeParameters::Instance();
   std::cout << "I love having to make this work like this: " << cascade_pars
             << std::endl;
-  if (varied_params && !is_static) {
+  /*if (varied_params && !is_static) {
     radius_trailing = fRNG.Uniform(0., 1.5);
     std::cout << "Threw: " << radius_trailing << std::endl;
     std::string command = "/process/had/cascade/shadowningRadius " +
@@ -269,6 +273,7 @@ int main(int argc, char * argv[]){
     UI->ApplyCommand(command);  
   }
   std::cout << "Radius trailing: " << G4CascadeParameters::radiusTrailing() << std::endl;
+  */
 
   //Initializing
   G4RunManager rm;

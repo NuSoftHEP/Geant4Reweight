@@ -115,6 +115,7 @@ struct CascadeConfig{
   std::map<int, double> thresholds;
 
   bool npi0, single_momentum;
+  double radiu_trailing;
 
   bool AboveThreshold(int pdg, double p) {
     if (thresholds.find(pdg) == thresholds.end()) {
@@ -172,7 +173,7 @@ int main(int argc, char * argv[]){
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
   double radius_trailing = 0.;
-  int is_varied = varied_params;
+  //int is_varied = varied_params;
   std::vector<int> c_pdg;
   std::vector<double> c_momentum_x, c_momentum_y, c_momentum_z, c_energy;
   std::vector<double> c_piplus_momentum, c_piminus_momentum, c_proton_momentum,
@@ -190,7 +191,7 @@ int main(int argc, char * argv[]){
   tree->Branch( "nNeutron", &nNeutron );
   tree->Branch( "momentum", &momentum );
   tree->Branch( "radius_trailing", &radius_trailing );
-  tree->Branch( "is_varied", &is_varied );
+  //tree->Branch( "is_varied", &is_varied );
   tree->Branch( "c_pdg", &c_pdg );
   tree->Branch( "c_energy", &c_energy );
   tree->Branch( "c_momentum_x", &c_momentum_x );
@@ -266,14 +267,15 @@ int main(int argc, char * argv[]){
                           std::to_string(radius_trailing);
     UI->ApplyCommand(command);
   }
-  else if (varied_params && is_static) {
+  else   */
+  if (varied_params && is_static) {
     radius_trailing = set_radius_trailing;
     std::string command = "/process/had/cascade/shadowningRadius " +
                           std::to_string(radius_trailing);
     UI->ApplyCommand(command);  
   }
   std::cout << "Radius trailing: " << G4CascadeParameters::radiusTrailing() << std::endl;
-  */
+
 
   //Initializing
   G4RunManager rm;
@@ -418,7 +420,9 @@ int main(int argc, char * argv[]){
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
     double theMomentum = momenta[iM];
-    double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
+    double KE = sqrt(
+        theMomentum*theMomentum +
+        part_def->GetPDGMass()*part_def->GetPDGMass()) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );
     for( size_t iC = 0; iC < theConfig.nCascades; ++iC ) {
 
@@ -426,9 +430,9 @@ int main(int argc, char * argv[]){
 
       //Every time, set radius trailing from a flat sample
       //only for unvaried
-      if (!varied_params && !is_static) {
+      /*if (!varied_params && !is_static) {
         radius_trailing = fRNG.Uniform(0., 1.5);
-      }
+      }*/
 
       nPi0 = 0;
       nPiPlus = 0;
@@ -669,9 +673,9 @@ bool parseArgs(int argc, char ** argv){
       varied_params = true;
     }
 
-    else if (strcmp(argv[i], "--static") == 0) {
+    /*else if (strcmp(argv[i], "--static") == 0) {
       is_static = true;
-    }
+    }*/
 
     else if( strcmp( argv[i], "--par" ) == 0 ){
       set_radius_trailing = atof( argv[i+1] );

@@ -158,14 +158,18 @@ int main(int argc, char * argv[]){
 
 
   TTree * tree = new TTree("tree","");
-  int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
-  double momentum;
+  int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron, nK0 = 0, nKPlus = 0, nKMinus = 0;
+  double momentum, kinetic_energy;
   tree->Branch( "nPi0", &nPi0 );
   tree->Branch( "nPiPlus", &nPiPlus );
   tree->Branch( "nPiMinus", &nPiMinus );
   tree->Branch( "nProton", &nProton );
   tree->Branch( "nNeutron", &nNeutron );
+  tree->Branch( "nK0", &nK0 );
+  tree->Branch( "nKPlus", &nKPlus );
+  tree->Branch( "nKMinus", &nKMinus );
   tree->Branch( "momentum", &momentum );
+  tree->Branch( "kinetic_energy", &kinetic_energy);
 
   std::cout << "Initializing" << std::endl;
   //Initializing
@@ -202,7 +206,7 @@ int main(int argc, char * argv[]){
 
 
     case -321:
-      std::cout << "Chose KMinus" << std::endl;
+      std::cout << "Chose KMinus prueba" << std::endl;
       part_def = kminus->Definition();
       inel_name = "kaon-Inelastic";
       break;
@@ -329,6 +333,8 @@ int main(int argc, char * argv[]){
     double theMomentum = momenta[iM];
     double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );
+
+    kinetic_energy = KE; // Is this the correct place? APVH
     for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
 
       if( !(iC % 1000) ) std::cout << "\tCascade: " << iC << std::endl;
@@ -338,6 +344,8 @@ int main(int argc, char * argv[]){
       nPiMinus = 0;
       nProton = 0;
       nNeutron = 0;
+      nKPlus = 0;
+      nKMinus = 0;
       momentum = dynamic_part->GetTotalMomentum();
       G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
 
@@ -361,7 +369,21 @@ int main(int argc, char * argv[]){
                     part->GetPDGcode(), part->GetTotalMomentum())) 
               ++nPi0;
             break;          
-
+          case( 321 ):
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum()))
+              ++nKPlus;
+            break;
+          case( -321 ):
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum()))
+              ++nKMinus;
+            break;
+          case( 311 ):
+            if (theConfig.AboveThreshold(
+                    part->GetPDGcode(), part->GetTotalMomentum()))
+              ++nK0;
+            break;
           case( 2212 ):
             if (theConfig.AboveThreshold(
                     part->GetPDGcode(), part->GetTotalMomentum())) 
@@ -386,7 +408,7 @@ int main(int argc, char * argv[]){
   }
 
   fout->cd();
-  tree->Write();
+  //tree->Write();
 
   std::map< std::string, std::string > cuts;
   //Define cuts and make graphs out of the results
@@ -457,12 +479,11 @@ int main(int argc, char * argv[]){
       xs.push_back( bins.at(i) );
       ys.push_back( hist->GetBinContent(bins.at(i)) );
     }
+    fout->cd();
     TGraph gr(xs.size(), &xs[0], &ys[0]);
     gr.Write( itCut->first.c_str() );
-
   }
-
-
+  tree->Write(); //APVH
   fout->Close();
   //delete rm;
 

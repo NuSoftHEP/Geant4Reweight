@@ -59,7 +59,9 @@ def convert(args):
           [e.c_momentum_x[i], e.c_momentum_y[i], e.c_momentum_z[i],
            e.c_pdg[i], 0.] #e.radius_trailing
         )
-        Y[a] = (1 if args.force_varied else e.is_varied)
+        #Y[a] = (1 if args.force_varied else e.is_varied)
+        Y[a] = (1 if args.force_varied else 0)
+
 
   f.Close()
 if __name__ == '__main__':

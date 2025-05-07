@@ -43,6 +43,7 @@ if __name__ == '__main__':
     fracs = dict()
     xsecs = dict()
     for cut in args.cuts:
+      print(cut)
       if( grab == "momentum" ): frac = frac_file.Get( cut )
       elif( grab == "KE" ): frac = mom_to_ke( frac_file.Get( cut ) )
       xsec_xs = []

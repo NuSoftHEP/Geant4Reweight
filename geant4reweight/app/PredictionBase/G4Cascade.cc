@@ -1,7 +1,10 @@
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4PionPlus.hh"
 #include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4KaonPlus.hh"
+#include "Geant4/G4KaonMinus.hh"
 #include "Geant4/G4Proton.hh"
+#include "Geant4/G4Neutron.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4DynamicParticle.hh"
 #include "Geant4/G4ThreeVector.hh"
@@ -159,6 +162,9 @@ int main(int argc, char * argv[]){
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
   G4Proton    * proton = 0x0;
+  G4KaonPlus  * kplus = 0x0;
+  G4KaonMinus * kminus = 0x0;
+  G4Neutron    * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
   std::string inel_name = 0x0;
   switch( theConfig.type ){
@@ -174,11 +180,68 @@ int main(int argc, char * argv[]){
       inel_name = "pi-Inelastic";
       break;
 
+    case 321:
+    {
+      std::cout << "Chose KPlus" << std::endl;
+      part_def = kplus->Definition();
+      inel_name = "kaon+Inelastic";
+      //Default for now
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+    
+      //Returns before this, but... eh
+      break;
+    
+    }
+    case -321:
+    {
+      std::cout << "Chose KMinus" << std::endl;
+      part_def = kminus->Definition();
+      inel_name = "kaon-Inelastic";
+      //Default for now
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+    
+      //Returns before this, but... eh
+      break;
+    }
+
     case 2212: 
     {
       std::cout << "Chose Proton" << std::endl;
       part_def = proton->Definition();
       inel_name = "protonInelastic";
+
+      //Default for now
+      ++momenta.back(); 
+      std::vector< double > total_ys(momenta.size(), 1.);
+      TGraph total_gr(momenta.size(), &momenta[0], &total_ys[0]);
+      fout->cd();
+      total_gr.Write( "total" );
+      fout->Close();
+      //delete rm;
+      return 1;
+    
+      //Returns before this, but... eh
+      break;
+    }
+    case 2112: 
+    {
+      std::cout << "Chose Neutron" << std::endl;
+      part_def = neutron->Definition();
+      inel_name = "neutronInelastic";
 
       //Default for now
       ++momenta.back(); 

@@ -6,7 +6,10 @@
       G4Reweighter.cc
       G4PiPlusReweighter.cc
       G4PiMinusReweighter.cc
+      G4KPlusReweighter.cc
+      G4KMinusReweighter.cc
       G4ProtonReweighter.cc
+      G4NeutronReweighter.cc
       G4ReweighterFactory.cc
     LIBRARIES
       ${FHICLCPP}

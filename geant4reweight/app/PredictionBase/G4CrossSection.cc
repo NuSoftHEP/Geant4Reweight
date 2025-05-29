@@ -1,6 +1,8 @@
 #include "Geant4/G4CrossSectionDataStore.hh"
 #include "Geant4/G4PionPlus.hh"
 #include "Geant4/G4PionMinus.hh"
+#include "Geant4/G4KaonPlus.hh"
+#include "Geant4/G4KaonMinus.hh"
 #include "Geant4/G4Proton.hh"
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4DynamicParticle.hh"
@@ -138,7 +140,10 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus = 0x0;
   G4PionMinus * piminus = 0x0;
+  G4KaonPlus  * kplus = 0x0;
+  G4KaonMinus * kminus = 0x0;
   G4Proton * proton = 0x0;
+  G4Neutron * neutron = 0x0;
   G4ParticleDefinition * part_def = 0x0;
   G4String inel_name;
   if( type == 211 ){
@@ -151,13 +156,28 @@ int main(int argc, char * argv[]){
     part_def = piminus->Definition();
     inel_name = "pi-Inelastic";
   }
+  if( type == 321 ){
+    std::cout << "Chose KPlus" << std::endl;
+    part_def = kplus->Definition();
+    inel_name = "kaon+Inelastic";
+  }
+  else if( type == -321 ){
+    std::cout << "Chose KMinus" << std::endl;
+    part_def = kminus->Definition();
+    inel_name = "kaon-Inelastic";
+  }
   else if( type == 2212 ){
     std::cout << "Chose Proton" << std::endl;
     part_def = proton->Definition();
     inel_name = "protonInelastic";
   }
+  else if( type == 2112 ){
+    std::cout << "Chose Neutron" << std::endl;
+    part_def = neutron->Definition();
+    inel_name = "neutronInelastic";
+  }
   else{
-    std::cout << "Please specify either 211, -211, or 2212" << std::endl;
+    std::cout << "Please specify either 211, -211, 2112, or 2212" << std::endl;
     return 0;
   }
   G4DynamicParticle * dynamic_part = new G4DynamicParticle(part_def, G4ThreeVector(0.,0.,1.), 0. );

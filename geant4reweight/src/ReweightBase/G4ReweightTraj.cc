@@ -16,7 +16,15 @@ trackID(tid), eventNum(eventnum), PDG(pdg), parID(parid), stepRange(range){
   else if( PDG == 2212 ){
     fInelastic = "protonInelastic";
   }
-
+    else if( PDG == 2112 ){
+    fInelastic = "neutronInelastic";
+  }
+  else if( PDG == 321 ){
+    fInelastic = "kaon+Inelastic";
+  }
+  else if( PDG == -321 ){
+    fInelastic = "kaon-Inelastic";
+  }
 }
 
 G4ReweightTraj::~G4ReweightTraj(){

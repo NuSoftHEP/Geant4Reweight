@@ -33,11 +33,11 @@ class G4Reweighter{
     double GetWeight( std::string, double );
     double GetWeightFromGraph( std::string, double );
 
-    double GetWeight( G4ReweightTraj * );
+    virtual double GetWeight( G4ReweightTraj * );
     virtual std::string GetInteractionSubtype( G4ReweightTraj & );
 
 
-    double GetElasticWeight( G4ReweightTraj * );
+    virtual double GetElasticWeight( G4ReweightTraj * );
     double GetNominalMFP( double );
     double GetBiasedMFP( double );
     double GetNominalElasticMFP( double );

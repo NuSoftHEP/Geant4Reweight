@@ -10,6 +10,11 @@ class G4NeutronReweighter : public G4Reweighter {
     G4NeutronReweighter(TFile * totalInput, TFile * FSInput, const std::map< std::string, TH1D* > &FSScales, TH1D * inputElasticBiasHist=0x0);
     virtual ~G4NeutronReweighter();
     std::string GetInteractionSubtype( G4ReweightTraj & ) override;
+    double GetWeight( G4ReweightTraj * ) override;
+    double GetElasticWeight( G4ReweightTraj * ) override;
+    double GetGenericWeight( G4ReweightTraj * theTraj, bool weight_elastic=false );
+
+
 };
 
 #endif

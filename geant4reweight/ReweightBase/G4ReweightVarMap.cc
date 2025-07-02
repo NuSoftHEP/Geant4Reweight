@@ -25,20 +25,22 @@ void G4ReweightVarMap::BuildFromPars(const std::vector<G4ReweightPar> & pars) {
     double new_low = new_par.Range.first;
     double new_high = new_par.Range.second;
 
-    auto & old_pars = fVarMap.at(the_cut);
-    //Check if they overlap with already-added pars
-    //The to-be-added parameter can have the same low as a previously-added parameter's high
-    //and/or it can have the same high as a previously-added's low
-    for (const auto & old_par : old_pars) {
-      auto old_low = old_par.Range.first;
-      auto old_high = old_par.Range.second;
-      if ((new_low <= old_low && old_low < new_high) ||
-          (new_low < old_high && old_high <= new_high)) {
-        std::string message
-            = "Attempting to set overlapping G4ReweightPars with ranges\n\t" +
-              std::to_string(new_low) + " " + std::to_string(new_high) + " " +
-              std::to_string(old_low) + " " + std::to_string(old_high);
-        throw std::runtime_error(message);
+    if (fVarMap.find(the_cut) != fVarMap.end()) {
+      auto & old_pars = fVarMap.at(the_cut);
+      //Check if they overlap with already-added pars
+      //The to-be-added parameter can have the same low as a previously-added parameter's high
+      //and/or it can have the same high as a previously-added's low
+      for (const auto & old_par : old_pars) {
+        auto old_low = old_par.Range.first;
+        auto old_high = old_par.Range.second;
+        if ((new_low <= old_low && old_low < new_high) ||
+            (new_low < old_high && old_high <= new_high)) {
+          std::string message
+              = "Attempting to set overlapping G4ReweightPars with ranges\n\t" +
+                std::to_string(new_low) + " " + std::to_string(new_high) + " " +
+                std::to_string(old_low) + " " + std::to_string(old_high);
+          throw std::runtime_error(message);
+        }
       }
     }
 

@@ -8,10 +8,10 @@ class G4ReweightStep{
  public:
    G4ReweightStep(int tid, int pid, int parid, int eventnum, double preStepP[3], double postStepP[3], double len, std::string chosenProc);
 
-   double GetFullPreStepP() {
+   double GetFullPreStepP() const {
      return sqrt(preStepPx*preStepPx + preStepPy*preStepPy + preStepPz*preStepPz);
    };
-   double GetFullPostStepP() {
+   double GetFullPostStepP() const {
      return sqrt(postStepPx*postStepPx + postStepPy*postStepPy + postStepPz*postStepPz);
    };
 

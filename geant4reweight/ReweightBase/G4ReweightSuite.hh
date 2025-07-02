@@ -23,7 +23,8 @@ using ParNameMap_t = std::map<PartMat_t, std::vector<std::string>>;
 
 class G4ReweightSuite {
  public:
-  G4ReweightSuite(fhicl::ParameterSet & pset);
+  G4ReweightSuite() {};
+  G4ReweightSuite(const fhicl::ParameterSet & pset);
   ~G4ReweightSuite();
 
   bool CheckPDG(int pdg) const;

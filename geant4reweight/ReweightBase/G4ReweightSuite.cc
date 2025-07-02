@@ -7,17 +7,21 @@
 using ParSetVector = std::vector<fhicl::ParameterSet>;
 
 G4ReweightSuite::~G4ReweightSuite() {
-  for (auto & rw : fReweighters) {
-    delete rw.second;
-  }
-  for (auto & f : fFracsFiles) {
-    f.second->Close();
-    delete f.second;
-  }
-  delete fManager;
+  //for (auto & rw : fReweighters) {
+  //  std::cout << "Cleaning up " << rw.first.first << std::endl;
+  //  delete rw.second;
+  //}
+
+  //for (auto & f : fFracsFiles) {
+  //  std::cout << "Cleaning up " << f.first.first << std::endl;
+  //  f.second->Close();
+  //  delete f.second;
+  //}
+
+  //delete fManager;
 }
 
-G4ReweightSuite::G4ReweightSuite(fhicl::ParameterSet & pset) {
+G4ReweightSuite::G4ReweightSuite(const fhicl::ParameterSet & pset) {
   //Get the material list and make the manager
   auto materials = pset.get<ParSetVector>("Materials");
   fManager = new G4ReweightManager(materials);

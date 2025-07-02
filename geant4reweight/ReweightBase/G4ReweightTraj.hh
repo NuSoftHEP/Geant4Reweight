@@ -1,7 +1,8 @@
 #ifndef G4ReweightTraj_h
 #define G4ReweightTraj_h 1
 
-class G4ReweightStep;
+//class G4ReweightStep;
+#include "G4ReweightStep.hh"
 
 #include <string>
 #include <utility> // std::pair

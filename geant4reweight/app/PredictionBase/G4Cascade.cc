@@ -434,7 +434,7 @@ int main(int argc, char * argv[]){
   const size_t nHDF5Values = 5;
   const size_t HDF5Length = nHDF5Secondaries*nHDF5Values;
   auto output_ntuple = hep_hpc::hdf5::make_ntuple(
-    {output, "X"},
+    {output, "Cascades"},
     hep_hpc::hdf5::make_column<float, 2>(
       "X", {nHDF5Secondaries, nHDF5Values}
     )

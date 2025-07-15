@@ -260,6 +260,7 @@ nug4		v1_15_03	s120a
 nug4		v1_15_00	s120
 nug4		v1_13_03	s117
 nug4		v1_12_02	s112
+hep_hpc         v0_14_02        -
 cetmodules	v3_22_02	-	only_for_build
 end_product_list
 ####################################
@@ -315,55 +316,55 @@ end_product_list
 #   case it is optional.
 #
 ####################################
-qualifier	nug4		notes
-s131:e26:debug	e26:debug
-s131:e26:prof	e26:prof
-s131:c14:debug	c14:debug
-s131:c14:prof	c14:prof
-s130:e26:debug	e26:debug
-s130:e26:prof	e26:prof
-s130:c14:debug	c14:debug
-s130:c14:prof	c14:prof
-s129:e26:debug	e26:debug
-s129:e26:prof	e26:prof
-s129:c14:debug	c14:debug
-s129:c14:prof	c14:prof
-s128:e26:debug	e26:debug
-s128:e26:prof	e26:prof
-s128:c14:debug	c14:debug
-s128:c14:prof	c14:prof
-s126:e26:debug	e26:debug
-s126:e26:prof	e26:prof
-s126:c14:debug	c14:debug
-s126:c14:prof	c14:prof
-s120b:e26:debug	e26:debug
-s120b:e26:prof	e26:prof
-s120b:c14:debug	c14:debug
-s120b:c14:prof	c14:prof
-s120a:e26:debug	e26:debug
-s120a:e26:prof	e26:prof
-s120a:c14:debug	c14:debug
-s120a:c14:prof	c14:prof
-s120:e26:debug	e26:debug
-s120:e26:prof	e26:prof
-s120:e20:debug	e20:debug
-s120:e20:prof	e20:prof
-s120:c14:debug	c14:debug
-s120:c14:prof	c14:prof
-s120:c7:debug	c7:debug
-s120:c7:prof	c7:prof
-e20:s117:debug	e20:debug
-e20:s117:prof	e20:prof
-e19:s117:debug	e19:debug
-e19:s117:prof	e19:prof
-c7:s117:debug	c7:debug
-c7:s117:prof	c7:prof
-e20:s112:debug	e20:debug
-e20:s112:prof	e20:prof
-e19:s112:debug	e19:debug
-e19:s112:prof	e19:prof
-c7:s112:debug	c7:debug
-c7:s112:prof	c7:prof
+qualifier	nug4		hep_hpc	        notes
+s131:e26:debug	e26:debug	e26:debug
+s131:e26:prof	e26:prof	e26:prof
+s131:c14:debug	c14:debug	c14:debug
+s131:c14:prof	c14:prof	c14:prof
+s130:e26:debug	e26:debug	e26:debug
+s130:e26:prof	e26:prof	e26:prof
+s130:c14:debug	c14:debug	c14:debug
+s130:c14:prof	c14:prof	c14:prof
+s129:e26:debug	e26:debug	e26:debug
+s129:e26:prof	e26:prof	e26:prof
+s129:c14:debug	c14:debug	c14:debug
+s129:c14:prof	c14:prof	c14:prof
+s128:e26:debug	e26:debug	e26:debug
+s128:e26:prof	e26:prof	e26:prof
+s128:c14:debug	c14:debug	c14:debug
+s128:c14:prof	c14:prof	c14:prof
+s126:e26:debug	e26:debug	e26:debug
+s126:e26:prof	e26:prof	e26:prof
+s126:c14:debug	c14:debug	c14:debug
+s126:c14:prof	c14:prof	c14:prof
+s120b:e26:debug	e26:debug	e26:debug
+s120b:e26:prof	e26:prof	e26:prof
+s120b:c14:debug	c14:debug	c14:debug
+s120b:c14:prof	c14:prof	c14:prof
+s120a:e26:debug	e26:debug	e26:debug
+s120a:e26:prof	e26:prof	e26:prof
+s120a:c14:debug	c14:debug	c14:debug
+s120a:c14:prof	c14:prof	c14:prof
+s120:e26:debug	e26:debug	e26:debug
+s120:e26:prof	e26:prof	e26:prof
+s120:e20:debug	e20:debug	e20:debug
+s120:e20:prof	e20:prof	e20:prof
+s120:c14:debug	c14:debug	c14:debug
+s120:c14:prof	c14:prof	c14:prof
+s120:c7:debug	c7:debug	c7:debug
+s120:c7:prof	c7:prof		c7:prof
+e20:s117:debug	e20:debug	e20:debug
+e20:s117:prof	e20:prof	e20:prof
+e19:s117:debug	e19:debug	e19:debug
+e19:s117:prof	e19:prof	e19:prof
+c7:s117:debug	c7:debug	c7:debug
+c7:s117:prof	c7:prof		c7:prof
+e20:s112:debug	e20:debug	e20:debug
+e20:s112:prof	e20:prof	e20:prof
+e19:s112:debug	e19:debug	e19:debug
+e19:s112:prof	e19:prof	e19:prof
+c7:s112:debug	c7:debug	c7:debug
+c7:s112:prof	c7:prof		c7:prof
 end_qualifier_list
 ####################################
 

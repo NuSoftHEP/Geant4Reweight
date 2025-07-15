@@ -25,6 +25,10 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "cetlib/filepath_maker.h"
+#include "hep_hpc/hdf5/File.hpp"
+#include "hep_hpc/hdf5/Ntuple.hpp"
+#include "hep_hpc/hdf5/make_ntuple.hpp"
+#include "hep_hpc/hdf5/make_column.hpp"
 
 #include "TH1F.h"
 #include "TFile.h"
@@ -417,6 +421,26 @@ int main(int argc, char * argv[]){
   G4Step * theStep   = track_par.theStep;
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
 
+  //HDF5 output stuff
+  hep_hpc::hdf5::File output(
+    theConfig.outFileName.replace(
+      theConfig.outFileName.end()-5,
+      theConfig.outFileName.end(),
+      ".h5"
+    ),
+    H5F_ACC_TRUNC
+  );
+  const size_t nHDF5Secondaries = 20;
+  const size_t nHDF5Values = 5;
+  const size_t HDF5Length = nHDF5Secondaries*nHDF5Values;
+  auto output_ntuple = hep_hpc::hdf5::make_ntuple(
+    {output, "X"},
+    hep_hpc::hdf5::make_column<float, 2>(
+      "X", {nHDF5Secondaries, nHDF5Values}
+    )
+  );
+
+
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
     double theMomentum = momenta[iM];
@@ -453,6 +477,7 @@ int main(int argc, char * argv[]){
       c_neutron_momentum.clear();
       c_proton_momentum.clear();*/
       G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
+      std::array<float, HDF5Length> hdf5_output{};
 
       size_t nSecondaries = thePC->GetNumberOfSecondaries();
       for( size_t i = 0; i < nSecondaries; ++i ){
@@ -497,12 +522,23 @@ int main(int argc, char * argv[]){
             break;
         }
 
+        
+
         c_pdg.push_back(part->GetPDGcode());
         c_energy.push_back(part->GetTotalEnergy());
         c_momentum_x.push_back(part->GetMomentum()[0]);
         c_momentum_y.push_back(part->GetMomentum()[1]);
         c_momentum_z.push_back(part->GetMomentum()[2]);
+
+
+        if (i < nHDF5Secondaries) {
+          hdf5_output[i*nHDF5Values + 0] = part->GetPDGcode();
+          hdf5_output[i*nHDF5Values + 1] = part->GetMomentum()[0];
+          hdf5_output[i*nHDF5Values + 2] = part->GetMomentum()[1];
+          hdf5_output[i*nHDF5Values + 3] = part->GetMomentum()[2];
+        }
       }
+      output_ntuple.insert(hdf5_output.data());
 
       for (auto m : map_to_momentums) {
         int the_pdg = m.first;

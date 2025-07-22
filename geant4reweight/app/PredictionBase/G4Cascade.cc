@@ -532,10 +532,10 @@ int main(int argc, char * argv[]){
 
 
         if (i < nHDF5Secondaries) {
-          hdf5_output[i*nHDF5Values + 0] = part->GetPDGcode();
-          hdf5_output[i*nHDF5Values + 1] = part->GetMomentum()[0];
-          hdf5_output[i*nHDF5Values + 2] = part->GetMomentum()[1];
-          hdf5_output[i*nHDF5Values + 3] = part->GetMomentum()[2];
+          hdf5_output[i*nHDF5Values + 0] = part->GetMomentum()[0];
+          hdf5_output[i*nHDF5Values + 1] = part->GetMomentum()[1];
+          hdf5_output[i*nHDF5Values + 2] = part->GetMomentum()[2];
+          hdf5_output[i*nHDF5Values + 3] = part->GetPDGcode();
         }
       }
       output_ntuple.insert(hdf5_output.data());

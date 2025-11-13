@@ -250,7 +250,7 @@ libdir	fq_dir		lib
 #
 ####################################
 product		version		qual	flags		<table_format=2>
-nug4		v1_16_10	s131
+nug4		v1_16_11	s131
 nug4		v1_15_00	s120
 nug4		v1_13_03	s117
 cetmodules	v3_24_01	-	only_for_build

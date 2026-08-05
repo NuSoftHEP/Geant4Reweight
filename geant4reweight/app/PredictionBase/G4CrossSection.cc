@@ -7,9 +7,9 @@
 #include "Geant4/G4CrossSectionDataStore.hh"
 #include "Geant4/G4DynamicParticle.hh"
 #include "Geant4/G4Element.hh"
-#include "Geant4/G4HadronCaptureProcess.hh"
+#include "Geant4/G4NeutronCaptureProcess.hh"
 #include "Geant4/G4HadronElasticProcess.hh"
-#include "Geant4/G4HadronFissionProcess.hh"
+#include "Geant4/G4NeutronFissionProcess.hh"
 #include "Geant4/G4HadronInelasticProcess.hh"
 #include "Geant4/G4LogicalVolume.hh"
 #include "Geant4/G4Material.hh"
@@ -20,6 +20,8 @@
 #include "Geant4/G4ParticleDefinition.hh"
 #include "Geant4/G4PionMinus.hh"
 #include "Geant4/G4PionPlus.hh"
+#include "Geant4/G4KaonMinus.hh"
+#include "Geant4/G4KaonPlus.hh"
 #include "Geant4/G4ProcessManager.hh"
 #include "Geant4/G4ProcessVector.hh"
 #include "Geant4/G4Proton.hh"
@@ -226,6 +228,8 @@ int main(int argc, char * argv[]){
 
   G4PionPlus  * piplus = nullptr;
   G4PionMinus * piminus = nullptr;
+  G4KaonPlus  * kaonplus = nullptr;
+  G4KaonMinus * kaonminus = nullptr;
   G4MuonPlus  * muonplus = nullptr;
   G4MuonMinus * muonminus = nullptr;
   G4Proton  * proton = nullptr;
@@ -241,6 +245,16 @@ int main(int argc, char * argv[]){
     std::cout << "Chose PiMinus" << std::endl;
     part_def = piminus->Definition();
     inel_name = "pi-Inelastic";
+  }
+  if( type == 321 ){
+    std::cout << "Chose KPlus" << std::endl;
+    part_def = kaonplus->Definition();
+    inel_name = "kaon+Inelastic";
+  }
+  else if( type == -321 ){
+    std::cout << "Chose KMinus" << std::endl;
+    part_def = kaonminus->Definition();
+    inel_name = "kaon-Inelastic";
   }
   else if( type == 2212 ){
     std::cout << "Chose Proton" << std::endl;
@@ -416,7 +430,7 @@ int main(int argc, char * argv[]){
         //std::cout << coul->LambdaTablePrim() << std::endl;
       }
       else if (theName == "nCapture") {
-        G4HadronCaptureProcess * cap = (G4HadronCaptureProcess*)proc;
+        G4NeutronCaptureProcess * cap = (G4NeutronCaptureProcess*)proc;
         if (cap->GetMeanFreePath(*theTrack, 0., nullptr) != DBL_MAX) {
           cap_mfps.push_back(cap->GetMeanFreePath(*theTrack, 0., nullptr));
         }
@@ -425,7 +439,7 @@ int main(int argc, char * argv[]){
         }
       }
       else if (theName == "nFission") {
-        G4HadronFissionProcess * fis = (G4HadronFissionProcess*)proc;
+        G4NeutronFissionProcess * fis = (G4NeutronFissionProcess*)proc;
         if (fis->GetMeanFreePath(*theTrack, 0., nullptr) != DBL_MAX) {
           fis_mfps.push_back(fis->GetMeanFreePath(*theTrack, 0., nullptr));
         }

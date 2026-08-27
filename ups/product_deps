@@ -87,7 +87,7 @@
 #>  define_pythonpath
 ####################################
 parent		geant4reweight
-defaultqual	e26:s131
+defaultqual	e28:s133
 ####################################
 
 ####################################
@@ -307,6 +307,8 @@ end_product_list
 #
 ####################################
 qualifier	nug4		notes
+s133:e28:debug	e28:debug
+s133:e28:prof	e28:prof
 s131:e28:debug	e28:debug
 s131:e28:prof	e28:prof
 s131:e26:debug	e26:debug

@@ -310,24 +310,24 @@ end_product_list
 #
 ####################################
 qualifier	nug4		hdf5		notes
-s131:e26:debug	e26:debug	e26
-s131:e26:prof	e26:prof	e26
-s131:c14:debug	c14:debug	c14
-s131:c14:prof	c14:prof	c14
-s120:e26:debug	e26:debug	e26
-s120:e26:prof	e26:prof	e26
-s120:e20:debug	e20:debug	e20
-s120:e20:prof	e20:prof	e20
-s120:c14:debug	c14:debug	c14
-s120:c14:prof	c14:prof	c14
-s120:c7:debug	c7:debug	c7
-s120:c7:prof	c7:prof		c7
-e20:s117:debug	e20:debug	e20
-e20:s117:prof	e20:prof	e20
-e19:s117:debug	e19:debug	e19
-e19:s117:prof	e19:prof	e19
-c7:s117:debug	c7:debug	c7
-c7:s117:prof	c7:prof		c7
+s131:e26:debug	e26:debug	e26:debug
+s131:e26:prof	e26:prof	e26:prof
+s131:c14:debug	c14:debug	c14:debug
+s131:c14:prof	c14:prof	c14:prof
+s120:e26:debug	e26:debug	e26:debug
+s120:e26:prof	e26:prof	e26:prof
+s120:e20:debug	e20:debug	e20:debug
+s120:e20:prof	e20:prof	e20:prof
+s120:c14:debug	c14:debug	c14:debug
+s120:c14:prof	c14:prof	c14:prof
+s120:c7:debug	c7:debug	c7:debug
+s120:c7:prof	c7:prof		c7:prof
+e20:s117:debug	e20:debug	e20:debug
+e20:s117:prof	e20:prof	e20:prof
+e19:s117:debug	e19:debug	e19:debug
+e19:s117:prof	e19:prof	e19:prof
+c7:s117:debug	c7:debug	c7:debug
+c7:s117:prof	c7:prof		c7:prof
 end_qualifier_list
 ####################################
 

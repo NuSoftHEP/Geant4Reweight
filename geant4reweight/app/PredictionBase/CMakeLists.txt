@@ -1,5 +1,3 @@
-include_directories($ENV{HEP_HPC_INC})
-
 cet_make_exec(NAME G4Cascade
   LIBRARIES PRIVATE
   geant4reweight::PredictionBaseLib
@@ -14,8 +12,7 @@ cet_make_exec(NAME G4Cascade
   ROOT::RIO
   ROOT::Tree
   fhiclcpp::fhiclcpp
-  hep_hpc_hdf5
-  ${HDF5_LIBRARIES}
+  HDF5::HDF5
   cetlib::cetlib
 )
 

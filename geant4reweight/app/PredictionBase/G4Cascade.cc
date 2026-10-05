@@ -26,10 +26,8 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "cetlib/filepath_maker.h"
-#include "hep_hpc/hdf5/File.hpp"
-#include "hep_hpc/hdf5/Ntuple.hpp"
-#include "hep_hpc/hdf5/make_ntuple.hpp"
-#include "hep_hpc/hdf5/make_column.hpp"
+
+#include "hdf5.h"
 
 #include "TH1F.h"
 #include "TFile.h"
@@ -40,9 +38,114 @@
 #include <iostream>
 #include <ctime>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <utility> // std::pair
 #include <vector>
+
+namespace {
+
+//Appends fixed-size (nRows x nCols) float entries to an extendible
+//dataset /<group>/<dataset>, buffering chunkRows entries per write
+class CascadeH5Writer {
+ public:
+  CascadeH5Writer(const std::string & path,
+                  hsize_t nRows, hsize_t nCols,
+                  const std::string & group = "Cascades",
+                  const std::string & dataset = "X",
+                  hsize_t chunkRows = 128,
+                  unsigned deflateLevel = 6)
+    : fEntrySize(nRows*nCols), fChunkRows(chunkRows),
+      fDims{0, nRows, nCols} {
+    fFile = check(H5Fcreate(path.c_str(), H5F_ACC_TRUNC,
+                            H5P_DEFAULT, H5P_DEFAULT),
+                  "creating file " + path);
+    fGroup = check(H5Gcreate2(fFile, group.c_str(), H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT),
+                   "creating group " + group);
+
+    hsize_t max_dims[3] = {H5S_UNLIMITED, nRows, nCols};
+    hid_t space = check(H5Screate_simple(3, fDims, max_dims),
+                        "creating dataspace");
+    hid_t dcpl = check(H5Pcreate(H5P_DATASET_CREATE), "creating dcpl");
+    hsize_t chunk[3] = {chunkRows, nRows, nCols};
+    check(H5Pset_chunk(dcpl, 3, chunk), "setting chunk size");
+    check(H5Pset_deflate(dcpl, deflateLevel), "setting deflate");
+    fDataset = H5Dcreate2(fGroup, dataset.c_str(), H5T_IEEE_F32LE, space,
+                          H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    H5Pclose(dcpl);
+    H5Sclose(space);
+    check(fDataset, "creating dataset " + dataset);
+
+    fBuffer.reserve(fChunkRows*fEntrySize);
+  }
+
+  CascadeH5Writer(const CascadeH5Writer &) = delete;
+  CascadeH5Writer & operator=(const CascadeH5Writer &) = delete;
+
+  ~CascadeH5Writer() {
+    try { close(); }
+    catch (const std::exception & e) {
+      std::cerr << "CascadeH5Writer: " << e.what() << std::endl;
+    }
+  }
+
+  void insert(const float * entry) {
+    fBuffer.insert(fBuffer.end(), entry, entry + fEntrySize);
+    if (fBuffer.size() >= fChunkRows*fEntrySize) flush();
+  }
+
+  void flush() {
+    if (fBuffer.empty() || fDataset < 0) return;
+    hsize_t n_new = fBuffer.size()/fEntrySize;
+    hsize_t offset[3] = {fDims[0], 0, 0};
+    hsize_t count[3] = {n_new, fDims[1], fDims[2]};
+    fDims[0] += n_new;
+    check(H5Dset_extent(fDataset, fDims), "extending dataset");
+
+    hid_t file_space = check(H5Dget_space(fDataset), "getting dataspace");
+    herr_t status = H5Sselect_hyperslab(file_space, H5S_SELECT_SET,
+                                        offset, nullptr, count, nullptr);
+    hid_t mem_space = H5Screate_simple(3, count, nullptr);
+    if (status >= 0 && mem_space >= 0) {
+      status = H5Dwrite(fDataset, H5T_NATIVE_FLOAT, mem_space, file_space,
+                        H5P_DEFAULT, fBuffer.data());
+    }
+    if (mem_space >= 0) H5Sclose(mem_space);
+    H5Sclose(file_space);
+    check(mem_space, "creating memory dataspace");
+    check(status, "writing entries");
+    fBuffer.clear();
+  }
+
+  void close() {
+    if (fFile < 0) return;
+    auto release = [this]() {
+      H5Dclose(fDataset);
+      H5Gclose(fGroup);
+      H5Fclose(fFile);
+      fDataset = fGroup = fFile = -1;
+    };
+    try { flush(); }
+    catch (...) { release(); throw; }
+    release();
+  }
+
+ private:
+  template <typename T>
+  static T check(T status, const std::string & what) {
+    if (status < 0)
+      throw std::runtime_error("HDF5 error " + what);
+    return status;
+  }
+
+  hid_t fFile = -1, fGroup = -1, fDataset = -1;
+  hsize_t fEntrySize, fChunkRows;
+  hsize_t fDims[3];
+  std::vector<float> fBuffer;
+};
+
+}
 
 std::string fcl_file;
 
@@ -439,22 +542,16 @@ int main(int argc, char * argv[]){
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
 
   //HDF5 output stuff
-  hep_hpc::hdf5::File output(
+  const size_t nHDF5Secondaries = 20;
+  const size_t nHDF5Values = 5;
+  const size_t HDF5Length = nHDF5Secondaries*nHDF5Values;
+  CascadeH5Writer output_h5(
     theConfig.outFileName.replace(
       theConfig.outFileName.end()-5,
       theConfig.outFileName.end(),
       ".h5"
     ),
-    H5F_ACC_TRUNC
-  );
-  const size_t nHDF5Secondaries = 20;
-  const size_t nHDF5Values = 5;
-  const size_t HDF5Length = nHDF5Secondaries*nHDF5Values;
-  auto output_ntuple = hep_hpc::hdf5::make_ntuple(
-    {output, "Cascades"},
-    hep_hpc::hdf5::make_column<float, 2>(
-      "X", {nHDF5Secondaries, nHDF5Values}
-    )
+    nHDF5Secondaries, nHDF5Values
   );
 
 
@@ -555,7 +652,7 @@ int main(int argc, char * argv[]){
           hdf5_output[i*nHDF5Values + 3] = part->GetPDGcode();
         }
       }
-      output_ntuple.insert(hdf5_output.data());
+      output_h5.insert(hdf5_output.data());
 
       for (auto m : map_to_momentums) {
         int the_pdg = m.first;
@@ -578,6 +675,7 @@ int main(int argc, char * argv[]){
 
     }
   }
+  output_h5.close();
 
   fout->cd();
   tree->Write();

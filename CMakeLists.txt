@@ -35,7 +35,7 @@ project(geant4reweight VERSION 01.21.03)
   find_package(cetlib REQUIRED EXPORT)
   find_package(cetlib_except REQUIRED EXPORT)
   find_package(fhiclcpp REQUIRED EXPORT)
-  find_package(hep_hpc REQUIRED EXPORT)
+  find_package(HDF5 REQUIRED COMPONENTS C)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)

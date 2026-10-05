@@ -12,6 +12,7 @@ cet_make_exec(NAME G4Cascade
   ROOT::RIO
   ROOT::Tree
   fhiclcpp::fhiclcpp
+  HDF5::HDF5
   cetlib::cetlib
 )
 

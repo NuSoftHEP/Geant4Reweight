@@ -19,21 +19,133 @@
 #include "Geant4/G4ThreeVector.hh"
 #include "Geant4/G4Track.hh"
 #include "Geant4/G4VParticleChange.hh"
+#include "Geant4/G4UImanager.hh"
+#include "Geant4/G4CascadeParamMessenger.hh"
+#include "Geant4/G4CascadeParameters.hh"
 
 #include "fhiclcpp/ParameterSet.h"
 
 #include "cetlib/filepath_maker.h"
 
+#include "hdf5.h"
+
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
+#include "TRandom3.h"
 
 #include <iostream>
+#include <ctime>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <utility> // std::pair
 #include <vector>
+
+namespace {
+
+//Appends fixed-size (nRows x nCols) float entries to an extendible
+//dataset /<group>/<dataset>, buffering chunkRows entries per write
+class CascadeH5Writer {
+ public:
+  CascadeH5Writer(const std::string & path,
+                  hsize_t nRows, hsize_t nCols,
+                  const std::string & group = "Cascades",
+                  const std::string & dataset = "X",
+                  hsize_t chunkRows = 128,
+                  unsigned deflateLevel = 6)
+    : fEntrySize(nRows*nCols), fChunkRows(chunkRows),
+      fDims{0, nRows, nCols} {
+    fFile = check(H5Fcreate(path.c_str(), H5F_ACC_TRUNC,
+                            H5P_DEFAULT, H5P_DEFAULT),
+                  "creating file " + path);
+    fGroup = check(H5Gcreate2(fFile, group.c_str(), H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT),
+                   "creating group " + group);
+
+    hsize_t max_dims[3] = {H5S_UNLIMITED, nRows, nCols};
+    hid_t space = check(H5Screate_simple(3, fDims, max_dims),
+                        "creating dataspace");
+    hid_t dcpl = check(H5Pcreate(H5P_DATASET_CREATE), "creating dcpl");
+    hsize_t chunk[3] = {chunkRows, nRows, nCols};
+    check(H5Pset_chunk(dcpl, 3, chunk), "setting chunk size");
+    check(H5Pset_deflate(dcpl, deflateLevel), "setting deflate");
+    fDataset = H5Dcreate2(fGroup, dataset.c_str(), H5T_IEEE_F32LE, space,
+                          H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    H5Pclose(dcpl);
+    H5Sclose(space);
+    check(fDataset, "creating dataset " + dataset);
+
+    fBuffer.reserve(fChunkRows*fEntrySize);
+  }
+
+  CascadeH5Writer(const CascadeH5Writer &) = delete;
+  CascadeH5Writer & operator=(const CascadeH5Writer &) = delete;
+
+  ~CascadeH5Writer() {
+    try { close(); }
+    catch (const std::exception & e) {
+      std::cerr << "CascadeH5Writer: " << e.what() << std::endl;
+    }
+  }
+
+  void insert(const float * entry) {
+    fBuffer.insert(fBuffer.end(), entry, entry + fEntrySize);
+    if (fBuffer.size() >= fChunkRows*fEntrySize) flush();
+  }
+
+  void flush() {
+    if (fBuffer.empty() || fDataset < 0) return;
+    hsize_t n_new = fBuffer.size()/fEntrySize;
+    hsize_t offset[3] = {fDims[0], 0, 0};
+    hsize_t count[3] = {n_new, fDims[1], fDims[2]};
+    fDims[0] += n_new;
+    check(H5Dset_extent(fDataset, fDims), "extending dataset");
+
+    hid_t file_space = check(H5Dget_space(fDataset), "getting dataspace");
+    herr_t status = H5Sselect_hyperslab(file_space, H5S_SELECT_SET,
+                                        offset, nullptr, count, nullptr);
+    hid_t mem_space = H5Screate_simple(3, count, nullptr);
+    if (status >= 0 && mem_space >= 0) {
+      status = H5Dwrite(fDataset, H5T_NATIVE_FLOAT, mem_space, file_space,
+                        H5P_DEFAULT, fBuffer.data());
+    }
+    if (mem_space >= 0) H5Sclose(mem_space);
+    H5Sclose(file_space);
+    check(mem_space, "creating memory dataspace");
+    check(status, "writing entries");
+    fBuffer.clear();
+  }
+
+  void close() {
+    if (fFile < 0) return;
+    auto release = [this]() {
+      H5Dclose(fDataset);
+      H5Gclose(fGroup);
+      H5Fclose(fFile);
+      fDataset = fGroup = fFile = -1;
+    };
+    try { flush(); }
+    catch (...) { release(); throw; }
+    release();
+  }
+
+ private:
+  template <typename T>
+  static T check(T status, const std::string & what) {
+    if (status < 0)
+      throw std::runtime_error("HDF5 error " + what);
+    return status;
+  }
+
+  hid_t fFile = -1, fGroup = -1, fDataset = -1;
+  hsize_t fEntrySize, fChunkRows;
+  hsize_t fDims[3];
+  std::vector<float> fBuffer;
+};
+
+}
 
 std::string fcl_file;
 
@@ -46,6 +158,10 @@ std::string output_file_override = "empty";
 int ncasc_override = 0;
 int ndiv_override = 0;
 int type_override = -999;
+bool single_momentum_override = false;
+bool varied_params = false;
+bool is_static = true; //false;
+double set_radius_trailing = 0.;
 
 
 struct CascadeConfig{
@@ -86,6 +202,8 @@ struct CascadeConfig{
     thresholds = std::map<int, double>(temp_vec.begin(), temp_vec.end());
     
     npi0 = pset.get<bool>("NPi0_Cex");
+
+    single_momentum = (pset.get<bool>("SingleMomentum", false) || single_momentum_override);
   };
 
   size_t nCascades;
@@ -104,7 +222,8 @@ struct CascadeConfig{
 
   std::map<int, double> thresholds;
 
-  bool npi0;
+  bool npi0, single_momentum;
+  double radiu_trailing;
 
   bool AboveThreshold(int pdg, double p) {
     if (thresholds.find(pdg) == thresholds.end()) {
@@ -152,22 +271,120 @@ int main(int argc, char * argv[]){
     return 0;
   }
 
+  auto now = static_cast<int>(std::time(0x0));
+  G4Random::setTheSeed(now, 1);
+
   std::vector< double > momenta = fillMomenta( theConfig );
 
   TFile * fout = new TFile( theConfig.outFileName.c_str(), "RECREATE");
-
-
   TTree * tree = new TTree("tree","");
   int nPi0 = 0, nPiPlus = 0, nPiMinus = 0, nProton, nNeutron;
   double momentum;
+  double radius_trailing = 0.;
+  //int is_varied = varied_params;
+  std::vector<int> c_pdg;
+  std::vector<double> c_momentum_x, c_momentum_y, c_momentum_z, c_energy;
+  std::vector<double> c_piplus_momentum, c_piminus_momentum, c_proton_momentum,
+                      c_neutron_momentum, c_pi0_momentum;
+  double c_leading_piplus_momentum, c_leading_piminus_momentum, c_leading_proton_momentum,
+         c_leading_neutron_momentum, c_leading_pi0_momentum;
+  std::vector<double> c_piplus_costheta, c_piminus_costheta, c_proton_costheta,
+                      c_neutron_costheta, c_pi0_costheta;
+  double c_leading_piplus_costheta, c_leading_piminus_costheta, c_leading_proton_costheta,
+         c_leading_neutron_costheta, c_leading_pi0_costheta;
   tree->Branch( "nPi0", &nPi0 );
   tree->Branch( "nPiPlus", &nPiPlus );
   tree->Branch( "nPiMinus", &nPiMinus );
   tree->Branch( "nProton", &nProton );
   tree->Branch( "nNeutron", &nNeutron );
   tree->Branch( "momentum", &momentum );
+  tree->Branch( "radius_trailing", &radius_trailing );
+  //tree->Branch( "is_varied", &is_varied );
+  tree->Branch( "c_pdg", &c_pdg );
+  tree->Branch( "c_energy", &c_energy );
+  tree->Branch( "c_momentum_x", &c_momentum_x );
+  tree->Branch( "c_momentum_y", &c_momentum_y );
+  tree->Branch( "c_momentum_z", &c_momentum_z );
+  tree->Branch( "c_piplus_momentum", &c_piplus_momentum );
+  tree->Branch( "c_piminus_momentum", &c_piminus_momentum );
+  tree->Branch( "c_pi0_momentum", &c_pi0_momentum );
+  tree->Branch( "c_proton_momentum", &c_proton_momentum );
+  tree->Branch( "c_neutron_momentum", &c_neutron_momentum );
 
+  tree->Branch( "c_piplus_costheta", &c_piplus_costheta );
+  tree->Branch( "c_piminus_costheta", &c_piminus_costheta );
+  tree->Branch( "c_pi0_costheta", &c_pi0_costheta );
+  tree->Branch( "c_proton_costheta", &c_proton_costheta );
+  tree->Branch( "c_neutron_costheta", &c_neutron_costheta );
+
+
+  tree->Branch( "c_leading_piplus_momentum", &c_leading_piplus_momentum );
+  tree->Branch( "c_leading_piminus_momentum", &c_leading_piminus_momentum );
+  tree->Branch( "c_leading_pi0_momentum", &c_leading_pi0_momentum );
+  tree->Branch( "c_leading_proton_momentum", &c_leading_proton_momentum );
+  tree->Branch( "c_leading_neutron_momentum", &c_leading_neutron_momentum );
+
+  tree->Branch( "c_leading_piplus_costheta", &c_leading_piplus_costheta );
+  tree->Branch( "c_leading_piminus_costheta", &c_leading_piminus_costheta );
+  tree->Branch( "c_leading_pi0_costheta", &c_leading_pi0_costheta );
+  tree->Branch( "c_leading_proton_costheta", &c_leading_proton_costheta );
+  tree->Branch( "c_leading_neutron_costheta", &c_leading_neutron_costheta );
+
+  std::map<int, std::vector<double>*> map_to_momentums = {
+    {211, &c_piplus_momentum},
+    {-211, &c_piminus_momentum},
+    {111, &c_pi0_momentum},
+    {2212, &c_proton_momentum},
+    {2112, &c_neutron_momentum}
+  };
+  std::map<int, std::vector<double>*> map_to_costhetas = {
+    {211, &c_piplus_costheta},
+    {-211, &c_piminus_costheta},
+    {111, &c_pi0_costheta},
+    {2212, &c_proton_costheta},
+    {2112, &c_neutron_costheta}
+  };
+
+  std::map<int, double*> map_to_leading_momentums = {
+    {211, &c_leading_piplus_momentum},
+    {-211, &c_leading_piminus_momentum},
+    {111, &c_leading_pi0_momentum},
+    {2212, &c_leading_proton_momentum},
+    {2112, &c_leading_neutron_momentum}
+  };
+  std::map<int, double*> map_to_leading_costhetas = {
+    {211, &c_leading_piplus_costheta},
+    {-211, &c_leading_piminus_costheta},
+    {111, &c_leading_pi0_costheta},
+    {2212, &c_leading_proton_costheta},
+    {2112, &c_leading_neutron_costheta}
+  };
+
+  TRandom3 fRNG(0);
   std::cout << "Initializing" << std::endl;
+  G4UImanager* UI = G4UImanager::GetUIpointer();
+  std::cout << "UI: " << UI << std::endl;
+
+  const auto * cascade_pars = G4CascadeParameters::Instance();
+  std::cout << "I love having to make this work like this: " << cascade_pars
+            << std::endl;
+  /*if (varied_params && !is_static) {
+    radius_trailing = fRNG.Uniform(0., 1.5);
+    std::cout << "Threw: " << radius_trailing << std::endl;
+    std::string command = "/process/had/cascade/shadowningRadius " +
+                          std::to_string(radius_trailing);
+    UI->ApplyCommand(command);
+  }
+  else   */
+  if (varied_params && is_static) {
+    radius_trailing = set_radius_trailing;
+    std::string command = "/process/had/cascade/shadowningRadius " +
+                          std::to_string(radius_trailing);
+    UI->ApplyCommand(command);  
+  }
+  std::cout << "Radius trailing: " << G4CascadeParameters::radiusTrailing() << std::endl;
+
+
   //Initializing
   G4RunManager rm;
   initRunMan( rm, theConfig.physlist );
@@ -324,14 +541,36 @@ int main(int argc, char * argv[]){
   G4Step * theStep   = track_par.theStep;
   G4DynamicParticle * dynamic_part = track_par.dynamic_part;
 
+  //HDF5 output stuff
+  const size_t nHDF5Secondaries = 20;
+  const size_t nHDF5Values = 5;
+  const size_t HDF5Length = nHDF5Secondaries*nHDF5Values;
+  CascadeH5Writer output_h5(
+    theConfig.outFileName.replace(
+      theConfig.outFileName.end()-5,
+      theConfig.outFileName.end(),
+      ".h5"
+    ),
+    nHDF5Secondaries, nHDF5Values
+  );
+
+
   for( size_t iM = 0; iM < momenta.size(); ++iM ){
     std::cout << "Momentum: " << momenta.at(iM) << std::endl;
     double theMomentum = momenta[iM];
-    double KE = sqrt( theMomentum*theMomentum + part_def->GetPDGMass()*part_def->GetPDGMass() ) - part_def->GetPDGMass();
+    double KE = sqrt(
+        theMomentum*theMomentum +
+        part_def->GetPDGMass()*part_def->GetPDGMass()) - part_def->GetPDGMass();
     dynamic_part->SetKineticEnergy( KE );
-    for( size_t iC = 0; iC < theConfig.nCascades; ++iC ){
+    for( size_t iC = 0; iC < theConfig.nCascades; ++iC ) {
 
       if( !(iC % 1000) ) std::cout << "\tCascade: " << iC << std::endl;
+
+      //Every time, set radius trailing from a flat sample
+      //only for unvaried
+      /*if (!varied_params && !is_static) {
+        radius_trailing = fRNG.Uniform(0., 1.5);
+      }*/
 
       nPi0 = 0;
       nPiPlus = 0;
@@ -339,12 +578,33 @@ int main(int argc, char * argv[]){
       nProton = 0;
       nNeutron = 0;
       momentum = dynamic_part->GetTotalMomentum();
+      for (auto m : map_to_costhetas) m.second->clear();
+      for (auto m : map_to_momentums) m.second->clear();
+      c_pdg.clear();
+      c_energy.clear();
+      c_momentum_x.clear();
+      c_momentum_y.clear();
+      c_momentum_z.clear();
+      /*c_piplus_momentum.clear();
+      c_piminus_momentum.clear();
+      c_pi0_momentum.clear();
+      c_neutron_momentum.clear();
+      c_proton_momentum.clear();*/
       G4VParticleChange * thePC = inelastic_proc->PostStepDoIt( *theTrack, *theStep );
+      std::array<float, HDF5Length> hdf5_output{};
 
       size_t nSecondaries = thePC->GetNumberOfSecondaries();
       for( size_t i = 0; i < nSecondaries; ++i ){
         auto part = thePC->GetSecondary(i)->GetDynamicParticle();
 
+        if (map_to_momentums.find(part->GetPDGcode()) !=
+            map_to_momentums.end()) {
+          map_to_momentums[part->GetPDGcode()]->push_back(part->GetTotalMomentum());
+
+          map_to_costhetas[part->GetPDGcode()]->push_back(
+            part->GetMomentumDirection().dot(
+                dynamic_part->GetMomentumDirection()));
+        }
         switch( part->GetPDGcode() ){
           case( 211 ):
             if (theConfig.AboveThreshold(
@@ -375,6 +635,37 @@ int main(int argc, char * argv[]){
           default:
             break;
         }
+
+        
+
+        c_pdg.push_back(part->GetPDGcode());
+        c_energy.push_back(part->GetTotalEnergy());
+        c_momentum_x.push_back(part->GetMomentum()[0]);
+        c_momentum_y.push_back(part->GetMomentum()[1]);
+        c_momentum_z.push_back(part->GetMomentum()[2]);
+
+
+        if (i < nHDF5Secondaries) {
+          hdf5_output[i*nHDF5Values + 0] = part->GetMomentum()[0];
+          hdf5_output[i*nHDF5Values + 1] = part->GetMomentum()[1];
+          hdf5_output[i*nHDF5Values + 2] = part->GetMomentum()[2];
+          hdf5_output[i*nHDF5Values + 3] = part->GetPDGcode();
+        }
+      }
+      output_h5.insert(hdf5_output.data());
+
+      for (auto m : map_to_momentums) {
+        int the_pdg = m.first;
+        //reset first
+        (*map_to_leading_momentums[the_pdg]) = -999;
+        (*map_to_leading_costhetas[the_pdg]) = -999;
+
+        for (size_t j = 0; j < m.second->size(); ++j) {
+          if ((*map_to_leading_momentums[the_pdg]) < map_to_momentums[the_pdg]->at(j)) {
+            (*map_to_leading_momentums[the_pdg]) = map_to_momentums[the_pdg]->at(j);
+            (*map_to_leading_costhetas[the_pdg]) = map_to_costhetas[the_pdg]->at(j);
+          }
+        }
       }
 
       thePC->SetVerboseLevel(0);
@@ -384,6 +675,7 @@ int main(int argc, char * argv[]){
 
     }
   }
+  output_h5.close();
 
   fout->cd();
   tree->Write();
@@ -487,6 +779,8 @@ bool parseArgs(int argc, char ** argv){
       std::cout << "\t--NC <number_of_cascades_per_point> (must be > 0 to work)" << std::endl;
       std::cout << "\t--ND <divisor_of_range> (must be > 0 to work)" << std::endl;
       std::cout << "\t-t <probe type> (currently only works with 211 and -211)" << std::endl;
+      std::cout << "\t--single_p (just do single momentum)" << std::endl;
+      std::cout << "\t--varied_pars" << std::endl;
 
       return false;
     }
@@ -520,6 +814,22 @@ bool parseArgs(int argc, char ** argv){
 
     else if( strcmp( argv[i], "-t" ) == 0 ){
       type_override = atoi( argv[i+1] );
+    }
+
+    else if (strcmp(argv[i], "--single_p") == 0) {
+      single_momentum_override = true;
+    }
+
+    else if (strcmp(argv[i], "--varied_pars") == 0) {
+      varied_params = true;
+    }
+
+    /*else if (strcmp(argv[i], "--static") == 0) {
+      is_static = true;
+    }*/
+
+    else if( strcmp( argv[i], "--par" ) == 0 ){
+      set_radius_trailing = atof( argv[i+1] );
     }
   }
 
@@ -642,6 +952,10 @@ CascadeConfig configure(fhicl::ParameterSet & pset){
 }
 
 std::vector< double > fillMomenta( CascadeConfig theConfig ){
+
+  //Check if we just want a single value
+  if (theConfig.single_momentum) return {theConfig.range.first};
+
   std::cout << "Range: " << theConfig.range.first << " " << theConfig.range.second << std::endl;
   std::vector< double > momenta;
   double delta = theConfig.range.second - theConfig.range.first;

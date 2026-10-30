@@ -15,7 +15,7 @@
 cmake_minimum_required (VERSION 3.20 FATAL_ERROR)
 
 find_package(cetmodules REQUIRED)
-project(geant4reweight VERSION 01.21.04)
+project(geant4reweight VERSION 01.21.05)
 
   include(CetCMakeEnv)
   cet_cmake_env()
@@ -35,6 +35,7 @@ project(geant4reweight VERSION 01.21.04)
   find_package(cetlib REQUIRED EXPORT)
   find_package(cetlib_except REQUIRED EXPORT)
   find_package(fhiclcpp REQUIRED EXPORT)
+  find_package(hep_hpc REQUIRED EXPORT)
 
   # ADD SOURCE CODE SUBDIRECTORIES HERE
   add_subdirectory(geant4reweight)
